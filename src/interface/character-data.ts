@@ -1,4 +1,3 @@
-import { ChildNode } from "./child-node.js";
 
 export abstract class CharacterData extends ChildNode {
 	//// Tree
@@ -22,21 +21,21 @@ export abstract class CharacterData extends ChildNode {
 	set textContent(data: string) {
 		this.data = data;
 	}
-	appendData(data) {
+	appendData(data: string) {
 		this.data += data;
 	}
-	deleteData(offset, count) {
+	deleteData(offset: number, count: number) {
 		this.data =
 			this.data.slice(0, offset) + this.data.slice(0, offset + count);
 	}
-	insertData(offset, data) {
+	insertData(offset: number, data: string) {
 		this.data = this.data.slice(0, offset) + data + this.data.slice(offset);
 	}
-	replaceData(offset, count, data) {
+	replaceData(offset: number, count: number, data: string) {
 		this.deleteData(offset, count);
 		this.insertData(offset, data);
 	}
-	substringData(offset, count) {
+	substringData(offset: number, count: number) {
 		this.data = this.data.substr(offset, count);
 	}
 	get length() {
@@ -69,5 +68,6 @@ export class Text extends CharacterData {
 	}
 }
 
-export class CDATASection extends Text {
-}
+export class CDATASection extends Text {}
+
+import { ChildNode } from "./child-node.js";

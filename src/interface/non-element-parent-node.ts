@@ -1,7 +1,5 @@
 import {  PREV, NEXT, END } from "./node.js";
 import { ParentNode } from "./parent-node.js";
-import { Element } from "./element.js";
-import { ChildNode } from "./child-node.js";
 
 export class NonElementParentNode extends ParentNode {
 
@@ -44,3 +42,6 @@ export class NonElementParentNode extends ParentNode {
 	//   return json;
 	// }
 }
+
+// import { ChildNode } from "./child-node.js";
+// import { Element } from "./element.js";

@@ -1,4 +1,3 @@
-import { Node } from "./node.js";
 
 export class Attr extends Node {
 	//// Tree
@@ -6,10 +5,14 @@ export class Attr extends Node {
 	//// Dom
 	namespaceURI?: string;
 	prefix?: string;
-	ownerElement?: Node;
+	// ownerElement?: Node;
 	localName: string;
 	value: string;
 	name: string;
+	constructor() {
+		super();
+		this.name = this.value = this.localName = "";
+	}
 	get textContent() {
 		// https://dom.spec.whatwg.org/#dom-node-textcontent
 		return this.value;
@@ -30,16 +33,26 @@ export class Attr extends Node {
 	get nodeName() {
 		return this.name;
 	}
-	isDefaultNamespace(namespaceURI?: string) {
-		const { ownerElement } = this;
-		return ownerElement && ownerElement.isDefaultNamespace(namespaceURI);
+	get ownerElement() {
+		const { parentNode: node } = this;
+		return node || null;
 	}
-	lookupNamespaceURI(prefix?: string) {
-		const { ownerElement } = this;
-		return ownerElement && ownerElement.lookupNamespaceURI(prefix);
-	}
-	lookupPrefix(namespaceURI: string) {
-		const { ownerElement } = this;
-		return ownerElement && ownerElement.lookupNamespacePrefix(prefix);
+	// isDefaultNamespace(namespaceURI?: string) {
+	// 	const { ownerElement } = this;
+	// 	return ownerElement && ownerElement.isDefaultNamespace(namespaceURI);
+	// }
+	// lookupNamespaceURI(prefix?: string) {
+	// 	const { ownerElement } = this;
+	// 	return ownerElement && ownerElement.lookupNamespaceURI(prefix);
+	// }
+	// lookupPrefix(namespaceURI: string) {
+	// 	const { ownerElement } = this;
+	// 	return ownerElement && ownerElement.lookupNamespacePrefix(prefix);
+	// }
+	lookupNamespaceURI(prefix: string | null): string | null {
+		const { ownerElement: node } = this;
+		return node ? node.lookupNamespaceURI(prefix) : null;
 	}
 }
+
+import { Node } from "./node.js";

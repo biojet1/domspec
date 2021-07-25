@@ -1,6 +1,6 @@
-import { NonElementParentNode } from "./non-element-parent-node.js";
+import { ChildNode } from "./child-node.js";
 
-export class DocumentType extends NonElementParentNode {
+export class DocumentType extends ChildNode {
 	readonly publicId: string;
 	readonly systemId: string;
 	readonly name: string;

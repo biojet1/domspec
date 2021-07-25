@@ -14,6 +14,7 @@ export class ParentNode extends ChildNode {
 		// End node or self
 		return this[END];
 	}
+
 	get followingSibling(): Node | null {
 		const next = this[END][NEXT];
 		return !next || next instanceof EndNode ? null : next;
@@ -158,6 +159,12 @@ export class EndNode extends Node {
 		prev[NEXT] = this;
 		return this;
 	}
-}
+	get startNode() {
+		// Always this
+		return this[START];
+	}
+	get nodeType() {
+		return -1;
+	}
 
-import { DocumentFragment } from "./document-fragment.js";
+}

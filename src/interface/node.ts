@@ -47,30 +47,6 @@ export class Node {
 	// 	prev && this.linkPrior(prev);
 	// 	next && this.linkNext(prev);
 	// }
-	get followingSibling(): Node | null {
-		const next = this[NEXT];
-		return !next || next instanceof EndNode ? null : next;
-	}
-
-	get precedingSibling(): Node | null {
-		const { [PREV]: prev } = this;
-		if (prev) {
-			if (prev instanceof EndNode) {
-				if (!(this instanceof ChildNode)) {
-					throw new Error(`Unexpected previous Node ${prev}`);
-				}
-				return prev[START];
-			} else if (prev instanceof ChildNode) {
-				if (this instanceof Attr) {
-					throw new Error(`Unexpected previous Node ${prev}`);
-				}
-				return prev;
-				// } else if (prev instanceof ParentNode) {
-				// throw new Error(`Unexpected previous Node ${prev}`);
-			}
-		}
-		return null;
-	}
 
 	remove() {
 		const {
@@ -118,6 +94,79 @@ export class Node {
 
 // Node <- ChildNode <- ParentNode
 // Node <- EndNode
+// Node <- AttrNode
+
+class Child extends Node {
+	get followingSibling(): Node | null {
+		const next = this[NEXT];
+		// [Child][Child] = next
+		// [Child][Attr]  = error
+		// [Child][Tag]  = next
+		// [Child][End]  = null
+		if (!next || next instanceof End) {
+			return null;
+		} else if (next instanceof Attr) {
+			throw new Error(`Unexpected next Node ${next}`);
+		}
+		return next;
+	}
+	get precedingSibling(): Node | null {
+		const { [PREV]: prev } = this;
+		// [Child][Child] = prev
+		// [Attr][Child]  = null
+		// [Tag][Child]  = null
+		// [End][Child]  = End[START]
+		if (!prev || prev instanceof Parent) {
+			return null;
+		} else if (prev instanceof Child) {
+			return prev;
+		} else if (prev instanceof End) {
+			return prev[START];
+		} else {
+			return null;
+		}
+	}
+}
+class End extends Node {}
+class Aux extends Node {}
+class Parent extends Child {
+	get followingSibling(): Node | null {
+		const next = this[END][NEXT];
+		if (!next || next instanceof End) {
+			// <div>Test <p></p>*</div>
+			return null;
+		} else if (next instanceof Child) {
+			// <p>...<p>*Text
+			// <p>...<p>*<div></div>
+			return next;
+		} else {
+			throw new Error(`Unexpected next Node ${next}`);
+		}
+	}
+	get precedingSibling(): Node | null {
+		const { [PREV]: prev } = this;
+		// [Child][Parent] = prev
+		// [Attr][Parent]  = null
+		// [Parent][Parent]  = null
+		// [End][Parent]  = End[START]
+		if (!prev || prev instanceof Parent || prev instanceof Attr) {
+			// <div>*<p></p>...</div>
+			// <div attr="value">*<p></p>...</div>
+			return null;
+		} else if (prev instanceof Child) {
+			// Text*<p></p>...
+			return prev;
+		} else if (prev instanceof End) {
+			// <div></div>*<p></p>...
+			return prev[START];
+		} else {
+			throw new Error(`Unexpected next Node ${prev}`);
+		}
+	}
+}
+// Node <- Child <- Parent
+// Node <- End
+// Node <- Aux
 
 export const setAdjacent = (prev: Node, next: Node) => {
 	if (prev) prev[NEXT] = next;
@@ -169,7 +218,7 @@ export const setAdjacent = (prev: Node, next: Node) => {
 // 	next && knownAdjacent(current, next);
 // };
 
-import { ChildNode } from "./child-node.js";
+// import { ChildNode } from "./child-node.js";
 import { EndNode, ParentNode } from "./parent-node.js";
 import { Document } from "./document.js";
 
@@ -193,5 +242,5 @@ import { Document } from "./document.js";
 
 // <End><Tag>
 // <End><Attr> X
-// <End><End> X
+// <End><End>
 // <End><Child>

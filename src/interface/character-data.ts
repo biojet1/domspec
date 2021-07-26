@@ -1,10 +1,9 @@
-
 export abstract class CharacterData extends ChildNode {
 	//// Tree
 
 	//// Dom
 	// https://dom.spec.whatwg.org/#interface-characterdata
-	private data: string;
+	data: string;
 	constructor(data: string) {
 		super();
 		this.data = data;
@@ -56,6 +55,10 @@ export class Comment extends CharacterData {
 	get nodeName() {
 		return "#comment";
 	}
+	// Extra
+	toString() {
+		return `<!--${escape(this.data)}-->`;
+	}
 }
 
 export class Text extends CharacterData {
@@ -66,8 +69,37 @@ export class Text extends CharacterData {
 	get nodeName() {
 		return "#data";
 	}
+	toString() {
+		return escape(this.data);
+	}
 }
 
 export class CDATASection extends Text {}
 
 import { ChildNode } from "./child-node.js";
+
+// escape
+
+
+const pe = function (m: string) {
+	switch (m) {
+		case "\xA0":
+			return "&nbsp;";
+		case "&":
+			return "&amp;";
+		case "<":
+			return "&lt;";
+		case ">":
+			return "&gt;";
+	}
+	return m;
+};
+
+/**
+ * Safely escape HTML entities such as `&`, `<`, `>` only.
+ * @param {string} es the input to safely escape
+ * @returns {string} the escaped input, and it **throws** an error if
+ *  the input type is unexpected, except for boolean and numbers,
+ *  converted as string.
+ */
+const escape = (es: string) => es.replace(/[<>&\xA0]/g, pe);

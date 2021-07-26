@@ -13,7 +13,7 @@ export class Node {
 		// End node or self
 		return this;
 	}
-	get startNode() {
+	get startNode(): Node {
 		// Always this
 		return this;
 	}
@@ -27,10 +27,11 @@ export class Node {
 		next[PREV] = this;
 		return this;
 	}
-	insertRight(next: Node) {
-		next.linkLeft(this);
-		const prev = this[PREV];
-		prev && next.linkRight(this);
+	insertRight(node: Node) {
+		// [THIS]<node>[NEXT]
+		const next = this[NEXT];
+		node.linkLeft(this);
+		next && node.linkRight(next);
 		return this;
 	}
 	linkPrior(prev: Node) {
@@ -96,74 +97,74 @@ export class Node {
 // Node <- EndNode
 // Node <- AttrNode
 
-class Child extends Node {
-	get followingSibling(): Node | null {
-		const next = this[NEXT];
-		// [Child][Child] = next
-		// [Child][Attr]  = error
-		// [Child][Tag]  = next
-		// [Child][End]  = null
-		if (!next || next instanceof End) {
-			return null;
-		} else if (next instanceof Attr) {
-			throw new Error(`Unexpected next Node ${next}`);
-		}
-		return next;
-	}
-	get precedingSibling(): Node | null {
-		const { [PREV]: prev } = this;
-		// [Child][Child] = prev
-		// [Attr][Child]  = null
-		// [Tag][Child]  = null
-		// [End][Child]  = End[START]
-		if (!prev || prev instanceof Parent) {
-			return null;
-		} else if (prev instanceof Child) {
-			return prev;
-		} else if (prev instanceof End) {
-			return prev[START];
-		} else {
-			return null;
-		}
-	}
-}
-class End extends Node {}
-class Aux extends Node {}
-class Parent extends Child {
-	get followingSibling(): Node | null {
-		const next = this[END][NEXT];
-		if (!next || next instanceof End) {
-			// <div>Test <p></p>*</div>
-			return null;
-		} else if (next instanceof Child) {
-			// <p>...<p>*Text
-			// <p>...<p>*<div></div>
-			return next;
-		} else {
-			throw new Error(`Unexpected next Node ${next}`);
-		}
-	}
-	get precedingSibling(): Node | null {
-		const { [PREV]: prev } = this;
-		// [Child][Parent] = prev
-		// [Attr][Parent]  = null
-		// [Parent][Parent]  = null
-		// [End][Parent]  = End[START]
-		if (!prev || prev instanceof Parent || prev instanceof Attr) {
-			// <div>*<p></p>...</div>
-			// <div attr="value">*<p></p>...</div>
-			return null;
-		} else if (prev instanceof Child) {
-			// Text*<p></p>...
-			return prev;
-		} else if (prev instanceof End) {
-			// <div></div>*<p></p>...
-			return prev[START];
-		} else {
-			throw new Error(`Unexpected next Node ${prev}`);
-		}
-	}
-}
+// class Child extends Node {
+// 	get followingSibling(): Node | null {
+// 		const next = this[NEXT];
+// 		// [Child][Child] = next
+// 		// [Child][Attr]  = error
+// 		// [Child][Tag]  = next
+// 		// [Child][End]  = null
+// 		if (!next || next instanceof End) {
+// 			return null;
+// 		} else if (next instanceof Attr) {
+// 			throw new Error(`Unexpected next Node ${next}`);
+// 		}
+// 		return next;
+// 	}
+// 	get precedingSibling(): Node | null {
+// 		const { [PREV]: prev } = this;
+// 		// [Child][Child] = prev
+// 		// [Attr][Child]  = null
+// 		// [Tag][Child]  = null
+// 		// [End][Child]  = End[START]
+// 		if (!prev || prev instanceof Parent) {
+// 			return null;
+// 		} else if (prev instanceof Child) {
+// 			return prev;
+// 		} else if (prev instanceof End) {
+// 			return prev[START];
+// 		} else {
+// 			return null;
+// 		}
+// 	}
+// }
+// class End extends Node {}
+// class Aux extends Node {}
+// class Parent extends Child {
+// 	get followingSibling(): Node | null {
+// 		const next = this[END][NEXT];
+// 		if (!next || next instanceof End) {
+// 			// <div>Test <p></p>*</div>
+// 			return null;
+// 		} else if (next instanceof Child) {
+// 			// <p>...<p>*Text
+// 			// <p>...<p>*<div></div>
+// 			return next;
+// 		} else {
+// 			throw new Error(`Unexpected next Node ${next}`);
+// 		}
+// 	}
+// 	get precedingSibling(): Node | null {
+// 		const { [PREV]: prev } = this;
+// 		// [Child][Parent] = prev
+// 		// [Attr][Parent]  = null
+// 		// [Parent][Parent]  = null
+// 		// [End][Parent]  = End[START]
+// 		if (!prev || prev instanceof Parent || prev instanceof Attr) {
+// 			// <div>*<p></p>...</div>
+// 			// <div attr="value">*<p></p>...</div>
+// 			return null;
+// 		} else if (prev instanceof Child) {
+// 			// Text*<p></p>...
+// 			return prev;
+// 		} else if (prev instanceof End) {
+// 			// <div></div>*<p></p>...
+// 			return prev[START];
+// 		} else {
+// 			throw new Error(`Unexpected next Node ${prev}`);
+// 		}
+// 	}
+// }
 // Node <- Child <- Parent
 // Node <- End
 // Node <- Aux

@@ -1,5 +1,5 @@
-import { NEXT } from "./node.js";
-import { ParentNode } from "./parent-node.js";
+import { NEXT, PREV, START, END, Node } from "./node.js";
+import { ParentNode, EndNode } from "./parent-node.js";
 
 export class Element extends ParentNode {
 	//// Tree
@@ -123,7 +123,45 @@ export class Element extends ParentNode {
 		if (prefix) node.prefix = prefix;
 		attr.insertRight(node);
 	}
+
+	toString() {
+		const out = [];
+		const { [END]: end } = this;
+		let isOpened = false;
+		let next = new Node();
+		next[NEXT] = this;
+		do {
+			next = next[NEXT] || end;
+			if (next instanceof Attr) {
+				out.push(` ${next.toString()}`);
+			} else if (next instanceof Element) {
+				isOpened && out.push(">");
+				out.push(`<${next.tagName}`);
+				isOpened = true;
+			} else if (next instanceof EndNode) {
+				const prev = next[PREV];
+				if (prev === this) {
+					out.push(`/>`);
+				} else if (prev instanceof Attr) {
+					isOpened && out.push(">");
+					out.push(`/>`);
+				} else {
+					isOpened && out.push(">");
+					out.push(`</${(next[START] as Element).tagName}>`);
+				}
+			} else if (next instanceof ChildNode) {
+				isOpened && out.push(">");
+				out.push(next.toString());
+				isOpened = false;
+			} else {
+				throw new Error(`Invalid node ${next}`);
+			}
+		} while (next !== end);
+
+		return out.join("");
+	}
 }
 
 import { XMLNS } from "./namespace.js";
 import { Attr } from "./attr.js";
+import { ChildNode } from "./child-node.js";

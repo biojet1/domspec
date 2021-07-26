@@ -1,10 +1,14 @@
+import { NonElementParentNode } from "./non-element-parent-node.js";
+
 export class Document extends NonElementParentNode {
 	//// Dom
 	contentType: string;
+	implementation: DOMImplementation;
 	constructor(contentType?: string) {
 		super();
 		this.contentType =
 			contentType && contentType !== "" ? contentType : "application/xml";
+		this.implementation =	 new DOMImplementation();
 	}
 
 	get nodeType() {
@@ -16,9 +20,9 @@ export class Document extends NonElementParentNode {
 	get documentElement() {
 		return this.firstElementChild;
 	}
-	get implementation() {
-		return new DOMImplementation();
-	}
+	// get implementation() {
+	// 	return new DOMImplementation();
+	// }
 
 	lookupNamespaceURI(prefix: string | null): string | null {
 		const { documentElement: node } = this;
@@ -101,8 +105,7 @@ function validateAndExtract(namespace: string | null, qualifiedName: string) {
 import { XMLNS, XML } from "./namespace.js";
 // import { Node } from "./node.js"; // prevent circular import
 // import { ChildNode } from "./child-node.js"; // prevent circular import
-import { NonElementParentNode } from "./non-element-parent-node.js";
 import { Element } from "./element.js";
 import { Comment, Text, CDATASection } from "./character-data.js";
 import { DOMImplementation } from "./dom-implementation.js";
-import { HTMLDocument } from "./html/document.js";
+// import { HTMLDocument } from "./html/document.js";

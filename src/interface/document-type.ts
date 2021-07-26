@@ -1,14 +1,13 @@
 import { ChildNode } from "./child-node.js";
-
 export class DocumentType extends ChildNode {
-	readonly publicId: string;
-	readonly systemId: string;
-	readonly name: string;
+	publicId: string;
+	systemId: string;
+	name: string;
 	constructor(name: string, publicId: string = "", systemId: string = "") {
 		super();
 		this.name = name;
-		this.publicId = publicId || "";
-		this.systemId = systemId || "";
+		this.publicId = publicId;
+		this.systemId = systemId;
 	}
 	get nodeType() {
 		return 10;
@@ -20,3 +19,4 @@ export class DocumentType extends ChildNode {
 		return 0;
 	}
 }
+

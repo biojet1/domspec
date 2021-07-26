@@ -1,4 +1,3 @@
-
 export class Attr extends Node {
 	//// Tree
 
@@ -52,6 +51,10 @@ export class Attr extends Node {
 	lookupNamespaceURI(prefix: string | null): string | null {
 		const { ownerElement: node } = this;
 		return node ? node.lookupNamespaceURI(prefix) : null;
+	}
+	toString() {
+		const { name, value } = this;
+		return `${name}="${value.replace(/"/g, "&quot;")}"`;
 	}
 }
 

@@ -1,11 +1,6 @@
-import { Element } from "./element.js";
-import { ParentNode } from "./parent-node.js";
 import { Document } from "./document.js";
-import { CDATASection } from "./character-data.js";
-import { SaxesParser } from "saxes";
 
-function domParse(str: string, document: Document, currentTag: ParentNode) {
-	let cdata: CDATASection;
+function domParse(str: string, doc: Document, currentTag: ParentNode) {
 	const parser = new SaxesParser({
 		// lowercase: true,
 		xmlns: true,
@@ -18,7 +13,7 @@ function domParse(str: string, document: Document, currentTag: ParentNode) {
 	parser.on("doctype", (dt) => {
 		let [name, pub, sys] = ["html", "", ""];
 
-		if (currentTag !== document) {
+		if (currentTag !== doc) {
 			throw new Error("Doctype can only be appended to document");
 		} else if (!HTML5_DOCTYPE.test(dt)) {
 			let m;
@@ -30,18 +25,18 @@ function domParse(str: string, document: Document, currentTag: ParentNode) {
 				name = m[1];
 			}
 		}
-		const node = document.implementation.createDocumentType(name, pub, sys);
-		node.ownerDocument = document;
+		let node = doc.implementation.createDocumentType(name, pub, sys);
+		node.ownerDocument = doc;
 		currentTag.appendChild(node);
 	});
 	parser.on("text", (str: string) =>
-		currentTag.appendChild(document.createTextNode(str))
+		currentTag.appendChild(doc.createTextNode(str))
 	);
 	parser.on("comment", (str: string) =>
-		currentTag.appendChild(document.createComment(str))
+		currentTag.appendChild(doc.createComment(str))
 	);
 	parser.on("cdata", (data) => {
-		currentTag.appendChild(document.createCDATASection(data));
+		currentTag.appendChild(doc.createCDATASection(data));
 	});
 
 	parser.on("opentag", (node) => {
@@ -52,7 +47,7 @@ function domParse(str: string, document: Document, currentTag: ParentNode) {
 			ns = currentTag.lookupNamespaceURI(prefix);
 		}
 
-		const tag = document.createElementNS(ns, name);
+		const tag = doc.createElementNS(ns, name);
 
 		for (const [key, { uri, value }] of Object.entries(attributes)) {
 			tag.setAttributeNS(uri, key, value);
@@ -128,3 +123,6 @@ const HTML5_DOCTYPE = /<!doctype html>/i;
 const PUBLIC_DOCTYPE = /<!doctype\s+([^\s]+)\s+public\s+"([^"]+)"\s+"([^"]+)"/i;
 const SYSTEM_DOCTYPE = /<!doctype\s+([^\s]+)\s+system\s+"([^"]+)"/i;
 const CUSTOM_NAME_DOCTYPE = /<!doctype\s+([^\s>]+)/i;
+
+import { ParentNode } from "./parent-node.js";
+import { SaxesParser } from "saxes";

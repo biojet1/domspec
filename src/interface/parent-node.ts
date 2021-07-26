@@ -1,6 +1,3 @@
-import { Node, PREV, NEXT, START, END } from "./node.js";
-import { ChildNode } from "./child-node.js";
-
 export class ParentNode extends ChildNode {
 	[END]: EndNode;
 
@@ -15,10 +12,10 @@ export class ParentNode extends ChildNode {
 		return this[END];
 	}
 
-	get followingSibling(): Node | null {
-		const next = this[END][NEXT];
-		return !next || next instanceof EndNode ? null : next;
-	}
+	// get nextSibling(): Node | null {
+	// 	const next = this[END][NEXT];
+	// 	return !next || next instanceof EndNode ? null : next;
+	// }
 
 	linkNext(next: Node) {
 		this[END][NEXT] = next;
@@ -57,7 +54,7 @@ export class ParentNode extends ChildNode {
 		// return null;
 
 		let { firstChild: cur }: { firstChild: Node | null } = this;
-		for (; cur instanceof ChildNode; cur = cur.followingSibling) {
+		for (; cur instanceof ChildNode; cur = cur.nextSibling) {
 			if (cur instanceof ParentNode && cur.nodeType === 1) {
 				return cur;
 			}
@@ -72,7 +69,7 @@ export class ParentNode extends ChildNode {
 
 	get lastElementChild(): ChildNode | null {
 		let { lastChild: cur }: { lastChild: Node | null } = this;
-		for (; cur instanceof ChildNode; cur = cur.precedingSibling) {
+		for (; cur instanceof ChildNode; cur = cur.previousSibling) {
 			if (cur instanceof ParentNode && cur.nodeType === 1) {
 				return cur;
 			}
@@ -98,13 +95,13 @@ export class ParentNode extends ChildNode {
 					// knownSegment(next[PREV], firstChild, lastChild, next);
 					// knownAdjacent(node, node[END]);
 					node.linkRight(node[END]);
-					for (let cur: Node | null | false = firstChild; cur; ) {
+					for (let cur: ChildNode | null | false = firstChild; cur; ) {
 						// children already connected side by side
 						cur.parentNode = this;
 						// moCallback(firstChild, null);
 						// if (firstChild.nodeType === ELEMENT_NODE)
 						// 	connectedCallback(firstChild);
-						cur = cur !== lastChild && cur.followingSibling;
+						cur = cur !== lastChild && cur.nextSibling;
 					}
 				}
 			} else {
@@ -159,8 +156,7 @@ export class EndNode extends Node {
 		prev[NEXT] = this;
 		return this;
 	}
-	get startNode() {
-		// Always this
+	get startNode(): Node {
 		return this[START];
 	}
 	get nodeType() {
@@ -168,3 +164,7 @@ export class EndNode extends Node {
 	}
 
 }
+
+import { Node, PREV, NEXT, START, END } from "./node.js";
+
+import { ChildNode } from "./child-node.js";

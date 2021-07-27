@@ -2,9 +2,9 @@ name: Test
 
 on:
   push:
-    branches: [main]
+    branches: [main, devel]
   pull_request:
-    branches: [main]
+    branches: [main, devel]
 
 jobs:
   build:
@@ -33,6 +33,7 @@ jobs:
             dist
 
       - run: npm run "test+cov"
+      - run: find . -name '*lcov*'
 
       - name: Coveralls
         uses: coverallsapp/github-action@master

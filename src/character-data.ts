@@ -74,12 +74,15 @@ export class Text extends CharacterData {
 	}
 }
 
-export class CDATASection extends Text {}
+export class CDATASection extends Text {
+	toString() {
+		return `<![CDATA[${this.data}]]>`;
+	}
+}
 
 import { ChildNode } from "./child-node.js";
 
 // escape
-
 
 const pe = function (m: string) {
 	switch (m) {

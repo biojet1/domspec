@@ -28,12 +28,11 @@ function domParse(str: string, doc: Document, top: ParentNode) {
 		top.appendChild(node);
 	});
 	parser.on("text", (str: string) => {
-		// console.log("text", top.nodeName, str);
+		// console.info("text", top.nodeName, str);
 		top.appendChild(doc.createTextNode(str));
 	});
 	parser.on("comment", (str: string) => {
-		// console.log("comment", top.nodeName, str);
-
+		// console.info("comment", top.nodeName, str);
 		top.appendChild(doc.createComment(str));
 	});
 	parser.on("cdata", (data) => {

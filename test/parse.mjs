@@ -18,6 +18,11 @@ const data = [
         '<foo \n\n\nbar\n\n=   \n"baz">\nhello\tworld</foo>',
         '<foo bar="baz">\nhello\tworld</foo>',
     ],
+    ['<foo name="朝">朝飯前</foo>', null],
+    ['<foo name="飯">朝飯前<!-- Asa-meshi-mae --></foo>', null],
+    ['<foo name="前"><!-- Asa-meshi-mae -->朝飯前</foo>', null],
+    ['<foo name="飯"><!-- Asa -->朝飯前<!-- meshi-mae --></foo>', null],
+    ['<foo name="前"><!-- Asa --><p/>朝飯前<br/><!-- meshi-mae --></foo>', null],
 ];
 
 const parser = new DOMParser();

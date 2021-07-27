@@ -156,43 +156,7 @@ export function* enumFlatDOM(node: Node) {
 	} while (cur !== end);
 }
 
-export function* enumDOMStr(node: Node) {
-	let isOpened = false;
-	const { endNode: end } = node;
-	let cur = new Node();
-	cur[NEXT] = node;
-	do {
-		cur = cur[NEXT] || end;
-		if (cur instanceof Attr) {
-			yield ` ${cur.toString()}`;
-		} else if (cur instanceof Element) {
-			if (isOpened) {
-				yield `><${cur.tagName}`;
-			} else {
-				yield `<${cur.tagName}`;
-			}
-			isOpened = true;
-		} else if (cur instanceof ChildNode) {
-			if (isOpened) {
-				yield ">";
-				isOpened = false;
-			}
-			yield cur.toString();
-		} else if (cur instanceof EndNode) {
-			const prev = cur[PREV];
-			if (prev === cur[START] || prev instanceof Attr) {
-				yield `/>`;
-			} else if (isOpened) {
-				yield `></${(cur[START] as Element).tagName}>`;
-			} else {
-				yield `</${(cur[START] as Element).tagName}>`;
-			}
-			isOpened = false;
-		} else {
-			throw new Error(`Invalid node ${cur}`);
-		}
-	} while (cur !== end);
-}
 import { XMLNS } from "./namespace.js";
 import { Attr } from "./attr.js";
 import { ChildNode } from "./child-node.js";
+import { enumDOMStr } from "./dom-serialize.js";

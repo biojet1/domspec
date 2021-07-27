@@ -19,7 +19,7 @@ jobs:
 
       - run: npm i
 
-      - run: npm i codecov --save-dev
+      - run: npm i codecov c8 --save-dev
 
       - run: npm run build --if-present
 
@@ -32,8 +32,10 @@ jobs:
           path: |
             dist
 
-      - run: npm run "test+cov"
-      - run: npm run "posttest"
+      # - run: npm run "test+cov"
+      # - run: npm run "posttest"
+      - run: npm run c8test
+      - run: npm run c8report
       - run: find . -name '*lcov*'
 
       - name: Coveralls

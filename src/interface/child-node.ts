@@ -43,6 +43,9 @@ export class ChildNode extends Node {
 		return node && node.nodeType == 1 ? (node as Element) : null;
 		// return node instanceof Element ? node : null;
 	}
+
+
 }
 
+import { ParentNode } from "./parent-node.js";
 import { Element } from "./element.js";

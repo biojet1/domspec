@@ -29,17 +29,23 @@ function domParse(str: string, doc: Document, currentTag: ParentNode) {
 		node.ownerDocument = doc;
 		currentTag.appendChild(node);
 	});
-	parser.on("text", (str: string) =>
-		currentTag.appendChild(doc.createTextNode(str))
-	);
-	parser.on("comment", (str: string) =>
-		currentTag.appendChild(doc.createComment(str))
-	);
+	parser.on("text", (str: string) => {
+		console.log("text", currentTag.nodeName, str);
+		currentTag.appendChild(doc.createTextNode(str));
+	});
+	parser.on("comment", (str: string) => {
+		console.log("comment", currentTag.nodeName, str);
+
+		currentTag.appendChild(doc.createComment(str));
+	});
 	parser.on("cdata", (data) => {
 		currentTag.appendChild(doc.createCDATASection(data));
 	});
 
 	parser.on("opentag", (node) => {
+		console.log("opentag", node.name, currentTag.nodeName);
+		// console.dir(currentTag, { depth: 1 });
+
 		const { local, attributes, uri, prefix, name } = node;
 		if (name === ROOT_TAG) return;
 		let ns = !uri || uri === "" ? null : uri;
@@ -97,8 +103,15 @@ function domParse(str: string, doc: Document, currentTag: ParentNode) {
 
 	parser.on("closetag", (node) => {
 		if (node.name === ROOT_TAG) return;
+		console.log("closetag", node.name, currentTag.nodeName);
+
 		const { parentNode } = currentTag;
-		if (parentNode) currentTag = parentNode;
+		// console.dir(currentTag, { depth: 1 });
+		if (parentNode) {
+			currentTag = parentNode;
+		} else {
+			throw new Error(`unexpected null parentNode of ${currentTag}`);
+		}
 	});
 
 	parser.write(str);

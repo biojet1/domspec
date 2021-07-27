@@ -126,40 +126,66 @@ export class Element extends ParentNode {
 
 	toString() {
 		const out = [];
-		const { [END]: end } = this;
+		const end = this[END];
 		let isOpened = false;
-		let next = new Node();
-		next[NEXT] = this;
+		let cur = new Node();
+		cur[NEXT] = this;
+		// console.log("CUR", "==============");
 		do {
-			next = next[NEXT] || end;
-			if (next instanceof Attr) {
-				out.push(` ${next.toString()}`);
-			} else if (next instanceof Element) {
+			cur = cur[NEXT] || end;
+			// console.dir([cur.nodeType, cur], { depth: 1 });
+			if (cur instanceof Attr) {
+				out.push(` ${cur.toString()}`);
+			} else if (cur instanceof Element) {
 				isOpened && out.push(">");
-				out.push(`<${next.tagName}`);
+				out.push(`<${cur.tagName}`);
 				isOpened = true;
-			} else if (next instanceof EndNode) {
-				const prev = next[PREV];
-				if (prev === this) {
-					out.push(`/>`);
-				} else if (prev instanceof Attr) {
-					isOpened && out.push(">");
+			} else if (cur instanceof ChildNode) {
+				isOpened && out.push(">");
+				out.push(cur.toString());
+				isOpened = false;
+			} else if (cur instanceof EndNode) {
+				const prev = cur[PREV];
+				if (prev === this || prev instanceof Attr) {
 					out.push(`/>`);
 				} else {
 					isOpened && out.push(">");
-					out.push(`</${(next[START] as Element).tagName}>`);
+					out.push(`</${(cur[START] as Element).tagName}>`);
 				}
-			} else if (next instanceof ChildNode) {
-				isOpened && out.push(">");
-				out.push(next.toString());
-				isOpened = false;
 			} else {
-				throw new Error(`Invalid node ${next}`);
+				throw new Error(`Invalid node ${cur}`);
 			}
-		} while (next !== end);
+		} while (cur !== end);
 
 		return out.join("");
 	}
+}
+
+export function* enumFlatDOM(node: Node) {
+	const { endNode: end } = node;
+	let cur = new Node();
+	cur[NEXT] = node;
+	do {
+		cur = cur[NEXT] || end;
+		if (cur instanceof Attr) {
+			const { nodeType, name, value } = cur;
+			yield nodeType;
+			yield name;
+			yield value;
+		} else if (cur instanceof Element) {
+			const { nodeType, tagName } = cur;
+			yield nodeType;
+			yield tagName;
+		} else if (cur instanceof EndNode) {
+			yield -1;
+		} else if (cur instanceof ChildNode) {
+			const { nodeType, nodeValue } = cur;
+			yield nodeType;
+			yield nodeValue;
+		} else {
+			throw new Error(`Invalid node ${cur}`);
+		}
+	} while (cur !== end);
 }
 
 import { XMLNS } from "./namespace.js";

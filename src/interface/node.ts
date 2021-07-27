@@ -17,14 +17,35 @@ export class Node {
 		// Always this
 		return this;
 	}
-	linkNext(next: Node) {
-		this[NEXT] = next;
-		next[PREV] = this;
+	linkNext(node: Node) {
+		// const end = this.endNode;
+		// end[NEXT] = node;
+		// node[PREV] = end;
+		this.endNode.linkRight(node);
+		// this[NEXT] = node;
+		// node[PREV] = this;
+		// if (
+		// 	node.parentNode !== this.parentNode &&
+		// 	node.parentNode &&
+		// 	this.parentNode
+		// ) {
+		// 	throw new Error(`Unexpected parents`);
+		// }
 		return this;
 	}
-	linkRight(next: Node) {
-		this[NEXT] = next;
-		next[PREV] = this;
+	linkRight(node: Node) {
+		// [THIS]<->node
+		this[NEXT] = node;
+		node[PREV] = this;
+		// if (
+		// 	node.parentNode !== this.parentNode &&
+		// 	node.parentNode &&
+		// 	this.parentNode
+		// ) {
+		// 	console.dir(node.parentNode, { depth: 1 });
+		// 	console.dir(this.parentNode, { depth: 1 });
+		// 	throw new Error(`Unexpected parents`);
+		// }
 		return this;
 	}
 	insertRight(node: Node) {
@@ -32,22 +53,63 @@ export class Node {
 		const next = this[NEXT];
 		node.linkLeft(this);
 		next && node.linkRight(next);
+		if (
+			node.parentNode !== this.parentNode &&
+			node.parentNode &&
+			this.parentNode
+		) {
+			console.dir(node.parentNode, { depth: 1 });
+			console.dir(this.parentNode, { depth: 1 });
+			throw new Error(`Unexpected parents`);
+		}
 		return this;
 	}
-	linkPrior(prev: Node) {
-		this[PREV] = prev;
-		prev[NEXT] = this;
+
+	linkPrior(node: Node) {
+		// <node>[THIS]
+		// const start = this.startNode;
+		// start[PREV] = node;
+		// node[NEXT] = start;
+		this.startNode.linkLeft(node);
+		// if (
+		// 	node.parentNode !== this.parentNode &&
+		// 	node.parentNode &&
+		// 	this.parentNode
+		// ) {
+		// 				console.dir([node, this], { depth: 1 });
+
+		// 	throw new Error(`Unexpected parents`);
+		// }
+
 		return this;
 	}
-	linkLeft(prev: Node) {
-		this[PREV] = prev;
-		prev[NEXT] = this;
+	linkLeft(node: Node) {
+		// node<->[THIS]
+		this[PREV] = node;
+		node[NEXT] = this;
+		// if (
+		// 	node.parentNode !== this.parentNode &&
+		// 	node.parentNode &&
+		// 	this.parentNode
+		// ) {
+		// 	throw new Error(`Unexpected parents`);
+		// }
+		// return this;
+	}
+	insertLeft(node: Node) {
+		// [PREV]<node>[THIS]
+		const prev = this[PREV];
+		prev && node.linkLeft(prev); // prev<->node
+		node.linkRight(this); // node<->this
+		if (
+			node.parentNode !== this.parentNode &&
+			node.parentNode &&
+			this.parentNode
+		) {
+			throw new Error(`Unexpected parents`);
+		}
 		return this;
 	}
-	// linkBetween(prev?: Node, next?: Node) {
-	// 	prev && this.linkPrior(prev);
-	// 	next && this.linkNext(prev);
-	// }
 
 	remove() {
 		const {
@@ -57,13 +119,15 @@ export class Node {
 			nodeType,
 		} = this;
 		// remove(prev, this, next);
+		// [PREV]<->[THIS]<->[NEXT] => [PREV]<->[NEXT]
+
 		prev && next && prev.linkRight(next);
-		if (prev || next) {
-			delete this[PREV];
-			delete this.endNode[NEXT];
-		}
+
+		this[PREV] = undefined;
+		this.endNode[NEXT] = undefined;
+
 		if (parentNode) {
-			delete this.parentNode;
+			this.parentNode = undefined;
 			// moCallback(this, parentNode);
 			// if (nodeType === ELEMENT_NODE) disconnectedCallback(this);
 		}
@@ -75,8 +139,23 @@ export class Node {
 	get nodeType() {
 		return 0;
 	}
+	get nodeValue(): string | null {
+		return null;
+	}
+	get nodeName(): string | null {
+		return null;
+	}
 	lookupNamespaceURI(prefix: string | null): string | null {
 		return null;
+	}
+	assertParent(node: ParentNode) {
+		const { parentNode } = this;
+		if (!parentNode) {
+			this.parentNode = node;
+		} else if (parentNode !== node) {
+			throw new Error(`Invalid parent`);
+		}
+		return this;
 	}
 	/// DOM constants
 	static ELEMENT_NODE = 1;

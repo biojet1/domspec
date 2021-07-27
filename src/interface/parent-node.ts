@@ -17,12 +17,11 @@ export class ParentNode extends ChildNode {
 	// 	return !next || next instanceof EndNode ? null : next;
 	// }
 
-	linkNext(next: Node) {
-		this[END][NEXT] = next;
-		next[PREV] = this;
-		return this;
-	}
-
+	// linkNext(node: Node) {
+	// 	this[END][NEXT] = node;
+	// 	node[PREV] = this;
+	// 	return this;
+	// }
 
 	// get followingNode() {
 	// 	const end = this.getEnd(node);
@@ -79,23 +78,28 @@ export class ParentNode extends ChildNode {
 
 	insertBefore(node: ChildNode, before?: ChildNode | null) {
 		if (node === this) throw new Error("unable to append a node to itself");
-		if (node === before) {
-			before = node.nextSibling;
-		}
-		const next = before || this[END];
+		if (before && node === before) before = node.nextSibling;
+
+		const ref = before ?? this[END];
+
+		const prev = ref[PREV];
+
 		if (node instanceof ParentNode) {
 			if (node.nodeType === 11) {
 				// DOCUMENT_FRAGMENT_NODE = 11;
 				const { firstChild, lastChild } = node;
 				// TODO: adopt
 				if (firstChild && lastChild) {
-					const prev = next[PREV];
 					prev && firstChild.linkPrior(prev);
-					lastChild.linkNext(next);
-					// knownSegment(next[PREV], firstChild, lastChild, next);
+					ref && lastChild.linkNext(ref);
+					// knownSegment(ref[PREV], firstChild, lastChild, ref);
 					// knownAdjacent(node, node[END]);
 					node.linkRight(node[END]);
-					for (let cur: ChildNode | null | false = firstChild; cur; ) {
+					for (
+						let cur: ChildNode | null | false = firstChild;
+						cur;
+
+					) {
 						// children already connected side by side
 						cur.parentNode = this;
 						// moCallback(firstChild, null);
@@ -107,22 +111,43 @@ export class ParentNode extends ChildNode {
 			} else {
 				node.remove();
 				node.parentNode = this;
-				const prev = next[PREV];
-
+				// ref.insertLeft(node);
+				// prev && node.linkLeft(prev);
+				// ref && node.linkRight(ref);
 				prev && node.linkPrior(prev);
-				node.linkNext(next);
-				// knownBoundaries(next[PREV], node, next);
+				node.linkNext(ref);
+				// prev && prev.assertParent(this).linkNext(node);
+				// ref && ref.assertParent(this).startNode.linkLeft(node);
+				// prev && prev.assertParent(this).linkNext(node);
+				// ref && ref.assertParent(this).startNode.linkLeft(node);
+				// prev && node.startNode.assertParent(this).linkLeft(prev);
+				// ref && node.endNode.assertParent(this).linkRight(ref);
+				// ref && node.linkRight(ref);
+
+				// knownBoundaries(ref[PREV], node, ref);
 				// moCallback(node, null);
 				// connectedCallback(node);
 			}
 		} else if (node instanceof ChildNode) {
 			node.remove();
 			node.parentNode = this;
-			const prev = next[PREV];
-
+			// ref.insertLeft(node);
+			// prev && node.linkLeft(prev);
+			// node.linkRight(ref);
+			// prev && node.linkLeft(prev);
+			// ref && node.linkRight(ref);
 			prev && node.linkPrior(prev);
-			node.linkNext(next);
+			node.linkNext(ref);
+
+			// if (prev) {
+			// 	prev.assertParent(this).linkNext(node);
+			// }
+			// if (ref) {
+			// 	ref.assertParent(this).startNode.linkLeft(node);
+			// }
 			// moCallback(node, null);
+		} else {
+			throw new Error(`Unexpected node`);
 		}
 
 		return node;
@@ -151,18 +176,17 @@ export class EndNode extends Node {
 		this[PREV] = parent;
 	}
 
-	linkPrior(prev: Node) {
-		this[START][PREV] = prev;
-		prev[NEXT] = this;
-		return this;
-	}
+	// linkPrior(node: Node) {
+	// 	this[START][PREV] = node;
+	// 	node[NEXT] = this;
+	// 	return this;
+	// }
 	get startNode(): Node {
 		return this[START];
 	}
 	get nodeType() {
 		return -1;
 	}
-
 }
 
 import { Node, PREV, NEXT, START, END } from "./node.js";

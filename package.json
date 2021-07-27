@@ -7,7 +7,10 @@
     "test": "tap test/parse.mjs",
     "test+cov": "tap --coverage test/parse.mjs",
     "posttest": "tap --coverage-report=text-lcov | codecov",
-    "compile": "tsc"
+    "rm-map": "find dist -name '*.js.map' -type f -delete",
+    "c8test": "c8 npx tap --no-coverage test/parse.mjs",
+    "c8report": "c8 report -r text-lcov > coverage/lcov.info",
+    "compile": "tsc -p . --sourcemap"
   },
   "author": "",
   "type": "module",
@@ -17,7 +20,13 @@
     "image-size": "",
     "saxes": "^5.0.1"
   },
+  "c8": {
+    "reports-dir": "/tmp/.c8/rep",
+    "temp-directory": "/tmp/.c8/tmp",
+    "src": "dist"
+  },
   "devDependencies": {
+    "source-map-support": "^0.5.19",
     "tap": "^15.0.9"
   }
 }

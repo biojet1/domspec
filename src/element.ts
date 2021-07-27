@@ -125,39 +125,7 @@ export class Element extends ParentNode {
 	}
 
 	toString() {
-		const out = [];
-		const end = this[END];
-		let isOpened = false;
-		let cur = new Node();
-		cur[NEXT] = this;
-		// console.log("CUR", "==============");
-		do {
-			cur = cur[NEXT] || end;
-			// console.dir([cur.nodeType, cur], { depth: 1 });
-			if (cur instanceof Attr) {
-				out.push(` ${cur.toString()}`);
-			} else if (cur instanceof Element) {
-				isOpened && out.push(">");
-				out.push(`<${cur.tagName}`);
-				isOpened = true;
-			} else if (cur instanceof ChildNode) {
-				isOpened && out.push(">");
-				out.push(cur.toString());
-				isOpened = false;
-			} else if (cur instanceof EndNode) {
-				const prev = cur[PREV];
-				if (prev === this || prev instanceof Attr) {
-					out.push(`/>`);
-				} else {
-					isOpened && out.push(">");
-					out.push(`</${(cur[START] as Element).tagName}>`);
-				}
-			} else {
-				throw new Error(`Invalid node ${cur}`);
-			}
-		} while (cur !== end);
-
-		return out.join("");
+		return Array.from(enumDOMStr(this)).join("");
 	}
 }
 
@@ -188,6 +156,43 @@ export function* enumFlatDOM(node: Node) {
 	} while (cur !== end);
 }
 
+export function* enumDOMStr(node: Node) {
+	let isOpened = false;
+	const { endNode: end } = node;
+	let cur = new Node();
+	cur[NEXT] = node;
+	do {
+		cur = cur[NEXT] || end;
+		if (cur instanceof Attr) {
+			yield ` ${cur.toString()}`;
+		} else if (cur instanceof Element) {
+			if (isOpened) {
+				yield `><${cur.tagName}`;
+			} else {
+				yield `<${cur.tagName}`;
+			}
+			isOpened = true;
+		} else if (cur instanceof ChildNode) {
+			if (isOpened) {
+				yield ">";
+				isOpened = false;
+			}
+			yield cur.toString();
+		} else if (cur instanceof EndNode) {
+			const prev = cur[PREV];
+			if (prev === cur[START] || prev instanceof Attr) {
+				yield `/>`;
+			} else if (isOpened) {
+				yield `></${(cur[START] as Element).tagName}>`;
+			} else {
+				yield `</${(cur[START] as Element).tagName}>`;
+			}
+			isOpened = false;
+		} else {
+			throw new Error(`Invalid node ${cur}`);
+		}
+	} while (cur !== end);
+}
 import { XMLNS } from "./namespace.js";
 import { Attr } from "./attr.js";
 import { ChildNode } from "./child-node.js";

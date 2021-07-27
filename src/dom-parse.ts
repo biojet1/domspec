@@ -1,6 +1,4 @@
-import { Document } from "./document.js";
-
-function domParse(str: string, doc: Document, currentTag: ParentNode) {
+function domParse(str: string, doc: Document, top: ParentNode) {
 	const parser = new SaxesParser({
 		// lowercase: true,
 		xmlns: true,
@@ -13,7 +11,7 @@ function domParse(str: string, doc: Document, currentTag: ParentNode) {
 	parser.on("doctype", (dt) => {
 		let [name, pub, sys] = ["html", "", ""];
 
-		if (currentTag !== doc) {
+		if (top !== doc) {
 			throw new Error("Doctype can only be appended to document");
 		} else if (!HTML5_DOCTYPE.test(dt)) {
 			let m;
@@ -27,30 +25,30 @@ function domParse(str: string, doc: Document, currentTag: ParentNode) {
 		}
 		let node = doc.implementation.createDocumentType(name, pub, sys);
 		node.ownerDocument = doc;
-		currentTag.appendChild(node);
+		top.appendChild(node);
 	});
 	parser.on("text", (str: string) => {
-		console.log("text", currentTag.nodeName, str);
-		currentTag.appendChild(doc.createTextNode(str));
+		// console.log("text", top.nodeName, str);
+		top.appendChild(doc.createTextNode(str));
 	});
 	parser.on("comment", (str: string) => {
-		console.log("comment", currentTag.nodeName, str);
+		// console.log("comment", top.nodeName, str);
 
-		currentTag.appendChild(doc.createComment(str));
+		top.appendChild(doc.createComment(str));
 	});
 	parser.on("cdata", (data) => {
-		currentTag.appendChild(doc.createCDATASection(data));
+		top.appendChild(doc.createCDATASection(data));
 	});
 
 	parser.on("opentag", (node) => {
-		console.log("opentag", node.name, currentTag.nodeName);
-		// console.dir(currentTag, { depth: 1 });
+		// console.log("opentag", node.name, top.nodeName);
+		// console.dir(top, { depth: 1 });
 
 		const { local, attributes, uri, prefix, name } = node;
 		if (name === ROOT_TAG) return;
 		let ns = !uri || uri === "" ? null : uri;
 		if (!ns && prefix && prefix != "") {
-			ns = currentTag.lookupNamespaceURI(prefix);
+			ns = top.lookupNamespaceURI(prefix);
 		}
 
 		const tag = doc.createElementNS(ns, name);
@@ -58,59 +56,20 @@ function domParse(str: string, doc: Document, currentTag: ParentNode) {
 		for (const [key, { uri, value }] of Object.entries(attributes)) {
 			tag.setAttributeNS(uri, key, value);
 		}
-		currentTag.appendChild(tag);
-		currentTag = tag;
+		top.appendChild(tag);
+		top = tag;
 	});
-
-	// parser.on("opentag", (tag) => {
-	// 	const { local: tagLocal, attributes: tagAttributes } = tag;
-
-	// 	const ownerDocument = getOwnerDocument();
-	// 	const tagNamespace = tag.uri === "" ? null : tag.uri;
-	// 	const tagPrefix = tag.prefix === "" ? null : tag.prefix;
-	// 	const isValue =
-	// 		tagAttributes.is === undefined ? null : tagAttributes.is.value;
-
-	// 	const elem = createElement(
-	// 		ownerDocument,
-	// 		tagLocal,
-	// 		tagNamespace,
-	// 		tagPrefix,
-	// 		isValue,
-	// 		true
-	// 	);
-
-	// 	// We mark a script element as "parser-inserted", which prevents it from
-	// 	// being immediately executed.
-	// 	if (tagLocal === "script" && tagNamespace === HTML_NS) {
-	// 		elem._parserInserted = true;
-	// 	}
-
-	// 	for (const key of Object.keys(tagAttributes)) {
-	// 		const { prefix, local, uri, value } = tagAttributes[key];
-	// 		attributes.setAttributeValue(
-	// 			elem,
-	// 			local,
-	// 			value,
-	// 			prefix === "" ? null : prefix,
-	// 			uri === "" ? null : uri
-	// 		);
-	// 	}
-
-	// 	appendChild(elem);
-	// 	openStack.push(elem);
-	// });
 
 	parser.on("closetag", (node) => {
 		if (node.name === ROOT_TAG) return;
-		console.log("closetag", node.name, currentTag.nodeName);
+		// console.log("closetag", node.name, top.nodeName);
 
-		const { parentNode } = currentTag;
-		// console.dir(currentTag, { depth: 1 });
+		const { parentNode } = top;
+		// console.dir(top, { depth: 1 });
 		if (parentNode) {
-			currentTag = parentNode;
+			top = parentNode;
 		} else {
-			throw new Error(`unexpected null parentNode of ${currentTag}`);
+			throw new Error(`unexpected null parentNode of ${top}`);
 		}
 	});
 
@@ -130,6 +89,24 @@ export const parseDOM = function (
 	}
 };
 
+export class DOMParser {
+	parseFromString(markup: string, type?: string) {
+		let doc: Document;
+		switch (type) {
+			case "text/html":
+				doc = new HTMLDocument();
+				break;
+			case "image/svg+xml":
+				doc = new SVGDocument();
+				break;
+			default:
+				doc = new Document();
+		}
+		domParse(markup, doc, doc);
+		return doc;
+	}
+}
+
 const ROOT_TAG = "parser:Root";
 
 const HTML5_DOCTYPE = /<!doctype html>/i;
@@ -139,3 +116,6 @@ const CUSTOM_NAME_DOCTYPE = /<!doctype\s+([^\s>]+)/i;
 
 import { ParentNode } from "./parent-node.js";
 import { SaxesParser } from "saxes";
+import { Document } from "./document.js";
+import { HTMLDocument } from "./html/document.js";
+import { SVGDocument } from "./svg/document.js";

@@ -12,25 +12,6 @@ export class ParentNode extends ChildNode {
 		return this[END];
 	}
 
-	// get nextSibling(): Node | null {
-	// 	const next = this[END][NEXT];
-	// 	return !next || next instanceof EndNode ? null : next;
-	// }
-
-	// linkNext(node: Node) {
-	// 	this[END][NEXT] = node;
-	// 	node[PREV] = this;
-	// 	return this;
-	// }
-
-	// get followingNode() {
-	// 	const end = this.getEnd(node);
-	// 	if (end) {
-	// 		const next = end[NEXT];
-	// 		return next && (next instanceof EndNode ? null : next);
-	// 	}
-	// }
-
 	//// DOM
 	get firstChild(): ChildNode | null {
 		// Tag -> Attr* -> ChildNode* -> END
@@ -91,14 +72,13 @@ export class ParentNode extends ChildNode {
 				// TODO: adopt
 				if (firstChild && lastChild) {
 					prev && firstChild.linkPrior(prev);
-					ref && lastChild.linkNext(ref);
+					lastChild.linkNext(ref);
 					// knownSegment(ref[PREV], firstChild, lastChild, ref);
 					// knownAdjacent(node, node[END]);
 					node.linkRight(node[END]);
 					for (
 						let cur: ChildNode | null | false = firstChild;
 						cur;
-
 					) {
 						// children already connected side by side
 						cur.parentNode = this;
@@ -111,40 +91,16 @@ export class ParentNode extends ChildNode {
 			} else {
 				node.remove();
 				node.parentNode = this;
-				// ref.insertLeft(node);
-				// prev && node.linkLeft(prev);
-				// ref && node.linkRight(ref);
 				prev && node.linkPrior(prev);
 				node.linkNext(ref);
-				// prev && prev.assertParent(this).linkNext(node);
-				// ref && ref.assertParent(this).startNode.linkLeft(node);
-				// prev && prev.assertParent(this).linkNext(node);
-				// ref && ref.assertParent(this).startNode.linkLeft(node);
-				// prev && node.startNode.assertParent(this).linkLeft(prev);
-				// ref && node.endNode.assertParent(this).linkRight(ref);
-				// ref && node.linkRight(ref);
-
-				// knownBoundaries(ref[PREV], node, ref);
 				// moCallback(node, null);
 				// connectedCallback(node);
 			}
 		} else if (node instanceof ChildNode) {
 			node.remove();
 			node.parentNode = this;
-			// ref.insertLeft(node);
-			// prev && node.linkLeft(prev);
-			// node.linkRight(ref);
-			// prev && node.linkLeft(prev);
-			// ref && node.linkRight(ref);
 			prev && node.linkPrior(prev);
 			node.linkNext(ref);
-
-			// if (prev) {
-			// 	prev.assertParent(this).linkNext(node);
-			// }
-			// if (ref) {
-			// 	ref.assertParent(this).startNode.linkLeft(node);
-			// }
 			// moCallback(node, null);
 		} else {
 			throw new Error(`Unexpected node`);
@@ -172,15 +128,8 @@ export class EndNode extends Node {
 	[START]: ParentNode;
 	constructor(parent: ParentNode) {
 		super();
-		this[START] = parent;
-		this[PREV] = parent;
+		this[START] = this[PREV] = parent;
 	}
-
-	// linkPrior(node: Node) {
-	// 	this[START][PREV] = node;
-	// 	node[NEXT] = this;
-	// 	return this;
-	// }
 	get startNode(): Node {
 		return this[START];
 	}

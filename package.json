@@ -7,7 +7,7 @@
     "test": "tap test/parse.mjs",
     "test+cov": "tap --coverage test/parse.mjs",
     "posttest": "tap --coverage-report=text-lcov | codecov",
-    "compile": "tsc"
+    "compile": "tsc -p . --sourcemap"
   },
   "author": "",
   "type": "module",

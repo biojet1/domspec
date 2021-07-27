@@ -4,14 +4,18 @@ import { Document } from "../dist/document.js";
 import { parseDOM, DOMParser } from "../dist/dom-parse.js";
 import { enumFlatDOM } from "../dist/element.js";
 
+const xml = `
+<cupidatat><!--ullamco--><dolor></dolor><labore commodo="proident,"><enim>sint<eiusmod><officia>aute<!--cillum-->anim</officia>elit,<voluptate Duis="irure"><!--veniam,--><quis eu="non"></quis><ipsum est="culpa" laboris="magna" sunt="mollit">adipiscing<nisi laborum="nulla"><nostrud></nostrud><!--qui--></nisi></ipsum></voluptate>Ut</eiusmod><amet><!--consequat.--><!--Lorem--><!--tempor--></amet><!--ad-->et<!--in--><fugiat></fugiat></enim></labore></cupidatat>
+`.trim();
+
 const data = [
-    ["<foo></foo>", "<foo/>"],
+    ["<foo></foo>", null],
     ["<foo/>", null],
     ["<foo>hello world</foo>", null],
     ["<foo><!-- hora! --></foo>", null],
     ["<foo><br/></foo>", null],
-    ["<foo><br></br></foo>", "<foo><br/></foo>"],
-    ['<foo bar="baz"></foo>', '<foo bar="baz"/>'],
+    ["<foo><br></br></foo>", null],
+    ['<foo bar="baz"></foo>', null],
     ["<a><b><c>hello</c></b></a>", null],
     ["<a><b>hello<c><!--comment --></c></b>END</a>", null],
     [
@@ -22,47 +26,20 @@ const data = [
     ['<foo name="飯">朝飯前<!-- Asa-meshi-mae --></foo>', null],
     ['<foo name="前"><!-- Asa-meshi-mae -->朝飯前</foo>', null],
     ['<foo name="飯"><!-- Asa -->朝飯前<!-- meshi-mae --></foo>', null],
-    ['<foo name="前"><!-- Asa --><p/>朝飯前<br/><!-- meshi-mae --></foo>', null],
+    [
+        '<foo name="前"><!-- Asa --><p/>朝飯前<br/><!-- meshi-mae --></foo>',
+        null,
+    ],
+
+    [xml, null, null],
 ];
 
 const parser = new DOMParser();
-for (let [xml, exp, msg] of data) {
+for (const [i, [xml, exp, msg]] of data.entries()) {
     const doc = parser.parseFromString(xml);
     const top = doc.documentElement;
-    test.equal(
-        top && top.toString(),
-        exp || xml,
-        top && Array.from(enumFlatDOM(top))
-    );
+    test.equal(top && top.toString(), exp || xml, [
+        i,
+        top && Array.from(enumFlatDOM(top)),
+    ]);
 }
-// it("should support nested tags", function () {
-//     var node = parse("<a><b><c>hello</c></b></a>");
-//     node.root.should.eql({
-//         name: "a",
-//         attributes: {},
-//         children: [
-//             {
-//                 name: "b",
-//                 attributes: {},
-//                 children: [
-//                     {
-//                         name: "c",
-//                         attributes: {},
-//                         children: [],
-//                         content: "hello",
-//                     },
-//                 ],
-//                 content: "",
-//             },
-//         ],
-//         content: "",
-//     });
-// });
-
-// test.test(`should support weird whitespace`, function (t) {
-//     const xml = '<foo \n\n\nbar\n\n=   \n"baz">\n\nhello world</foo>';
-//     const doc = new Document();
-//     parseDOM(xml, doc);
-//     t.equal(doc.documentElement.toString(), '<foo bar="baz">\n\nhello world</foo>');
-//     t.end();
-// });

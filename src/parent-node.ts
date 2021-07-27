@@ -16,11 +16,11 @@ export class ParentNode extends ChildNode {
 	get firstChild(): ChildNode | null {
 		// Tag -> Attr* -> ChildNode* -> END
 		let { [NEXT]: next, [END]: end } = this;
-		do {
+		for (; next && next !== end; next = next[NEXT]) {
 			if (next instanceof ChildNode) {
 				return next;
 			}
-		} while (next && (next = next[NEXT]) !== end);
+		}
 		return null;
 	}
 
@@ -44,7 +44,7 @@ export class ParentNode extends ChildNode {
 
 	get lastChild(): ChildNode | null {
 		const prev = this[END][PREV];
-		return prev && prev instanceof ChildNode ? prev : null;
+		return prev && prev != this && prev instanceof ChildNode ? prev : null;
 	}
 
 	get lastElementChild(): ChildNode | null {
@@ -79,6 +79,7 @@ export class ParentNode extends ChildNode {
 					for (
 						let cur: ChildNode | null | false = firstChild;
 						cur;
+
 					) {
 						// children already connected side by side
 						cur.parentNode = this;

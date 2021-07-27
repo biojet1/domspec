@@ -36,8 +36,8 @@ jobs:
       # - run: npm run "posttest"
       - run: npm run c8test
       - run: |
-          npm run c8report
           mkdir -p coverage
+          npm run c8report
           cat coverage/lcov.info
 
       - run: find . -name '*lcov*'

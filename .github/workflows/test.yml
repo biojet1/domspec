@@ -33,6 +33,7 @@ jobs:
             dist
 
       - run: npm run "test+cov"
+      - run: npm run "posttest"
       - run: find . -name '*lcov*'
 
       - name: Coveralls

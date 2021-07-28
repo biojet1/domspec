@@ -64,8 +64,7 @@ export class Node {
 		}
 		return this;
 	}
-
-	remove() {
+	unlink() {
 		const {
 			[PREV]: prev,
 			endNode: { [NEXT]: next },
@@ -85,6 +84,7 @@ export class Node {
 			// moCallback(this, parentNode);
 			// if (nodeType === ELEMENT_NODE) disconnectedCallback(this);
 		}
+		return this;
 	}
 	/// Extra
 	assertParent(node: ParentNode) {
@@ -139,6 +139,10 @@ export class Node {
 	lookupNamespaceURI(prefix: string | null): string | null {
 		return null;
 	}
+	remove() {
+		this.unlink();
+	}
+
 	/// DOM constants
 	static ELEMENT_NODE = 1;
 	static ATTRIBUTE_NODE = 2;

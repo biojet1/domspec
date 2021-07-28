@@ -30,54 +30,27 @@ export class Element extends ParentNode {
 	}
 
 	getAttributeNode(name: string) {
-		for (
-			let attr = this[NEXT];
-			attr && attr instanceof Attr;
-			attr = attr[NEXT]
-		) {
+		let attr = this[NEXT];
+		for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
 			if (!attr.namespaceURI && attr.name === name) return attr;
 		}
 		return null;
 	}
 
-	getAttributeNodeNS(namespace: string, localName: string) {
-		for (
+	getAttributeNodeNS(ns: string|null, localName: string) {
+		if (ns && ns != "") {
 			let attr = this[NEXT];
-			attr && attr instanceof Attr;
-			attr = attr[NEXT]
-		) {
-			if (attr.namespaceURI === namespace) {
-				if (attr.localName === localName) {
-					return attr;
+			for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
+				if (attr.namespaceURI === ns) {
+					if (attr.localName === localName) {
+						return attr;
+					}
 				}
 			}
+		} else {
+			return this.getAttributeNode(localName);
 		}
 		return null;
-	}
-	lookupNamespaceURI(prefix: string | null): string | null {
-		if (prefix === "" || !prefix) prefix = null;
-		const { namespaceURI } = this;
-
-		if (namespaceURI && this.prefix === prefix) return namespaceURI;
-
-		for (
-			let attr = this[NEXT];
-			attr && attr instanceof Attr;
-			attr = attr[NEXT]
-		) {
-			if (attr.namespaceURI === XMLNS) {
-				const { prefix: prefixA, localName: localNameA } = attr;
-				if (
-					(prefixA === "xmlns" && localNameA === prefix) ||
-					(!prefix && !prefixA && localNameA === "xmlns")
-				) {
-					return attr.value || null;
-				}
-			}
-		}
-		const { parentElement: parent } = this;
-
-		return parent ? parent.lookupNamespaceURI(prefix) : null;
 	}
 	setAttribute(qname: string, value: string) {
 		let attr = this[NEXT];
@@ -102,6 +75,8 @@ export class Element extends ParentNode {
 		let prefix, lname;
 		if (ns === "" || !ns) {
 			return this.setAttribute(qname, value);
+		} else if (qname.length <= 0) {
+			throw new Error("Empty attribute name");
 		} else {
 			const pos = qname.indexOf(":");
 			if (pos < 0) {
@@ -134,13 +109,71 @@ export class Element extends ParentNode {
 		if (prefix) node.prefix = prefix;
 		attr.insertRight(node);
 	}
-
+	setAttributeNode(node: Attr) {
+		return this.setAttributeNodeNS(node);
+	}
+	setAttributeNodeNS(node: Attr) {
+		const prev = this.getAttributeNodeNS(
+			node.namespaceURI || null,
+			node.localName
+		);
+		if (node === prev) {
+			return node;
+		} else if (prev) {
+			prev.insertLeft(node).remove();
+		} else {
+			let attr = this[NEXT];
+			for (; attr && attr instanceof Attr; attr = attr[NEXT]);
+			if (attr) {
+				node.unlink().parentNode = this;
+				attr.insertLeft(node);
+			}
+		}
+		return prev;
+	}
+	removeAttribute(qName: string) {
+		const node = this.getAttributeNode(qName);
+		node && node.unlink();
+	}
+	removeAttributeNS(ns: string, localName: string) {
+		const node = this.getAttributeNodeNS(ns, localName);
+		node && node.unlink();
+	}
+	hasAttribute(qName: string) {
+		const node = this.getAttributeNode(qName);
+		return !!node;
+	}
+	hasAttributeNS(ns: string, localName: string) {
+		const node = this.getAttributeNodeNS(ns, localName);
+		return !!node;
+	}
 	toString() {
 		return Array.from(enumDOMStr(this)).join("");
 	}
+
+	lookupNamespaceURI(prefix: string | null): string | null {
+		if (prefix === "" || !prefix) prefix = null;
+		const { namespaceURI } = this;
+
+		if (namespaceURI && this.prefix === prefix) return namespaceURI;
+
+		let attr = this[NEXT];
+		for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
+			if (attr.namespaceURI === XMLNS) {
+				const { prefix: prefixA, localName: localNameA } = attr;
+				if (
+					(prefixA === "xmlns" && localNameA === prefix) ||
+					(!prefix && !prefixA && localNameA === "xmlns")
+				) {
+					return attr.value || null;
+				}
+			}
+		}
+		const { parentElement: parent } = this;
+
+		return parent ? parent.lookupNamespaceURI(prefix) : null;
+	}
 }
-
-
 
 export function* enumFlatDOM(node: Node) {
 	const { endNode: end } = node;

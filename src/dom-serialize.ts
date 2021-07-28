@@ -56,6 +56,31 @@ export function* enumDOMStr(node: Node) {
 	} while (cur !== end && (cur = cur[NEXT]));
 }
 
+export function* enumFlatDOM(node: Node) {
+	const { endNode: end } = node;
+	let cur: Node | null | undefined = node;
+	do {
+		if (cur instanceof Attr) {
+			const { nodeType, name, value } = cur;
+			yield nodeType;
+			yield name;
+			yield value;
+		} else if (cur instanceof Element) {
+			const { nodeType, tagName } = cur;
+			yield nodeType;
+			yield tagName;
+		} else if (cur instanceof EndNode) {
+			yield -1;
+		} else if (cur instanceof ChildNode) {
+			const { nodeType, nodeValue } = cur;
+			yield nodeType;
+			yield nodeValue;
+		} else {
+			throw new Error(`Invalid node ${cur}`);
+		}
+	} while (cur !== end && (cur = cur[NEXT]));
+}
+
 import { NEXT, PREV, START, END, Node } from "./node.js";
 import { ChildNode } from "./child-node.js";
 import { ParentNode, EndNode } from "./parent-node.js";

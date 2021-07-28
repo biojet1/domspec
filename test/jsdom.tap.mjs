@@ -3,7 +3,6 @@ import test from "tap";
 import { JSDOM } from "jsdom";
 import { Document } from "../dist/document.js";
 import { parseDOM, DOMParser } from "../dist/dom-parse.js";
-import { enumFlatDOM } from "../dist/element.js";
 
 const xml = `
 <cupidatat><!--ullamco--><dolor></dolor><labore commodo="proident,"><enim>sint<eiusmod><officia>aute<!--cillum-->anim</officia>elit,<voluptate Duis="irure"><!--veniam,--><quis eu="non"></quis><ipsum est="culpa" laboris="magna" sunt="mollit">adipiscing<nisi laborum="nulla"><nostrud></nostrud><!--qui--></nisi></ipsum></voluptate>Ut</eiusmod><amet><!--consequat.--><!--Lorem--><!--tempor--></amet><!--ad-->et<!--in--><fugiat></fugiat></enim></labore></cupidatat>
@@ -42,7 +41,8 @@ function checkNode(t, a, b) {
                 );
 
                 const attrA = a.getAttributeNode(attrB.name);
-                t.notOk(a.getAttributeNode(`${attrB.name}-not`));
+
+                // t.notOk(a.getAttributeNode(`${attrB.name}-not`));
                 t.ok(a.getAttributeNode(attrB.name));
                 t.ok(a.getAttributeNodeNS("", attrB.name));
                 t.ok(a.getAttributeNodeNS(null, attrB.name));
@@ -51,37 +51,8 @@ function checkNode(t, a, b) {
                 t.strictSame(a.hasAttributeNS(null, attrB.name), true);
                 t.strictSame(a.hasAttribute(`${attrB.name}-not`), false);
 
-                if (attrA.namespaceURI || attrB.namespaceURI) {
-                    t.strictSame(
-                        attrA.namespaceURI,
-                        attrB.namespaceURI,
-                        `namespaceURI ${attrB.name} ${aN}`
-                    );
-                }
-                if (attrA.prefix || attrB.prefix) {
-                    t.strictSame(
-                        attrA.prefix,
-                        attrB.prefix,
-                        `prefix ${attrB.name} '${attrA.name}' '${attrB.name}' ${aN}`
-                    );
-                }
-
-                t.strictSame(
-                    attrA.value,
-                    attrB.value,
-                    `value ${attrB.name} '${attrA.value}' '${attrB.value}' ${aN}`
-                );
-                t.strictSame(
-                    attrA.localName,
-                    attrB.localName,
-                    `localName ${attrB.name} '${attrA.name}' '${attrB.name}' ${aN}`
-                );
-                t.strictSame(
-                    attrA.specified,
-                    attrB.specified,
-                    `specified ${attrB.name} ${aN}`
-                );
                 similarNode(t, attrA.ownerElement, attrB.ownerElement);
+                checkNode(t, attrA, attrB);
 
                 if (i % 2 == 0) {
                     a.removeAttribute(attrB.name);
@@ -95,40 +66,87 @@ function checkNode(t, a, b) {
                 t.strictSame(a.hasAttribute(attrB.name), false);
                 t.strictSame(a.hasAttributeNS("", attrB.name), false);
                 t.strictSame(a.hasAttributeNS(null, attrB.name), false);
+                a.toggleAttribute(attrB.name);
+                t.strictSame(a.getAttribute(attrB.name), "");
             }
-            // getAttributeNode()
         }
         case 9: // DOCUMENT_NODE (9)
-        case 11: {
-            // DOCUMENT_FRAGMENT_NODE (11).
-            const A = Array.from(a.childNodes);
-            const B = Array.from(b.childNodes);
-            t.strictSame(A.length, B.length, `childNodes.length ${aN}`);
-            let i = B.length;
-            while (i-- > 0) {
-                checkNode(t, A[i], B[i]);
-            }
-            const EA = Array.from(a.children);
-            const EB = Array.from(b.children);
-            t.strictSame(EA.length, EA.length, `children.length ${aN}`);
+        case 11:
+            {
+                // DOCUMENT_FRAGMENT_NODE (11).
+                const A = Array.from(a.childNodes);
+                const B = Array.from(b.childNodes);
+                t.strictSame(A.length, B.length, `childNodes.length ${aN}`);
+                let i = B.length;
+                while (i-- > 0) {
+                    checkNode(t, A[i], B[i]);
+                }
+                const EA = Array.from(a.children);
+                const EB = Array.from(b.children);
+                t.strictSame(EA.length, EA.length, `children.length ${aN}`);
 
-            for (i = EA.length; i-- > 0; ) {
-                t.ok(A.indexOf(EA[i]) >= 0, `children[${i}] ${aN}`);
-                t.strictSame(
-                    EA[i].nodeType,
-                    1,
-                    `children[${i}] is element ${aN}`
-                );
+                for (i = EA.length; i-- > 0; ) {
+                    t.ok(A.indexOf(EA[i]) >= 0, `children[${i}] ${aN}`);
+                    t.strictSame(
+                        EA[i].nodeType,
+                        1,
+                        `children[${i}] is element ${aN}`
+                    );
+                }
             }
-
             break;
-        }
         case 3: // TEXT_NODE (3);
         case 4: // CDATA_SECTION_NODE (4);
         case 8: // COMMENT_NODE (8);
             t.strictSame(a.data, b.data, `data ${aN}`);
             t.strictSame(a.length, b.length, `length ${aN}`);
-            t.strictSame(a.textContent, a.data, `textContent==data  ${aN}`);
+            t.strictSame(
+                a.textContent,
+                b.nodeValue,
+                `textContent==data  ${aN}`
+            );
+            t.strictSame(
+                b.nodeValue,
+                a.textContent,
+                `textContent==data  ${aN}`
+            );
+            break;
+        case 2: // ATTRIBUTE_NODE (2);
+            if (a.namespaceURI || b.namespaceURI) {
+                t.strictSame(
+                    a.namespaceURI,
+                    b.namespaceURI,
+                    `namespaceURI ${b.name} ${aN}`
+                );
+            }
+            if (a.prefix || b.prefix) {
+                t.strictSame(
+                    a.prefix,
+                    b.prefix,
+                    `prefix ${b.name} '${a.name}' '${b.name}' ${aN}`
+                );
+            }
+            t.strictSame(
+                a.value,
+                b.value,
+                `value ${b.name} '${a.value}' '${b.value}' ${aN}`
+            );
+            t.strictSame(
+                a.localName,
+                b.localName,
+                `localName ${b.name} '${a.name}' '${b.name}' ${aN}`
+            );
+            t.strictSame(
+                a.textContent,
+                b.nodeValue,
+                `textContent==data  ${aN}`
+            );
+            t.strictSame(
+                b.nodeValue,
+                a.textContent,
+                `textContent==data  ${aN}`
+            );
+            t.strictSame(a.specified, b.specified, `specified ${b.name} ${aN}`);
 
         case 7: // PROCESSING_INSTRUCTION_NODE (7);
             t.strictSame(a.textContent, b.textContent, `textContent  ${aN}`);

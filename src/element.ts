@@ -37,7 +37,7 @@ export class Element extends ParentNode {
 		return null;
 	}
 
-	getAttributeNodeNS(ns: string|null, localName: string) {
+	getAttributeNodeNS(ns: string | null, localName: string) {
 		if (ns && ns != "") {
 			let attr = this[NEXT];
 			for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
@@ -61,15 +61,14 @@ export class Element extends ParentNode {
 				return;
 			}
 		}
-		if (!attr || !(attr instanceof Attr)) {
-			attr = this;
-		}
+
 		const node = new Attr();
 		node.name = qname;
 		node.localName = qname;
 		node.value = value;
 		node.parentNode = this;
-		attr.insertRight(node);
+
+		(attr && attr instanceof Attr ? attr : this).insertRight(node);
 	}
 	setAttributeNS(ns: string | null, qname: string, value: string) {
 		let prefix, lname;
@@ -147,6 +146,21 @@ export class Element extends ParentNode {
 		const node = this.getAttributeNodeNS(ns, localName);
 		return !!node;
 	}
+
+	toggleAttribute(name: string, force?: boolean) {
+		if (this.hasAttribute(name)) {
+			if (force == true) {
+				this.removeAttribute(name);
+				return false;
+			}
+			return true;
+		} else if (force == true || force === undefined) {
+			this.setAttribute(name, "");
+			return true;
+		}
+		return false;
+	}
+
 	toString() {
 		return Array.from(enumDOMStr(this)).join("");
 	}
@@ -173,33 +187,6 @@ export class Element extends ParentNode {
 
 		return parent ? parent.lookupNamespaceURI(prefix) : null;
 	}
-}
-
-export function* enumFlatDOM(node: Node) {
-	const { endNode: end } = node;
-	let cur = new Node();
-	cur[NEXT] = node;
-	do {
-		cur = cur[NEXT] || end;
-		if (cur instanceof Attr) {
-			const { nodeType, name, value } = cur;
-			yield nodeType;
-			yield name;
-			yield value;
-		} else if (cur instanceof Element) {
-			const { nodeType, tagName } = cur;
-			yield nodeType;
-			yield tagName;
-		} else if (cur instanceof EndNode) {
-			yield -1;
-		} else if (cur instanceof ChildNode) {
-			const { nodeType, nodeValue } = cur;
-			yield nodeType;
-			yield nodeValue;
-		} else {
-			throw new Error(`Invalid node ${cur}`);
-		}
-	} while (cur !== end);
 }
 
 import { XMLNS } from "./namespace.js";

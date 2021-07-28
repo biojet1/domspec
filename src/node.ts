@@ -29,15 +29,6 @@ export class Node {
 		const next = this[NEXT];
 		node.linkLeft(this);
 		next && node.linkRight(next);
-		if (
-			node.parentNode !== this.parentNode &&
-			node.parentNode &&
-			this.parentNode
-		) {
-			console.dir(node.parentNode, { depth: 1 });
-			console.dir(this.parentNode, { depth: 1 });
-			throw new Error(`Unexpected parents`);
-		}
 		return this;
 	}
 

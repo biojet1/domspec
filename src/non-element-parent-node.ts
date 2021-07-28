@@ -1,21 +1,16 @@
-import {  PREV, NEXT, END } from "./node.js";
+import { PREV, NEXT, END } from "./node.js";
 import { ParentNode } from "./parent-node.js";
 
 export class NonElementParentNode extends ParentNode {
-
 	getElementById(id: string) {
 		let { [NEXT]: next, [END]: end } = this;
-		while (next && next !== end) {
-			if(next instanceof ParentNode){
-
+		for (; next && next !== end; next = next.endNode[NEXT]) {
+			if (next.nodeType === 1) {
+				const el = next as Element;
+				if (el.id === id) {
+					return next;
+				}
 			}
-			// if (next.nodeType === 1) {
-			// 	const el = next as Element;
-			// 	if (el.id === id) {
-			// 		return next;
-			// 	}
-			// }
-			next = next[NEXT];
 		}
 		return null;
 	}
@@ -44,4 +39,4 @@ export class NonElementParentNode extends ParentNode {
 }
 
 // import { ChildNode } from "./child-node.js";
-// import { Element } from "./element.js";
+import { Element } from "./element.js";

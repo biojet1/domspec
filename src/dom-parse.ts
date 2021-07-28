@@ -82,10 +82,8 @@ function domParse(str: string, doc: Document, top: ParentNode) {
 
 		const { parentNode } = top;
 		// console.dir(top, { depth: 1 });
-		if (!node.isSelfClosing) {
-			// console.log("lastChild", node.name, top.nodeName,  top.lastChild);
-
-			top.lastChild || top.appendChild(doc.createTextNode(""));
+		if (node.isSelfClosing) {
+			(top as Element)._parsed_closed = true;
 		}
 		if (parentNode) {
 			top = parentNode;
@@ -135,8 +133,9 @@ const PUBLIC_DOCTYPE = /<!doctype\s+([^\s]+)\s+public\s+"([^"]+)"\s+"([^"]+)"/i;
 const SYSTEM_DOCTYPE = /<!doctype\s+([^\s]+)\s+system\s+"([^"]+)"/i;
 const CUSTOM_NAME_DOCTYPE = /<!doctype\s+([^\s>]+)/i;
 
-import { ParentNode } from "./parent-node.js";
 import { SaxesParser } from "saxes";
+import { ParentNode } from "./parent-node.js";
+import { Element } from "./element.js";
 import { Document } from "./document.js";
 import { HTMLDocument } from "./html/document.js";
 import { SVGDocument } from "./svg/document.js";

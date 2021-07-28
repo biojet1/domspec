@@ -11,6 +11,26 @@ export class ParentNode extends ChildNode {
 		// End node or self
 		return this[END];
 	}
+	hasChildNodes() {
+		return !!this.lastChild;
+	}
+	get childNodes() {
+		const nodes = new NodeList();
+		let { firstChild: cur } = this;
+		for (; cur; cur = cur.nextSibling) {
+			nodes.push(cur);
+		}
+		return nodes;
+	}
+
+	get children() {
+		const nodes = new NodeList();
+		let { firstElementChild: cur } = this;
+		for (; cur; cur = cur.nextElementSibling) {
+			nodes.push(cur);
+		}
+		return nodes;
+	}
 
 	//// DOM
 	get firstChild(): ChildNode | null {
@@ -128,6 +148,17 @@ export class EndNode extends Node {
 	}
 	get nodeType() {
 		return -1;
+	}
+}
+
+// https://dom.spec.whatwg.org/#interface-nodelist
+
+/**
+ *NodeList
+ */
+export class NodeList extends Array<ChildNode> {
+	item(i: number) {
+		return i < this.length ? this[i] : null;
 	}
 }
 

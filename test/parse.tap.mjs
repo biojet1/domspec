@@ -1,7 +1,9 @@
 "uses strict";
 import test from "tap";
 import { Document } from "../dist/document.js";
-import { parseDOM, DOMParser } from "../dist/dom-parse.js";
+import { ParentNode } from "../dist/parent-node.js";
+import { DOMParser } from "../dist/dom-parse.js";
+import { XMLSerializer } from "../dist/dom-serialize.js";
 import { enumFlatDOM } from "../dist/element.js";
 
 const xml = `
@@ -35,13 +37,16 @@ const data = [
 ];
 
 const parser = new DOMParser();
-for (const [i, [xml, exp, msg]] of data.entries()) {
+const serializer = new XMLSerializer();
+
+for (let [i, [xml, expected, msg]] of data.entries()) {
     const doc = parser.parseFromString(xml);
     const top = doc.documentElement;
-    test.equal(top && top.toString(), exp || xml, [
-        i,
-        top && Array.from(enumFlatDOM(top)),
-    ]);
+    const extra = [i, top && Array.from(enumFlatDOM(top))];
+
+    expected = expected || xml;
+    test.strictSame(top.toString(), expected, extra);
+    test.strictSame(serializer.serializeToString(doc), expected, extra);
 
     test.test(`checkNode`, function (t) {
         checkNode(t, doc);
@@ -81,12 +86,20 @@ function checkNode(t, node) {
     const F = Array.from(collectF());
     const L = Array.from(collectL()).reverse();
     t.strictSame(F, L);
+    switch (node.nodeType) {
+        case 1: // ELEMENT_NODE (1)
+        case 9: // DOCUMENT_NODE (9);
+        case 11: // DOCUMENT_FRAGMENT_NODE (11).
+            t.strictSame(F, Array.from(node.childNodes));
+    }
 
     // console.dir(F);
     // console.dir(first);
 
     for (let cur = first; cur; cur = cur === last ? null : cur.nextSibling) {
         t.strictSame(cur.parentNode, node);
+        t.ok(cur.parentNode.isSameNode(node));
+        t.notOk(cur.isSameNode(node));
         checkNode(t, cur);
     }
 }

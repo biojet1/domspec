@@ -35,6 +35,26 @@ export class ChildNode extends Node {
 		const { parentNode: node } = this;
 		return node && node.nodeType == 1 ? (node as Element) : null;
 	}
+
+	get nextElementSibling(): Element | null {
+		let { nextSibling: node } = this;
+		for (; node; node = node.nextSibling) {
+			if (node.nodeType == 1) {
+				return node as Element;
+			}
+		}
+		return null;
+	}
+
+	get previousElementSibling(): Element | null {
+		let { previousSibling: node } = this;
+		for (; node; node = node.previousSibling) {
+			if (node.nodeType == 1) {
+				return node as Element;
+			}
+		}
+		return null;
+	}
 }
 
 import { ParentNode, EndNode } from "./parent-node.js";

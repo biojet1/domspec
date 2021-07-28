@@ -86,6 +86,16 @@ export class Node {
 			// if (nodeType === ELEMENT_NODE) disconnectedCallback(this);
 		}
 	}
+	/// Extra
+	assertParent(node: ParentNode) {
+		const { parentNode } = this;
+		if (!parentNode) {
+			this.parentNode = node;
+		} else if (parentNode !== node) {
+			throw new Error(`Invalid parent`);
+		}
+		return this;
+	}
 
 	//// DOM
 	ownerDocument?: Document;
@@ -99,17 +109,35 @@ export class Node {
 	get nodeName(): string | null {
 		return null;
 	}
-	lookupNamespaceURI(prefix: string | null): string | null {
+	get textContent(): string | null {
 		return null;
 	}
-	assertParent(node: ParentNode) {
-		const { parentNode } = this;
-		if (!parentNode) {
-			this.parentNode = node;
-		} else if (parentNode !== node) {
-			throw new Error(`Invalid parent`);
-		}
-		return this;
+
+	isSameNode(node: Node) {
+		return this === node;
+	}
+
+	// isEqualNode(node) {
+	// 	if (this === node) return true;
+	// 	if (this.nodeType === node.nodeType) {
+	// 		switch (this.nodeType) {
+	// 			case DOCUMENT_NODE:
+	// 			case DOCUMENT_FRAGMENT_NODE: {
+	// 				const aNodes = this.childNodes;
+	// 				const bNodes = node.childNodes;
+	// 				return (
+	// 					aNodes.length === bNodes.length &&
+	// 					aNodes.every((node, i) => node.isEqualNode(bNodes[i]))
+	// 				);
+	// 			}
+	// 			case 1:
+	// 				return this.toString() === node.toString();
+	// 		}
+	// 	}
+	// 	return false;
+	// }
+	lookupNamespaceURI(prefix: string | null): string | null {
+		return null;
 	}
 	/// DOM constants
 	static ELEMENT_NODE = 1;

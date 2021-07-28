@@ -2,6 +2,8 @@ import { NEXT, PREV, START, END, Node } from "./node.js";
 import { ParentNode, EndNode } from "./parent-node.js";
 
 export class Element extends ParentNode {
+	//// Parse
+	_parsed_closed?: boolean;
 	//// Tree
 	//// DOM
 	localName: string;
@@ -18,6 +20,14 @@ export class Element extends ParentNode {
 	get nodeName() {
 		return this.tagName;
 	}
+	get id() {
+		return this.getAttribute("id");
+	}
+
+	getAttribute(name: string) {
+		const node = this.getAttributeNode(name);
+		return node ? node.value : null;
+	}
 
 	getAttributeNode(name: string) {
 		for (
@@ -29,6 +39,7 @@ export class Element extends ParentNode {
 		}
 		return null;
 	}
+
 	getAttributeNodeNS(namespace: string, localName: string) {
 		for (
 			let attr = this[NEXT];
@@ -128,6 +139,8 @@ export class Element extends ParentNode {
 		return Array.from(enumDOMStr(this)).join("");
 	}
 }
+
+
 
 export function* enumFlatDOM(node: Node) {
 	const { endNode: end } = node;

@@ -1,15 +1,34 @@
-import { Node, NEXT, PREV } from "./node.js";
+import { Node, NEXT, PREV, START } from "./node.js";
 
 export class ChildNode extends Node {
 	//// Tree
 	//// Dom
 	get nextSibling(): ChildNode | null {
 		const node = this.endNode[NEXT];
-		return node instanceof ChildNode ? node : null;
+		if (node instanceof EndNode) {
+			if (node[START] !== this.parentNode) {
+				throw new Error("Unexpected following node");
+			}
+		} else if (node instanceof ChildNode) {
+			return node;
+		} else if (node) {
+			throw new Error("Unexpected following node");
+		}
+		return null;
 	}
 	get previousSibling(): ChildNode | null {
 		const node = this.startNode[PREV];
-		return node instanceof ChildNode ? node : null;
+		if (node instanceof EndNode) {
+			// ...<child/></end>
+			return node[START];
+		} else if (node instanceof ParentNode) {
+			if (node !== this.parentNode) {
+				throw new Error("Unexpected previous node : ParentNode");
+			}
+		} else if (node instanceof ChildNode) {
+			return node;
+		}
+		return null;
 	}
 
 	get parentElement(): Element | null {
@@ -18,5 +37,5 @@ export class ChildNode extends Node {
 	}
 }
 
-import { ParentNode } from "./parent-node.js";
+import { ParentNode, EndNode } from "./parent-node.js";
 import { Element } from "./element.js";

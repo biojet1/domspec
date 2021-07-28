@@ -7,10 +7,8 @@ export class XMLSerializer {
 export function* enumDOMStr(node: Node) {
 	let isOpened = false;
 	const { endNode: end } = node;
-	let cur = new Node();
-	cur[NEXT] = node;
+	let cur: Node | null | undefined = node;
 	do {
-		cur = cur[NEXT] || end;
 		if (cur instanceof Attr) {
 			yield ` ${cur.toString()}`;
 		} else if (cur instanceof Element) {
@@ -41,7 +39,7 @@ export function* enumDOMStr(node: Node) {
 		} else {
 			throw new Error(`Invalid node ${cur}`);
 		}
-	} while (cur !== end);
+	} while (cur !== end && (cur = cur[NEXT]));
 }
 
 import { NEXT, PREV, START, END, Node } from "./node.js";

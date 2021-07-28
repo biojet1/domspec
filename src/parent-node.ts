@@ -16,23 +16,17 @@ export class ParentNode extends ChildNode {
 	get firstChild(): ChildNode | null {
 		// Tag -> Attr* -> ChildNode* -> END
 		let { [NEXT]: next, [END]: end } = this;
-		for (; next && next !== end; next = next[NEXT]) {
+		for (; next && next !== end; next = next.endNode[NEXT]) {
 			if (next instanceof ChildNode) {
 				return next;
+			} else if (next instanceof EndNode) {
+				throw new Error("Unexpected following EndNode node");
 			}
 		}
 		return null;
 	}
 
 	get firstElementChild(): ParentNode | null {
-		// let { [NEXT]: next, [END]: end } = this;
-		// do {
-		// 	if (next instanceof ParentNode && next.nodeType === 1) {
-		// 		return next;
-		// 	}
-		// } while (next && (next = next[NEXT]) !== end);
-		// return null;
-
 		let { firstChild: cur }: { firstChild: Node | null } = this;
 		for (; cur instanceof ChildNode; cur = cur.nextSibling) {
 			if (cur instanceof ParentNode && cur.nodeType === 1) {
@@ -44,7 +38,16 @@ export class ParentNode extends ChildNode {
 
 	get lastChild(): ChildNode | null {
 		const prev = this[END][PREV];
-		return prev && prev != this && prev instanceof ChildNode ? prev : null;
+		if (prev && prev != this) {
+			if (prev instanceof EndNode) {
+				return prev[START];
+			} else if (prev instanceof ParentNode) {
+				throw new Error("Unexpected preceding ParentNode node");
+			} else if (prev instanceof ChildNode) {
+				return prev;
+			}
+		}
+		return null;
 	}
 
 	get lastElementChild(): ChildNode | null {
@@ -113,17 +116,6 @@ export class ParentNode extends ChildNode {
 		return this.insertBefore(node);
 	}
 }
-
-// type RemoveKindField<Type> = {
-//     [Property in keyof Type as Exclude<Property, "kind">]: Type[Property]
-// };
-
-// type Mapper<T extends SimplePOJO> = Omit<{
-//     [K in keyof T]: {
-//       name: K;
-//       type: T[K];
-//     };
-// }, 'last_name'>;
 
 export class EndNode extends Node {
 	[START]: ParentNode;

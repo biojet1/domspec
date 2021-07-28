@@ -42,4 +42,51 @@ for (const [i, [xml, exp, msg]] of data.entries()) {
         i,
         top && Array.from(enumFlatDOM(top)),
     ]);
+
+    test.test(`checkNode`, function (t) {
+        checkNode(t, doc);
+        t.end();
+    });
+}
+
+function checkNode(t, node) {
+    const first = node.firstChild;
+    const last = node.lastChild;
+
+    function* collectF(t, node) {
+        for (
+            let cur = first;
+            cur;
+            cur = cur === last ? null : cur.nextSibling
+        ) {
+            if (!cur) {
+                console.dir([first, last, cur]);
+            }
+            yield cur;
+        }
+    }
+
+    function* collectL(t, node) {
+        for (
+            let cur = last;
+            cur;
+            cur = cur === first ? null : cur.previousSibling
+        ) {
+            if (!cur) {
+                console.dir([first, last, cur]);
+            }
+            yield cur;
+        }
+    }
+    const F = Array.from(collectF());
+    const L = Array.from(collectL()).reverse();
+    t.strictSame(F, L);
+
+    // console.dir(F);
+    // console.dir(first);
+
+    for (let cur = first; cur; cur = cur === last ? null : cur.nextSibling) {
+        t.strictSame(cur.parentNode, node);
+        checkNode(t, cur);
+    }
 }

@@ -8,7 +8,7 @@
     "test+cov": "tap --coverage test/parse.mjs",
     "posttest": "tap --coverage-report=text-lcov | codecov",
     "rm-map": "find dist -name '*.js.map' -type f -delete",
-    "c8test": "c8 npx tap --no-coverage test/parse.mjs",
+    "c8test": "c8 npx tap --no-coverage test/*.tap.*js",
     "c8report": "c8 report -r text-lcov > coverage/lcov.info",
     "compile": "tsc -p . --sourcemap"
   },

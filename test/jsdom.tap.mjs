@@ -28,8 +28,10 @@ function checkNode(t, a, b) {
         case 1: {
             // ELEMENT_NODE (1)
             const attrsB = b.attributes;
-            let i = attrsB.length;
-            while (i-- > 0) {
+            let i;
+
+            // Attribute compare
+            for (i = attrsB.length; i-- > 0; ) {
                 const attrB = attrsB[i];
 
                 t.strictSame(
@@ -74,11 +76,49 @@ function checkNode(t, a, b) {
                 const attrA2 = a.getAttributeNode(attrB.name);
                 attrA2.textContent = "朝飯前";
                 t.strictSame(a.getAttribute(attrB.name), "朝飯前");
+                attrA2.textContent = attrB.textContent;
             }
+
+            t.strictSame(a.outerHTML, b.outerHTML);
+
+            // Attribute modification
+
+            for (i = attrsB.length; i-- > 0; ) {
+                const attrB = attrsB[i];
+                const attrA = a.getAttributeNode(attrB.name);
+
+                if (i % 2 == 0) {
+                    a.removeAttribute(attrB.name);
+                } else {
+                    a.removeAttributeNS("", attrB.name);
+                }
+
+                t.notOk(a.getAttributeNode(attrB.name));
+                t.notOk(a.getAttributeNodeNS("", attrB.name));
+                t.notOk(a.getAttributeNodeNS(null, attrB.name));
+                //
+                t.strictSame(a.hasAttribute(attrB.name), false);
+                t.strictSame(a.hasAttributeNS("", attrB.name), false);
+                t.strictSame(a.hasAttributeNS(null, attrB.name), false);
+                //
+                a.toggleAttribute(attrB.name);
+                t.strictNotSame(a.getAttributeNode(attrB.name), attrA);
+                t.strictSame(a.getAttribute(attrB.name), "");
+                const attrA2 = a.getAttributeNode(attrB.name);
+                attrA2.textContent = "朝飯前";
+                t.strictSame(a.getAttribute(attrB.name), "朝飯前");
+            }
+
             t.strictSame(a.id, b.id);
             t.strictSame(a.toggleAttribute("id"), b.toggleAttribute("id"));
-            t.strictSame(a.toggleAttribute("id", true), b.toggleAttribute("id", true));
-            t.strictSame(a.toggleAttribute("id", false), b.toggleAttribute("id", false));
+            t.strictSame(
+                a.toggleAttribute("id", true),
+                b.toggleAttribute("id", true)
+            );
+            t.strictSame(
+                a.toggleAttribute("id", false),
+                b.toggleAttribute("id", false)
+            );
         }
         case 9: // DOCUMENT_NODE (9)
         case 11:
@@ -166,16 +206,8 @@ function checkNode(t, a, b) {
                 b.localName,
                 `localName ${b.name} '${a.name}' '${b.name}' ${aN}`
             );
-            t.strictSame(
-                a.textContent,
-                b.nodeValue,
-                `textContent==data  ${aN}`
-            );
-            t.strictSame(
-                b.nodeValue,
-                a.textContent,
-                `textContent==data  ${aN}`
-            );
+            t.strictSame(a.textContent, b.nodeValue, `textContent==data ${aN}`);
+            t.strictSame(b.nodeValue, a.textContent, `textContent==data ${aN}`);
             t.strictSame(a.specified, b.specified, `specified ${b.name} ${aN}`);
 
         case 7: // PROCESSING_INSTRUCTION_NODE (7);

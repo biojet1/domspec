@@ -167,7 +167,9 @@ export class Element extends ParentNode {
 	toString() {
 		return Array.from(enumDOMStr(this)).join("");
 	}
-
+	get outerHTML() {
+		return Array.from(enumXMLDump(this)).join("");
+	}
 	lookupNamespaceURI(prefix: string | null): string | null {
 		if (prefix === "" || !prefix) prefix = null;
 		const { namespaceURI } = this;
@@ -195,4 +197,4 @@ export class Element extends ParentNode {
 import { XMLNS } from "./namespace.js";
 import { Attr } from "./attr.js";
 import { ChildNode } from "./child-node.js";
-import { enumDOMStr } from "./dom-serialize.js";
+import { enumDOMStr, enumXMLDump } from "./dom-serialize.js";

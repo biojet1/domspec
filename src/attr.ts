@@ -54,8 +54,27 @@ export class Attr extends Node {
 	}
 	toString() {
 		const { name, value } = this;
-		return `${name}="${value.replace(/"/g, "&quot;")}"`;
+		return `${name}="${value.replace(/[<>&"\xA0]/g, rep)}"`;
 	}
 }
-
+const rep = function (m: string) {
+	switch (m) {
+		// case "\xA0":
+		// 	return "&nbsp;";
+		case "&":
+			return "&amp;";
+		case "<":
+			return "&lt;";
+		case ">":
+			return "&gt;";
+		case '"':
+			return "&quot;";
+	}
+	return m;
+};
 import { Node } from "./node.js";
+// "   &quot;
+// '   &apos;
+// <   &lt;
+// >   &gt;
+// &   &amp;

@@ -55,6 +55,74 @@ export function* enumDOMStr(node: Node) {
 		}
 	} while (cur !== end && (cur = cur[NEXT]));
 }
+export function* enumXMLDump(node: Node) {
+	let isOpened = false;
+	const { endNode: end } = node;
+	let cur: Node | null | undefined = node;
+	do {
+		switch (cur.nodeType) {
+			case 2: // ATTRIBUTE_NODE
+				yield ` ${cur.toString()}`;
+				break;
+
+			case 3: // TEXT_NODE
+			case 4: // CDATA_SECTION_NODE
+			case 8: // COMMENT_NODE
+				if (isOpened) {
+					yield ">";
+					isOpened = false;
+				}
+				yield cur.toString();
+				break;
+
+			case -1: // End Tag
+				const { [PREV]: prev, [START]: start } = cur as EndNode;
+				if (start.nodeType === 1) {
+					if (prev === start || prev instanceof Attr) {
+						yield `/>`;
+					} else if (isOpened) {
+						yield `></${(start as Element).tagName}>`;
+					} else {
+						yield `</${(start as Element).tagName}>`;
+					}
+					isOpened = false;
+				}
+				break;
+
+			case 1: // ELEMENT_NODE
+				if (isOpened) {
+					yield `><${(cur as Element).tagName}`;
+				} else {
+					yield `<${(cur as Element).tagName}`;
+				}
+				isOpened = true;
+				break;
+
+			// case 10: // DOCUMENT_TYPE_NODE
+			// 	break;
+			// case 9: // DOCUMENT_NODE
+			// case 11: // DOCUMENT_FRAGMENT_NODE
+			// 	break;
+			// ENTITY_REFERENCE_NODE 	5
+			// ENTITY_NODE 	6
+			// PROCESSING_INSTRUCTION_NODE	7
+			// NOTATION_NODE 	12
+			default:
+				throw new Error(`Unexpected nodeType ${cur.nodeType}`);
+		}
+
+		// if (cur instanceof EndNode) {
+		// } else if (cur instanceof ParentNode) {
+		// 	if (cur instanceof NonElementParentNode) {
+		// 		// pass
+		// 	} else {
+		// 		throw new Error(`Unexpected ParentNode`);
+		// 	}
+		// } else {
+		// 	throw new Error(`Invalid node ${cur}`);
+		// }
+	} while (cur !== end && (cur = cur[NEXT]));
+}
 
 export function* enumFlatDOM(node: Node) {
 	const { endNode: end } = node;

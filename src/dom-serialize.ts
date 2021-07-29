@@ -7,10 +7,8 @@ export class XMLSerializer {
 export function* enumDOMStr(node: Node) {
 	let isOpened = false;
 	const { endNode: end } = node;
-	let cur = new Node();
-	cur[NEXT] = node;
+	let cur: Node | null | undefined = node;
 	do {
-		cur = cur[NEXT] || end;
 		if (cur instanceof Attr) {
 			yield ` ${cur.toString()}`;
 		} else if (cur instanceof Element) {
@@ -20,16 +18,18 @@ export function* enumDOMStr(node: Node) {
 				yield `<${cur.tagName}`;
 			}
 			isOpened = true;
-		} else if (cur instanceof ChildNode) {
-			if (isOpened) {
-				yield ">";
-				isOpened = false;
-			}
-			yield cur.toString();
 		} else if (cur instanceof EndNode) {
 			const { [PREV]: prev, [START]: start } = cur;
 			if (prev === start || prev instanceof Attr) {
-				yield `/>`;
+				if (start instanceof Element) {
+					if (start._parsed_closed) {
+						yield `/>`;
+					} else {
+						yield `></${start.tagName}>`;
+					}
+				}
+			} else if (start instanceof NonElementParentNode) {
+				// pass;
 			} else if (!(start instanceof Element)) {
 				throw new Error(`Unexpected parent node`);
 			} else if (isOpened) {
@@ -38,14 +38,53 @@ export function* enumDOMStr(node: Node) {
 				yield `</${start.tagName}>`;
 			}
 			isOpened = false;
+		} else if (cur instanceof ParentNode) {
+			if (cur instanceof NonElementParentNode) {
+				// pass
+			} else {
+				throw new Error(`Unexpected ParentNode`);
+			}
+		} else if (cur instanceof ChildNode) {
+			if (isOpened) {
+				yield ">";
+				isOpened = false;
+			}
+			yield cur.toString();
 		} else {
 			throw new Error(`Invalid node ${cur}`);
 		}
-	} while (cur !== end);
+	} while (cur !== end && (cur = cur[NEXT]));
+}
+
+export function* enumFlatDOM(node: Node) {
+	const { endNode: end } = node;
+	let cur: Node | null | undefined = node;
+	do {
+		if (cur instanceof Attr) {
+			const { nodeType, name, value } = cur;
+			yield nodeType;
+			yield name;
+			yield value;
+		} else if (cur instanceof Element) {
+			const { nodeType, tagName } = cur;
+			yield nodeType;
+			yield tagName;
+		} else if (cur instanceof EndNode) {
+			yield -1;
+		} else if (cur instanceof ChildNode) {
+			const { nodeType, nodeValue } = cur;
+			yield nodeType;
+			yield nodeValue;
+		} else {
+			throw new Error(`Invalid node ${cur}`);
+		}
+	} while (cur !== end && (cur = cur[NEXT]));
 }
 
 import { NEXT, PREV, START, END, Node } from "./node.js";
 import { ChildNode } from "./child-node.js";
 import { ParentNode, EndNode } from "./parent-node.js";
 import { Element } from "./element.js";
+import { Document } from "./document.js";
+import { NonElementParentNode } from "./non-element-parent-node.js";
 import { Attr } from "./attr.js";

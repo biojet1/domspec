@@ -29,15 +29,6 @@ export class Node {
 		const next = this[NEXT];
 		node.linkLeft(this);
 		next && node.linkRight(next);
-		if (
-			node.parentNode !== this.parentNode &&
-			node.parentNode &&
-			this.parentNode
-		) {
-			console.dir(node.parentNode, { depth: 1 });
-			console.dir(this.parentNode, { depth: 1 });
-			throw new Error(`Unexpected parents`);
-		}
 		return this;
 	}
 
@@ -64,8 +55,7 @@ export class Node {
 		}
 		return this;
 	}
-
-	remove() {
+	unlink() {
 		const {
 			[PREV]: prev,
 			endNode: { [NEXT]: next },
@@ -85,6 +75,17 @@ export class Node {
 			// moCallback(this, parentNode);
 			// if (nodeType === ELEMENT_NODE) disconnectedCallback(this);
 		}
+		return this;
+	}
+	/// Extra
+	assertParent(node: ParentNode) {
+		const { parentNode } = this;
+		if (!parentNode) {
+			this.parentNode = node;
+		} else if (parentNode !== node) {
+			throw new Error(`Invalid parent`);
+		}
+		return this;
 	}
 
 	//// DOM
@@ -99,18 +100,40 @@ export class Node {
 	get nodeName(): string | null {
 		return null;
 	}
+	get textContent(): string | null {
+		return null;
+	}
+
+	isSameNode(node: Node) {
+		return this === node;
+	}
+
+	// isEqualNode(node) {
+	// 	if (this === node) return true;
+	// 	if (this.nodeType === node.nodeType) {
+	// 		switch (this.nodeType) {
+	// 			case DOCUMENT_NODE:
+	// 			case DOCUMENT_FRAGMENT_NODE: {
+	// 				const aNodes = this.childNodes;
+	// 				const bNodes = node.childNodes;
+	// 				return (
+	// 					aNodes.length === bNodes.length &&
+	// 					aNodes.every((node, i) => node.isEqualNode(bNodes[i]))
+	// 				);
+	// 			}
+	// 			case 1:
+	// 				return this.toString() === node.toString();
+	// 		}
+	// 	}
+	// 	return false;
+	// }
 	lookupNamespaceURI(prefix: string | null): string | null {
 		return null;
 	}
-	assertParent(node: ParentNode) {
-		const { parentNode } = this;
-		if (!parentNode) {
-			this.parentNode = node;
-		} else if (parentNode !== node) {
-			throw new Error(`Invalid parent`);
-		}
-		return this;
+	remove() {
+		this.unlink();
 	}
+
 	/// DOM constants
 	static ELEMENT_NODE = 1;
 	static ATTRIBUTE_NODE = 2;

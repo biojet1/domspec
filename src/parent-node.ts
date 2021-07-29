@@ -11,28 +11,42 @@ export class ParentNode extends ChildNode {
 		// End node or self
 		return this[END];
 	}
+	hasChildNodes() {
+		return !!this.lastChild;
+	}
+	get childNodes() {
+		const nodes = new NodeList();
+		let { firstChild: cur } = this;
+		for (; cur; cur = cur.nextSibling) {
+			nodes.push(cur);
+		}
+		return nodes;
+	}
+
+	get children() {
+		const nodes = new NodeList();
+		let { firstElementChild: cur } = this;
+		for (; cur; cur = cur.nextElementSibling) {
+			nodes.push(cur);
+		}
+		return nodes;
+	}
 
 	//// DOM
 	get firstChild(): ChildNode | null {
 		// Tag -> Attr* -> ChildNode* -> END
 		let { [NEXT]: next, [END]: end } = this;
-		do {
+		for (; next && next !== end; next = next.endNode[NEXT]) {
 			if (next instanceof ChildNode) {
 				return next;
+			} else if (next instanceof EndNode) {
+				throw new Error("Unexpected following EndNode node");
 			}
-		} while (next && (next = next[NEXT]) !== end);
+		}
 		return null;
 	}
 
 	get firstElementChild(): ParentNode | null {
-		// let { [NEXT]: next, [END]: end } = this;
-		// do {
-		// 	if (next instanceof ParentNode && next.nodeType === 1) {
-		// 		return next;
-		// 	}
-		// } while (next && (next = next[NEXT]) !== end);
-		// return null;
-
 		let { firstChild: cur }: { firstChild: Node | null } = this;
 		for (; cur instanceof ChildNode; cur = cur.nextSibling) {
 			if (cur instanceof ParentNode && cur.nodeType === 1) {
@@ -44,7 +58,16 @@ export class ParentNode extends ChildNode {
 
 	get lastChild(): ChildNode | null {
 		const prev = this[END][PREV];
-		return prev && prev instanceof ChildNode ? prev : null;
+		if (prev && prev != this) {
+			if (prev instanceof EndNode) {
+				return prev[START];
+			} else if (prev instanceof ParentNode) {
+				throw new Error("Unexpected preceding ParentNode node");
+			} else if (prev instanceof ChildNode) {
+				return prev;
+			}
+		}
+		return null;
 	}
 
 	get lastElementChild(): ChildNode | null {
@@ -79,6 +102,7 @@ export class ParentNode extends ChildNode {
 					for (
 						let cur: ChildNode | null | false = firstChild;
 						cur;
+
 					) {
 						// children already connected side by side
 						cur.parentNode = this;
@@ -111,18 +135,27 @@ export class ParentNode extends ChildNode {
 	appendChild(node: ChildNode) {
 		return this.insertBefore(node);
 	}
+
+	contains(node: ChildNode) {
+		let parentNode: ChildNode | undefined | null = node;
+		while (parentNode && parentNode !== this)
+			parentNode = parentNode.parentNode;
+		return parentNode === this;
+	}
+
+	removeChild(node: ChildNode) {
+		if (node.parentNode !== this) throw new Error("node is not a child");
+		node.remove();
+		return node;
+	}
+
+	replaceChild(node: ChildNode, replaced: ChildNode) {
+		const next = replaced.endNode[NEXT] as ChildNode;
+		replaced.remove();
+		this.insertBefore(node, next);
+		return replaced;
+	}
 }
-
-// type RemoveKindField<Type> = {
-//     [Property in keyof Type as Exclude<Property, "kind">]: Type[Property]
-// };
-
-// type Mapper<T extends SimplePOJO> = Omit<{
-//     [K in keyof T]: {
-//       name: K;
-//       type: T[K];
-//     };
-// }, 'last_name'>;
 
 export class EndNode extends Node {
 	[START]: ParentNode;
@@ -135,6 +168,17 @@ export class EndNode extends Node {
 	}
 	get nodeType() {
 		return -1;
+	}
+}
+
+// https://dom.spec.whatwg.org/#interface-nodelist
+
+/**
+ *NodeList
+ */
+export class NodeList extends Array<ChildNode> {
+	item(i: number) {
+		return i < this.length ? this[i] : null;
 	}
 }
 

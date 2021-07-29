@@ -52,7 +52,22 @@ function domParse(str: string, doc: Document, top: ParentNode) {
 
 		const tag = doc.createElementNS(ns, name);
 
-		for (const [key, { uri, value }] of Object.entries(attributes)) {
+		const attrs = Object.entries(attributes);
+
+		attrs.sort(function (a, b) {
+			var nameA = a[0];
+			var nameB = b[0];
+			if (nameA < nameB) {
+				return 1;
+			}
+			if (nameA > nameB) {
+				return -1;
+			}
+			// names must be equal
+			return 0;
+		});
+
+		for (const [key, { uri, value }] of attrs) {
 			tag.setAttributeNS(uri, key, value);
 		}
 		top.appendChild(tag);
@@ -61,10 +76,15 @@ function domParse(str: string, doc: Document, top: ParentNode) {
 
 	parser.on("closetag", (node) => {
 		if (node.name === ROOT_TAG) return;
-		// console.log("closetag", node.name, top.nodeName);
+		// console.log("closetag",  node.name, top.nodeName);
+		// !top.lastChild && console.log("Empty",  node.name, top.nodeName);
+		// node.isSelfClosing && console.log("isSelfClosing",  node.name, top.nodeName);
 
 		const { parentNode } = top;
 		// console.dir(top, { depth: 1 });
+		if (node.isSelfClosing) {
+			(top as Element)._parsed_closed = true;
+		}
 		if (parentNode) {
 			top = parentNode;
 		} else {
@@ -113,8 +133,9 @@ const PUBLIC_DOCTYPE = /<!doctype\s+([^\s]+)\s+public\s+"([^"]+)"\s+"([^"]+)"/i;
 const SYSTEM_DOCTYPE = /<!doctype\s+([^\s]+)\s+system\s+"([^"]+)"/i;
 const CUSTOM_NAME_DOCTYPE = /<!doctype\s+([^\s>]+)/i;
 
-import { ParentNode } from "./parent-node.js";
 import { SaxesParser } from "saxes";
+import { ParentNode } from "./parent-node.js";
+import { Element } from "./element.js";
 import { Document } from "./document.js";
 import { HTMLDocument } from "./html/document.js";
 import { SVGDocument } from "./svg/document.js";

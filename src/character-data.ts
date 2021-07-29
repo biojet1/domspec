@@ -67,7 +67,7 @@ export class Text extends CharacterData {
 		return 3;
 	}
 	get nodeName() {
-		return "#data";
+		return "#text";
 	}
 	toString() {
 		return escape(this.data);
@@ -77,6 +77,9 @@ export class Text extends CharacterData {
 export class CDATASection extends Text {
 	toString() {
 		return `<![CDATA[${this.data}]]>`;
+	}
+	get nodeName() {
+		return "#cdata-section";
 	}
 }
 

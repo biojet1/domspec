@@ -151,11 +151,11 @@ export class Element extends ParentNode {
 
 	toggleAttribute(name: string, force?: boolean) {
 		if (this.hasAttribute(name)) {
-			if (force == true) {
+			if (!force) {
 				this.removeAttribute(name);
-				return false;
+			} else {
+				return true;
 			}
-			return true;
 		} else if (force == true || force === undefined) {
 			this.setAttribute(name, "");
 			return true;

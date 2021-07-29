@@ -75,6 +75,10 @@ function checkNode(t, a, b) {
                 attrA2.textContent = "朝飯前";
                 t.strictSame(a.getAttribute(attrB.name), "朝飯前");
             }
+            t.strictSame(a.id, b.id);
+            t.strictSame(a.toggleAttribute("id"), b.toggleAttribute("id"));
+            t.strictSame(a.toggleAttribute("id", true), b.toggleAttribute("id", true));
+            t.strictSame(a.toggleAttribute("id", false), b.toggleAttribute("id", false));
         }
         case 9: // DOCUMENT_NODE (9)
         case 11:
@@ -99,6 +103,7 @@ function checkNode(t, a, b) {
                         `children[${i}] is element ${aN}`
                     );
                 }
+                ///////
 
                 //
                 let node = a.parentNode;

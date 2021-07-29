@@ -47,20 +47,6 @@ export abstract class CharacterData extends ChildNode {
 	// Extra
 }
 
-export class Comment extends CharacterData {
-	//// Dom
-	get nodeType() {
-		return 8;
-	}
-	get nodeName() {
-		return "#comment";
-	}
-	// Extra
-	toString() {
-		return `<!--${escape(this.data)}-->`;
-	}
-}
-
 export class Text extends CharacterData {
 	//// Dom
 	get nodeType() {
@@ -73,6 +59,21 @@ export class Text extends CharacterData {
 		return escape(this.data);
 	}
 }
+
+export class Comment extends CharacterData {
+	//// Dom
+	get nodeType() {
+		return 8;
+	}
+	get nodeName() {
+		return "#comment";
+	}
+	// Extra
+	toString() {
+		return `<!--${this.data}-->`;
+	}
+}
+
 
 export class CDATASection extends Text {
 	toString() {

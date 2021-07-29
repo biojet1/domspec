@@ -20,8 +20,8 @@ def gen():
             #         pass
             #     else:
             #         continue
-            if a == "Text" and b == "Text":
-                continue
+            # if a == "Text" and b == "Text":
+            #     continue
             if a == "End":
                 if b == "Attr":
                     continue

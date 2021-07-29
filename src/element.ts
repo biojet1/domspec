@@ -151,11 +151,11 @@ export class Element extends ParentNode {
 
 	toggleAttribute(name: string, force?: boolean) {
 		if (this.hasAttribute(name)) {
-			if (force == true) {
+			if (!force) {
 				this.removeAttribute(name);
-				return false;
+			} else {
+				return true;
 			}
-			return true;
 		} else if (force == true || force === undefined) {
 			this.setAttribute(name, "");
 			return true;
@@ -167,7 +167,15 @@ export class Element extends ParentNode {
 	toString() {
 		return Array.from(enumDOMStr(this)).join("");
 	}
-
+	get outerHTML() {
+		return Array.from(enumXMLDump(this, this[END])).join("");
+	}
+	get innerHTML() {
+		const { firstChild, lastChild } = this;
+		return firstChild && lastChild
+			? Array.from(enumXMLDump(firstChild.startNode, lastChild.endNode)).join("")
+			: "";
+	}
 	lookupNamespaceURI(prefix: string | null): string | null {
 		if (prefix === "" || !prefix) prefix = null;
 		const { namespaceURI } = this;
@@ -195,4 +203,4 @@ export class Element extends ParentNode {
 import { XMLNS } from "./namespace.js";
 import { Attr } from "./attr.js";
 import { ChildNode } from "./child-node.js";
-import { enumDOMStr } from "./dom-serialize.js";
+import { enumDOMStr, enumXMLDump } from "./dom-serialize.js";

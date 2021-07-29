@@ -23,7 +23,7 @@ export class Element extends ParentNode {
 		return this.tagName;
 	}
 	get id() {
-		return this.getAttribute("id") || '';
+		return this.getAttribute("id") || "";
 	}
 	set id(id: string) {
 		this.setAttribute("id", id);
@@ -137,20 +137,16 @@ export class Element extends ParentNode {
 		return prev;
 	}
 	removeAttribute(qName: string) {
-		const node = this.getAttributeNode(qName);
-		node && node.unlink();
+		this.getAttributeNode(qName)?.unlink();
 	}
 	removeAttributeNS(ns: string, localName: string) {
-		const node = this.getAttributeNodeNS(ns, localName);
-		node && node.unlink();
+		this.getAttributeNodeNS(ns, localName)?.unlink();
 	}
 	hasAttribute(qName: string) {
-		const node = this.getAttributeNode(qName);
-		return !!node;
+		return !!this.getAttributeNode(qName);
 	}
 	hasAttributeNS(ns: string, localName: string) {
-		const node = this.getAttributeNodeNS(ns, localName);
-		return !!node;
+		return !!this.getAttributeNodeNS(ns, localName);
 	}
 
 	toggleAttribute(name: string, force?: boolean) {

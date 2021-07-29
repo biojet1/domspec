@@ -1,13 +1,11 @@
 "uses strict";
 import test from "tap";
+import fs from "fs";
 import { JSDOM } from "jsdom";
 import { Document } from "../dist/document.js";
 import { parseDOM, DOMParser } from "../dist/dom-parse.js";
 
-const xml = `
-<cupidatat><!--ullamco--><dolor></dolor><labore commodo="proident,"><enim>sint<eiusmod><officia>aute<!--cillum-->anim</officia>elit,<voluptate Duis="irure"><!--veniam,--><quis eu="non"></quis><ipsum est="culpa" laboris="magna" sunt="mollit">adipiscing<nisi laborum="nulla"><nostrud></nostrud><!--qui--></nisi></ipsum></voluptate>Ut</eiusmod><amet><!--consequat.--><!--Lorem--><!--tempor--></amet><!--ad-->et<!--in--><fugiat></fugiat></enim></labore></cupidatat>
-
-    `;
+const xml = fs.readFileSync("test/test.xml", "utf8");
 
 function similarNode(t, a, b) {
     t.ok(a && b);
@@ -54,6 +52,8 @@ function checkNode(t, a, b) {
                 similarNode(t, attrA.ownerElement, attrB.ownerElement);
                 checkNode(t, attrA, attrB);
 
+                t.strictSame(a.getAttributeNode(attrB.name), attrA);
+
                 if (i % 2 == 0) {
                     a.removeAttribute(attrB.name);
                 } else {
@@ -63,11 +63,17 @@ function checkNode(t, a, b) {
                 t.notOk(a.getAttributeNode(attrB.name));
                 t.notOk(a.getAttributeNodeNS("", attrB.name));
                 t.notOk(a.getAttributeNodeNS(null, attrB.name));
+                //
                 t.strictSame(a.hasAttribute(attrB.name), false);
                 t.strictSame(a.hasAttributeNS("", attrB.name), false);
                 t.strictSame(a.hasAttributeNS(null, attrB.name), false);
+                //
                 a.toggleAttribute(attrB.name);
+                t.strictNotSame(a.getAttributeNode(attrB.name), attrA);
                 t.strictSame(a.getAttribute(attrB.name), "");
+                const attrA2 = a.getAttributeNode(attrB.name);
+                attrA2.textContent = "朝飯前";
+                t.strictSame(a.getAttribute(attrB.name), "朝飯前");
             }
         }
         case 9: // DOCUMENT_NODE (9)
@@ -97,12 +103,20 @@ function checkNode(t, a, b) {
                 //
                 let node = a.parentNode;
                 while (node) {
-                    const p = node.parentNode;
-
                     t.strictSame(node.contains(a), true, `contains ${aN}`);
                     t.strictSame(a.contains(node), false, `not contains ${aN}`);
-
-                    node = p;
+                    node = node.parentNode;
+                }
+                //
+                for (i = A.length; i-- > 0; ) {
+                    const child = a.removeChild(A[i]);
+                    t.strictSame(child, A[i], `removeChild ${aN}`);
+                    t.notOk(A[i].parentNode, `removeChild parentNode ${aN}`);
+                    t.notOk(A[i].nextSibling, `removeChild nextSibling ${aN}`);
+                    t.notOk(
+                        A[i].previousSibling,
+                        `removeChild previousSibling ${aN}`
+                    );
                 }
             }
             break;

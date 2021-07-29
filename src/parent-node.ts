@@ -136,11 +136,9 @@ export class ParentNode extends ChildNode {
 		return this.insertBefore(node);
 	}
 
-	contains(node: ChildNode) {
-		let parentNode: ChildNode | undefined | null = node;
-		while (parentNode && parentNode !== this)
-			parentNode = parentNode.parentNode;
-		return parentNode === this;
+	contains(node?: ChildNode) {
+		while (node && node !== this) node = node.parentNode;
+		return node === this;
 	}
 
 	removeChild(node: ChildNode) {

@@ -135,6 +135,24 @@ export class ParentNode extends ChildNode {
 	appendChild(node: ChildNode) {
 		return this.insertBefore(node);
 	}
+
+	contains(node?: ChildNode) {
+		while (node && node !== this) node = node.parentNode;
+		return node === this;
+	}
+
+	removeChild(node: ChildNode) {
+		if (node.parentNode !== this) throw new Error("node is not a child");
+		node.remove();
+		return node;
+	}
+
+	replaceChild(node: ChildNode, replaced: ChildNode) {
+		const next = replaced.endNode[NEXT] as ChildNode;
+		replaced.remove();
+		this.insertBefore(node, next);
+		return replaced;
+	}
 }
 
 export class EndNode extends Node {

@@ -1,5 +1,6 @@
 from xml.dom.minidom import parse, parseString
 from lxml import etree
+
 # from lxml.etree.ElementTree import ElementTree
 from sys import stdout, stderr
 from io import BytesIO
@@ -38,11 +39,6 @@ def gen():
             c = b
 
 
-# def flatten(g):
-#     for a in g:
-#         for b in a:
-#             yield b
-# 无人爱苦，亦无人寻之欲之，乃因其苦
 lorem = r"""
 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum
 """.split()
@@ -50,26 +46,45 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
 
 l = list(gen())
 
+from itertools import cycle
+from html import escape
+
+text_escapes = cycle(["&", "<", ">", '"', "'", ""])
+attr_escapes = cycle(["&", "<", ">", '"', "'", ""])
+str_mod = cycle(["lower", "upper", "title", ""])
+
 
 def fix(l):
     lor = iter(set(lorem))
+
+    def next_text():
+        return escape(f"{next(lor)}{next(text_escapes)}")
+
+    def next_name():
+        mod = next(str_mod)
+        s = f"{next(lor).strip(',').strip('.')}"
+        return getattr(s, mod)() if mod else s
+
+    def next_value():
+        return escape(f"{next(lor)}{next(attr_escapes)}")
+
     p = []
-    t = 0
+    # t = 0
     on = None
     for i, v in enumerate(l):
         if v == "Tag":
-            k = next(lor).strip(",").strip(".")
+            k = next_name()
             p.append(k)
             l[i] = f"{on and '>' or ''}<{k}"
             on = True
         elif v == "Attr":
-            assert(on is True)
-            l[i] = f''' {next(lor).strip(',').strip('.')}="{next(lor)}"'''
+            assert on is True
+            l[i] = f''' {next_name()}="{next_value()}"'''
         elif v == "Comment":
-            l[i] = f"{on and '>' or ''}<!--{next(lor)}-->"
+            l[i] = f"{on and '>' or ''}<!--{next_text()}-->"
             on = False
         elif v == "Text":
-            l[i] = f"{on and '>' or ''}{next(lor)}"
+            l[i] = f"{on and '>' or ''}{next_text()}"
             on = False
         elif v == "End":
             k = p.pop()
@@ -101,6 +116,8 @@ xml = "".join(l)
 
 empty = regex(r"<(\w+)></\1>")
 even = 0
+
+
 def rep(m):
     global even
     even += 1
@@ -109,11 +126,12 @@ def rep(m):
     return m.group(0)
     # print(m.group(0), even % 2, file=stderr)
 
+
 xml = empty.sub(rep, xml)
 
 print(xml, file=stderr)
 tree.parse(BytesIO(xml.encode("UTF-8")))
-tree.write(stdout.buffer, method="c14n" )
+tree.write(stdout.buffer, method="c14n")
 # etree.tostring(root
 # dom = parseString(xml)
 # print(dom.toxml())

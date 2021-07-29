@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "tap test/parse.mjs",
-    "test+cov": "tap --coverage test/parse.mjs",
-    "posttest": "tap --coverage-report=text-lcov | codecov",
+    "test_xml": "python test/gen.py > test/test.xml",
     "rm-map": "find dist -name '*.js.map' -type f -delete",
     "c8test": "c8 npx tap --no-coverage test/*.tap.*js",
     "c8report": "c8 report -r text-lcov > coverage/lcov.info",

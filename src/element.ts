@@ -14,6 +14,8 @@ export class Element extends ParentNode {
 		super();
 		this.localName = this.tagName = "";
 	}
+	//// DOM: <specialGetters>
+
 	get nodeType() {
 		return 1; // ELEMENT_NODE (1)
 	}
@@ -21,9 +23,13 @@ export class Element extends ParentNode {
 		return this.tagName;
 	}
 	get id() {
-		return this.getAttribute("id");
+		return this.getAttribute("id") || "";
 	}
-
+	set id(id: string) {
+		this.setAttribute("id", id);
+	}
+	//// DOM: </specialGetters>
+	//// DOM: <Attributes>
 	getAttribute(name: string) {
 		const node = this.getAttributeNode(name);
 		return node ? node.value : null;
@@ -131,20 +137,16 @@ export class Element extends ParentNode {
 		return prev;
 	}
 	removeAttribute(qName: string) {
-		const node = this.getAttributeNode(qName);
-		node && node.unlink();
+		this.getAttributeNode(qName)?.unlink();
 	}
 	removeAttributeNS(ns: string, localName: string) {
-		const node = this.getAttributeNodeNS(ns, localName);
-		node && node.unlink();
+		this.getAttributeNodeNS(ns, localName)?.unlink();
 	}
 	hasAttribute(qName: string) {
-		const node = this.getAttributeNode(qName);
-		return !!node;
+		return !!this.getAttributeNode(qName);
 	}
 	hasAttributeNS(ns: string, localName: string) {
-		const node = this.getAttributeNodeNS(ns, localName);
-		return !!node;
+		return !!this.getAttributeNodeNS(ns, localName);
 	}
 
 	toggleAttribute(name: string, force?: boolean) {
@@ -160,6 +162,7 @@ export class Element extends ParentNode {
 		}
 		return false;
 	}
+	//// DOM: </Attributes>
 
 	toString() {
 		return Array.from(enumDOMStr(this)).join("");

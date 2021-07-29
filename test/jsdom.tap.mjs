@@ -63,9 +63,11 @@ function checkNode(t, a, b) {
                 t.notOk(a.getAttributeNode(attrB.name));
                 t.notOk(a.getAttributeNodeNS("", attrB.name));
                 t.notOk(a.getAttributeNodeNS(null, attrB.name));
+                //
                 t.strictSame(a.hasAttribute(attrB.name), false);
                 t.strictSame(a.hasAttributeNS("", attrB.name), false);
                 t.strictSame(a.hasAttributeNS(null, attrB.name), false);
+                //
                 a.toggleAttribute(attrB.name);
                 t.strictSame(a.getAttribute(attrB.name), "");
             }
@@ -91,6 +93,25 @@ function checkNode(t, a, b) {
                         EA[i].nodeType,
                         1,
                         `children[${i}] is element ${aN}`
+                    );
+                }
+
+                //
+                let node = a.parentNode;
+                while (node) {
+                    t.strictSame(node.contains(a), true, `contains ${aN}`);
+                    t.strictSame(a.contains(node), false, `not contains ${aN}`);
+                    node = node.parentNode;
+                }
+                //
+                for (i = A.length; i-- > 0; ) {
+                    const child = a.removeChild(A[i]);
+                    t.strictSame(child, A[i], `removeChild ${aN}`);
+                    t.notOk(A[i].parentNode, `removeChild parentNode ${aN}`);
+                    t.notOk(A[i].nextSibling, `removeChild nextSibling ${aN}`);
+                    t.notOk(
+                        A[i].previousSibling,
+                        `removeChild previousSibling ${aN}`
                     );
                 }
             }

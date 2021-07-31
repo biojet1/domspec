@@ -28,6 +28,13 @@ export class Element extends ParentNode {
 	set id(id: string) {
 		this.setAttribute("id", id);
 	}
+	get className() {
+		return this.getAttribute("class") || "";
+	}
+	set className(str: string) {
+		this.setAttribute("class", str);
+	}
+
 	//// DOM: </specialGetters>
 	//// DOM: <Attributes>
 	getAttribute(name: string) {
@@ -163,6 +170,7 @@ export class Element extends ParentNode {
 		return false;
 	}
 	//// DOM: </Attributes>
+	//// DOM: </Content>
 
 	toString() {
 		return Array.from(enumDOMStr(this)).join("");
@@ -173,9 +181,31 @@ export class Element extends ParentNode {
 	get innerHTML() {
 		const { firstChild, lastChild } = this;
 		return firstChild && lastChild
-			? Array.from(enumXMLDump(firstChild.startNode, lastChild.endNode)).join("")
+			? Array.from(
+					enumXMLDump(firstChild.startNode, lastChild.endNode)
+			  ).join("")
 			: "";
 	}
+	get innerText() {
+		return this.textContent;
+	}
+
+	get textContent() {
+		const text = [];
+		let cur: Node | null | undefined = this[NEXT];
+		const end = this[NEXT];
+		for (; cur && cur !== end; cur = cur[NEXT]) {
+			if (cur.nodeType === 3) text.push(cur.textContent);
+		}
+		return text.join("");
+	}
+
+	// set textContent(text) {
+	// 	this.replaceChildren();
+	// 	if (text) this.appendChild(new Text(this.ownerDocument, text));
+	// }
+	//// DOM: </Content>
+
 	lookupNamespaceURI(prefix: string | null): string | null {
 		if (prefix === "" || !prefix) prefix = null;
 		const { namespaceURI } = this;
@@ -204,3 +234,4 @@ import { XMLNS } from "./namespace.js";
 import { Attr } from "./attr.js";
 import { ChildNode } from "./child-node.js";
 import { enumDOMStr, enumXMLDump } from "./dom-serialize.js";
+import { parseDOM } from "./dom-parse.js";

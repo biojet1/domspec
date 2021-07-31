@@ -20,6 +20,9 @@ export class Node {
 	}
 	linkRight(node: Node) {
 		// [THIS]<->node
+		if (node === this) {
+			throw new Error(`Same node`);
+		}
 		this[NEXT] = node;
 		node[PREV] = this;
 		return this;
@@ -38,8 +41,12 @@ export class Node {
 	}
 	linkLeft(node: Node) {
 		// node<->[THIS]
+		if (node === this) {
+			throw new Error(`Same node`);
+		}
 		this[PREV] = node;
 		node[NEXT] = this;
+		return this;
 	}
 	insertLeft(node: Node) {
 		// [PREV]<node>[THIS]

@@ -11,27 +11,6 @@ export class ParentNode extends ChildNode {
 		// End node or self
 		return this[END];
 	}
-	hasChildNodes() {
-		return !!this.lastChild;
-	}
-	get childNodes() {
-		const nodes = new NodeList();
-		let { firstChild: cur } = this;
-		for (; cur; cur = cur.nextSibling) {
-			nodes.push(cur);
-		}
-		return nodes;
-	}
-
-	get children() {
-		const nodes = new NodeList();
-		let { firstElementChild: cur } = this;
-		for (; cur; cur = cur.nextElementSibling) {
-			nodes.push(cur);
-		}
-		return nodes;
-	}
-
 	//// DOM
 	get firstChild(): ChildNode | null {
 		// Tag -> Attr* -> ChildNode* -> END
@@ -80,8 +59,37 @@ export class ParentNode extends ChildNode {
 		return null;
 	}
 
-	insertBefore(node: ChildNode, before?: ChildNode | null) {
-		if (node === this) throw new Error("unable to append a node to itself");
+	prepend(...nodes: Array<ChildNode>) {
+		this._insert(this.firstChild || this[END], nodes);
+	}
+
+	append(...nodes: Array<ChildNode>) {
+		this._insert(this[END], nodes);
+	}
+	private _insert(ref: ChildNode | EndNode, nodes: Iterable<ChildNode>) {
+		let prev: Node = ref[PREV] || this;
+		for (const node of nodes) {
+			node.remove();
+			prev = node._link(prev, ref, this);
+		}
+	}
+	insertBefore(node: ChildNode, before?: ChildNode | EndNode | null) {
+		if (node === this) {
+			throw new Error("unable to append a node to itself");
+		} else if (!before) {
+			// this._insert(this[END], node);
+			// node._link(this[END][PREV] || this, this[END], this);
+			this.insertBefore(node, this[END]);
+		} else if (node === before) {
+			// this._insert(node.nextSibling || this[END], node);
+			// node._link(before[PREV] || this, before, this);
+			this.insertBefore(node, before.nextSibling);
+		} else {
+			// this._insert(before, node);
+			node.remove();
+			node._link(before[PREV] || this, before, this);
+		}
+		/*
 		if (before && node === before) before = node.nextSibling;
 
 		const ref = before ?? this[END];
@@ -98,7 +106,7 @@ export class ParentNode extends ChildNode {
 					lastChild.linkNext(ref);
 					// knownSegment(ref[PREV], firstChild, lastChild, ref);
 					// knownAdjacent(node, node[END]);
-					node.linkRight(node[END]);
+					node.linkRight(node[END]); // close
 					for (
 						let cur: ChildNode | null | false = firstChild;
 						cur;
@@ -129,7 +137,7 @@ export class ParentNode extends ChildNode {
 		} else {
 			throw new Error(`Unexpected node`);
 		}
-
+*/
 		return node;
 	}
 	appendChild(node: ChildNode) {
@@ -152,6 +160,60 @@ export class ParentNode extends ChildNode {
 		replaced.remove();
 		this.insertBefore(node, next);
 		return replaced;
+	}
+
+	hasChildNodes() {
+		return !!this.lastChild;
+	}
+	get childNodes() {
+		const nodes = new NodeList();
+		let { firstChild: cur } = this;
+		for (; cur; cur = cur.nextSibling) {
+			nodes.push(cur);
+		}
+		return nodes;
+	}
+
+	get children() {
+		const nodes = new NodeList();
+		let { firstElementChild: cur } = this;
+		for (; cur; cur = cur.nextElementSibling) {
+			nodes.push(cur);
+		}
+		return nodes;
+	}
+	get childElementCount() {
+		let i = 0;
+		let { firstElementChild: cur } = this;
+		for (; cur; cur = cur.nextElementSibling) {
+			++i;
+		}
+		return i;
+	}
+
+	replaceChildren(...nodes: Array<string | ChildNode>) {
+		let { [NEXT]: next, [END]: end, ownerDocument: doc } = this;
+		let child;
+		while (next && next !== end) {
+			next = (child = next).endNode[NEXT];
+			if (child instanceof ChildNode) {
+				child.remove();
+			} else if (child instanceof EndNode) {
+				throw new Error("Unexpected following EndNode node");
+			}
+		}
+
+		function* gen() {
+			for (const node of nodes) {
+				if (typeof node === "string") {
+					if (doc) yield doc.createTextNode(node);
+				} else {
+					yield node;
+				}
+			}
+		}
+
+		this._insert(end, gen());
 	}
 }
 
@@ -183,3 +245,4 @@ export class NodeList extends Array<ChildNode> {
 import { Node, PREV, NEXT, START, END } from "./node.js";
 
 import { ChildNode } from "./child-node.js";
+import { NonElementParentNode } from "./non-element-parent-node.js";

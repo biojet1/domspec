@@ -2,12 +2,18 @@ import { Node, NEXT, PREV, START } from "./node.js";
 
 export class ChildNode extends Node {
 	//// Tree
+	_link(prev: Node, next: Node, parent: ParentNode) {
+		this.parentNode = parent;
+		prev.linkRight(this.startNode);
+		return this.endNode.linkRight(next);
+	}
 	//// Dom
 	get nextSibling(): ChildNode | null {
 		const node = this.endNode[NEXT];
 		if (node instanceof EndNode) {
 			if (node[START] !== this.parentNode) {
-				throw new Error("Unexpected following node");
+				console.log([node[START], this.parentNode])
+				throw new Error("Unexpected following EndNode");
 			}
 		} else if (node instanceof ChildNode) {
 			return node;

@@ -8,7 +8,7 @@ export class Document extends NonElementParentNode {
 		super();
 		this.contentType =
 			contentType && contentType !== "" ? contentType : "application/xml";
-		this.implementation =	 new DOMImplementation();
+		this.implementation = new DOMImplementation();
 	}
 
 	get nodeType() {
@@ -70,6 +70,11 @@ export class Document extends NonElementParentNode {
 		node.ownerDocument = this;
 		return node;
 	}
+	createDocumentFragment() {
+		const node = new DocumentFragment();
+		node.ownerDocument = this;
+		return node;
+	}
 }
 function validateAndExtract(namespace: string | null, qualifiedName: string) {
 	let prefix = null,
@@ -107,5 +112,7 @@ import { XMLNS, XML } from "./namespace.js";
 // import { ChildNode } from "./child-node.js"; // prevent circular import
 import { Element } from "./element.js";
 import { Comment, Text, CDATASection } from "./character-data.js";
+import { DocumentFragment } from "./document-fragment.js";
+
 import { DOMImplementation } from "./dom-implementation.js";
 // import { HTMLDocument } from "./html/document.js";

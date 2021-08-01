@@ -3,7 +3,7 @@ export const PREV = Symbol("prev");
 export const START = Symbol("start");
 export const END = Symbol("end");
 
-export class Node {
+export abstract class Node {
 	[NEXT]?: Node;
 	[PREV]?: Node;
 	//// Tree
@@ -20,6 +20,9 @@ export class Node {
 	}
 	linkRight(node: Node) {
 		// [THIS]<->node
+		if (node === this) {
+			throw new Error(`Same node`);
+		}
 		this[NEXT] = node;
 		node[PREV] = this;
 		return this;
@@ -38,8 +41,12 @@ export class Node {
 	}
 	linkLeft(node: Node) {
 		// node<->[THIS]
+		if (node === this) {
+			throw new Error(`Same node`);
+		}
 		this[PREV] = node;
 		node[NEXT] = this;
+		return this;
 	}
 	insertLeft(node: Node) {
 		// [PREV]<node>[THIS]
@@ -91,13 +98,9 @@ export class Node {
 	//// DOM
 	ownerDocument?: Document;
 	parentNode?: ParentNode;
-	get nodeType() {
-		return 0;
-	}
+	abstract get nodeType() : number;
+	abstract get nodeName() : string;
 	get nodeValue(): string | null {
-		return null;
-	}
-	get nodeName(): string | null {
 		return null;
 	}
 	get textContent(): string | null {

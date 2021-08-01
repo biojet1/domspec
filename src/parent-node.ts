@@ -1,4 +1,4 @@
-export class ParentNode extends ChildNode {
+export abstract class ParentNode extends ChildNode {
 	[END]: EndNode;
 
 	//// Tree
@@ -11,27 +11,6 @@ export class ParentNode extends ChildNode {
 		// End node or self
 		return this[END];
 	}
-	hasChildNodes() {
-		return !!this.lastChild;
-	}
-	get childNodes() {
-		const nodes = new NodeList();
-		let { firstChild: cur } = this;
-		for (; cur; cur = cur.nextSibling) {
-			nodes.push(cur);
-		}
-		return nodes;
-	}
-
-	get children() {
-		const nodes = new NodeList();
-		let { firstElementChild: cur } = this;
-		for (; cur; cur = cur.nextElementSibling) {
-			nodes.push(cur);
-		}
-		return nodes;
-	}
-
 	//// DOM
 	get firstChild(): ChildNode | null {
 		// Tag -> Attr* -> ChildNode* -> END
@@ -59,8 +38,9 @@ export class ParentNode extends ChildNode {
 	get lastChild(): ChildNode | null {
 		const prev = this[END][PREV];
 		if (prev && prev != this) {
+			// return prev.startNode;
 			if (prev instanceof EndNode) {
-				return prev[START];
+				return prev.parentNode;
 			} else if (prev instanceof ParentNode) {
 				throw new Error("Unexpected preceding ParentNode node");
 			} else if (prev instanceof ChildNode) {
@@ -80,56 +60,31 @@ export class ParentNode extends ChildNode {
 		return null;
 	}
 
-	insertBefore(node: ChildNode, before?: ChildNode | null) {
-		if (node === this) throw new Error("unable to append a node to itself");
-		if (before && node === before) before = node.nextSibling;
+	prepend(...nodes: Array<ChildNode>) {
+		this._insert(this.firstChild || this[END], nodes);
+	}
 
-		const ref = before ?? this[END];
-
-		const prev = ref[PREV];
-
-		if (node instanceof ParentNode) {
-			if (node.nodeType === 11) {
-				// DOCUMENT_FRAGMENT_NODE = 11;
-				const { firstChild, lastChild } = node;
-				// TODO: adopt
-				if (firstChild && lastChild) {
-					prev && firstChild.linkPrior(prev);
-					lastChild.linkNext(ref);
-					// knownSegment(ref[PREV], firstChild, lastChild, ref);
-					// knownAdjacent(node, node[END]);
-					node.linkRight(node[END]);
-					for (
-						let cur: ChildNode | null | false = firstChild;
-						cur;
-
-					) {
-						// children already connected side by side
-						cur.parentNode = this;
-						// moCallback(firstChild, null);
-						// if (firstChild.nodeType === ELEMENT_NODE)
-						// 	connectedCallback(firstChild);
-						cur = cur !== lastChild && cur.nextSibling;
-					}
-				}
-			} else {
-				node.remove();
-				node.parentNode = this;
-				prev && node.linkPrior(prev);
-				node.linkNext(ref);
-				// moCallback(node, null);
-				// connectedCallback(node);
-			}
-		} else if (node instanceof ChildNode) {
+	append(...nodes: Array<ChildNode>) {
+		this._insert(this[END], nodes);
+	}
+	private _insert(ref: ChildNode | EndNode, nodes: Iterable<ChildNode>) {
+		let prev: Node = ref[PREV] || this;
+		for (const node of nodes) {
 			node.remove();
-			node.parentNode = this;
-			prev && node.linkPrior(prev);
-			node.linkNext(ref);
-			// moCallback(node, null);
-		} else {
-			throw new Error(`Unexpected node`);
+			prev = node._link(prev, ref, this);
 		}
-
+	}
+	insertBefore(node: ChildNode, before?: ChildNode | EndNode | null) {
+		if (node === this) {
+			throw new Error("unable to append a node to itself");
+		} else if (!before) {
+			this.insertBefore(node, this[END]);
+		} else if (node === before) {
+			this.insertBefore(node, node.nextSibling);
+		} else {
+			node.remove();
+			node._link(before[PREV] || this, before, this);
+		}
 		return node;
 	}
 	appendChild(node: ChildNode) {
@@ -153,19 +108,91 @@ export class ParentNode extends ChildNode {
 		this.insertBefore(node, next);
 		return replaced;
 	}
+
+	hasChildNodes() {
+		return !!this.lastChild;
+	}
+	get childNodes() {
+		const nodes = new NodeList();
+		let { firstChild: cur } = this;
+		for (; cur; cur = cur.nextSibling) {
+			nodes.push(cur);
+		}
+		return nodes;
+	}
+
+	get children() {
+		const nodes = new NodeList();
+		let { firstElementChild: cur } = this;
+		for (; cur; cur = cur.nextElementSibling) {
+			nodes.push(cur);
+		}
+		return nodes;
+	}
+	get childElementCount() {
+		let i = 0;
+		let { firstElementChild: cur } = this;
+		for (; cur; cur = cur.nextElementSibling) {
+			++i;
+		}
+		return i;
+	}
+
+	replaceChildren(...nodes: Array<string | ChildNode>) {
+		let { [NEXT]: next, [END]: end, ownerDocument: doc } = this;
+		let child;
+		while (next && next !== end) {
+			next = (child = next).endNode[NEXT];
+			if (child instanceof ChildNode) {
+				child.remove();
+			} else if (child instanceof EndNode) {
+				throw new Error("Unexpected following EndNode node");
+			}
+		}
+
+		function* gen() {
+			for (const node of nodes) {
+				if (typeof node === "string") {
+					if (doc) yield doc.createTextNode(node);
+				} else {
+					yield node;
+				}
+			}
+		}
+
+		this._insert(end, gen());
+	}
+	get textContent(): string | null {
+		const text = [];
+		let cur: Node | null | undefined = this[NEXT];
+		const end = this[END];
+		for (; cur && cur !== end; cur = cur[NEXT]) {
+			if (cur.nodeType === 3) text.push(cur.textContent);
+		}
+		return text.join("");
+	}
 }
 
 export class EndNode extends Node {
-	[START]: ParentNode;
+	// [START]: ParentNode;
+	parentNode: ParentNode;
 	constructor(parent: ParentNode) {
 		super();
-		this[START] = this[PREV] = parent;
+		// this[START] = this[PREV] = parent;
+		this.parentNode = this[PREV] = parent;
 	}
+	// get [START](): ParentNode {
+	// 	return this.parentNode;
+	// }
 	get startNode(): Node {
-		return this[START];
+		// return this[START];
+		return this.parentNode;
 	}
 	get nodeType() {
 		return -1;
+	}
+	get nodeName() {
+		return "#end";
 	}
 }
 
@@ -183,3 +210,4 @@ export class NodeList extends Array<ChildNode> {
 import { Node, PREV, NEXT, START, END } from "./node.js";
 
 import { ChildNode } from "./child-node.js";
+import { NonElementParentNode } from "./non-element-parent-node.js";

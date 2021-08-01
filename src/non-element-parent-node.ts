@@ -1,7 +1,7 @@
 import { PREV, NEXT, END } from "./node.js";
 import { ParentNode } from "./parent-node.js";
 
-export class NonElementParentNode extends ParentNode {
+export abstract class NonElementParentNode extends ParentNode {
 	getElementById(id: string) {
 		let { [NEXT]: next, [END]: end } = this;
 		for (; next && next !== end; next = next.endNode[NEXT]) {

@@ -19,7 +19,7 @@ export function* enumDOMStr(node: Node) {
 			}
 			isOpened = true;
 		} else if (cur instanceof EndNode) {
-			const { [PREV]: prev, [START]: start } = cur;
+			const { [PREV]: prev, parentNode: start } = cur;
 			if (prev === start || prev instanceof Attr) {
 				if (start instanceof Element) {
 					if (start._parsed_closed) {
@@ -55,10 +55,10 @@ export function* enumDOMStr(node: Node) {
 		}
 	} while (cur !== end && (cur = cur[NEXT]));
 }
-export function* enumXMLDump(node: Node) {
+export function* enumXMLDump(start: Node, end: Node) {
 	let isOpened = false;
-	const { endNode: end } = node;
-	let cur: Node | null | undefined = node;
+	let cur: Node | undefined = start;
+
 	do {
 		switch (cur.nodeType) {
 			case 2: // ATTRIBUTE_NODE
@@ -76,7 +76,7 @@ export function* enumXMLDump(node: Node) {
 				break;
 
 			case -1: // End Tag
-				const { [PREV]: prev, [START]: start } = cur as EndNode;
+				const { [PREV]: prev, parentNode: start } = cur as EndNode;
 				if (start.nodeType === 1) {
 					if (prev === start || prev instanceof Attr) {
 						yield `/>`;
@@ -110,17 +110,6 @@ export function* enumXMLDump(node: Node) {
 			default:
 				throw new Error(`Unexpected nodeType ${cur.nodeType}`);
 		}
-
-		// if (cur instanceof EndNode) {
-		// } else if (cur instanceof ParentNode) {
-		// 	if (cur instanceof NonElementParentNode) {
-		// 		// pass
-		// 	} else {
-		// 		throw new Error(`Unexpected ParentNode`);
-		// 	}
-		// } else {
-		// 	throw new Error(`Invalid node ${cur}`);
-		// }
 	} while (cur !== end && (cur = cur[NEXT]));
 }
 
@@ -149,7 +138,7 @@ export function* enumFlatDOM(node: Node) {
 	} while (cur !== end && (cur = cur[NEXT]));
 }
 
-import { NEXT, PREV, START, END, Node } from "./node.js";
+import { NEXT, PREV, END, Node } from "./node.js";
 import { ChildNode } from "./child-node.js";
 import { ParentNode, EndNode } from "./parent-node.js";
 import { Element } from "./element.js";

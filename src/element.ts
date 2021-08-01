@@ -1,4 +1,4 @@
-import { NEXT, PREV, START, END, Node } from "./node.js";
+import { NEXT, PREV, END, Node } from "./node.js";
 import { ParentNode, EndNode } from "./parent-node.js";
 
 export class Element extends ParentNode {
@@ -28,6 +28,13 @@ export class Element extends ParentNode {
 	set id(id: string) {
 		this.setAttribute("id", id);
 	}
+	get className() {
+		return this.getAttribute("class") || "";
+	}
+	set className(str: string) {
+		this.setAttribute("class", str);
+	}
+
 	//// DOM: </specialGetters>
 	//// DOM: <Attributes>
 	getAttribute(name: string) {
@@ -163,13 +170,32 @@ export class Element extends ParentNode {
 		return false;
 	}
 	//// DOM: </Attributes>
+	//// DOM: </Content>
 
 	toString() {
 		return Array.from(enumDOMStr(this)).join("");
 	}
 	get outerHTML() {
-		return Array.from(enumXMLDump(this)).join("");
+		return Array.from(enumXMLDump(this, this[END])).join("");
 	}
+	get innerHTML() {
+		const { firstChild, lastChild } = this;
+		return firstChild && lastChild
+			? Array.from(
+					enumXMLDump(firstChild.startNode, lastChild.endNode)
+			  ).join("")
+			: "";
+	}
+	get innerText() {
+		return this.textContent;
+	}
+
+	// set textContent(text) {
+	// 	this.replaceChildren();
+	// 	if (text) this.appendChild(new Text(this.ownerDocument, text));
+	// }
+	//// DOM: </Content>
+
 	lookupNamespaceURI(prefix: string | null): string | null {
 		if (prefix === "" || !prefix) prefix = null;
 		const { namespaceURI } = this;
@@ -198,3 +224,4 @@ import { XMLNS } from "./namespace.js";
 import { Attr } from "./attr.js";
 import { ChildNode } from "./child-node.js";
 import { enumDOMStr, enumXMLDump } from "./dom-serialize.js";
+import { parseDOM } from "./dom-parse.js";

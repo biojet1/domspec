@@ -1,13 +1,19 @@
-import { Node, NEXT, PREV, START } from "./node.js";
+import { Node, NEXT, PREV } from "./node.js";
 
-export class ChildNode extends Node {
+export abstract class ChildNode extends Node {
 	//// Tree
+	_link(prev: Node, next: Node, parent: ParentNode) {
+		this.parentNode = parent;
+		prev.linkRight(this.startNode);
+		return this.endNode.linkRight(next);
+	}
 	//// Dom
 	get nextSibling(): ChildNode | null {
 		const node = this.endNode[NEXT];
 		if (node instanceof EndNode) {
-			if (node[START] !== this.parentNode) {
-				throw new Error("Unexpected following node");
+			if (node.parentNode !== this.parentNode) {
+				console.log([node.parentNode, this.parentNode]);
+				throw new Error("Unexpected following EndNode");
 			}
 		} else if (node instanceof ChildNode) {
 			return node;
@@ -20,7 +26,7 @@ export class ChildNode extends Node {
 		const node = this.startNode[PREV];
 		if (node instanceof EndNode) {
 			// ...<child/></end>
-			return node[START];
+			return node.parentNode;
 		} else if (node instanceof ParentNode) {
 			if (node !== this.parentNode) {
 				throw new Error("Unexpected previous node : ParentNode");

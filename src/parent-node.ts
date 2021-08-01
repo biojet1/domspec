@@ -1,4 +1,4 @@
-export class ParentNode extends ChildNode {
+export abstract class ParentNode extends ChildNode {
 	[END]: EndNode;
 
 	//// Tree
@@ -38,8 +38,9 @@ export class ParentNode extends ChildNode {
 	get lastChild(): ChildNode | null {
 		const prev = this[END][PREV];
 		if (prev && prev != this) {
+			// return prev.startNode;
 			if (prev instanceof EndNode) {
-				return prev[START];
+				return prev.parentNode;
 			} else if (prev instanceof ParentNode) {
 				throw new Error("Unexpected preceding ParentNode node");
 			} else if (prev instanceof ChildNode) {
@@ -83,7 +84,7 @@ export class ParentNode extends ChildNode {
 		} else if (node === before) {
 			// this._insert(node.nextSibling || this[END], node);
 			// node._link(before[PREV] || this, before, this);
-			this.insertBefore(node, before.nextSibling);
+			this.insertBefore(node, node.nextSibling);
 		} else {
 			// this._insert(before, node);
 			node.remove();
@@ -215,19 +216,37 @@ export class ParentNode extends ChildNode {
 
 		this._insert(end, gen());
 	}
+	get textContent(): string | null {
+		const text = [];
+		let cur: Node | null | undefined = this[NEXT];
+		const end = this[END];
+		for (; cur && cur !== end; cur = cur[NEXT]) {
+			if (cur.nodeType === 3) text.push(cur.textContent);
+		}
+		return text.join("");
+	}
 }
 
 export class EndNode extends Node {
-	[START]: ParentNode;
+	// [START]: ParentNode;
+	parentNode: ParentNode;
 	constructor(parent: ParentNode) {
 		super();
-		this[START] = this[PREV] = parent;
+		// this[START] = this[PREV] = parent;
+		this.parentNode = this[PREV] = parent;
 	}
+	// get [START](): ParentNode {
+	// 	return this.parentNode;
+	// }
 	get startNode(): Node {
-		return this[START];
+		// return this[START];
+		return this.parentNode;
 	}
 	get nodeType() {
 		return -1;
+	}
+	get nodeName() {
+		return "#end";
 	}
 }
 

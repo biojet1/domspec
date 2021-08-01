@@ -4,14 +4,24 @@ import fs from "fs";
 import { JSDOM } from "jsdom";
 import { Document } from "../dist/document.js";
 import { parseDOM, DOMParser } from "../dist/dom-parse.js";
+import { checkParentNode } from "./domCheck.mjs";
 
 const xml = fs.readFileSync("test/test.xml", "utf8");
+const CI = !!process.env.CI;
 
 function similarNode(t, a, b) {
     t.ok(a && b);
+    const aN = `[${a.nodeType}:${a.nodeName}]`;
+    const bN = `[${a.nodeType}:${a.nodeName}]`;
     t.strictSame(a.nodeType, b.nodeType, "nodeType");
     t.strictSame(a.nodeName, b.nodeName, "nodeName");
     t.strictSame(a.nodeValue, b.nodeValue, "nodeValue");
+    t.strictSame(
+        a.textContent,
+        b.textContent,
+        `textContent ${aN} ${a.outerHTML} ${b.outerHTML}`
+    );
+
     switch (a.nodeType) {
         case 1: {
             t.ok(a.ownerDocument, `${a.nodeName}`);
@@ -122,78 +132,36 @@ function checkNode(t, a, b) {
             );
         }
         case 9: // DOCUMENT_NODE (9)
-        case 11:
+        case 11: // DOCUMENT_FRAGMENT_NODE (11).
             {
-                // DOCUMENT_FRAGMENT_NODE (11).
+                checkParentNode(t, a);
+                CI && checkParentNode(t, b);
                 const A = Array.from(a.childNodes);
                 const B = Array.from(b.childNodes);
                 t.strictSame(A.length, B.length, `childNodes.length ${aN}`);
                 let i = B.length;
 
-                t.strictSame(a.hasChildNodes(), i > 0);
                 t.strictSame(a.childElementCount, b.childElementCount);
 
                 while (i-- > 0) {
                     checkNode(t, A[i], B[i]);
-                    if (i > 0) {
-                        t.strictSame(A[i].previousSibling, A[i - 1]);
-                        t.strictSame(A[i - 1].nextSibling, A[i]);
-                        if (A.length === i + 1) {
-                            t.strictSame(A[i].nextSibling, null);
-                            t.strictSame(A[i], a.lastChild);
-                        }
-                    } else {
-                        t.strictSame(A[i], a.firstChild);
-                        t.strictSame(A[i].previousSibling, null);
-                    }
-                    t.strictSame(A[i].parentNode, a, null);
                 }
 
-                if (nt !== 9) {
+                if (nt !== 9 && nt != 11) {
                     const fA = a.ownerDocument.createDocumentFragment();
                     const fB = b.ownerDocument.createDocumentFragment();
                     fB.prepend(...B);
                     fA.prepend(...A);
                     t.strictSame(a.hasChildNodes(), false);
+
                     a.appendChild(fA);
                     b.appendChild(fB);
                     t.strictSame(a.hasChildNodes(), B.length > 0, a.outerHTML);
-                    t.strictSame(a.innerHTML, b.innerHTML);
+                    t.strictSame(a.outerHTML, b.outerHTML);
                 }
 
-                const EA = Array.from(a.children);
-                const EB = Array.from(b.children);
-                t.strictSame(EA.length, EA.length, `children.length ${aN}`);
-
-                for (i = EA.length; i-- > 0; ) {
-                    t.ok(A.indexOf(EA[i]) >= 0, `children[${i}] ${aN}`);
-                    t.strictSame(
-                        EA[i].nodeType,
-                        1,
-                        `children[${i}] is element ${aN}`
-                    );
-                    similarNode(t, EA[i], EB[i]);
-                    if (i > 0) {
-                        t.strictSame(EA[i].previousElementSibling, EA[i - 1]);
-                        t.strictSame(EA[i - 1].nextElementSibling, EA[i]);
-                        if (EA.length === i + 1) {
-                            t.strictSame(EA[i].nextElementSibling, null);
-                            t.strictSame(EA[i], a.lastElementChild);
-                        }
-                    } else {
-                        t.strictSame(EA[i], a.firstElementChild);
-                        t.strictSame(EA[i].previousElementSibling, null);
-                    }
-                }
                 ///////
 
-                //
-                let node = a.parentNode;
-                while (node) {
-                    t.strictSame(node.contains(a), true, `contains ${aN}`);
-                    t.strictSame(a.contains(node), false, `not contains ${aN}`);
-                    node = node.parentNode;
-                }
                 //
                 for (i = A.length; i-- > 0; ) {
                     const child = a.removeChild(A[i]);
@@ -217,8 +185,8 @@ function checkNode(t, a, b) {
                         b.ownerDocument.createComment("BETA")
                     );
                     t.strictSame(a.outerHTML, b.outerHTML);
+                    t.strictSame(a.innerHTML, b.innerHTML);
                 }
-                // t.strictSame(a.innerHTML, b.innerHTML);
             }
             break;
         case 3: // TEXT_NODE (3);
@@ -273,7 +241,7 @@ function checkNode(t, a, b) {
             throw new Error(`Unexpected nodeType=${b.nodeType} ${aN}`);
     }
 }
-test.test(`checkNode`, function (t) {
+test.test(`checkNode`, { bail: !CI }, function (t) {
     const parser = new DOMParser();
 
     const doc1 = new JSDOM(xml, {

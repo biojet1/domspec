@@ -19,7 +19,7 @@ export function* enumDOMStr(node: Node) {
 			}
 			isOpened = true;
 		} else if (cur instanceof EndNode) {
-			const { [PREV]: prev, [START]: start } = cur;
+			const { [PREV]: prev, parentNode: start } = cur;
 			if (prev === start || prev instanceof Attr) {
 				if (start instanceof Element) {
 					if (start._parsed_closed) {
@@ -76,7 +76,7 @@ export function* enumXMLDump(start: Node, end: Node) {
 				break;
 
 			case -1: // End Tag
-				const { [PREV]: prev, [START]: start } = cur as EndNode;
+				const { [PREV]: prev, parentNode: start } = cur as EndNode;
 				if (start.nodeType === 1) {
 					if (prev === start || prev instanceof Attr) {
 						yield `/>`;
@@ -138,7 +138,7 @@ export function* enumFlatDOM(node: Node) {
 	} while (cur !== end && (cur = cur[NEXT]));
 }
 
-import { NEXT, PREV, START, END, Node } from "./node.js";
+import { NEXT, PREV, END, Node } from "./node.js";
 import { ChildNode } from "./child-node.js";
 import { ParentNode, EndNode } from "./parent-node.js";
 import { Element } from "./element.js";

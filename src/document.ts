@@ -20,6 +20,9 @@ export class Document extends NonElementParentNode {
 	get documentElement() {
 		return this.firstElementChild;
 	}
+	get textContent() {
+		return null;
+	}
 	// get implementation() {
 	// 	return new DOMImplementation();
 	// }

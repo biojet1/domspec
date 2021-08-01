@@ -3,7 +3,7 @@ export const PREV = Symbol("prev");
 export const START = Symbol("start");
 export const END = Symbol("end");
 
-export class Node {
+export abstract class Node {
 	[NEXT]?: Node;
 	[PREV]?: Node;
 	//// Tree
@@ -98,13 +98,9 @@ export class Node {
 	//// DOM
 	ownerDocument?: Document;
 	parentNode?: ParentNode;
-	get nodeType() {
-		return 0;
-	}
+	abstract get nodeType() : number;
+	abstract get nodeName() : string;
 	get nodeValue(): string | null {
-		return null;
-	}
-	get nodeName(): string | null {
 		return null;
 	}
 	get textContent(): string | null {

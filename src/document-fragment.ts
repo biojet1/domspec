@@ -31,4 +31,4 @@ export class DocumentFragment extends NonElementParentNode {
 }
 import { ChildNode } from "./child-node.js";
 import { EndNode, ParentNode } from "./parent-node.js";
-import { Node, PREV, NEXT, START, END } from "./node.js";
+import { Node, PREV, NEXT, END } from "./node.js";

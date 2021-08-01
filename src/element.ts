@@ -1,4 +1,4 @@
-import { NEXT, PREV, START, END, Node } from "./node.js";
+import { NEXT, PREV, END, Node } from "./node.js";
 import { ParentNode, EndNode } from "./parent-node.js";
 
 export class Element extends ParentNode {
@@ -188,16 +188,6 @@ export class Element extends ParentNode {
 	}
 	get innerText() {
 		return this.textContent;
-	}
-
-	get textContent() {
-		const text = [];
-		let cur: Node | null | undefined = this[NEXT];
-		const end = this[NEXT];
-		for (; cur && cur !== end; cur = cur[NEXT]) {
-			if (cur.nodeType === 3) text.push(cur.textContent);
-		}
-		return text.join("");
 	}
 
 	// set textContent(text) {

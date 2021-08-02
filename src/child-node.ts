@@ -11,15 +11,19 @@ export abstract class ChildNode extends Node {
 	get nextSibling(): ChildNode | null {
 		const node = this.endNode[NEXT];
 		if (node instanceof EndNode) {
+			/* c8 ignore start */
 			if (node.parentNode !== this.parentNode) {
 				console.log([node.parentNode, this.parentNode]);
 				throw new Error("Unexpected following EndNode");
 			}
+			/* c8 ignore stop */
 		} else if (node instanceof ChildNode) {
 			return node;
+			/* c8 ignore start */
 		} else if (node) {
 			throw new Error("Unexpected following node");
 		}
+		/* c8 ignore stop */
 		return null;
 	}
 	get previousSibling(): ChildNode | null {
@@ -28,9 +32,11 @@ export abstract class ChildNode extends Node {
 			// ...<child/></end>
 			return node.parentNode;
 		} else if (node instanceof ParentNode) {
+			/* c8 ignore start */
+
 			if (node !== this.parentNode) {
 				throw new Error("Unexpected previous node : ParentNode");
-			}
+			} /* c8 ignore stop */
 		} else if (node instanceof ChildNode) {
 			return node;
 		}

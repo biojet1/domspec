@@ -98,8 +98,8 @@ export abstract class Node {
 	//// DOM
 	ownerDocument?: Document;
 	parentNode?: ParentNode;
-	abstract get nodeType() : number;
-	abstract get nodeName() : string;
+	abstract get nodeType(): number;
+	abstract get nodeName(): string;
 	get nodeValue(): string | null {
 		return null;
 	}
@@ -135,6 +135,12 @@ export abstract class Node {
 	}
 	remove() {
 		this.unlink();
+	}
+
+	getRootNode() : Node {
+		let root: Node = this;
+		while (root.parentNode) root = root.parentNode;
+		return root.nodeType === 9 ? ((root as Document).documentElement || root) : root;
 	}
 
 	/// DOM constants

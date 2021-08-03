@@ -147,13 +147,15 @@ export function checkParentNode(t, parent) {
 
             t.strictSame(
                 node.parentElement,
-                nodeType === 9 ? null : parent,
+                nodeType === 9 || nodeType === 11 ? null : parent,
                 extra
             );
             t.strictSame(node.nextSibling, childNodes[i + 1] || null);
             t.strictSame(node.previousSibling, childNodes[i - 1] || null);
         } else {
-            t.notOk(childNodes[i]);
+            t.strictSame(childNodes.length, 0);
+            t.notOk(lastChild);
+            break;
         }
         if (node === lastChild) {
             break;
@@ -162,11 +164,15 @@ export function checkParentNode(t, parent) {
         }
     }
     node = lastChild;
-    for (i = childNodes.length; --i; ) {
+    for (i = childNodes.length; i-- > 0; ) {
         if (node) {
             extra = [parent, childNodes[i]];
             t.strictSame(node, childNodes[i]);
-            t.strictSame(childNodes[i].parentNode, parent, extra);
+            t.strictSame(
+                childNodes[i] && childNodes[i].parentNode,
+                parent,
+                extra
+            );
             t.strictSame(
                 childNodes[i].ownerDocument,
                 nodeType === 9 ? parent : ownerDocument,
@@ -174,13 +180,15 @@ export function checkParentNode(t, parent) {
             );
             t.strictSame(
                 childNodes[i].parentElement,
-                nodeType === 9 ? null : parent,
+                nodeType === 9 || nodeType === 11 ? null : parent,
                 extra
             );
             t.strictSame(node.nextSibling, childNodes[i + 1] || null);
             t.strictSame(node.previousSibling, childNodes[i - 1] || null);
         } else {
-            t.notOk(childNodes[i]);
+            t.strictSame(childNodes.length, 0);
+            t.notOk(firstChild);
+            break;
         }
         if (node === firstChild) {
             break;
@@ -191,8 +199,8 @@ export function checkParentNode(t, parent) {
     t.ok(childNodes.length >= children.length);
     node = firstElementChild;
     for (i = 0; ; ++i) {
+        extra = [parent, node];
         if (node) {
-            extra = [parent, node];
             t.strictSame(node, children.item(i));
             t.ok(Array.prototype.indexOf.call(childNodes, node, i) >= i, extra);
             t.strictSame(
@@ -206,7 +214,9 @@ export function checkParentNode(t, parent) {
                 extra
             );
         } else {
-            t.ok(children.item(i) == null, children.item(i));
+            t.strictSame(children.length, 0, extra);
+            t.strictSame(lastElementChild, null, extra);
+            break;
         }
         if (node === lastElementChild) {
             break;
@@ -233,7 +243,9 @@ export function checkParentNode(t, parent) {
                 extra
             );
         } else {
-            t.ok(children.item(i) == null, children.item(i));
+            t.strictSame(children.length, 0, extra);
+            t.strictSame(firstElementChild, null, extra);
+            break;
         }
         if (node === firstElementChild) {
             break;

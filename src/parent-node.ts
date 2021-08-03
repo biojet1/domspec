@@ -61,17 +61,21 @@ export abstract class ParentNode extends ChildNode {
 	}
 
 	prepend(...nodes: Array<ChildNode>) {
-		this._insert(this.firstChild || this[END], nodes);
+		this._insert(this.firstChild || this[END], this._toNodes(nodes));
 	}
 
 	append(...nodes: Array<ChildNode>) {
-		this._insert(this[END], nodes);
+		this._insert(this[END], this._toNodes(nodes));
 	}
-	private _insert(ref: ChildNode | EndNode, nodes: Iterable<ChildNode>) {
+	_insert(ref: ChildNode | EndNode, nodes: Iterable<ChildNode>) {
 		let prev: Node = ref[PREV] || this;
 		for (const node of nodes) {
-			node.remove();
-			prev = node._link(prev, ref, this);
+			if (node !== ref) {
+				node.remove();
+				node._link(ref[PREV] || this, ref, this);
+				// ref = node;
+				// prev = node._link(prev, ref, this);
+			}
 		}
 	}
 	insertBefore(node: ChildNode, before?: ChildNode | EndNode | null) {
@@ -102,11 +106,10 @@ export abstract class ParentNode extends ChildNode {
 		return node;
 	}
 
-	replaceChild(node: ChildNode, replaced: ChildNode) {
-		const next = replaced.endNode[NEXT] as ChildNode;
-		replaced.remove();
-		this.insertBefore(node, next);
-		return replaced;
+	replaceChild(node: ChildNode, child: ChildNode) {
+		this.insertBefore(node, child.endNode[NEXT] as ChildNode);
+		child.remove();
+		return child;
 	}
 
 	hasChildNodes() {
@@ -150,17 +153,17 @@ export abstract class ParentNode extends ChildNode {
 			}
 		}
 
-		function* gen() {
-			for (const node of nodes) {
-				if (typeof node === "string") {
-					if (doc) yield doc.createTextNode(node);
-				} else {
-					yield node;
-				}
-			}
-		}
+		// function* gen() {
+		// 	for (const node of nodes) {
+		// 		if (typeof node === "string") {
+		// 			if (doc) yield doc.createTextNode(node);
+		// 		} else {
+		// 			yield node;
+		// 		}
+		// 	}
+		// }
 
-		this._insert(end, gen());
+		this._insert(end, this._toNodes(nodes));
 	}
 	get textContent(): string | null {
 		const text = [];

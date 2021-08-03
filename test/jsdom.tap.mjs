@@ -23,10 +23,60 @@ function similarNode(t, a, b) {
     );
 
     switch (a.nodeType) {
-        case 1: {
-            t.ok(a.ownerDocument, `${a.nodeName}`);
-            t.strictSame(a.tagName, b.tagName, "nodeValue");
-        }
+        case 1:
+            {
+                t.ok(a.ownerDocument, `${a.nodeName}`);
+                t.strictSame(a.tagName, b.tagName, "nodeValue");
+            }
+            break;
+        case 3: // TEXT_NODE (3);
+        case 4: // CDATA_SECTION_NODE (4);
+        case 8: // COMMENT_NODE (8);
+            t.strictSame(a.data, b.data, `data ${aN}`);
+            t.strictSame(a.length, b.length, `length ${aN}`);
+            t.strictSame(
+                a.textContent,
+                b.nodeValue,
+                `textContent==data  ${aN}`
+            );
+            t.strictSame(
+                b.nodeValue,
+                a.textContent,
+                `textContent==data  ${aN}`
+            );
+            break;
+        case 2: // ATTRIBUTE_NODE (2);
+            if (a.namespaceURI || b.namespaceURI) {
+                t.strictSame(
+                    a.namespaceURI,
+                    b.namespaceURI,
+                    `namespaceURI ${b.name} ${aN}`
+                );
+            }
+            if (a.prefix || b.prefix) {
+                t.strictSame(
+                    a.prefix,
+                    b.prefix,
+                    `prefix ${b.name} '${a.name}' '${b.name}' ${aN}`
+                );
+            }
+            t.strictSame(
+                a.value,
+                b.value,
+                `value ${b.name} '${a.value}' '${b.value}' ${aN}`
+            );
+            t.strictSame(
+                a.localName,
+                b.localName,
+                `localName ${b.name} '${a.name}' '${b.name}' ${aN}`
+            );
+            t.strictSame(a.textContent, b.nodeValue, `textContent==data ${aN}`);
+            t.strictSame(b.nodeValue, a.textContent, `textContent==data ${aN}`);
+            t.strictSame(a.specified, b.specified, `specified ${b.name} ${aN}`);
+            break;
+        case 7: // PROCESSING_INSTRUCTION_NODE (7);
+            t.strictSame(a.textContent, b.textContent, `textContent  ${aN}`);
+            break;
     }
 }
 
@@ -134,46 +184,136 @@ function compareNode(t, a, b) {
         case 9: // DOCUMENT_NODE (9)
         case 11: // DOCUMENT_FRAGMENT_NODE (11).
             {
+                const outerHTMLA = a.outerHTML;
+                const outerHTMLB = b.outerHTML;
                 const A = Array.from(a.childNodes);
                 const B = Array.from(b.childNodes);
+                const nA = a.childNodes.length;
+                const nB = b.childNodes.length;
+                let i, fA, fB;
                 t.strictSame(A.length, B.length, `childNodes.length ${aN}`);
-                let i = B.length;
-
                 t.strictSame(a.childElementCount, b.childElementCount);
+                t.strictSame(outerHTMLA, outerHTMLB);
 
-                while (i-- > 0) {
+                for (i = B.length; i-- > 0; ) {
                     compareNode(t, A[i], B[i]);
                 }
 
                 if (nt !== 9 && nt != 11) {
-                    const fA = a.ownerDocument.createDocumentFragment();
-                    const fB = b.ownerDocument.createDocumentFragment();
+                    fA = a.ownerDocument.createDocumentFragment();
+                    fB = b.ownerDocument.createDocumentFragment();
+
                     fB.prepend(...B);
                     fA.prepend(...A);
                     t.strictSame(a.hasChildNodes(), false);
+                    t.strictSame(fA.childNodes.length, fB.childNodes.length);
+                    t.strictSame(fA.hasChildNodes(), fB.childNodes.length > 0);
+                    checkNode(t, fA);
+                    CI && checkNode(t, fB);
 
                     a.appendChild(fA);
                     b.appendChild(fB);
                     t.strictSame(a.hasChildNodes(), B.length > 0, a.outerHTML);
-                    t.strictSame(a.outerHTML, b.outerHTML);
+                    t.strictSame(a.outerHTML, outerHTMLB);
+                    t.strictSame(fA.hasChildNodes(), false);
+                }
+                if (nt === 1 || nt == 11) {
+                    const n = a.childNodes.length;
+                    for (i = n; i-- > 0; ) {
+                        a.lastChild.after(a.firstChild);
+                        b.lastChild.after(b.firstChild);
+                        t.strictSame(a.outerHTML, b.outerHTML, `${i}/${n} `, [
+                            outerHTMLB,
+                        ]);
+                        if (i === 0) {
+                            t.strictSame(outerHTMLB, b.outerHTML);
+                            t.strictSame(outerHTMLA, a.outerHTML);
+                        } else {
+                            t.strictNotSame(outerHTMLB, b.outerHTML);
+                            t.strictNotSame(outerHTMLA, a.outerHTML);
+                        }
+                    }
+                    t.strictSame(b.outerHTML, outerHTMLB);
+                    t.strictSame(a.outerHTML, outerHTMLB);
+                }
+                if (nt === 1 || nt == 11) {
+                    const n = a.childNodes.length;
+                    for (i = n; i-- > 0; ) {
+                        const extra = [outerHTMLB];
+                        a.firstChild.before(a.lastChild);
+                        b.firstChild.before(b.lastChild);
+                        t.strictSame(
+                            a.outerHTML,
+                            b.outerHTML,
+                            `${i}/${n}`,
+                            extra
+                        );
+                        if (i === 0) {
+                            t.strictSame(
+                                outerHTMLB,
+                                b.outerHTML,
+                                `${i}/${n}`,
+                                extra
+                            );
+                            t.strictSame(
+                                outerHTMLA,
+                                a.outerHTML,
+                                `${i}/${n}`,
+                                extra
+                            );
+                        } else {
+                            t.strictNotSame(
+                                outerHTMLB,
+                                b.outerHTML,
+                                `${i}/${n}`,
+                                extra
+                            );
+                            t.strictNotSame(
+                                outerHTMLA,
+                                a.outerHTML,
+                                `${i}/${n}`,
+                                extra
+                            );
+                        }
+                    }
+                    t.strictSame(b.outerHTML, outerHTMLB);
+                    t.strictSame(a.outerHTML, outerHTMLB);
+                    // a.firstChild.replaceWith()
+                    fA = a.ownerDocument.createDocumentFragment();
+                    fA.append(...a.childNodes);
+                    t.strictSame(a.childNodes.length, 0);
+                    t.strictSame(fA.childNodes.length, nA);
+                    a.replaceChildren(fA);
+                    t.strictSame(a.outerHTML, outerHTMLB);
+
+                    // a.replaceWith(.createComment("COMMENT"));
                 }
 
-                ///////
-
-                //
-                for (i = A.length; i-- > 0; ) {
-                    const child = a.removeChild(A[i]);
-                    t.strictSame(child, A[i], `removeChild ${aN}`);
-                    t.notOk(A[i].parentNode, `removeChild parentNode ${aN}`);
-                    t.notOk(A[i].nextSibling, `removeChild nextSibling ${aN}`);
-                    t.notOk(
-                        A[i].previousSibling,
-                        `removeChild previousSibling ${aN}`
-                    );
-                    b.removeChild(B[i]);
-                }
-                t.strictSame(a.outerHTML, b.outerHTML);
                 if (a.parentNode) {
+                    i = A.length;
+                    const rep = a.ownerDocument.createComment("COMMENT");
+                    while (i-- > 0) {
+                        A[i].replaceWith(rep);
+                        t.strictNotSame(a.outerHTML, outerHTMLB);
+                        t.strictSame(rep.parentNode, a);
+                        t.notOk(A[i].parentNode);
+                        rep.replaceWith(A[i]);
+                        t.strictSame(a.outerHTML, outerHTMLB);
+                        t.strictSame(A[i].parentNode, a);
+                        t.notOk(rep.parentNode);
+                    }
+                }
+                ///////
+                if (a.parentNode) {
+                    fA = a.ownerDocument.createDocumentFragment();
+                    fB = b.ownerDocument.createDocumentFragment();
+                    t.strictSame(a.childNodes.length, nB);
+                    fA.append(...a.childNodes);
+                    fB.append(...b.childNodes);
+                    t.strictSame(a.childNodes.length, 0);
+                    t.strictSame(b.childNodes.length, 0);
+                    t.strictSame(fA.childNodes.length, nA);
+                    t.strictSame(fB.childNodes.length, nB);
                     a.replaceChildren(
                         "APLHA",
                         a.ownerDocument.createComment("BETA")
@@ -184,57 +324,58 @@ function compareNode(t, a, b) {
                     );
                     t.strictSame(a.outerHTML, b.outerHTML);
                     t.strictSame(a.innerHTML, b.innerHTML);
+                    t.strictNotSame(outerHTMLB, b.outerHTML);
+                    t.strictNotSame(outerHTMLA, a.outerHTML);
+                    a.replaceChildren();
+                    b.replaceChildren();
+                    a.prepend(fA);
+                    b.prepend(fB);
+                    // while (fB.firstChild) b.appendChild(fB.firstChild);
+                    t.strictSame(a.childNodes.length, nA);
+                    t.strictSame(b.childNodes.length, nB);
+                    t.strictSame(b.outerHTML, outerHTMLB);
+                    t.strictSame(a.outerHTML, outerHTMLB);
                 }
+
+                //
+                if (nt === 9) {
+                    fA = a.createDocumentFragment();
+                    fB = b.createDocumentFragment();
+                } else {
+                    fA = a.ownerDocument.createDocumentFragment();
+                    fB = b.ownerDocument.createDocumentFragment();
+                }
+                for (i = A.length; i-- > 0; ) {
+                    const childA = a.removeChild(A[i]);
+                    const childB = b.removeChild(B[i]);
+
+                    t.strictSame(childA, A[i], `removeChild ${aN}`);
+                    t.notOk(A[i].parentNode, `removeChild parentNode ${aN}`);
+                    t.notOk(A[i].nextSibling, `removeChild nextSibling ${aN}`);
+                    t.notOk(
+                        A[i].previousSibling,
+                        `removeChild previousSibling ${aN}`
+                    );
+                    fA.prepend(childA);
+                    fB.prepend(childB);
+                }
+                a.prepend(fA);
+                b.prepend(fB);
+
+                t.strictSame(b.outerHTML, outerHTMLB);
+                t.strictSame(a.outerHTML, outerHTMLA);
             }
             break;
         case 3: // TEXT_NODE (3);
         case 4: // CDATA_SECTION_NODE (4);
         case 8: // COMMENT_NODE (8);
-            t.strictSame(a.data, b.data, `data ${aN}`);
-            t.strictSame(a.length, b.length, `length ${aN}`);
-            t.strictSame(
-                a.textContent,
-                b.nodeValue,
-                `textContent==data  ${aN}`
-            );
-            t.strictSame(
-                b.nodeValue,
-                a.textContent,
-                `textContent==data  ${aN}`
-            );
             break;
-        case 2: // ATTRIBUTE_NODE (2);
-            if (a.namespaceURI || b.namespaceURI) {
-                t.strictSame(
-                    a.namespaceURI,
-                    b.namespaceURI,
-                    `namespaceURI ${b.name} ${aN}`
-                );
-            }
-            if (a.prefix || b.prefix) {
-                t.strictSame(
-                    a.prefix,
-                    b.prefix,
-                    `prefix ${b.name} '${a.name}' '${b.name}' ${aN}`
-                );
-            }
-            t.strictSame(
-                a.value,
-                b.value,
-                `value ${b.name} '${a.value}' '${b.value}' ${aN}`
-            );
-            t.strictSame(
-                a.localName,
-                b.localName,
-                `localName ${b.name} '${a.name}' '${b.name}' ${aN}`
-            );
-            t.strictSame(a.textContent, b.nodeValue, `textContent==data ${aN}`);
-            t.strictSame(b.nodeValue, a.textContent, `textContent==data ${aN}`);
-            t.strictSame(a.specified, b.specified, `specified ${b.name} ${aN}`);
 
-        case 7: // PROCESSING_INSTRUCTION_NODE (7);
-            t.strictSame(a.textContent, b.textContent, `textContent  ${aN}`);
+        case 2: // ATTRIBUTE_NODE (2);
             break;
+        case 7: // PROCESSING_INSTRUCTION_NODE (7);
+            break;
+
         default:
             throw new Error(`Unexpected nodeType=${b.nodeType} ${aN}`);
     }

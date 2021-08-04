@@ -4,10 +4,10 @@ import { ParentNode } from "./parent-node.js";
 export abstract class NonElementParentNode extends ParentNode {
 	getElementById(id: string) {
 		let { [NEXT]: next, [END]: end } = this;
-		for (; next && next !== end; next = next.endNode[NEXT]) {
+		for (; next && next !== end; next = next[NEXT]) {
 			if (next.nodeType === 1) {
 				const el = next as Element;
-				if (el.id === id) {
+				if (el.getAttribute("id") === id) {
 					return next;
 				}
 			}

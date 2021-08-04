@@ -1,4 +1,4 @@
-import { Node, NEXT, PREV } from "./node.js";
+import { Node, NEXT, PREV, END } from "./node.js";
 
 export abstract class ChildNode extends Node {
 	//// Tree
@@ -11,15 +11,19 @@ export abstract class ChildNode extends Node {
 	get nextSibling(): ChildNode | null {
 		const node = this.endNode[NEXT];
 		if (node instanceof EndNode) {
+			/* c8 ignore start */
 			if (node.parentNode !== this.parentNode) {
 				console.log([node.parentNode, this.parentNode]);
 				throw new Error("Unexpected following EndNode");
 			}
+			/* c8 ignore stop */
 		} else if (node instanceof ChildNode) {
 			return node;
+			/* c8 ignore start */
 		} else if (node) {
 			throw new Error("Unexpected following node");
 		}
+		/* c8 ignore stop */
 		return null;
 	}
 	get previousSibling(): ChildNode | null {
@@ -28,9 +32,11 @@ export abstract class ChildNode extends Node {
 			// ...<child/></end>
 			return node.parentNode;
 		} else if (node instanceof ParentNode) {
+			/* c8 ignore start */
 			if (node !== this.parentNode) {
 				throw new Error("Unexpected previous node : ParentNode");
 			}
+			/* c8 ignore stop */
 		} else if (node instanceof ChildNode) {
 			return node;
 		}
@@ -61,7 +67,53 @@ export abstract class ChildNode extends Node {
 		}
 		return null;
 	}
+
+	after(...nodes: Array<string | ChildNode>) {
+		const { parentNode, nextSibling } = this;
+		if (parentNode) {
+			parentNode._insert(
+				nextSibling || parentNode[END],
+				this._toNodes(nodes)
+			);
+		}
+	}
+
+	before(...nodes: Array<string | ChildNode>) {
+		const { parentNode: node } = this;
+		if (node) {
+			node._insert(this, this._toNodes(nodes));
+		}
+	}
+
+	replaceWith(...nodes: Array<string | ChildNode>) {
+		const { parentNode: node } = this;
+		if (node) {
+			node._insert(this, this._toNodes(nodes));
+			this.remove();
+		}
+	}
+
+	*_toNodes(
+		nodes: Iterable<string | ChildNode>
+	): IterableIterator<ChildNode> {
+		const { ownerDocument: doc } = this;
+		for (const node of nodes) {
+			if (typeof node === "string") {
+				if (doc) yield doc.createTextNode(node) as ChildNode;
+			} else if (11 === node.nodeType) {
+				// DOCUMENT_FRAGMENT_NODE (11).
+				for (const cur of node._toNodes(
+					(node as ParentNode).childNodes
+				)) {
+					yield cur;
+				}
+			} else {
+				yield node;
+			}
+		}
+	}
 }
 
 import { ParentNode, EndNode } from "./parent-node.js";
 import { Element } from "./element.js";
+// import { Element } from "./element.js";

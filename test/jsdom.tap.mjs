@@ -297,7 +297,7 @@ function compareNode(t, a, b) {
                         t.strictNotSame(a.outerHTML, outerHTMLB);
                         t.strictSame(rep.parentNode, a);
                         t.notOk(A[i].parentNode);
-                        rep.replaceWith(A[i]);
+                        a.replaceChild(A[i], rep);
                         t.strictSame(a.outerHTML, outerHTMLB);
                         t.strictSame(A[i].parentNode, a);
                         t.notOk(rep.parentNode);

@@ -218,6 +218,34 @@ export class Element extends ParentNode {
 
 		return parent ? parent.lookupNamespaceURI(prefix) : null;
 	}
+
+	insertAdjacentElement(position:string, element: Element) {
+		const { parentElement } = this;
+		switch (position) {
+			case "beforebegin":
+				if (parentElement) {
+					parentElement.insertBefore(element, this);
+					break;
+				}
+				return null;
+			case "afterbegin":
+				this.insertBefore(element, this.firstChild);
+				break;
+			case "beforeend":
+				this.insertBefore(element, null);
+				break;
+			case "afterend":
+				if (parentElement) {
+					parentElement.insertBefore(element, this.nextSibling);
+					break;
+				}
+				return null;
+
+			default:
+				throw new Error(`SyntaxError: Invalid position ${position}`);
+		}
+		return element;
+	}
 }
 
 import { XMLNS } from "./namespace.js";

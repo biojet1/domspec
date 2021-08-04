@@ -84,6 +84,7 @@ export function checkParentNode(t, parent) {
         childElementCount,
         `children.length vs childElementCount ${name}`
     );
+    t.strictNotSame(parent, parentNode, 'this != parentNode', parentNode);
 
     t.ok(
         parent.hasChildNodes()
@@ -125,9 +126,11 @@ export function checkParentNode(t, parent) {
     );
 
     let node;
+    const root = parent.getRootNode();
     for (node = parentNode; node; node = node.parentNode) {
         t.strictSame(node.contains(parent), true, `contains ${name}`);
         t.strictSame(parent.contains(node), false, `not contains ${name}`);
+        // t.strictSame(root.contains(node), true, `root contains ${name}`);
     }
 
     let i = 0;

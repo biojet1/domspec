@@ -18,8 +18,10 @@ export abstract class ParentNode extends ChildNode {
 		for (; next && next !== end; next = next.endNode[NEXT]) {
 			if (next instanceof ChildNode) {
 				return next;
+				/* c8 ignore start */
 			} else if (next instanceof EndNode) {
 				throw new Error("Unexpected following EndNode node");
+				/* c8 ignore stop */
 			}
 		}
 		return null;
@@ -42,7 +44,9 @@ export abstract class ParentNode extends ChildNode {
 			if (prev instanceof EndNode) {
 				return prev.parentNode;
 			} else if (prev instanceof ParentNode) {
+				/* c8 ignore start */
 				throw new Error("Unexpected preceding ParentNode node");
+				/* c8 ignore stop */
 			} else if (prev instanceof ChildNode) {
 				return prev;
 			}
@@ -69,20 +73,33 @@ export abstract class ParentNode extends ChildNode {
 	}
 	_insert(ref: ChildNode | EndNode, nodes: Iterable<ChildNode>) {
 		let prev: Node = ref[PREV] || this;
+		if (ref.parentNode != this) {
+			throw new Error("NotFoundError: unexpected reference child parent");
+		}
 		for (const node of nodes) {
+			if (node instanceof ParentNode) {
+				if (node.contains(this)) {
+					throw new Error(
+						"HierarchyRequestError: node is ansector of parent."
+					);
+				}
+			}
 			if (node !== ref) {
 				node.remove();
 				node._link(ref[PREV] || this, ref, this);
-				// ref = node;
-				// prev = node._link(prev, ref, this);
 			}
 		}
 	}
 	insertBefore(node: ChildNode, before?: ChildNode | EndNode | null) {
 		if (node === this) {
-			throw new Error("unable to append a node to itself");
+			throw new Error(
+				"HierarchyRequestError: unable to append a node to itself"
+			);
 		} else if (!before) {
-			this.insertBefore(node, this[END]);
+			const cur = this[END];
+			node.remove();
+			node._link(cur[PREV] || this, cur, this);
+			// this.insertBefore(node, this[END]);
 		} else if (node === before) {
 			this.insertBefore(node, node.nextSibling);
 		} else {
@@ -101,7 +118,7 @@ export abstract class ParentNode extends ChildNode {
 	}
 
 	removeChild(node: ChildNode) {
-		if (node.parentNode !== this) throw new Error("node is not a child");
+		if (node.parentNode !== this) throw new Error("NotFoundError");
 		node.remove();
 		return node;
 	}
@@ -148,8 +165,10 @@ export abstract class ParentNode extends ChildNode {
 			next = (child = next).endNode[NEXT];
 			if (child instanceof ChildNode) {
 				child.remove();
+				/* c8 ignore start */
 			} else if (child instanceof EndNode) {
 				throw new Error("Unexpected following EndNode node");
+				/* c8 ignore stop */
 			}
 		}
 

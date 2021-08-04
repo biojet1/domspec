@@ -81,7 +81,9 @@ export class Element extends ParentNode {
 		node.value = value;
 		node.parentNode = this;
 
-		(attr && attr instanceof Attr ? attr : this).insertRight(node);
+		// (attr && attr instanceof Attr ? attr : this).insertRight(node);
+		const ref = attr && attr instanceof Attr ? attr : this;
+		node._link(ref, ref[NEXT] || this[END], this);
 	}
 	setAttributeNS(ns: string | null, qname: string, value: string) {
 		let prefix, lname;
@@ -109,9 +111,6 @@ export class Element extends ParentNode {
 				return;
 			}
 		}
-		if (!attr || !(attr instanceof Attr)) {
-			attr = this;
-		}
 		const node = new Attr();
 		node.name = qname;
 		node.localName = lname;
@@ -119,7 +118,10 @@ export class Element extends ParentNode {
 		node.parentNode = this;
 		node.namespaceURI = ns;
 		if (prefix) node.prefix = prefix;
-		attr.insertRight(node);
+		//  (attr && attr instanceof Attr ? attr : this).insertRight(node);
+		const ref = attr && attr instanceof Attr ? attr : this;
+		node._link(ref, ref[NEXT] || this[END], this);
+		// node._link(attr, attr[NEXT], this);
 	}
 	setAttributeNode(node: Attr) {
 		return this.setAttributeNodeNS(node);
@@ -132,14 +134,22 @@ export class Element extends ParentNode {
 		if (node === prev) {
 			return node;
 		} else if (prev) {
-			prev.insertLeft(node).remove();
+			// prev.insertLeft(node).remove();
+			const ref = prev[PREV] || this;
+			prev.remove();
+			node.remove();
+			node._link(ref, ref[NEXT] || this[END], this);
 		} else {
 			let attr = this[NEXT];
 			for (; attr && attr instanceof Attr; attr = attr[NEXT]);
-			if (attr) {
-				node.unlink().parentNode = this;
-				attr.insertLeft(node);
-			}
+			// if (attr) {
+			// 	// node.unlink().parentNode = this;
+			// 	// attr.insertLeft(node);
+
+			// }
+			const ref = attr && attr instanceof Attr ? attr : this;
+			node.remove();
+			node._link(ref, ref[NEXT] || this[END], this);
 		}
 		return prev;
 	}
@@ -219,7 +229,7 @@ export class Element extends ParentNode {
 		return parent ? parent.lookupNamespaceURI(prefix) : null;
 	}
 
-	insertAdjacentElement(position:string, element: Element) {
+	insertAdjacentElement(position: string, element: Element) {
 		const { parentElement } = this;
 		switch (position) {
 			case "beforebegin":

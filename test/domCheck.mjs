@@ -84,7 +84,7 @@ export function checkParentNode(t, parent) {
         childElementCount,
         `children.length vs childElementCount ${name}`
     );
-    t.strictNotSame(parent, parentNode);
+    t.strictNotSame(parent, parentNode, 'this != parentNode', parentNode);
 
     t.ok(
         parent.hasChildNodes()

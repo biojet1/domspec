@@ -78,6 +78,11 @@ export class Document extends NonElementParentNode {
 		node.ownerDocument = this;
 		return node;
 	}
+	createAttribute(name: string) {
+		const node = Attr.create(name);
+		node.ownerDocument = this;
+		return node;
+	}
 }
 function validateAndExtract(namespace: string | null, qualifiedName: string) {
 	let prefix = null,
@@ -114,6 +119,7 @@ import { XMLNS, XML } from "./namespace.js";
 // import { Node } from "./node.js"; // prevent circular import
 // import { ChildNode } from "./child-node.js"; // prevent circular import
 import { Element } from "./element.js";
+import { Attr } from "./attr.js";
 import { Comment, Text, CDATASection } from "./character-data.js";
 import { DocumentFragment } from "./document-fragment.js";
 

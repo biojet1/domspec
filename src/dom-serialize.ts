@@ -10,7 +10,8 @@ export function* enumDOMStr(node: Node) {
 	let cur: Node | null | undefined = node;
 	do {
 		if (cur instanceof Attr) {
-			yield ` ${cur.toString()}`;
+			const xml = cur.dumpXML();
+			if (xml.length > 0) yield ` ${xml}`;
 		} else if (cur instanceof Element) {
 			if (isOpened) {
 				yield `><${cur.tagName}`;

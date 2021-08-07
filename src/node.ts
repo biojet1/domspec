@@ -7,6 +7,7 @@ export abstract class Node {
 	[NEXT]?: Node;
 	[PREV]?: Node;
 	//// Tree
+
 	get endNode(): Node {
 		// End node or self
 		return this;
@@ -15,9 +16,14 @@ export abstract class Node {
 		// Always this
 		return this;
 	}
-	linkNext(node: Node) {
-		return this.endNode.linkRight(node);
+	_link(prev: Node, next: Node, parent: ParentNode) {
+		this.parentNode = parent;
+		prev.linkRight(this.startNode);
+		return this.endNode.linkRight(next);
 	}
+	// linkNext(node: Node) {
+	// 	return this.endNode.linkRight(node);
+	// }
 	linkRight(node: Node) {
 		// [THIS]<->node
 		if (node === this) {
@@ -27,41 +33,41 @@ export abstract class Node {
 		node[PREV] = this;
 		return this;
 	}
-	insertRight(node: Node) {
-		// [THIS]<node>[NEXT]
-		const next = this[NEXT];
-		node.linkLeft(this);
-		next && node.linkRight(next);
-		return this;
-	}
+	// insertRight(node: Node) {
+	// 	// [THIS]<node>[NEXT]
+	// 	const next = this[NEXT];
+	// 	node.linkLeft(this);
+	// 	next && node.linkRight(next);
+	// 	return this;
+	// }
 
-	linkPrior(node: Node) {
-		// <node>[THIS]
-		return this.startNode.linkLeft(node);
-	}
-	linkLeft(node: Node) {
-		// node<->[THIS]
-		if (node === this) {
-			throw new Error(`Same node`);
-		}
-		this[PREV] = node;
-		node[NEXT] = this;
-		return this;
-	}
-	insertLeft(node: Node) {
-		// [PREV]<node>[THIS]
-		const prev = this[PREV];
-		prev && node.linkLeft(prev); // prev<->node
-		node.linkRight(this); // node<->this
-		if (
-			node.parentNode !== this.parentNode &&
-			node.parentNode &&
-			this.parentNode
-		) {
-			throw new Error(`Unexpected parents`);
-		}
-		return this;
-	}
+	// linkPrior(node: Node) {
+	// 	// <node>[THIS]
+	// 	return this.startNode.linkLeft(node);
+	// }
+	// linkLeft(node: Node) {
+	// 	// node<->[THIS]
+	// 	if (node === this) {
+	// 		throw new Error(`Same node`);
+	// 	}
+	// 	this[PREV] = node;
+	// 	node[NEXT] = this;
+	// 	return this;
+	// }
+	// insertLeft(node: Node) {
+	// 	// [PREV]<node>[THIS]
+	// 	const prev = this[PREV];
+	// 	prev && node.linkLeft(prev); // prev<->node
+	// 	node.linkRight(this); // node<->this
+	// 	if (
+	// 		node.parentNode !== this.parentNode &&
+	// 		node.parentNode &&
+	// 		this.parentNode
+	// 	) {
+	// 		throw new Error(`Unexpected parents`);
+	// 	}
+	// 	return this;
+	// }
 	unlink() {
 		const {
 			[PREV]: prev,
@@ -85,15 +91,15 @@ export abstract class Node {
 		return this;
 	}
 	/// Extra
-	assertParent(node: ParentNode) {
-		const { parentNode } = this;
-		if (!parentNode) {
-			this.parentNode = node;
-		} else if (parentNode !== node) {
-			throw new Error(`Invalid parent`);
-		}
-		return this;
-	}
+	// assertParent(node: ParentNode) {
+	// 	const { parentNode } = this;
+	// 	if (!parentNode) {
+	// 		this.parentNode = node;
+	// 	} else if (parentNode !== node) {
+	// 		throw new Error(`Invalid parent`);
+	// 	}
+	// 	return this;
+	// }
 
 	//// DOM
 	ownerDocument?: Document;
@@ -137,10 +143,12 @@ export abstract class Node {
 		this.unlink();
 	}
 
-	getRootNode() : Node {
+	getRootNode(): Node {
 		let root: Node = this;
 		while (root.parentNode) root = root.parentNode;
-		return root.nodeType === 9 ? ((root as Document).documentElement || root) : root;
+		return root.nodeType === 9
+			? (root as Document).documentElement || root
+			: root;
 	}
 
 	/// DOM constants
@@ -162,10 +170,10 @@ export abstract class Node {
 // Node <- EndNode
 // Node <- AttrNode
 
-export const setAdjacent = (prev: Node, next: Node) => {
-	if (prev) prev[NEXT] = next;
-	if (next) next[PREV] = prev;
-};
+// export const setAdjacent = (prev: Node, next: Node) => {
+// 	if (prev) prev[NEXT] = next;
+// 	if (next) next[PREV] = prev;
+// };
 
 import { EndNode, ParentNode } from "./parent-node.js";
 import { Document } from "./document.js";

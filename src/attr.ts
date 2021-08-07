@@ -1,16 +1,19 @@
-export class Attr extends Node {
+// export class Property extends Node {}
+export const VALUE = Symbol();
+
+export abstract class Attr extends Node {
 	//// Tree
 
 	//// Dom
+	name: string;
+	localName: string;
 	namespaceURI?: string;
 	prefix?: string;
-	// ownerElement?: Node;
-	localName: string;
-	value: string;
-	name: string;
-	constructor() {
+	// [VALUE]?: string;
+	constructor(qname: string, lname?: string) {
 		super();
-		this.name = this.value = this.localName = "";
+		this.name = qname;
+		this.localName = lname || qname;
 	}
 	get textContent() {
 		// https://dom.spec.whatwg.org/#dom-node-textcontent
@@ -26,6 +29,8 @@ export class Attr extends Node {
 		// https://dom.spec.whatwg.org/#dom-node-nodevalue
 		return this.value;
 	}
+	abstract get value(): string;
+	abstract set value(value: string);
 	get specified() {
 		return true;
 	}
@@ -56,7 +61,30 @@ export class Attr extends Node {
 		const { name, value } = this;
 		return `${name}="${value.replace(/[<>&"\xA0]/g, rep)}"`;
 	}
+	dumpXML() {
+		const { name, value } = this;
+		return `${name}="${value.replace(/[<>&"\xA0]/g, rep)}"`;
+	}
+	static create(qname: string, lname?: string) {
+		return new StringAttr(qname, lname);
+	}
 }
+
+export class StringAttr extends Attr {
+	//// Dom
+	[VALUE]?: string;
+	get value() {
+		return this[VALUE] || "";
+	}
+	set value(value: string) {
+		this[VALUE] = value;
+	}
+	dumpXML() {
+		const { [VALUE]: val } = this;
+		return val ? super.dumpXML() : "";
+	}
+}
+
 const rep = function (m: string) {
 	switch (m) {
 		// case "\xA0":

@@ -2,11 +2,6 @@ import { Node, NEXT, PREV, END } from "./node.js";
 
 export abstract class ChildNode extends Node {
 	//// Tree
-	_link(prev: Node, next: Node, parent: ParentNode) {
-		this.parentNode = parent;
-		prev.linkRight(this.startNode);
-		return this.endNode.linkRight(next);
-	}
 	//// Dom
 	get nextSibling(): ChildNode | null {
 		const node = this.endNode[NEXT];

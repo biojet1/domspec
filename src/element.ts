@@ -1,5 +1,6 @@
 import { NEXT, PREV, END, Node } from "./node.js";
 import { ParentNode, EndNode } from "./parent-node.js";
+export const STYLE = Symbol();
 
 export class Element extends ParentNode {
 	//// Parse
@@ -10,6 +11,7 @@ export class Element extends ParentNode {
 	tagName: string;
 	namespaceURI?: string;
 	prefix?: string;
+	[STYLE]?: any;
 	constructor() {
 		super();
 		this.localName = this.tagName = "";
@@ -75,13 +77,13 @@ export class Element extends ParentNode {
 			}
 		}
 
-		const node = new Attr();
-		node.name = qname;
-		node.localName = qname;
+		const node = Attr.create(qname);
 		node.value = value;
 		node.parentNode = this;
 
-		(attr && attr instanceof Attr ? attr : this).insertRight(node);
+		// (attr && attr instanceof Attr ? attr : this).insertRight(node);
+		const ref = attr && attr instanceof Attr ? attr : this;
+		node._link(ref, ref[NEXT] || this[END], this);
 	}
 	setAttributeNS(ns: string | null, qname: string, value: string) {
 		let prefix, lname;
@@ -109,17 +111,15 @@ export class Element extends ParentNode {
 				return;
 			}
 		}
-		if (!attr || !(attr instanceof Attr)) {
-			attr = this;
-		}
-		const node = new Attr();
-		node.name = qname;
-		node.localName = lname;
+		const node = Attr.create(qname, lname);
 		node.value = value;
 		node.parentNode = this;
 		node.namespaceURI = ns;
 		if (prefix) node.prefix = prefix;
-		attr.insertRight(node);
+		//  (attr && attr instanceof Attr ? attr : this).insertRight(node);
+		const ref = attr && attr instanceof Attr ? attr : this;
+		node._link(ref, ref[NEXT] || this[END], this);
+		// node._link(attr, attr[NEXT], this);
 	}
 	setAttributeNode(node: Attr) {
 		return this.setAttributeNodeNS(node);
@@ -132,23 +132,42 @@ export class Element extends ParentNode {
 		if (node === prev) {
 			return node;
 		} else if (prev) {
-			prev.insertLeft(node).remove();
+			// prev.insertLeft(node).remove();
+			const ref = prev[PREV] || this;
+			prev.remove();
+			node.remove();
+			node._link(ref, ref[NEXT] || this[END], this);
 		} else {
 			let attr = this[NEXT];
 			for (; attr && attr instanceof Attr; attr = attr[NEXT]);
-			if (attr) {
-				node.unlink().parentNode = this;
-				attr.insertLeft(node);
-			}
+			// if (attr) {
+			// 	// node.remove().parentNode = this;
+			// 	// attr.insertLeft(node);
+
+			// }
+			const ref = attr && attr instanceof Attr ? attr : this;
+			node.remove();
+			node._link(ref, ref[NEXT] || this[END], this);
 		}
 		return prev;
 	}
 	removeAttribute(qName: string) {
-		this.getAttributeNode(qName)?.unlink();
+		this.getAttributeNode(qName)?.remove();
 	}
-	removeAttributeNS(ns: string, localName: string) {
-		this.getAttributeNodeNS(ns, localName)?.unlink();
+	removeAttributeNS(ns: string | null, localName: string) {
+		this.getAttributeNodeNS(ns, localName)?.remove();
 	}
+	removeAttributeNode(node: Attr) {
+		let attr = this[NEXT];
+		for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
+			if (attr === node) {
+				attr.remove();
+				return;
+			}
+		}
+		this.removeAttributeNS(node.namespaceURI || null, node.localName);
+	}
+
 	hasAttribute(qName: string) {
 		return !!this.getAttributeNode(qName);
 	}
@@ -219,7 +238,7 @@ export class Element extends ParentNode {
 		return parent ? parent.lookupNamespaceURI(prefix) : null;
 	}
 
-	insertAdjacentElement(position:string, element: Element) {
+	insertAdjacentElement(position: string, element: Element) {
 		const { parentElement } = this;
 		switch (position) {
 			case "beforebegin":
@@ -246,6 +265,47 @@ export class Element extends ParentNode {
 		}
 		return element;
 	}
+	get style() {
+		const attr = this.getAttributeNode("style");
+		if (!attr) {
+			// console.log("StyleAttr:NEW");
+			const node = new StyleAttr("style");
+			this.setAttributeNode(node);
+			return node.proxy;
+		} else if (attr instanceof StyleAttr) {
+			// console.log("StyleAttr:GET");
+			return attr.proxy;
+		} else {
+			// console.log("StyleAttr:REP");
+			attr.remove();
+			const ref = attr[PREV] || this;
+			const node = new StyleAttr("style");
+			node._link(ref, ref[NEXT] || this[END], this);
+			node.value = attr.value;
+			return node.proxy;
+		}
+	}
+
+	// get classList() {
+	// 	const attr = this.getAttributeNode("class");
+	// 	if (!attr) {
+	// 		// console.log("StyleAttr:NEW");
+	// 		const node = new ClassAttr("style");
+	// 		this.setAttributeNode(node);
+	// 		return node.val;
+	// 	} else if (attr instanceof ClassAttr) {
+	// 		// console.log("StyleAttr:GET");
+	// 		return attr.val;
+	// 	} else {
+	// 		// console.log("StyleAttr:REP");
+	// 		attr.remove();
+	// 		const ref = attr[PREV] || this;
+	// 		const node = new ClassAttr("style");
+	// 		node._link(ref, ref[NEXT] || this[END], this);
+	// 		node.value = attr.value;
+	// 		return node.val;
+	// 	}
+	// }
 }
 
 import { XMLNS } from "./namespace.js";
@@ -253,3 +313,5 @@ import { Attr } from "./attr.js";
 import { ChildNode } from "./child-node.js";
 import { enumDOMStr, enumXMLDump } from "./dom-serialize.js";
 import { parseDOM } from "./dom-parse.js";
+import { StyleAttr } from "./attr-style.js";
+// import { ClassAttr } from "./attr-class.js";

@@ -141,6 +141,8 @@ export abstract class Node {
 		return null;
 	}
 	remove() {
+		console.log("RM:NODE");
+		console.dir(this, {depth:0});
 		this.unlink();
 	}
 

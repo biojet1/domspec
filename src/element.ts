@@ -1,5 +1,6 @@
 import { NEXT, PREV, END, Node } from "./node.js";
 import { ParentNode, EndNode } from "./parent-node.js";
+export const STYLE = Symbol();
 
 export class Element extends ParentNode {
 	//// Parse
@@ -10,6 +11,7 @@ export class Element extends ParentNode {
 	tagName: string;
 	namespaceURI?: string;
 	prefix?: string;
+	[STYLE]?: any;
 	constructor() {
 		super();
 		this.localName = this.tagName = "";
@@ -75,9 +77,7 @@ export class Element extends ParentNode {
 			}
 		}
 
-		const node = new Attr();
-		node.name = qname;
-		node.localName = qname;
+		const node = Attr.create(qname);
 		node.value = value;
 		node.parentNode = this;
 
@@ -111,9 +111,7 @@ export class Element extends ParentNode {
 				return;
 			}
 		}
-		const node = new Attr();
-		node.name = qname;
-		node.localName = lname;
+		const node = Attr.create(qname, lname);
 		node.value = value;
 		node.parentNode = this;
 		node.namespaceURI = ns;
@@ -143,7 +141,7 @@ export class Element extends ParentNode {
 			let attr = this[NEXT];
 			for (; attr && attr instanceof Attr; attr = attr[NEXT]);
 			// if (attr) {
-			// 	// node.unlink().parentNode = this;
+			// 	// node.remove().parentNode = this;
 			// 	// attr.insertLeft(node);
 
 			// }
@@ -154,11 +152,22 @@ export class Element extends ParentNode {
 		return prev;
 	}
 	removeAttribute(qName: string) {
-		this.getAttributeNode(qName)?.unlink();
+		this.getAttributeNode(qName)?.remove();
 	}
-	removeAttributeNS(ns: string, localName: string) {
-		this.getAttributeNodeNS(ns, localName)?.unlink();
+	removeAttributeNS(ns: string | null, localName: string) {
+		this.getAttributeNodeNS(ns, localName)?.remove();
 	}
+	removeAttributeNode(node: Attr) {
+		let attr = this[NEXT];
+		for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
+			if (attr === node) {
+				attr.remove();
+				return;
+			}
+		}
+		this.removeAttributeNS(node.namespaceURI || null, node.localName);
+	}
+
 	hasAttribute(qName: string) {
 		return !!this.getAttributeNode(qName);
 	}
@@ -256,6 +265,41 @@ export class Element extends ParentNode {
 		}
 		return element;
 	}
+	// get style2() {
+	// 	return this[STYLE] || (this[STYLE] = new Proxy(this, style_handler));
+	// }
+	get style() {
+		const attr = this.getAttributeNode("style");
+		if (!attr) {
+			// console.log("CSSMapAttr:NEW");
+			const node = new CSSMapAttr("style");
+			this.setAttributeNode(node);
+			return node.proxy;
+			// return (
+			// 	this[STYLE] ||
+			// 	(this[STYLE] = new Proxy<CSSMapAttr>(node, handler))
+			// );
+		} else if (attr instanceof CSSMapAttr) {
+			// console.log("CSSMapAttr:GET");
+			return attr.proxy;
+			// return (
+			// 	this[STYLE] ||
+			// 	(this[STYLE] = new Proxy<CSSMapAttr>(attr, handler))
+			// );
+		} else {
+			// console.log("CSSMapAttr:REP");
+			attr.remove();
+			const ref = attr[PREV] || this;
+			const node = new CSSMapAttr("style");
+			node._link(ref, ref[NEXT] || this[END], this);
+			node.value = attr.value;
+			return node.proxy;
+			// return (
+			// 	this[STYLE] ||
+			// 	(this[STYLE] = new Proxy<CSSMapAttr>(node, handler))
+			// );
+		}
+	}
 }
 
 import { XMLNS } from "./namespace.js";
@@ -263,3 +307,4 @@ import { Attr } from "./attr.js";
 import { ChildNode } from "./child-node.js";
 import { enumDOMStr, enumXMLDump } from "./dom-serialize.js";
 import { parseDOM } from "./dom-parse.js";
+import { CSSMapAttr, handler } from "./attr-style.js";

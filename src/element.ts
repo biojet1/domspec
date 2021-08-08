@@ -286,26 +286,26 @@ export class Element extends ParentNode {
 		}
 	}
 
-	// get classList() {
-	// 	const attr = this.getAttributeNode("class");
-	// 	if (!attr) {
-	// 		// console.log("StyleAttr:NEW");
-	// 		const node = new ClassAttr("style");
-	// 		this.setAttributeNode(node);
-	// 		return node.val;
-	// 	} else if (attr instanceof ClassAttr) {
-	// 		// console.log("StyleAttr:GET");
-	// 		return attr.val;
-	// 	} else {
-	// 		// console.log("StyleAttr:REP");
-	// 		attr.remove();
-	// 		const ref = attr[PREV] || this;
-	// 		const node = new ClassAttr("style");
-	// 		node._link(ref, ref[NEXT] || this[END], this);
-	// 		node.value = attr.value;
-	// 		return node.val;
-	// 	}
-	// }
+	get classList() {
+		const attr = this.getAttributeNode("class");
+		if (!attr) {
+			// console.log("StyleAttr:NEW");
+			const node = new ClassAttr("class");
+			this.setAttributeNode(node);
+			return node.tokens;
+		} else if (attr instanceof ClassAttr) {
+			// console.log("StyleAttr:GET");
+			return attr.tokens;
+		} else {
+			// console.log("StyleAttr:REP");
+			attr.remove();
+			const ref = attr[PREV] || this;
+			const node = new ClassAttr("class");
+			node._link(ref, ref[NEXT] || this[END], this);
+			node.value = attr.value;
+			return node.tokens;
+		}
+	}
 }
 
 import { XMLNS } from "./namespace.js";
@@ -314,4 +314,4 @@ import { ChildNode } from "./child-node.js";
 import { enumDOMStr, enumXMLDump } from "./dom-serialize.js";
 import { parseDOM } from "./dom-parse.js";
 import { StyleAttr } from "./attr-style.js";
-// import { ClassAttr } from "./attr-class.js";
+import { ClassAttr } from "./attr-class.js";

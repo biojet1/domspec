@@ -1,8 +1,12 @@
-const { add } = Set.prototype;
+// const { add } = Set.prototype;
 
 export class DOMTokenList extends Set<string> {
 	add(...tokens: Array<string>): this {
-		for (const token of tokens) add.call(this, token);
+		for (const token of tokens) {
+			// console.info("add:", token, this);
+			// add.call(this, token);
+			super.add(token);
+		}
 		return this;
 	}
 
@@ -43,6 +47,16 @@ export class DOMTokenList extends Set<string> {
 	}
 
 	parse(tokens: string) {
-		for (const token of tokens.split(/\s+/)) add.call(this, token);
+		this.clear();
+		this.add(...tokens.split(/\s+/));
+		// for (const token of tokens.split(/\s+/)) add.call(this, token);
+	}
+
+	get value() {
+		return this.format();
+	}
+
+	get length() {
+		return this.size;
 	}
 }

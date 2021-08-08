@@ -1,8 +1,7 @@
-export class NamedNodeMap extends Array {
+export class NamedNodeMap {
 	ownerElement: Element;
 
 	constructor(ownerElement: Element) {
-		super();
 		this.ownerElement = ownerElement;
 	}
 
@@ -15,28 +14,41 @@ export class NamedNodeMap extends Array {
 
 	removeNamedItem(name: string) {
 		const item = this.getNamedItem(name);
-		this.ownerElement.removeAttribute(name);
-		this.splice(this.indexOf(item), 1);
+		item && this.ownerElement.removeAttributeNode(item);
 	}
 	removeNamedItemNS(ns: string, name: string) {
 		const item = this.getNamedItemNS(ns, name);
-		this.ownerElement.removeAttributeNS(ns, name);
-		this.splice(this.indexOf(item), 1);
+		item && this.ownerElement.removeAttributeNode(item);
 	}
 
 	setNamedItem(attr: Attr) {
 		this.ownerElement.setAttributeNode(attr);
-		this.unshift(attr);
 	}
 
 	setNamedItemNS(attr: Attr) {
 		this.ownerElement.setAttributeNodeNS(attr);
-		this.unshift(attr);
 	}
 
 	item(index: number) {
-		return index < this.length ? this[index] : null;
+		if (index >= 0) {
+			let attr = this.ownerElement[NEXT];
+			for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
+				if (index-- === 0) {
+					return attr;
+				}
+			}
+		}
+	}
+
+	get length() {
+		let n = 0;
+		let attr = this.ownerElement[NEXT];
+		for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
+			n++;
+		}
+		return n;
 	}
 }
 import { Element } from "./element.js";
 import { Attr } from "./attr.js";
+import { NEXT } from "./node.js";

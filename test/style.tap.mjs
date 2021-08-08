@@ -51,7 +51,7 @@ assert(node.toString(), "<div></div>", "setter as null");
 assert(node.className, '', 'no class name');
 assert(node.classList.contains('test'), false, 'no test class');
 node.classList.add('a', 'test', 'b');
-console.dir(node.classList, {depth:1});
+// console.dir(node.classList, {depth:1});
 assert(node.classList.value, 'a test b', 'correct .value');
 assert(node.classList.length, 3, 'correct .length');
 assert(node.classList.contains('test'), true, 'test class');
@@ -76,3 +76,13 @@ assert(node.getAttribute('class'), 'a b c');
 node.removeAttribute('class');
 assert(node.classList.length, 0);
 assert(node.getAttribute('class'), '');
+
+assert(Object.keys(node.dataset).length, 0, 'empty dataset');
+assert(node.dataset.testValue, void 0, 'no testValue');
+node.dataset.testValue = 123;
+assert('testValue' in node.dataset, true, 'dataset in trap');
+assert(node.getAttribute('data-test-value'), '123', 'dataset.testValue');
+// console.log(Object.keys(node.dataset), Object.getOwnPropertyNames(node.dataset))
+assert(Object.keys(node.dataset).length, 1, 'not empty dataset');
+delete node.dataset.testValue;
+assert(Object.keys(node.dataset).length, 0, 'empty dataset again');

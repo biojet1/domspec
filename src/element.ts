@@ -1,6 +1,6 @@
 import { NEXT, PREV, END, Node } from "./node.js";
 import { ParentNode, EndNode } from "./parent-node.js";
-export const STYLE = Symbol();
+export const DATASET = Symbol();
 
 export class Element extends ParentNode {
 	//// Parse
@@ -11,7 +11,7 @@ export class Element extends ParentNode {
 	tagName: string;
 	namespaceURI?: string;
 	prefix?: string;
-	[STYLE]?: any;
+	[DATASET]?: any;
 	constructor() {
 		super();
 		this.localName = this.tagName = "";
@@ -188,6 +188,11 @@ export class Element extends ParentNode {
 		}
 		return false;
 	}
+
+	get attributes() {
+		return new NamedNodeMap(this);
+	}
+
 	//// DOM: </Attributes>
 	//// DOM: </Content>
 
@@ -268,15 +273,12 @@ export class Element extends ParentNode {
 	get style() {
 		const attr = this.getAttributeNode("style");
 		if (!attr) {
-			// console.log("StyleAttr:NEW");
 			const node = new StyleAttr("style");
 			this.setAttributeNode(node);
 			return node.proxy;
 		} else if (attr instanceof StyleAttr) {
-			// console.log("StyleAttr:GET");
 			return attr.proxy;
 		} else {
-			// console.log("StyleAttr:REP");
 			attr.remove();
 			const ref = attr[PREV] || this;
 			const node = new StyleAttr("style");
@@ -306,7 +308,87 @@ export class Element extends ParentNode {
 			return node.tokens;
 		}
 	}
+
+	get dataset() {
+		return (
+			this[DATASET] ||
+			(this[DATASET] = new Proxy<Element>(this, dsHandler))
+		);
+	}
 }
+
+function toCamelCase(name: string) {
+	return name.slice(5).replace(/-([a-z])/g, (_, $1) => $1.toUpperCase());
+}
+
+function fromCamelCase(name: string) {
+	if (/-[a-z]/.test(name)) {
+		throw new Error(`Unexpected dataset name`);
+	}
+	return (
+		"data-" + name.replace(/([A-Z])/g, (_, $1) => `-${$1.toLowerCase()}`)
+	);
+}
+
+export const dsHandler = {
+	get(element: Element, name: string) {
+		return element.getAttribute(fromCamelCase(name)) || undefined;
+	},
+
+	set(element: Element, name: string, value: string) {
+		element.setAttribute(fromCamelCase(name), value + "");
+		return true;
+	},
+	has(element: Element, name: string) {
+		return element.hasAttribute(fromCamelCase(name));
+	},
+	deleteProperty(element: Element, name: string) {
+		const attr = element.getAttributeNode(fromCamelCase(name));
+		if (!attr) return false;
+
+		element.removeAttributeNode(attr);
+		return true;
+	},
+
+	ownKeys(element: Element) {
+		// function* gen() {
+		// 	let attr = element[NEXT];
+		// 	for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
+		// 		const { namespaceURI, name } = attr;
+		// 		if (
+		// 			(!namespaceURI || namespaceURI === "") &&
+		// 			name.startsWith("data-")
+		// 		) {
+		// 			yield toCamelCase(name);
+		// 		}
+		// 	}
+		// }
+		// // console.log("ownKeys [..]", [...gen()]);
+		// return [...gen()];
+		return Array.from(
+			(function* () {
+				let attr = element[NEXT];
+				for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
+					const { namespaceURI, name } = attr;
+					if (
+						(!namespaceURI || namespaceURI === "") &&
+						name.startsWith("data-")
+					) {
+						console.log("ownKeys", name, toCamelCase(name));
+						yield toCamelCase(name);
+					}
+				}
+			})()
+		);
+	},
+
+	getOwnPropertyDescriptor(element: Element, name: string) {
+		return {
+			enumerable: true,
+			configurable: true,
+		};
+	},
+};
 
 import { XMLNS } from "./namespace.js";
 import { Attr } from "./attr.js";
@@ -315,3 +397,4 @@ import { enumDOMStr, enumXMLDump } from "./dom-serialize.js";
 import { parseDOM } from "./dom-parse.js";
 import { StyleAttr } from "./attr-style.js";
 import { ClassAttr } from "./attr-class.js";
+import { NamedNodeMap } from "./named-node-map.js";

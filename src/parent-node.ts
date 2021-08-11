@@ -71,6 +71,7 @@ export abstract class ParentNode extends ChildNode {
 	append(...nodes: Array<ChildNode>) {
 		this._insert(this[END], this._toNodes(nodes));
 	}
+
 	_insert(ref: ChildNode | EndNode, nodes: Iterable<ChildNode>) {
 		let prev: Node = ref[PREV] || this;
 		if (ref.parentNode != this) {
@@ -90,6 +91,7 @@ export abstract class ParentNode extends ChildNode {
 			}
 		}
 	}
+
 	insertBefore(node: ChildNode, before?: ChildNode | EndNode | null) {
 		if (node === this) {
 			throw new Error(
@@ -108,6 +110,7 @@ export abstract class ParentNode extends ChildNode {
 		}
 		return node;
 	}
+
 	appendChild(node: ChildNode) {
 		return this.insertBefore(node);
 	}
@@ -132,6 +135,7 @@ export abstract class ParentNode extends ChildNode {
 	hasChildNodes() {
 		return !!this.lastChild;
 	}
+
 	get childNodes() {
 		const nodes = new NodeList();
 		let { firstChild: cur } = this;
@@ -149,6 +153,7 @@ export abstract class ParentNode extends ChildNode {
 		}
 		return nodes;
 	}
+
 	get childElementCount() {
 		let i = 0;
 		let { firstElementChild: cur } = this;
@@ -172,18 +177,9 @@ export abstract class ParentNode extends ChildNode {
 			}
 		}
 
-		// function* gen() {
-		// 	for (const node of nodes) {
-		// 		if (typeof node === "string") {
-		// 			if (doc) yield doc.createTextNode(node);
-		// 		} else {
-		// 			yield node;
-		// 		}
-		// 	}
-		// }
-
 		this._insert(end, this._toNodes(nodes));
 	}
+
 	get textContent(): string | null {
 		const text = [];
 		let cur: Node | null | undefined = this[NEXT];
@@ -193,6 +189,49 @@ export abstract class ParentNode extends ChildNode {
 		}
 		return text.join("");
 	}
+
+	*elementsByTagName(name: string) {
+		let { [NEXT]: next, [END]: end } = this;
+		for (; next && next !== end; next = next[NEXT]) {
+			if (next.nodeType === 1) {
+				const el = next as any as Element;
+				const { localName } = el;
+				if (localName === name) {
+					yield el;
+				}
+			}
+		}
+	}
+
+	*elementsByClassName(name: string) {
+		let { [NEXT]: next, [END]: end } = this;
+		for (; next && next !== end; next = next[NEXT]) {
+			if (next.nodeType === 1) {
+				const el = next as any as Element;
+				if (el.hasAttribute("class") && el.classList.contains(name)) {
+					yield el;
+				}
+			}
+		}
+	}
+
+	getElementsByTagName(name: string) {
+		return ElementList.from(this.elementsByTagName(name));
+	}
+
+	getElementsByClassName(name: string) {
+		return ElementList.from(this.elementsByClassName(name));
+	}
+
+	// querySelector(selectors) {
+	// 	const matches = prepareMatch(this, selectors);
+	// 	let { [NEXT]: next, [END]: end } = this;
+	// 	while (next !== end) {
+	// 		if (next.nodeType === ELEMENT_NODE && matches(next)) return next;
+	// 		next = next[NEXT];
+	// 	}
+	// 	return null;
+	// }
 }
 
 export class EndNode extends Node {
@@ -218,16 +257,24 @@ export class EndNode extends Node {
 	}
 }
 
+export class NodeCollection<T> extends Array<T> {
+	item(i: number): T | null {
+		return i < this.length ? this[i] : null;
+	}
+}
 // https://dom.spec.whatwg.org/#interface-nodelist
 
 /**
  *NodeList
  */
-export class NodeList extends Array<ChildNode> {
-	item(i: number) {
-		return i < this.length ? this[i] : null;
-	}
-}
+
+// export class NodeList extends Array<ChildNode> {
+// 	item(i: number) {
+// 		return i < this.length ? this[i] : null;
+// 	}
+// }
+export class NodeList extends NodeCollection<ChildNode> {}
+export class ElementList extends NodeCollection<Element> {}
 
 import { Node, PREV, NEXT, START, END } from "./node.js";
 

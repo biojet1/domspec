@@ -83,6 +83,16 @@ export class StringAttr extends Attr {
 		const { [VALUE]: val } = this;
 		return val ? super.dumpXML() : "";
 	}
+	cloneNode() {
+		const { ownerDocument, name, namespaceURI, value, localName, prefix } =
+			this;
+		const attr = new StringAttr(name, localName);
+		attr.ownerDocument = ownerDocument;
+		if (namespaceURI) attr.namespaceURI = namespaceURI;
+		if (value) attr.value = value;
+		if (prefix) attr.prefix = prefix;
+		return attr;
+	}
 }
 
 const rep = function (m: string) {

@@ -1,4 +1,4 @@
-export class DOMImplementation {
+export abstract class DOMImplementation {
 	hasFeature(feature: string = "", version: string = "") {
 		// Deprecated,  spec settled to force this method to always return true
 		return true;
@@ -10,6 +10,11 @@ export class DOMImplementation {
 	) {
 		return new DocumentType(qualifiedName, publicId, systemId);
 	}
+	abstract createDocument(
+		namespace?: string,
+		qualifiedName?: string,
+		doctype?: DocumentType
+	): Document;
 	// createDocument(
 	// 	namespace?: string,
 	// 	qualifiedName?: string,
@@ -30,6 +35,7 @@ export class DOMImplementation {
 	// 	}
 	// 	return doc;
 	// }
+	abstract createHTMLDocument(titleText:string): Document;
 	// createHTMLDocument(titleText = "") {
 	// 	const d = new HTMLDocument();
 	// 	const root = d.createElement("html");
@@ -44,6 +50,6 @@ export class DOMImplementation {
 	// }
 }
 
-// import { Document } from "./document.js";
+import { Document } from "./document.js";
 // import { HTMLDocument } from "./html/document.js";
 import { DocumentType } from "./document-type.js";

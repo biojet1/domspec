@@ -3,7 +3,7 @@ export const PREV = Symbol("prev");
 export const START = Symbol("start");
 export const END = Symbol("end");
 
-export abstract class Node {
+export abstract class Node extends EventTarget {
 	[NEXT]?: Node;
 	[PREV]?: Node;
 	//// Tree
@@ -177,6 +177,7 @@ export abstract class Node {
 
 import { EndNode, ParentNode } from "./parent-node.js";
 import { Document } from "./document.js";
+import { EventTarget } from "./event-target.js";
 
 // Tag, Attr, Child, End
 // <Tag><Child><End><Tag><End><Tag><Attr><End><Child><Tag><Attr><Child><End>

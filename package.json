@@ -2,7 +2,7 @@
   "name": "svgdom-ts",
   "version": "1.0.0",
   "description": "SVG DOM Implementation",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "test": "tap test/parse.mjs",
     "madge": "node test/madge.cjs",
@@ -14,6 +14,9 @@
   },
   "author": "",
   "type": "module",
+  "exports": {
+    ".": "./dist/index.js"
+  },
   "license": "ISC",
   "dependencies": {
     "@types/sax": "^1.2.3",
@@ -26,7 +29,9 @@
     "src": "dist"
   },
   "devDependencies": {
+    "chai": "^4.3.4",
     "jsdom": "^16.6.0",
+    "mocha-sugar-free": "^1.4.0",
     "source-map-support": "^0.5.19",
     "tap": "^15.0.9"
   }

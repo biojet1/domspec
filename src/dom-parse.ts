@@ -119,7 +119,7 @@ export class DOMParser {
 				doc = new SVGDocument();
 				break;
 			default:
-				doc = new Document();
+				doc = new XMLDocument();
 		}
 		domParse(markup, doc, doc);
 		return doc;
@@ -136,6 +136,4 @@ const CUSTOM_NAME_DOCTYPE = /<!doctype\s+([^\s>]+)/i;
 import { SaxesParser } from "saxes";
 import { ParentNode } from "./parent-node.js";
 import { Element } from "./element.js";
-import { Document } from "./document.js";
-import { HTMLDocument } from "./html/document.js";
-import { SVGDocument } from "./svg/document.js";
+import { Document, HTMLDocument, SVGDocument, XMLDocument } from "./document.js";

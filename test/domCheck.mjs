@@ -9,35 +9,52 @@ export function checkNode(t, node) {
         case 2: //             ATTRIBUTE_NODE (2);
             t.strictSame(node.nodeName, node.name);
             t.strictSame(node.textContent, node.nodeValue);
+            t.strictSame(node.value, node.textContent);
             t.strictSame(node.specified, true);
+            const { namespaceURI, prefix, localName, name } = node;
+            if (namespaceURI) {
+                t.strictNotSame(namespaceURI, "");
+                t.ok(prefix && prefix != "");
+            }
+            t.ok(localName && localName != "");
+            t.ok(name && name != "");
             break;
         case 3:
             t.strictSame(node.nodeName, "#text");
+            t.strictSame(node.nodeValue, node.data);
             break;
         case 4:
             t.strictSame(node.nodeName, "#cdata-section");
+            t.strictSame(node.nodeValue, node.data);
             break;
         case 7: // PROCESSING_INSTRUCTION_NODE
             t.ok(node.nodeName);
+            t.strictSame(node.nodeValue, null);
             break;
         case 8:
             t.strictSame(node.nodeName, "#comment");
+            t.strictSame(node.nodeValue, node.data);
             break;
         case 9:
             t.strictSame(node.nodeName, "#document");
+            t.strictSame(node.nodeValue, null);
             checkParentNode(t, node);
             break;
         case 10: // DOCUMENT_TYPE_NODE
             t.strictSame(node.nodeName, node.name);
+            t.strictSame(node.textContent, null);
+            t.strictSame(node.nodeValue, null);
             break;
         case 11:
             t.strictSame(node.nodeName, "#document-fragment");
+            t.strictSame(node.nodeValue, null);
             checkParentNode(t, node);
             break;
         case -1:
             t.strictSame(node.nodeName, "#end");
             t.strictSame(node.startNode, node.parentNode);
             t.strictSame(node, node.endNode);
+            t.strictSame(node.nodeValue, null);
             break;
         default:
             throw new Error(`Unexpected node type ${node.nodeType}`);
@@ -75,6 +92,7 @@ export function checkParentNode(t, parent) {
         lastElementChild,
         ownerDocument,
         attributes,
+        parentElement,
     } = parent;
     const elements = Array.from(parent.children);
     const name = `[${nodeType}:${nodeName}]`;
@@ -84,7 +102,15 @@ export function checkParentNode(t, parent) {
         childElementCount,
         `children.length vs childElementCount ${name}`
     );
-    t.strictNotSame(parent, parentNode, 'this != parentNode', parentNode);
+    t.strictNotSame(parent, parentNode, "this != parentNode", parentNode);
+    if (parentElement) {
+        t.strictSame(
+            parentElement,
+            parentNode,
+            "parentElement == parentNode",
+            parentElement
+        );
+    }
 
     t.ok(
         parent.hasChildNodes()
@@ -233,7 +259,6 @@ export function checkParentNode(t, parent) {
         if (node) {
             extra = [parent, children[i]];
             t.strictSame(node, children.item(i));
-
             t.ok(Array.prototype.indexOf.call(childNodes, node, i) >= i, extra);
             t.strictSame(
                 node.nextElementSibling,
@@ -256,8 +281,14 @@ export function checkParentNode(t, parent) {
             node = node.previousElementSibling;
         }
     }
-
-    // const attrsB = b.attributes;
+    if (1 === nodeType) {
+        let n = attributes.length;
+        while (n-- > 0) {
+            const attr = attributes.item(n);
+            t.strictSame(parent.hasAttribute(attr.name), true);
+            t.strictSame(parent.hasAttribute(attr.name), true);
+        }
+    }
 
     childNodes.forEach((node) => checkNode(t, node));
 }

@@ -3,12 +3,14 @@ import { NonElementParentNode } from "./non-element-parent-node.js";
 export class Document extends NonElementParentNode {
 	//// Dom
 	contentType: string;
-	implementation: DOMImplementation;
+	// implementation: DOMImplementation;
+	defaultView?: Window;
+
 	constructor(contentType?: string) {
 		super();
 		this.contentType =
 			contentType && contentType !== "" ? contentType : "application/xml";
-		this.implementation = new DOMImplementation();
+		// this.implementation = new DOMImplementation();
 	}
 
 	get nodeType() {
@@ -23,9 +25,25 @@ export class Document extends NonElementParentNode {
 	get textContent() {
 		return null;
 	}
-	// get implementation() {
-	// 	return new DOMImplementation();
-	// }
+	get implementation() {
+		// return new DOMImplementationA();
+		const doc = this;
+		return new (class extends DOMImplementationA {
+			createDocumentType(
+				qualifiedName: string,
+				publicId: string,
+				systemId: string
+			) {
+				const node = super.createDocumentType(
+					qualifiedName,
+					publicId,
+					systemId
+				);
+				node.ownerDocument = doc;
+				return node;
+			}
+		})();
+	}
 
 	lookupNamespaceURI(prefix: string | null): string | null {
 		const { documentElement: node } = this;
@@ -83,7 +101,18 @@ export class Document extends NonElementParentNode {
 		node.ownerDocument = this;
 		return node;
 	}
+	static fromNS(ns?: string) {
+		switch (ns) {
+			case "http://www.w3.org/1999/xhtml":
+				return new HTMLDocument();
+			case "http://www.w3.org/2000/svg":
+				return new SVGDocument();
+			default:
+				return new XMLDocument();
+		}
+	}
 }
+
 function validateAndExtract(namespace: string | null, qualifiedName: string) {
 	let prefix = null,
 		localName = qualifiedName,
@@ -107,21 +136,66 @@ function validateAndExtract(namespace: string | null, qualifiedName: string) {
 	return [ns, prefix, localName];
 }
 
-// exports.NAMESPACE = {
-//   HTML: 'http://www.w3.org/1999/xhtml',
-//   XML: 'http://www.w3.org/XML/1998/namespace',
-//   XMLNS: 'http://www.w3.org/2000/xmlns/',
-//   MATHML: 'http://www.w3.org/1998/Math/MathML',
-//   SVG: 'http://www.w3.org/2000/svg',
-//   XLINK: 'http://www.w3.org/1999/xlink'
-// };
+export class XMLDocument extends Document {
+	constructor(mimeType: string = "application/xml") {
+		super(mimeType);
+	}
+}
+
+export class HTMLDocument extends Document {
+	constructor() {
+		super("text/html");
+	}
+}
+
+export class SVGDocument extends Document {
+	constructor() {
+		super("image/svg+xml");
+	}
+}
+
+export abstract class DOMImplementationA extends DOMImplementation {
+	createDocument(
+		namespace?: string,
+		qualifiedName?: string,
+		doctype?: DocumentType
+	) {
+		var doc = Document.fromNS(namespace);
+		if (doctype) {
+			if (doctype.ownerDocument) {
+				throw new Error(
+					"the object is in the wrong Document, a call to importNode is required"
+				);
+			}
+			doctype.ownerDocument = doc;
+			doc.appendChild(doctype);
+		}
+		if (qualifiedName) {
+			doc.appendChild(
+				doc.createElementNS(namespace || null, qualifiedName)
+			);
+		}
+		return doc;
+	}
+	createHTMLDocument(titleText = "") {
+		const d = new HTMLDocument();
+		const root = d.createElement("html");
+		const head = d.createElement("head");
+		const title = d.createElement("title");
+		title.appendChild(d.createTextNode(titleText));
+		head.appendChild(title);
+		root.appendChild(head);
+		root.appendChild(d.createElement("body"));
+		d.appendChild(root);
+		return d;
+	}
+}
+
 import { XMLNS, XML } from "./namespace.js";
-// import { Node } from "./node.js"; // prevent circular import
-// import { ChildNode } from "./child-node.js"; // prevent circular import
 import { Element } from "./element.js";
 import { Attr } from "./attr.js";
 import { Comment, Text, CDATASection } from "./character-data.js";
 import { DocumentFragment } from "./document-fragment.js";
-
 import { DOMImplementation } from "./dom-implementation.js";
-// import { HTMLDocument } from "./html/document.js";
+import { Window } from "./window.js";
+import { DocumentType } from "./document-type.js";

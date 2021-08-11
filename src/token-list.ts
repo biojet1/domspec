@@ -1,11 +1,19 @@
-// const { add } = Set.prototype;
+function checkToken(token: string) {
+	if (token.length > 0) {
+		if (/\s/.test(token)) {
+			throw new Error("InvalidCharacterError: white space");
+		}
+		return token;
+	} else {
+		throw new Error("SyntaxError: empty token");
+	}
+}
 
 export class DOMTokenList extends Set<string> {
 	add(...tokens: Array<string>): this {
 		for (const token of tokens) {
 			// console.info("add:", token, this);
-			// add.call(this, token);
-			super.add(token);
+			checkToken(token) && super.add(token);
 		}
 		return this;
 	}
@@ -15,16 +23,20 @@ export class DOMTokenList extends Set<string> {
 	}
 
 	remove(...tokens: Array<string>) {
-		for (const token of tokens) this.delete(token);
+		for (const token of tokens) {
+			checkToken(token) && this.delete(token);
+		}
 	}
 
 	toggle(token: string, force?: boolean) {
-		if (this.has(token)) {
-			if (force) return true;
-			this.delete(token);
-		} else if (force || force === undefined) {
-			this.add(token);
-			return true;
+		if (checkToken(token)) {
+			if (this.has(token)) {
+				if (force) return true;
+				this.delete(token);
+			} else if (force || force === undefined) {
+				this.add(token);
+				return true;
+			}
 		}
 		return false;
 	}
@@ -48,8 +60,8 @@ export class DOMTokenList extends Set<string> {
 
 	parse(tokens: string) {
 		this.clear();
-		this.add(...tokens.split(/\s+/));
-		// for (const token of tokens.split(/\s+/)) add.call(this, token);
+		for (const token of tokens.split(/\s+/))
+			token.length > 0 && super.add(token);
 	}
 
 	get value() {
@@ -58,5 +70,21 @@ export class DOMTokenList extends Set<string> {
 
 	get length() {
 		return this.size;
+	}
+
+	item(index: number) {
+		if (index >= 0) {
+			for (const token of this) {
+				if (index-- === 0) {
+					return token;
+				} else if (index < 0) {
+					break;
+				}
+			}
+		}
+	}
+
+	toString() {
+		return this.format();
 	}
 }

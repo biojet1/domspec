@@ -5,13 +5,13 @@ import { EventTarget } from "./event-target.js";
 
 export class Window extends EventTarget {
 	document?: Document;
-	self?: Window;
-	constructor() {
+	constructor(doc?: Document) {
 		super();
-		const doc = new Document();
-		doc.defaultView = this;
-		this.self = this;
-		this.document = doc;
+		// const doc = new Document();
+		if (doc) {
+			doc.defaultView = this;
+			this.document = doc;
+		}
 		// const doc = this.document;
 		// this.Image = class {
 		// 	constructor(width, height) {
@@ -24,6 +24,9 @@ export class Window extends EventTarget {
 	}
 	get DOMTokenList() {
 		return DOMTokenList;
+	}
+	get self() {
+		return this;
 	}
 	get DOMImplementation() {
 		return DOMImplementation;

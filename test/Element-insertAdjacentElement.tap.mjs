@@ -30,7 +30,7 @@ const document =
 
       `);
 
-console.info(document.outerHTML);
+// console.info(document.outerHTML);
 
 let current_t = null;
 function test(fn, msg) {
@@ -125,37 +125,37 @@ test(function () {
   assert_equals(el.id, "test4");
 }, "Inserted element should be target element's next sibling for 'afterend' case");
 
-// test(function () {
-//   var docElement = document.documentElement;
-//   docElement.style.visibility = "hidden";
+test(function () {
+  var docElement = document.documentElement;
+  docElement.style.visibility = "hidden";
 
-//   assert_throws_dom("HierarchyRequestError", function () {
-//     var el = docElement.insertAdjacentElement(
-//       "beforebegin",
-//       document.getElementById("test1")
-//     );
-//     assert_equals(el, null);
-//   });
+  assert_throws_dom("HierarchyRequestError", function () {
+    var el = docElement.insertAdjacentElement(
+      "beforebegin",
+      document.getElementById("test1")
+    );
+    assert_equals(el, null);
+  });
 
-//   var el = docElement.insertAdjacentElement(
-//     "afterbegin",
-//     document.getElementById("test2")
-//   );
-//   assert_equals(docElement.firstChild.id, "test2");
-//   assert_equals(el.id, "test2");
+  var el = docElement.insertAdjacentElement(
+    "afterbegin",
+    document.getElementById("test2")
+  );
+  assert_equals(docElement.firstChild.id, "test2");
+  assert_equals(el.id, "test2");
 
-//   el = docElement.insertAdjacentElement(
-//     "beforeend",
-//     document.getElementById("test3")
-//   );
-//   assert_equals(docElement.lastChild.id, "test3");
-//   assert_equals(el.id, "test3");
+  el = docElement.insertAdjacentElement(
+    "beforeend",
+    document.getElementById("test3")
+  );
+  assert_equals(docElement.lastChild.id, "test3");
+  assert_equals(el.id, "test3");
 
-//   assert_throws_dom("HierarchyRequestError", function () {
-//     var el = docElement.insertAdjacentElement(
-//       "afterend",
-//       document.getElementById("test4")
-//     );
-//     assert_equals(el, null);
-//   });
-// }, "Adding more than one child to document should cause a HierarchyRequestError exception");
+  assert_throws_dom("HierarchyRequestError", function () {
+    var el = docElement.insertAdjacentElement(
+      "afterend",
+      document.getElementById("test4")
+    );
+    assert_equals(el, null);
+  });
+}, "Adding more than one child to document should cause a HierarchyRequestError exception");

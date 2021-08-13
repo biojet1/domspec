@@ -28,11 +28,9 @@ function domParse(str: string, doc: Document, top: ParentNode) {
 		top.appendChild(node);
 	});
 	parser.on("text", (str: string) => {
-		// console.info("text", top.nodeName, str);
 		top.appendChild(doc.createTextNode(str));
 	});
 	parser.on("comment", (str: string) => {
-		// console.info("comment", top.nodeName, str);
 		top.appendChild(doc.createComment(str));
 	});
 	parser.on("cdata", (data) => {
@@ -126,7 +124,7 @@ export class DOMParser {
 	}
 }
 
-const ROOT_TAG = "parser:Root";
+const ROOT_TAG = "parser_root";
 
 const HTML5_DOCTYPE = /<!doctype html>/i;
 const PUBLIC_DOCTYPE = /<!doctype\s+([^\s]+)\s+public\s+"([^"]+)"\s+"([^"]+)"/i;

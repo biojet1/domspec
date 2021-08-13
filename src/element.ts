@@ -12,6 +12,7 @@ export class Element extends ParentNode {
 	namespaceURI?: string;
 	prefix?: string;
 	[DATASET]?: any;
+
 	constructor() {
 		super();
 		this.localName = this.tagName = "";
@@ -21,18 +22,23 @@ export class Element extends ParentNode {
 	get nodeType() {
 		return 1; // ELEMENT_NODE (1)
 	}
+
 	get nodeName() {
 		return this.tagName;
 	}
+
 	get id() {
 		return this.getAttribute("id") || "";
 	}
+
 	set id(id: string) {
 		this.setAttribute("id", id);
 	}
+
 	get className() {
 		return this.getAttribute("class") || "";
 	}
+
 	set className(str: string) {
 		this.setAttribute("class", str);
 	}
@@ -199,9 +205,11 @@ export class Element extends ParentNode {
 	toString() {
 		return Array.from(enumDOMStr(this)).join("");
 	}
+
 	get outerHTML() {
 		return Array.from(enumXMLDump(this, this[END])).join("");
 	}
+
 	get innerHTML() {
 		const { firstChild, lastChild } = this;
 		return firstChild && lastChild
@@ -210,6 +218,12 @@ export class Element extends ParentNode {
 			  ).join("")
 			: "";
 	}
+
+	set innerHTML(html: string) {
+		this.replaceChildren();
+		parseDOM(html, this);
+	}
+
 	get innerText() {
 		return this.textContent;
 	}
@@ -250,8 +264,9 @@ export class Element extends ParentNode {
 				if (parentElement) {
 					parentElement.insertBefore(element, this);
 					break;
+				} else {
+					throw new Error(`HierarchyRequestError: No parentNode`);
 				}
-				return null;
 			case "afterbegin":
 				this.insertBefore(element, this.firstChild);
 				break;
@@ -262,9 +277,9 @@ export class Element extends ParentNode {
 				if (parentElement) {
 					parentElement.insertBefore(element, this.nextSibling);
 					break;
+				} else {
+					throw new Error(`HierarchyRequestError: No parentNode`);
 				}
-				return null;
-
 			default:
 				throw new Error(`SyntaxError: Invalid position ${position}`);
 		}

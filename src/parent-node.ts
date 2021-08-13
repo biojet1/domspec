@@ -223,30 +223,36 @@ export abstract class ParentNode extends ChildNode {
 		return ElementList.from(this.elementsByClassName(name));
 	}
 
-	// querySelector(selectors) {
-	// 	const matches = prepareMatch(this, selectors);
-	// 	let { [NEXT]: next, [END]: end } = this;
-	// 	while (next !== end) {
-	// 		if (next.nodeType === ELEMENT_NODE && matches(next)) return next;
-	// 		next = next[NEXT];
-	// 	}
-	// 	return null;
-	// }
+	querySelector(selectors: string) : Element | null {
+		const test = prepareMatch(this, selectors);
+		for (const node of iterQuery(test, this)) {
+			return node;
+		}
+		return null;
+	}
+
+	querySelectorAll(selectors: string) : Element[] {
+		const test = prepareMatch(this, selectors);
+		return Array.from(iterQuery(test, this));
+	}
+}
+
+function* iterQuery(test: (node: Element) => boolean, elem: ParentNode) {
+	let { [NEXT]: next, [END]: end } = elem;
+	for (; next && next !== end; next = next[NEXT]) {
+		if (1 === next.nodeType && test(next as Element)) {
+			yield next as Element;
+		}
+	}
 }
 
 export class EndNode extends Node {
-	// [START]: ParentNode;
 	parentNode: ParentNode;
 	constructor(parent: ParentNode) {
 		super();
-		// this[START] = this[PREV] = parent;
 		this.parentNode = this[PREV] = parent;
 	}
-	// get [START](): ParentNode {
-	// 	return this.parentNode;
-	// }
 	get startNode(): Node {
-		// return this[START];
 		return this.parentNode;
 	}
 	get nodeType() {
@@ -257,26 +263,17 @@ export class EndNode extends Node {
 	}
 }
 
+// https://dom.spec.whatwg.org/#interface-nodelist
 export class NodeCollection<T> extends Array<T> {
 	item(i: number): T | null {
 		return i < this.length ? this[i] : null;
 	}
 }
-// https://dom.spec.whatwg.org/#interface-nodelist
-
-/**
- *NodeList
- */
-
-// export class NodeList extends Array<ChildNode> {
-// 	item(i: number) {
-// 		return i < this.length ? this[i] : null;
-// 	}
-// }
 export class NodeList extends NodeCollection<ChildNode> {}
 export class ElementList extends NodeCollection<Element> {}
 
 import { Node, PREV, NEXT, START, END } from "./node.js";
-
 import { ChildNode } from "./child-node.js";
 import { NonElementParentNode } from "./non-element-parent-node.js";
+import { Element } from "./element.js";
+import { prepareMatch } from "./css/match.js";

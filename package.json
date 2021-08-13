@@ -20,6 +20,7 @@
   "license": "ISC",
   "dependencies": {
     "@types/sax": "^1.2.3",
+    "css-select": "^4.1.3",
     "image-size": "",
     "saxes": "^5.0.1"
   },

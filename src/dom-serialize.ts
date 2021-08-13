@@ -82,19 +82,20 @@ export function* enumXMLDump(start: Node, end: Node) {
 					if (prev === start || prev instanceof Attr) {
 						yield `/>`;
 					} else if (isOpened) {
-						yield `></${(start as Element).tagName}>`;
+						yield `></${start.nodeName}>`;
 					} else {
-						yield `</${(start as Element).tagName}>`;
+						yield `</${start.nodeName}>`;
 					}
 					isOpened = false;
 				}
 				break;
 
+			case 11: // DOCUMENT_FRAGMENT_NODE
 			case 1: // ELEMENT_NODE
 				if (isOpened) {
-					yield `><${(cur as Element).tagName}`;
+					yield `><${cur.nodeName}`;
 				} else {
-					yield `<${(cur as Element).tagName}`;
+					yield `<${cur.nodeName}`;
 				}
 				isOpened = true;
 				break;
@@ -102,8 +103,6 @@ export function* enumXMLDump(start: Node, end: Node) {
 			// case 10: // DOCUMENT_TYPE_NODE
 			// 	break;
 			// case 9: // DOCUMENT_NODE
-			// case 11: // DOCUMENT_FRAGMENT_NODE
-			// 	break;
 			// ENTITY_REFERENCE_NODE 	5
 			// ENTITY_NODE 	6
 			// PROCESSING_INSTRUCTION_NODE	7

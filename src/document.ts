@@ -1,12 +1,12 @@
 import { NonElementParentNode } from "./non-element-parent-node.js";
 
-export class Document extends NonElementParentNode {
+export abstract class Document extends NonElementParentNode {
 	//// Dom
 	contentType: string;
 	// implementation: DOMImplementation;
 	defaultView?: Window;
 
-	constructor(contentType?: string) {
+	protected constructor(contentType?: string) {
 		super();
 		this.contentType =
 			contentType && contentType !== "" ? contentType : "application/xml";

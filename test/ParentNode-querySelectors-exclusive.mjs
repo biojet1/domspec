@@ -2,34 +2,6 @@ import { Document } from "../dist/document.js";
 import { parseDOM, DOMParser } from "../dist/dom-parse.js";
 import tap from "tap";
 
-const parser = new DOMParser();
-const document =
-  parser.parseFromString(`<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8"/>
-<title/>
-<script src="/resources/testharness.js"/>
-<script src="/resources/testharnessreport.js"/>
-
-</head>
-<body>
-<div id="target"/>
-<div id="parent"><span id="target2"/></div>
-<div id="log" style="visibility:visible"/>
-<span id="test1"/>
-<span id="test2"/>
-<span id="test3"/>
-<span id="test4"/>
-
-
-</body>
-</html>
-
-
-      `);
-
 // console.info(document.outerHTML);
 
 let current_t = null;

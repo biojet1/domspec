@@ -257,34 +257,88 @@ export class Element extends ParentNode {
 		return parent ? parent.lookupNamespaceURI(prefix) : null;
 	}
 
-	insertAdjacentElement(position: string, element: Element) {
-		const { parentElement } = this;
+	insertAdjacentElement(position: string, element: ChildNode) {
+		// const { parentElement } = this;
+		const { parentNode } = this;
+		// if (parentNode) {
+		// 	if (parentNode.nodeType === 9) {
+		// 		throw new Error(
+		// 			`HierarchyRequestError: Only one child element for document`
+		// 		);
+		// 	} else {
+		// 		throw new Error(`HierarchyRequestError: No parentNode`);
+		// 	}
+		// } else {
+		// 	return null;
+		// }
+		if (element.nodeType !== 1) {
+			throw new TypeError(`Element expected`);
+		}
+
 		switch (position) {
 			case "beforebegin":
-				if (parentElement) {
-					parentElement.insertBefore(element, this);
-					break;
+				if (parentNode) {
+					parentNode.insertBefore(element, this);
 				} else {
-					throw new Error(`HierarchyRequestError: No parentNode`);
+					return null;
 				}
+				break;
+			case "afterend":
+				if (parentNode) {
+					parentNode.insertBefore(element, this.nextSibling);
+				} else {
+					return null;
+				}
+				break;
 			case "afterbegin":
 				this.insertBefore(element, this.firstChild);
 				break;
 			case "beforeend":
 				this.insertBefore(element, null);
 				break;
-			case "afterend":
-				if (parentElement) {
-					parentElement.insertBefore(element, this.nextSibling);
-					break;
-				} else {
-					throw new Error(`HierarchyRequestError: No parentNode`);
-				}
 			default:
 				throw new Error(`SyntaxError: Invalid position ${position}`);
 		}
 		return element;
 	}
+
+	insertAdjacentText(position: string, text: string) {
+		const { ownerDocument, parentNode } = this;
+		// ownerDocument &&
+		// 	this.insertAdjacentElement(
+		// 		position,
+
+		// 	);
+		const node = ownerDocument && ownerDocument.createTextNode(text);
+
+		if (node)
+			switch (position) {
+				case "beforebegin":
+					if (parentNode) {
+						parentNode.insertBefore(node, this);
+					}
+					break;
+				case "afterend":
+					if (parentNode) {
+						parentNode.insertBefore(node, this.nextSibling);
+					}
+					break;
+				case "afterbegin":
+					this.insertBefore(node, this.firstChild);
+					break;
+				case "beforeend":
+					this.insertBefore(node, null);
+					break;
+				case null:
+				case undefined:
+					break;
+				default:
+					throw new Error(
+						`SyntaxError: Invalid position ${position}`
+					);
+			}
+	}
+
 	get style() {
 		const attr = this.getAttributeNode("style");
 		if (!attr) {

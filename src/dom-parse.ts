@@ -124,6 +124,29 @@ export class DOMParser {
 	}
 }
 
+// export interface Handler {
+//     onparserinit(parser: Parser): void;
+
+//     onreset(): void;
+
+//     onend(): void;
+//     onerror(error: Error): void;
+//     onclosetag(name: string): void;
+//     onopentagname(name: string): void;
+//     onattribute(
+//         name: string,
+//         value: string,
+//         quote?: string | undefined | null
+//     ): void;
+//     onopentag(name: string, attribs: { [s: string]: string }): void;
+//     ontext(data: string): void;
+//     oncomment(data: string): void;
+//     oncdatastart(): void;
+//     oncdataend(): void;
+//     oncommentend(): void;
+//     onprocessinginstruction(name: string, data: string): void;
+// }
+
 const ROOT_TAG = "parser_root";
 
 const HTML5_DOCTYPE = /<!doctype html>/i;
@@ -134,4 +157,9 @@ const CUSTOM_NAME_DOCTYPE = /<!doctype\s+([^\s>]+)/i;
 import { SaxesParser } from "saxes";
 import { ParentNode } from "./parent-node.js";
 import { Element } from "./element.js";
-import { Document, HTMLDocument, SVGDocument, XMLDocument } from "./document.js";
+import {
+	Document,
+	HTMLDocument,
+	SVGDocument,
+	XMLDocument,
+} from "./document.js";

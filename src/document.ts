@@ -86,6 +86,12 @@ export abstract class Document extends NonElementParentNode {
 		node.ownerDocument = this;
 		return node;
 	}
+	createProcessingInstruction(target: string, data: string) {
+		const node = new ProcessingInstruction(target, data);
+		node.ownerDocument = this;
+		return node;
+	}
+
 	createCDATASection(text: string) {
 		const node = new CDATASection(text);
 		node.ownerDocument = this;
@@ -194,7 +200,7 @@ export abstract class DOMImplementationA extends DOMImplementation {
 import { XMLNS, XML } from "./namespace.js";
 import { Element } from "./element.js";
 import { Attr } from "./attr.js";
-import { Comment, Text, CDATASection } from "./character-data.js";
+import { Comment, Text, CDATASection, ProcessingInstruction } from "./character-data.js";
 import { DocumentFragment } from "./document-fragment.js";
 import { DOMImplementation } from "./dom-implementation.js";
 import { Window } from "./window.js";

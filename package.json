@@ -8,7 +8,8 @@
     "madge": "node test/madge.cjs",
     "test_xml": "python test/gen.py > test/test.xml",
     "rm-map": "find dist -name '*.js.map' -type f -delete",
-    "c8test": "c8 npx tap --no-coverage test/*.tap.*js",
+    "c8test": "c8 npx tap --no-coverage 'test/**/*.tap.*js'",
+    "wpt": "c8 npx tap --no-coverage test/wpt/**/*.tap.*js",
     "c8report": "c8 report -r text-lcov > coverage/lcov.info",
     "compile": "tsc --sourcemap"
   },

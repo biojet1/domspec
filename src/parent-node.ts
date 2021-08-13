@@ -98,16 +98,34 @@ export abstract class ParentNode extends ChildNode {
 				"HierarchyRequestError: unable to append a node to itself"
 			);
 		} else if (!before) {
-			const cur = this[END];
-			node.remove();
-			node._link(cur[PREV] || this, cur, this);
+			// const cur = this[END];
+			// node.remove();
+			// node._link(cur[PREV] || this, cur, this);
 			// this.insertBefore(node, this[END]);
+			before = this[END];
 		} else if (node === before) {
-			this.insertBefore(node, node.nextSibling);
-		} else {
-			node.remove();
-			node._link(before[PREV] || this, before, this);
+			before = node.nextSibling || this[END];
+			// this.insertBefore(node, node.nextSibling);
+			// } else {
 		}
+		if (this.nodeType === 9) {
+			switch (node.nodeType) {
+				case 1:
+					if (this.firstElementChild) {
+						throw new Error(
+							`HierarchyRequestError: Only one child element for document`
+						);
+					}
+					break;
+				case 3:
+					throw new Error(
+						`HierarchyRequestError: nodeType == ${node.nodeType} not Allowed`
+					);
+			}
+		}
+		node.remove();
+		node._link(before[PREV] || this, before, this);
+
 		return node;
 	}
 
@@ -223,7 +241,7 @@ export abstract class ParentNode extends ChildNode {
 		return ElementList.from(this.elementsByClassName(name));
 	}
 
-	querySelector(selectors: string) : Element | null {
+	querySelector(selectors: string): Element | null {
 		const test = prepareMatch(this, selectors);
 		for (const node of iterQuery(test, this)) {
 			return node;
@@ -231,7 +249,7 @@ export abstract class ParentNode extends ChildNode {
 		return null;
 	}
 
-	querySelectorAll(selectors: string) : Element[] {
+	querySelectorAll(selectors: string): Element[] {
 		const test = prepareMatch(this, selectors);
 		return Array.from(iterQuery(test, this));
 	}

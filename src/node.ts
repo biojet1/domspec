@@ -150,7 +150,9 @@ export abstract class Node extends EventTarget {
 			? (root as Document).documentElement || root
 			: root;
 	}
-
+	appendChild(node: Node) {
+		throw new Error(`HierarchyRequestError: Not implemented`);
+	}
 	/// DOM constants
 	static ELEMENT_NODE = 1;
 	static ATTRIBUTE_NODE = 2;

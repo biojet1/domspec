@@ -80,50 +80,19 @@ export class StringAttr extends Attr {
 		this[VALUE] = value;
 	}
 	dumpXML() {
-		const { [VALUE]:val } = this;
+		const { [VALUE]: val } = this;
 		return val ? super.dumpXML() : "";
 	}
-}
-
-interface AttrValue {
-	format(): string;
-	parse(value: string): void;
-}
-
-export class TypeAttr<T extends AttrValue> extends Attr {
-	//// Dom
-	val?: T;
-	// constructor(value: T, qname: string, lname?: string) {
-	// 	super(qname, lname);
-	// 	this.val = value;
-	// }
-	get value() {
-		return this.val?.format() || "";
+	cloneNode() {
+		const { ownerDocument, name, namespaceURI, value, localName, prefix } =
+			this;
+		const attr = new StringAttr(name, localName);
+		attr.ownerDocument = ownerDocument;
+		if (namespaceURI) attr.namespaceURI = namespaceURI;
+		if (value) attr.value = value;
+		if (prefix) attr.prefix = prefix;
+		return attr;
 	}
-	set value(value: string) {
-		this.val?.parse(value);
-	}
-	// static clone(attr: Attr, val:T) {
-	// 	const { namespaceURI, prefix } = attr;
-	// 	if (namespaceURI && namespaceURI != "") {
-	// 		const attr2 = new this(val, attr.name, attr.localName);
-	// 		attr2.namespaceURI = namespaceURI;
-	// 		attr2.namespaceURI = namespaceURI;
-
-	// 		attr2.namespaceURI = namespaceURI;
-	// 		attr2.parentNode = attr.parentNode;
-	// 		const { value, prefix } = attr;
-	// 		if (prefix) attr2.prefix = attr.prefix;
-	// 		if (value) attr2.parse(value);
-	// 		return attr2;
-	// 	} else {
-	// 		const attr2 = new this(val, attr.name, attr.localName);
-	// 		attr2.parentNode = attr.parentNode;
-	// 		const { value } = attr;
-	// 		if (value) attr2.parse(value);
-	// 		return attr2;
-	// 	}
-	// }
 }
 
 const rep = function (m: string) {

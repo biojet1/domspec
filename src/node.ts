@@ -3,11 +3,10 @@ export const PREV = Symbol("prev");
 export const START = Symbol("start");
 export const END = Symbol("end");
 
-export abstract class Node {
+export abstract class Node extends EventTarget {
 	[NEXT]?: Node;
 	[PREV]?: Node;
 	//// Tree
-
 
 	get endNode(): Node {
 		// End node or self
@@ -141,8 +140,6 @@ export abstract class Node {
 		return null;
 	}
 	remove() {
-		console.log("RM:NODE");
-		console.dir(this, {depth:0});
 		this.unlink();
 	}
 
@@ -180,6 +177,7 @@ export abstract class Node {
 
 import { EndNode, ParentNode } from "./parent-node.js";
 import { Document } from "./document.js";
+import { EventTarget } from "./event-target.js";
 
 // Tag, Attr, Child, End
 // <Tag><Child><End><Tag><End><Tag><Attr><End><Child><Tag><Attr><Child><End>

@@ -1,8 +1,3 @@
-// get style() {
-//   return this[STYLE] || (
-//     this[STYLE] = new CSSStyleDeclaration(this)
-//   );
-// }
 export const fullHex = function (hex: string) {
 	return hex.length === 4
 		? [
@@ -85,160 +80,91 @@ export const mapToCss = function (myMap: Map<string, string>) {
 	return arr.join("; ");
 };
 
-export const style_handler = {
-	get(target: Element, key: string) {
-		const styles = target.getAttribute("style") || "";
-		const styleMap = cssToMap(styles);
-		if (key === "cssText") {
-			return styles;
-		}
-		if (key === "setProperty") {
-			return function (propertyName: string, value = "", priority = "") {
-				target.style[propertyName] =
-					value + (priority ? ` !${priority}` : "");
-			};
-		}
-		key = deCamelize(key);
-		if (!styleMap.has(key)) return "";
-		return styleMap.get(key);
-	},
-	set(target: Element, key: string, value: string) {
-		key = deCamelize(key);
-		switch (key) {
-			case "css-text": {
-				// ensure correct spacing and syntax by converting back and forth
-				target.setAttribute("style", mapToCss(cssToMap(value)));
-				return true;
-			}
-			default: {
-				value = hexToRGB(value.toString());
-				const styles = target.getAttribute("style") || "";
-				const styleMap = cssToMap(styles);
-				switch (key) {
-					case null:
-					case undefined:
-					case "":
-						styleMap.delete(key);
-						break;
-					default:
-						styleMap.set(key, value);
-				}
-				target.setAttribute("style", mapToCss(styleMap));
-				return true;
-			}
-		}
-	},
-};
-
 class CSSMap extends Map<string, string> {
+}
+
+export class StyleAttr extends Attr {
+	val?: CSSMap;
+	_proxy?: any;
+
 	format() {
+		let { mapq: map } = this;
+		if (!map) {
+			return "";
+		}
 		const arr: string[] = [];
-		for (const [key, val] of this) {
-			switch (val) {
+		for (const [key, v] of map) {
+			switch (v) {
 				case null:
 				case undefined:
 				case "":
 					break;
 				default:
-					arr.push(`${deCamelize(key)}:${val}`);
+					arr.push(`${deCamelize(key)}:${v}`);
 			}
 		}
 		return arr.join(";");
 	}
+
 	parse(css: string) {
-		const map = this;
+		let { map } = this;
 		map.clear();
-		// console.info(css);
 		for (const s of css.split(/\s*;\s*/)) {
 			if (s) {
 				const a = s.split(/\s*:\s*/);
 				a[0] && map.set(a[0], a[1] || "");
 			}
 		}
-		// console.info(map);
 	}
-}
-
-export class CSSMapAttr extends Attr {
-	val?: CSSMap;
-	_proxy?: any;
-
-	// format() {
-	// 	let { val } = this;
-	// 	if (!val) {
-	// 		return "";
-	// 	}
-	// 	const arr: string[] = [];
-	// 	for (const [key, v] of val) {
-	// 		switch (v) {
-	// 			case null:
-	// 			case undefined:
-	// 			case "":
-	// 				break;
-	// 			default:
-	// 				arr.push(`${deCamelize(key)} : ${v}`);
-	// 		}
-	// 	}
-	// 	return arr.join("; ");
-	// }
-
-	// parse(css: string) {
-	// 	let { map } = this;
-	// 	map.clear();
-	// 	for (const s of css.split(/\s*;\s*/)) {
-	// 		if (s) {
-	// 			const a = s.split(/\s*:\s*/);
-	// 			a[0] && map.set(a[0], a[1] || "");
-	// 		}
-	// 	}
-	// }
 	get map() {
 		return this.val || (this.val = new CSSMap());
 	}
+	get mapq() {
+		return this.val || null;
+	}
 
 	get cssText() {
-		return this.map.format();
+		return this.format();
 	}
 
 	set cssText(value: string) {
-		this.map.parse(value);
-		// refs.get(this).setAttribute("style", value);
+		this.parse(value);
 	}
 
 	set value(value: string) {
-		this.map.parse(value);
+		this.parse(value);
 	}
 	get value() {
-		return this.map.format();
+		return this.format();
 	}
 	[Symbol.iterator]() {
 		return this.map.keys();
 	}
 	get proxy() {
 		return (
-			this._proxy || (this._proxy = new Proxy<CSSMapAttr>(this, handler))
+			this._proxy || (this._proxy = new Proxy<StyleAttr>(this, handler))
 		);
 	}
 
 	toString() {
-		return this.map.format();
+		return this.format();
 	}
 
 	remove() {
-		let { val } = this;
-		val && val.clear();
+		let { mapq: map } = this;
+		map && map.clear();
 		return super.remove();
 	}
 
 	dumpXML() {
-		const { val } = this;
-		return val && val.size > 0 ? super.dumpXML() : "";
+		let { mapq: map } = this;
+		return map && map.size > 0 ? super.dumpXML() : "";
 	}
 }
 
-export const handler = {
-	get(attr: CSSMapAttr, key: string) {
-		if (key in CSSMapAttr.prototype) return (attr as any)[key];
+const handler = {
+	get(attr: StyleAttr, key: string) {
+		if (key in StyleAttr.prototype) return (attr as any)[key];
 		if (key === "length") return attr.map.size;
 		if (/^-?\d+$/.test(key)) {
 			let i = parseInt(key);
@@ -251,17 +177,17 @@ export const handler = {
 			}
 			return undefined;
 		}
-		// if (typeof key === "number")
 		key = deCamelize(key);
 		return attr.map.get(key);
 	},
-	set(attr: CSSMapAttr, key: string, value: string) {
+	set(attr: StyleAttr, key: string, value: string) {
 		if (key === "cssText") {
-			attr.map.parse(value);
+			attr.parse(value);
 		} else {
 			key = deCamelize(key);
 			switch (value) {
 				case null:
+				case undefined:
 				case "":
 					attr.map.delete(key);
 					break;
@@ -274,4 +200,4 @@ export const handler = {
 };
 
 import { Element } from "./element.js";
-import { TypeAttr, Attr } from "./attr.js";
+import { Attr } from "./attr.js";

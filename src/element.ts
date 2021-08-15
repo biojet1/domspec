@@ -13,10 +13,29 @@ export class Element extends ParentNode {
 	prefix?: string;
 	[DATASET]?: any;
 
-	constructor() {
+	// constructor() {
+	// 	super();
+	// 	this.localName = this.tagName = "";
+	// }
+	constructor(
+		name: string,
+		ns?: string,
+		prefix?: string,
+		tag?: string
+	) {
 		super();
-		this.localName = this.tagName = "";
+		this.localName = name;
+		this.tagName = tag || (prefix && `${prefix}:${name}`) || name;
+		if (ns) {
+			this.namespaceURI = ns;
+			if (prefix) this.prefix = prefix;
+		}
 	}
+	get qualifiedName() {
+		const { localName, prefix } = this;
+		return prefix ? `${prefix}:${localName}` : localName;
+	}
+
 	//// DOM: <specialGetters>
 
 	get nodeType() {
@@ -383,6 +402,50 @@ export class Element extends ParentNode {
 			this[DATASET] ||
 			(this[DATASET] = new Proxy<Element>(this, dsHandler))
 		);
+	}
+
+	cloneNode(deep?: boolean) {
+		const { ownerDocument, namespaceURI, localName, prefix, tagName } =
+			this;
+		const node = new (this.constructor as any)();
+		if (ownerDocument) node.ownerDocument = ownerDocument;
+		if (namespaceURI) node.namespaceURI = namespaceURI;
+		if (prefix) node.prefix = prefix;
+		if (localName) node.localName = localName;
+		if (tagName) node.tagName = tagName;
+		let cur: Node = this;
+		const fin = this[END];
+		const end = node[END];
+		for (cur = this[NEXT] || fin; cur != fin; cur = cur[NEXT] || fin) {
+			if (cur instanceof Attr) {
+				cur.cloneNode()._link(end[PREV] || node, end, node);
+			} else {
+				break;
+			}
+		}
+		if (deep) {
+			for (; cur != fin; cur = cur.endNode[NEXT] || fin) {
+				switch (cur.nodeType) {
+					case 1: // ELEMENT_NODE
+						cur.cloneNode()._link(end[PREV] || node, end, node);
+						break;
+					case 3: // TEXT_NODE
+					case 4: // CDATA_SECTION_NODE
+					case 7: // PROCESSING_INSTRUCTION_NODE
+					case 8: // COMMENT_NODE
+						cur.cloneNode()._link(end[PREV] || node, end, node);
+						break;
+					case 2: // ATTRIBUTE_NODE
+					case 9: // DOCUMENT_NODE
+					case 10: // DOCUMENT_TYPE_NODE
+					case 11: // DOCUMENT_FRAGMENT_NODE
+					case -1:
+						throw new Error(`Unexpected ${cur.nodeType}`);
+						break;
+				}
+			}
+		}
+		return node;
 	}
 }
 

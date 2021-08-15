@@ -80,11 +80,11 @@ export const mapToCss = function (myMap: Map<string, string>) {
 	return arr.join("; ");
 };
 
-class CSSMap extends Map<string, string> {
-}
+class CSSMap extends Map<string, string> {}
 
 export class StyleAttr extends Attr {
 	val?: CSSMap;
+	// val?: CSSMap|string;
 	_proxy?: any;
 
 	format() {
@@ -118,9 +118,11 @@ export class StyleAttr extends Attr {
 	}
 	get map() {
 		return this.val || (this.val = new CSSMap());
+		// return typeof val === "string" ? (this.val = new CSSMap(val)) : val;
 	}
 	get mapq() {
 		return this.val || null;
+		// return val && (typeof val === "string" ? (this.val = new CSSMap(val)) : val) || null;
 	}
 
 	get cssText() {
@@ -133,9 +135,11 @@ export class StyleAttr extends Attr {
 
 	set value(value: string) {
 		this.parse(value);
+		// this.val = value;
 	}
 	get value() {
 		return this.format();
+		// return typeof val === "string" ? val : this.format();
 	}
 	[Symbol.iterator]() {
 		return this.map.keys();
@@ -160,6 +164,8 @@ export class StyleAttr extends Attr {
 		let { mapq: map } = this;
 		return map && map.size > 0 ? super.dumpXML() : "";
 	}
+
+
 }
 
 const handler = {

@@ -19,7 +19,7 @@ jobs:
 
       - run: npm i
 
-      - run: npm i codecov c8 --save-dev
+      - run: npm i codecov c8 typescript@rc --save-dev
 
       - run: npm run build --if-present
 

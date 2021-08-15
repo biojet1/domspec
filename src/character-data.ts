@@ -108,6 +108,14 @@ export abstract class CharacterData extends ChildNode {
 	get nodeLength() {
 		return this._data.length;
 	}
+
+	cloneNode(deep?: boolean) {
+		const { ownerDocument, data } = this;
+		const node = new (this.constructor as any)(data);
+		if (node) node.ownerDocument = node;
+		return node;
+	}
+
 	// Extra
 }
 
@@ -130,6 +138,9 @@ export class CDATASection extends Text {
 	}
 	get nodeName() {
 		return "#cdata-section";
+	}
+	get nodeType() {
+		return 4;
 	}
 }
 
@@ -162,7 +173,15 @@ export class ProcessingInstruction extends CharacterData {
 	}
 	// Extra
 	toString() {
-		return `<? ${this._data} ?`;
+		const { target, _data } = this;
+		return `<? ${target} ${_data} ?>`;
+	}
+
+	cloneNode() {
+		const { ownerDocument, target, data } = this;
+		const node = new ProcessingInstruction(target, data);
+		if (node) node.ownerDocument = ownerDocument;
+		return node;
 	}
 }
 

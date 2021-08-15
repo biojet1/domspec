@@ -56,9 +56,25 @@ export function* enumDOMStr(node: Node) {
 		}
 	} while (cur !== end && (cur = cur[NEXT]));
 }
+
 export function* enumXMLDump(start: Node, end: Node) {
 	let isOpened = false;
 	let cur: Node | undefined = start;
+	const { ownerDocument } = start;
+	let voidElements =
+		ownerDocument &&
+		ownerDocument.isHTML &&
+		/^(?:area|base|br|col|embed|hr|img|input|keygen|link|menuitem|meta|param|source|track|wbr)$/i;
+
+	// if (ownerDocument && ownerDocument.isHTML) {
+	// 	function tagOf(elem:Element){
+	// 		if(elem.namespaceURI){
+	// 			return elem.tagName;
+	// 		}else{
+	// 			return elem.tagName;
+	// 		}
+	// 	}
+	// }
 
 	do {
 		switch (cur.nodeType) {
@@ -80,11 +96,18 @@ export function* enumXMLDump(start: Node, end: Node) {
 				const { [PREV]: prev, parentNode: start } = cur as EndNode;
 				if (start.nodeType === 1) {
 					if (prev === start || prev instanceof Attr) {
-						yield `/>`;
+						if (
+							!voidElements ||
+							voidElements.test((start as Element).localName)
+						) {
+							yield `/>`;
+						} else {
+							yield `></${(start as Element).qualifiedName}>`;
+						}
 					} else if (isOpened) {
-						yield `></${start.nodeName}>`;
+						yield `></${(start as Element).qualifiedName}>`;
 					} else {
-						yield `</${start.nodeName}>`;
+						yield `</${(start as Element).qualifiedName}>`;
 					}
 					isOpened = false;
 				}
@@ -93,9 +116,9 @@ export function* enumXMLDump(start: Node, end: Node) {
 			case 11: // DOCUMENT_FRAGMENT_NODE
 			case 1: // ELEMENT_NODE
 				if (isOpened) {
-					yield `><${cur.nodeName}`;
+					yield `><${(cur as Element).qualifiedName}`;
 				} else {
-					yield `<${cur.nodeName}`;
+					yield `<${(cur as Element).qualifiedName}`;
 				}
 				isOpened = true;
 				break;

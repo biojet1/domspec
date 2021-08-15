@@ -28,6 +28,10 @@ export class DocumentFragment extends NonElementParentNode {
 		}
 		return next;
 	}
+
+	cloneNode(deep?: boolean): Node {
+		throw new Error(`Not implemented`);
+	}
 }
 import { ChildNode } from "./child-node.js";
 import { EndNode, ParentNode } from "./parent-node.js";

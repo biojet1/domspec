@@ -64,37 +64,38 @@ export abstract class ChildNode extends Node {
 	}
 
 	after(...nodes: Array<string | ChildNode>) {
-		const { parentNode, nextSibling } = this;
-		if (parentNode) {
-			parentNode._insert(
-				nextSibling || parentNode[END],
-				this._toNodes(nodes)
-			);
-		}
+		this.parentNode?._after(this, this._toNodes(nodes));
 	}
 
 	before(...nodes: Array<string | ChildNode>) {
-		const { parentNode: node } = this;
-		if (node) {
-			node._insert(this, this._toNodes(nodes));
-		}
+		this.parentNode?._before(this, this._toNodes(nodes));
 	}
 
 	replaceWith(...nodes: Array<string | ChildNode>) {
 		const { parentNode: node } = this;
 		if (node) {
-			node._insert(this, this._toNodes(nodes));
+			let next = this.nextSibling;
+			while (next) {
+				if (nodes.indexOf(next) < 0) {
+					break;
+				} else {
+					next = next.nextSibling;
+				}
+			}
 			this.remove();
+			node._before(next || node[END], this._toNodes(nodes));
 		}
 	}
 
-	*_toNodes(
+	protected *_toNodes(
 		nodes: Iterable<string | ChildNode>
 	): IterableIterator<ChildNode> {
 		const { ownerDocument: doc } = this;
 		for (const node of nodes) {
 			if (typeof node === "string") {
 				if (doc) yield doc.createTextNode(node) as ChildNode;
+			} else if (!node) {
+				if (doc) yield doc.createTextNode(String(node)) as ChildNode;
 			} else if (11 === node.nodeType) {
 				// DOCUMENT_FRAGMENT_NODE (11).
 				for (const cur of node._toNodes(
@@ -107,6 +108,26 @@ export abstract class ChildNode extends Node {
 			}
 		}
 	}
+	// protected *_nodes(
+	// 	nodes: Iterable<string | ChildNode>
+	// ): IterableIterator<ChildNode> {
+	// 	const { ownerDocument: doc } = this;
+	// 	for (const node of nodes) {
+	// 		if (typeof node === "string") {
+	// 			if (doc) yield doc.createTextNode(node) as ChildNode;
+	// 		} else if (11 === node.nodeType) {
+	// 			// DOCUMENT_FRAGMENT_NODE (11).
+	// 			for (const cur of node._toNodes(
+	// 				(node as ParentNode).childNodes
+	// 			)) {
+	// 				yield cur;
+	// 			}
+	// 		} else {
+	// 			node.remove();
+	// 			yield node;
+	// 		}
+	// 	}
+	// }
 }
 
 import { ParentNode, EndNode } from "./parent-node.js";

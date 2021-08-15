@@ -1,3 +1,3 @@
-export class HTMLElement extends Element {
+export class SVGElement extends Element {
 }
 import { Element } from "../element.js";

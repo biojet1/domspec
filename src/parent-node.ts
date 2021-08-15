@@ -65,15 +65,15 @@ export abstract class ParentNode extends ChildNode {
 	}
 
 	prepend(...nodes: Array<ChildNode>) {
-		this._insert(this.firstChild || this[END], this._toNodes(nodes));
+		this._before(this.firstChild || this[END], this._toNodes(nodes));
 	}
 
 	append(...nodes: Array<ChildNode>) {
-		this._insert(this[END], this._toNodes(nodes));
+		this._before(this[END], this._toNodes(nodes));
 	}
 
-	_insert(ref: ChildNode | EndNode, nodes: Iterable<ChildNode>) {
-		let prev: Node = ref[PREV] || this;
+	_before(ref: ChildNode | EndNode, nodes: Iterable<ChildNode>) {
+		let prev: Node = ref.endNode || this;
 		if (ref.parentNode != this) {
 			throw new Error("NotFoundError: unexpected reference child parent");
 		}
@@ -87,7 +87,28 @@ export abstract class ParentNode extends ChildNode {
 			}
 			if (node !== ref) {
 				node.remove();
+				// node._link(prev, prev[NEXT] || this[END], this);
 				node._link(ref[PREV] || this, ref, this);
+			}
+		}
+	}
+	_after(ref: ChildNode | EndNode, nodes: Iterable<ChildNode>) {
+		if (ref.parentNode != this) {
+			throw new Error("NotFoundError: unexpected reference child parent");
+		}
+		for (const node of nodes) {
+			if (node instanceof ParentNode) {
+				if (node.contains(this)) {
+					throw new Error(
+						"HierarchyRequestError: node is ansector of parent."
+					);
+				}
+			}
+			if (node !== ref) {
+				node.remove();
+				const prev: Node = ref.endNode;
+				node._link(prev, prev[NEXT] || this[END], this);
+				ref = node;
 			}
 		}
 	}
@@ -195,7 +216,7 @@ export abstract class ParentNode extends ChildNode {
 			}
 		}
 
-		this._insert(end, this._toNodes(nodes));
+		this._before(end, this._toNodes(nodes));
 	}
 
 	get textContent(): string | null {
@@ -278,6 +299,9 @@ export class EndNode extends Node {
 	}
 	get nodeName() {
 		return "#end";
+	}
+	cloneNode(deep?: boolean): Node {
+		throw new Error("Not implemented");
 	}
 }
 

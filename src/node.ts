@@ -2,6 +2,7 @@ export const NEXT = Symbol("next");
 export const PREV = Symbol("prev");
 export const START = Symbol("start");
 export const END = Symbol("end");
+export const PARENT = Symbol();
 
 export abstract class Node extends EventTarget {
 	[NEXT]?: Node;
@@ -21,9 +22,6 @@ export abstract class Node extends EventTarget {
 		prev.linkRight(this.startNode);
 		return this.endNode.linkRight(next);
 	}
-	// linkNext(node: Node) {
-	// 	return this.endNode.linkRight(node);
-	// }
 	linkRight(node: Node) {
 		// [THIS]<->node
 		if (node === this) {
@@ -33,41 +31,6 @@ export abstract class Node extends EventTarget {
 		node[PREV] = this;
 		return this;
 	}
-	// insertRight(node: Node) {
-	// 	// [THIS]<node>[NEXT]
-	// 	const next = this[NEXT];
-	// 	node.linkLeft(this);
-	// 	next && node.linkRight(next);
-	// 	return this;
-	// }
-
-	// linkPrior(node: Node) {
-	// 	// <node>[THIS]
-	// 	return this.startNode.linkLeft(node);
-	// }
-	// linkLeft(node: Node) {
-	// 	// node<->[THIS]
-	// 	if (node === this) {
-	// 		throw new Error(`Same node`);
-	// 	}
-	// 	this[PREV] = node;
-	// 	node[NEXT] = this;
-	// 	return this;
-	// }
-	// insertLeft(node: Node) {
-	// 	// [PREV]<node>[THIS]
-	// 	const prev = this[PREV];
-	// 	prev && node.linkLeft(prev); // prev<->node
-	// 	node.linkRight(this); // node<->this
-	// 	if (
-	// 		node.parentNode !== this.parentNode &&
-	// 		node.parentNode &&
-	// 		this.parentNode
-	// 	) {
-	// 		throw new Error(`Unexpected parents`);
-	// 	}
-	// 	return this;
-	// }
 	unlink() {
 		const {
 			[PREV]: prev,
@@ -84,26 +47,17 @@ export abstract class Node extends EventTarget {
 		this.endNode[NEXT] = undefined;
 
 		if (parentNode) {
-			this.parentNode = undefined;
+			this.parentNode = null;
 			// moCallback(this, parentNode);
 			// if (nodeType === ELEMENT_NODE) disconnectedCallback(this);
 		}
 		return this;
 	}
 	/// Extra
-	// assertParent(node: ParentNode) {
-	// 	const { parentNode } = this;
-	// 	if (!parentNode) {
-	// 		this.parentNode = node;
-	// 	} else if (parentNode !== node) {
-	// 		throw new Error(`Invalid parent`);
-	// 	}
-	// 	return this;
-	// }
 
 	//// DOM
 	ownerDocument?: Document;
-	parentNode?: ParentNode;
+	parentNode?: ParentNode | null;
 	abstract get nodeType(): number;
 	abstract get nodeName(): string;
 	get nodeValue(): string | null {
@@ -150,7 +104,15 @@ export abstract class Node extends EventTarget {
 			? (root as Document).documentElement || root
 			: root;
 	}
+	appendChild(node: Node) {
+		throw new Error(`HierarchyRequestError: Not implemented`);
+	}
+	contains(node?: ChildNode) {
+		return false;
+		// return this === node;
+	}
 
+	abstract cloneNode(deep?: boolean): Node;
 	/// DOM constants
 	static ELEMENT_NODE = 1;
 	static ATTRIBUTE_NODE = 2;
@@ -176,6 +138,7 @@ export abstract class Node extends EventTarget {
 // };
 
 import { EndNode, ParentNode } from "./parent-node.js";
+import { ChildNode } from "./child-node.js";
 import { Document } from "./document.js";
 import { EventTarget } from "./event-target.js";
 

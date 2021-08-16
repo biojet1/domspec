@@ -28,11 +28,9 @@ function domParse(str: string, doc: Document, top: ParentNode) {
 		top.appendChild(node);
 	});
 	parser.on("text", (str: string) => {
-		// console.info("text", top.nodeName, str);
 		top.appendChild(doc.createTextNode(str));
 	});
 	parser.on("comment", (str: string) => {
-		// console.info("comment", top.nodeName, str);
 		top.appendChild(doc.createComment(str));
 	});
 	parser.on("cdata", (data) => {
@@ -126,7 +124,30 @@ export class DOMParser {
 	}
 }
 
-const ROOT_TAG = "parser:Root";
+// export interface Handler {
+//     onparserinit(parser: Parser): void;
+
+//     onreset(): void;
+
+//     onend(): void;
+//     onerror(error: Error): void;
+//     onclosetag(name: string): void;
+//     onopentagname(name: string): void;
+//     onattribute(
+//         name: string,
+//         value: string,
+//         quote?: string | undefined | null
+//     ): void;
+//     onopentag(name: string, attribs: { [s: string]: string }): void;
+//     ontext(data: string): void;
+//     oncomment(data: string): void;
+//     oncdatastart(): void;
+//     oncdataend(): void;
+//     oncommentend(): void;
+//     onprocessinginstruction(name: string, data: string): void;
+// }
+
+const ROOT_TAG = "parser_root";
 
 const HTML5_DOCTYPE = /<!doctype html>/i;
 const PUBLIC_DOCTYPE = /<!doctype\s+([^\s]+)\s+public\s+"([^"]+)"\s+"([^"]+)"/i;
@@ -136,4 +157,9 @@ const CUSTOM_NAME_DOCTYPE = /<!doctype\s+([^\s>]+)/i;
 import { SaxesParser } from "saxes";
 import { ParentNode } from "./parent-node.js";
 import { Element } from "./element.js";
-import { Document, HTMLDocument, SVGDocument, XMLDocument } from "./document.js";
+import {
+	Document,
+	HTMLDocument,
+	SVGDocument,
+	XMLDocument,
+} from "./document.js";

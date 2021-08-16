@@ -12,27 +12,52 @@ export class Element extends ParentNode {
 	namespaceURI?: string;
 	prefix?: string;
 	[DATASET]?: any;
-	constructor() {
+
+	// constructor() {
+	// 	super();
+	// 	this.localName = this.tagName = "";
+	// }
+	constructor(
+		name: string,
+		ns?: string,
+		prefix?: string,
+		tag?: string
+	) {
 		super();
-		this.localName = this.tagName = "";
+		this.localName = name;
+		this.tagName = tag || (prefix && `${prefix}:${name}`) || name;
+		if (ns) {
+			this.namespaceURI = ns;
+			if (prefix) this.prefix = prefix;
+		}
 	}
+	get qualifiedName() {
+		const { localName, prefix } = this;
+		return prefix ? `${prefix}:${localName}` : localName;
+	}
+
 	//// DOM: <specialGetters>
 
 	get nodeType() {
 		return 1; // ELEMENT_NODE (1)
 	}
+
 	get nodeName() {
 		return this.tagName;
 	}
+
 	get id() {
 		return this.getAttribute("id") || "";
 	}
+
 	set id(id: string) {
 		this.setAttribute("id", id);
 	}
+
 	get className() {
 		return this.getAttribute("class") || "";
 	}
+
 	set className(str: string) {
 		this.setAttribute("class", str);
 	}
@@ -199,9 +224,11 @@ export class Element extends ParentNode {
 	toString() {
 		return Array.from(enumDOMStr(this)).join("");
 	}
+
 	get outerHTML() {
 		return Array.from(enumXMLDump(this, this[END])).join("");
 	}
+
 	get innerHTML() {
 		const { firstChild, lastChild } = this;
 		return firstChild && lastChild
@@ -210,6 +237,12 @@ export class Element extends ParentNode {
 			  ).join("")
 			: "";
 	}
+
+	set innerHTML(html: string) {
+		this.replaceChildren();
+		parseDOM(html, this);
+	}
+
 	get innerText() {
 		return this.textContent;
 	}
@@ -243,33 +276,88 @@ export class Element extends ParentNode {
 		return parent ? parent.lookupNamespaceURI(prefix) : null;
 	}
 
-	insertAdjacentElement(position: string, element: Element) {
-		const { parentElement } = this;
+	insertAdjacentElement(position: string, element: ChildNode) {
+		// const { parentElement } = this;
+		const { parentNode } = this;
+		// if (parentNode) {
+		// 	if (parentNode.nodeType === 9) {
+		// 		throw new Error(
+		// 			`HierarchyRequestError: Only one child element for document`
+		// 		);
+		// 	} else {
+		// 		throw new Error(`HierarchyRequestError: No parentNode`);
+		// 	}
+		// } else {
+		// 	return null;
+		// }
+		if (element.nodeType !== 1) {
+			throw new TypeError(`Element expected`);
+		}
+
 		switch (position) {
 			case "beforebegin":
-				if (parentElement) {
-					parentElement.insertBefore(element, this);
-					break;
+				if (parentNode) {
+					parentNode.insertBefore(element, this);
+				} else {
+					return null;
 				}
-				return null;
+				break;
+			case "afterend":
+				if (parentNode) {
+					parentNode.insertBefore(element, this.nextSibling);
+				} else {
+					return null;
+				}
+				break;
 			case "afterbegin":
 				this.insertBefore(element, this.firstChild);
 				break;
 			case "beforeend":
 				this.insertBefore(element, null);
 				break;
-			case "afterend":
-				if (parentElement) {
-					parentElement.insertBefore(element, this.nextSibling);
-					break;
-				}
-				return null;
-
 			default:
 				throw new Error(`SyntaxError: Invalid position ${position}`);
 		}
 		return element;
 	}
+
+	insertAdjacentText(position: string, text: string) {
+		const { ownerDocument, parentNode } = this;
+		// ownerDocument &&
+		// 	this.insertAdjacentElement(
+		// 		position,
+
+		// 	);
+		const node = ownerDocument && ownerDocument.createTextNode(text);
+
+		if (node)
+			switch (position) {
+				case "beforebegin":
+					if (parentNode) {
+						parentNode.insertBefore(node, this);
+					}
+					break;
+				case "afterend":
+					if (parentNode) {
+						parentNode.insertBefore(node, this.nextSibling);
+					}
+					break;
+				case "afterbegin":
+					this.insertBefore(node, this.firstChild);
+					break;
+				case "beforeend":
+					this.insertBefore(node, null);
+					break;
+				case null:
+				case undefined:
+					break;
+				default:
+					throw new Error(
+						`SyntaxError: Invalid position ${position}`
+					);
+			}
+	}
+
 	get style() {
 		const attr = this.getAttributeNode("style");
 		if (!attr) {
@@ -314,6 +402,50 @@ export class Element extends ParentNode {
 			this[DATASET] ||
 			(this[DATASET] = new Proxy<Element>(this, dsHandler))
 		);
+	}
+
+	cloneNode(deep?: boolean) {
+		const { ownerDocument, namespaceURI, localName, prefix, tagName } =
+			this;
+		const node = new (this.constructor as any)();
+		if (ownerDocument) node.ownerDocument = ownerDocument;
+		if (namespaceURI) node.namespaceURI = namespaceURI;
+		if (prefix) node.prefix = prefix;
+		if (localName) node.localName = localName;
+		if (tagName) node.tagName = tagName;
+		let cur: Node = this;
+		const fin = this[END];
+		const end = node[END];
+		for (cur = this[NEXT] || fin; cur != fin; cur = cur[NEXT] || fin) {
+			if (cur instanceof Attr) {
+				cur.cloneNode()._link(end[PREV] || node, end, node);
+			} else {
+				break;
+			}
+		}
+		if (deep) {
+			for (; cur != fin; cur = cur.endNode[NEXT] || fin) {
+				switch (cur.nodeType) {
+					case 1: // ELEMENT_NODE
+						cur.cloneNode()._link(end[PREV] || node, end, node);
+						break;
+					case 3: // TEXT_NODE
+					case 4: // CDATA_SECTION_NODE
+					case 7: // PROCESSING_INSTRUCTION_NODE
+					case 8: // COMMENT_NODE
+						cur.cloneNode()._link(end[PREV] || node, end, node);
+						break;
+					case 2: // ATTRIBUTE_NODE
+					case 9: // DOCUMENT_NODE
+					case 10: // DOCUMENT_TYPE_NODE
+					case 11: // DOCUMENT_FRAGMENT_NODE
+					case -1:
+						throw new Error(`Unexpected ${cur.nodeType}`);
+						break;
+				}
+			}
+		}
+		return node;
 	}
 }
 

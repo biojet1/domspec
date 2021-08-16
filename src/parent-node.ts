@@ -65,15 +65,15 @@ export abstract class ParentNode extends ChildNode {
 	}
 
 	prepend(...nodes: Array<ChildNode>) {
-		this._insert(this.firstChild || this[END], this._toNodes(nodes));
+		this._before(this.firstChild || this[END], this._toNodes(nodes));
 	}
 
 	append(...nodes: Array<ChildNode>) {
-		this._insert(this[END], this._toNodes(nodes));
+		this._before(this[END], this._toNodes(nodes));
 	}
 
-	_insert(ref: ChildNode | EndNode, nodes: Iterable<ChildNode>) {
-		let prev: Node = ref[PREV] || this;
+	_before(ref: ChildNode | EndNode, nodes: Iterable<ChildNode>) {
+		let prev: Node = ref.endNode || this;
 		if (ref.parentNode != this) {
 			throw new Error("NotFoundError: unexpected reference child parent");
 		}
@@ -85,12 +85,50 @@ export abstract class ParentNode extends ChildNode {
 					);
 				}
 			}
+			switch (node.nodeType) {
+				case 1: // ELEMENT_NODE
+				case 11: {
+					// DOCUMENT_FRAGMENT_NODE
+					// this._before(ref, (node as ParentNode).childNodes);
+					// node._link(ref[PREV] || this, ref, this);
+					// continue;
+				}
+				case 3: // TEXT_NODE
+				case 4: // CDATA_SECTION_NODE
+				case 7: // PROCESSING_INSTRUCTION_NODE
+				case 8: // COMMENT_NODE
+				case 10: // DOCUMENT_TYPE_NODE
+					break;
+				default:
+					throw new Error(`HierarchyRequestError`);
+			}
 			if (node !== ref) {
 				node.remove();
+				// node._link(prev, prev[NEXT] || this[END], this);
 				node._link(ref[PREV] || this, ref, this);
 			}
 		}
 	}
+	// _after(ref: ChildNode | EndNode, nodes: Iterable<ChildNode>) {
+	// 	if (ref.parentNode != this) {
+	// 		throw new Error("NotFoundError: unexpected reference child parent");
+	// 	}
+	// 	for (const node of nodes) {
+	// 		if (node instanceof ParentNode) {
+	// 			if (node.contains(this)) {
+	// 				throw new Error(
+	// 					"HierarchyRequestError: node is ansector of parent."
+	// 				);
+	// 			}
+	// 		}
+	// 		if (node !== ref) {
+	// 			node.remove();
+	// 			const prev: Node = ref.endNode;
+	// 			node._link(prev, prev[NEXT] || this[END], this);
+	// 			ref = node;
+	// 		}
+	// 	}
+	// }
 
 	insertBefore(node: ChildNode, before?: ChildNode | EndNode | null) {
 		if (node === this) {
@@ -98,24 +136,65 @@ export abstract class ParentNode extends ChildNode {
 				"HierarchyRequestError: unable to append a node to itself"
 			);
 		} else if (!before) {
-			const cur = this[END];
-			node.remove();
-			node._link(cur[PREV] || this, cur, this);
+			// const cur = this[END];
+			// node.remove();
+			// node._link(cur[PREV] || this, cur, this);
 			// this.insertBefore(node, this[END]);
+			before = this[END];
 		} else if (node === before) {
-			this.insertBefore(node, node.nextSibling);
-		} else {
-			node.remove();
-			node._link(before[PREV] || this, before, this);
+			before = node.nextSibling || this[END];
+			// this.insertBefore(node, node.nextSibling);
+		} else if (before.parentNode != this) {
+			throw new Error("NotFoundError: unexpected reference child parent");
 		}
+		switch (this.nodeType) {
+			case 9: // DOCUMENT
+				switch (node.nodeType) {
+					case 1:
+						if (this.firstElementChild) {
+							throw new Error(
+								`HierarchyRequestError: Only one child element for document`
+							);
+						}
+						break;
+					case 3:
+						throw new Error(
+							`HierarchyRequestError: nodeType == ${node.nodeType} not Allowed`
+						);
+				}
+				break;
+			// case 10: // DOCUMENT_TYPE_NODE
+			// 	break;
+			case 11:
+			case 1:
+				switch (node.nodeType) {
+					case 1:
+					case 3:
+					case 4:
+					case 7: // PROCESSING_INSTRUCTION_NODE
+					case 8:
+						break;
+					default:
+						throw new Error(
+							`HierarchyRequestError: nodeType == ${node.nodeType} not Allowed in Element`
+						);
+				}
+				break;
+			default:
+				throw new Error(`HierarchyRequestError`);
+		}
+		node.remove();
+		node._link(before[PREV] || this, before, this);
 		return node;
 	}
 
 	appendChild(node: ChildNode) {
-		return this.insertBefore(node);
+		this._before(this[END], [node]);
+		return node;
+		// return this.insertBefore(node);
 	}
 
-	contains(node?: ChildNode) {
+	contains(node?: ChildNode | null) {
 		while (node && node !== this) node = node.parentNode;
 		return node === this;
 	}
@@ -177,7 +256,7 @@ export abstract class ParentNode extends ChildNode {
 			}
 		}
 
-		this._insert(end, this._toNodes(nodes));
+		this._before(end, this._toNodes(nodes));
 	}
 
 	get textContent(): string | null {
@@ -223,18 +302,23 @@ export abstract class ParentNode extends ChildNode {
 		return ElementList.from(this.elementsByClassName(name));
 	}
 
-	// querySelector(selectors: string) : Element | null {
-	// 	const test = prepareMatch(this, selectors);
-	// 	for (const node of iterQuery(test, this)) {
-	// 		return node;
-	// 	}
-	// 	return null;
-	// }
+	querySelector(selectors: string): Element | null {
+		const test = prepareMatch(this, selectors);
+		for (const node of iterQuery(test, this)) {
+			return node;
+		}
+		return null;
+	}
 
-	// querySelectorAll(selectors: string) {
-	// 	const test = prepareMatch(this, selectors);
-	// 	return Array.from(iterQuery(test, this));
-	// }
+	querySelectorAll(selectors: string): Element[] {
+		const test = prepareMatch(this, selectors);
+		return Array.from(iterQuery(test, this));
+	}
+
+	set textContent(data: string | null) {
+		const { ownerDocument: doc } = this;
+		doc && this.replaceChildren(doc.createTextNode(data || ""));
+	}
 }
 
 function* iterQuery(test: (node: Element) => boolean, elem: ParentNode) {
@@ -247,18 +331,12 @@ function* iterQuery(test: (node: Element) => boolean, elem: ParentNode) {
 }
 
 export class EndNode extends Node {
-	// [START]: ParentNode;
 	parentNode: ParentNode;
 	constructor(parent: ParentNode) {
 		super();
-		// this[START] = this[PREV] = parent;
 		this.parentNode = this[PREV] = parent;
 	}
-	// get [START](): ParentNode {
-	// 	return this.parentNode;
-	// }
 	get startNode(): Node {
-		// return this[START];
 		return this.parentNode;
 	}
 	get nodeType() {
@@ -267,30 +345,22 @@ export class EndNode extends Node {
 	get nodeName() {
 		return "#end";
 	}
+	cloneNode(deep?: boolean): Node {
+		throw new Error("Not implemented");
+	}
 }
 
+// https://dom.spec.whatwg.org/#interface-nodelist
 export class NodeCollection<T> extends Array<T> {
 	item(i: number): T | null {
 		return i < this.length ? this[i] : null;
 	}
 }
-// https://dom.spec.whatwg.org/#interface-nodelist
-
-/**
- *NodeList
- */
-
-// export class NodeList extends Array<ChildNode> {
-// 	item(i: number) {
-// 		return i < this.length ? this[i] : null;
-// 	}
-// }
 export class NodeList extends NodeCollection<ChildNode> {}
 export class ElementList extends NodeCollection<Element> {}
 
 import { Node, PREV, NEXT, START, END } from "./node.js";
-
 import { ChildNode } from "./child-node.js";
 import { NonElementParentNode } from "./non-element-parent-node.js";
 import { Element } from "./element.js";
-// import { prepareMatch } from "./css/match.js";
+import { prepareMatch } from "./css/match.js";

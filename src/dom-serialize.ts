@@ -56,9 +56,15 @@ export function* enumDOMStr(node: Node) {
 		}
 	} while (cur !== end && (cur = cur[NEXT]));
 }
+
 export function* enumXMLDump(start: Node, end: Node) {
 	let isOpened = false;
 	let cur: Node | undefined = start;
+	const { ownerDocument } = start;
+	let voidElements =
+		ownerDocument &&
+		ownerDocument.isHTML &&
+		/^(?:area|base|br|col|embed|hr|img|input|keygen|link|menuitem|meta|param|source|track|wbr)$/i;
 
 	do {
 		switch (cur.nodeType) {
@@ -80,21 +86,29 @@ export function* enumXMLDump(start: Node, end: Node) {
 				const { [PREV]: prev, parentNode: start } = cur as EndNode;
 				if (start.nodeType === 1) {
 					if (prev === start || prev instanceof Attr) {
-						yield `/>`;
+						if (
+							!voidElements ||
+							voidElements.test((start as Element).localName)
+						) {
+							yield `/>`;
+						} else {
+							yield `></${(start as Element).qualifiedName}>`;
+						}
 					} else if (isOpened) {
-						yield `></${(start as Element).tagName}>`;
+						yield `></${(start as Element).qualifiedName}>`;
 					} else {
-						yield `</${(start as Element).tagName}>`;
+						yield `</${(start as Element).qualifiedName}>`;
 					}
 					isOpened = false;
 				}
 				break;
 
+			case 11: // DOCUMENT_FRAGMENT_NODE
 			case 1: // ELEMENT_NODE
 				if (isOpened) {
-					yield `><${(cur as Element).tagName}`;
+					yield `><${(cur as Element).qualifiedName}`;
 				} else {
-					yield `<${(cur as Element).tagName}`;
+					yield `<${(cur as Element).qualifiedName}`;
 				}
 				isOpened = true;
 				break;
@@ -102,8 +116,6 @@ export function* enumXMLDump(start: Node, end: Node) {
 			// case 10: // DOCUMENT_TYPE_NODE
 			// 	break;
 			// case 9: // DOCUMENT_NODE
-			// case 11: // DOCUMENT_FRAGMENT_NODE
-			// 	break;
 			// ENTITY_REFERENCE_NODE 	5
 			// ENTITY_NODE 	6
 			// PROCESSING_INSTRUCTION_NODE	7

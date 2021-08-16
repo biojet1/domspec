@@ -68,6 +68,19 @@ export abstract class Attr extends Node {
 	static create(qname: string, lname?: string) {
 		return new StringAttr(qname, lname);
 	}
+	cloneNode(deep?: boolean) {
+		const { ownerDocument, name, namespaceURI, value, localName, prefix } =
+			this;
+
+		const attr = new (this.constructor as any)(name, localName);
+		if (ownerDocument) attr.ownerDocument = ownerDocument;
+		if (namespaceURI) attr.namespaceURI = namespaceURI;
+		// if (localName) attr.localName = localName;
+		if (prefix) attr.prefix = prefix;
+		if (value) attr.value = value;
+
+		return attr;
+	}
 }
 
 export class StringAttr extends Attr {
@@ -83,15 +96,35 @@ export class StringAttr extends Attr {
 		const { [VALUE]: val } = this;
 		return val ? super.dumpXML() : "";
 	}
-	cloneNode() {
-		const { ownerDocument, name, namespaceURI, value, localName, prefix } =
-			this;
-		const attr = new StringAttr(name, localName);
-		attr.ownerDocument = ownerDocument;
-		if (namespaceURI) attr.namespaceURI = namespaceURI;
-		if (value) attr.value = value;
-		if (prefix) attr.prefix = prefix;
-		return attr;
+}
+export abstract class Typed {
+	abstract toString(): string;
+	// abstract constructor (value?:string) : Typed;
+}
+
+export class TypedAttr<T extends Typed> extends Attr {
+	[VALUE]?: T | string;
+	get value() {
+		const { [VALUE]: val } = this;
+		return val ? val.toString() : "";
+	}
+	set value(value: string) {
+		this[VALUE] = value;
+	}
+	// into() {
+	// 	const { [VALUE]: val } = this;
+	// 	if (typeof val === "string") {
+	// 		return (this[VALUE] = new T(val));
+	// 	} else {
+	// 		return val || (this[VALUE] = new T());
+	// 	}
+	// 	// return typeof val === "string"
+	// 	// 	? (this[VALUE] = T.parse(val))
+	// 	// 	: val || (this[VALUE] = T.parse());
+	// }
+	dumpXML() {
+		const { [VALUE]: val } = this;
+		return val ? super.dumpXML() : "";
 	}
 }
 

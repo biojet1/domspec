@@ -2,22 +2,13 @@ import { Node, NEXT, END } from "../node.js";
 import { ParentNode } from "../parent-node.js";
 import { compile, is } from "css-select";
 
-// import {ELEMENT_NODE, TEXT_NODE} from './constants.js';
-// import {ignoreCase} from './utils.js';
-
-// const {isArray} = Array;
-
-// /* c8 ignore start */
-
-// /* c8 ignore stop */
-
 function* iterAll(test: (node: Element) => boolean, nodes: Iterable<Node>) {
 	for (const node of nodes) {
 		if (node.nodeType === 1) {
 			if (test(node as Element)) {
 				yield node as Element;
 			} else {
-				let { [NEXT]: next, [END]: end } = node as Element;
+				let { [NEXT]: next, [END]: end } = node as ParentNode;
 				for (; next && next !== end; next = next[NEXT]) {
 					if (next.nodeType === 1 && test(next as Element)) {
 						yield next as Element;
@@ -27,6 +18,7 @@ function* iterAll(test: (node: Element) => boolean, nodes: Iterable<Node>) {
 		}
 	}
 }
+
 const adapter = {
 	isTag: function (node: Node): node is Element {
 		// return node is Element;
@@ -57,11 +49,13 @@ const adapter = {
 
 	getParent: function (elem: Element) {
 		const { parentNode } = elem;
-		return parentNode && parentNode instanceof Element ? parentNode : null;
+		return parentNode && 1 === parentNode.nodeType
+			? (parentNode as Element)
+			: null;
 	},
 
 	getChildren: function (node: Node) {
-		return node instanceof Element ? node.childNodes : [];
+		return node instanceof ParentNode ? node.childNodes : [];
 	},
 
 	getSiblings: function (elem: Node) {
@@ -95,6 +89,7 @@ const adapter = {
 		}
 		return false;
 	},
+
 	removeSubsets: function (nodes: Node[]) {
 		let { length } = nodes;
 		while (length-- > 0) {
@@ -116,30 +111,12 @@ const adapter = {
 		}
 		return nodes;
 	},
-	// const removeSubsets = nodes => {
-	//   let {length} = nodes;
-	//   while (length--) {
-	//     const node = nodes[length];
-	//   }
-	//   return nodes;
-	// };
-
-	// const getText = node => {
-	//   if (isArray(node))
-	//     return node.map(getText).join('');
-	//   if (isTag(node))
-	//     return getText(getChildren(node));
-	//   if (node.nodeType === TEXT_NODE)
-	//     return node.data;
-	//   return '';
-	// };
-	// removeSubsets,
 };
 
 export function prepareMatch(
 	elem: ParentNode,
 	selectors: string
-): (node: Element) => boolean {
+): (node: ParentNode) => boolean {
 	return compile(selectors, {
 		// xmlMode: !ignoreCase(elem),
 		xmlMode: true,
@@ -147,7 +124,7 @@ export function prepareMatch(
 	});
 }
 
-// export const matches = (elem: Element, selectors: string) => {
+// export const matches = (elem: ParentNode, selectors: string) => {
 // 	return is(elem, selectors, {
 // 		// strict: true,
 // 		// xmlMode: !ignoreCase(elem),

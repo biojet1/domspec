@@ -3,47 +3,119 @@ export abstract class CharacterData extends ChildNode {
 
 	//// Dom
 	// https://dom.spec.whatwg.org/#interface-characterdata
-	data: string;
+	_data: string;
 	constructor(data: string) {
 		super();
-		this.data = data;
+		this._data = data;
 	}
 
 	get nodeValue() {
 		// https://dom.spec.whatwg.org/#dom-node-nodevalue
-		return this.data;
+		return this._data;
 	}
 	get textContent() {
 		// https://dom.spec.whatwg.org/#dom-node-textcontent
-		return this.data;
+		return this._data;
+	}
+	get data() {
+		return this._data;
+	}
+	set data(data: string) {
+		switch (data) {
+			case null:
+				this._data = "";
+				break;
+			default:
+				this._data = data + "";
+		}
 	}
 	set textContent(data: string) {
 		this.data = data;
 	}
+
 	appendData(data: string) {
-		this.data += data;
+		switch (data) {
+			case undefined:
+				if (arguments.length < 1) {
+					throw new TypeError("Expecting data arguments");
+				}
+			default:
+				const { _data } = this;
+				this._data = _data + data;
+		}
 	}
 	deleteData(offset: number, count: number) {
-		this.data =
-			this.data.slice(0, offset) + this.data.slice(0, offset + count);
+		this.replaceData(offset, count);
 	}
 	insertData(offset: number, data: string) {
-		this.data = this.data.slice(0, offset) + data + this.data.slice(offset);
+		this.replaceData(offset, 0, data);
 	}
-	replaceData(offset: number, count: number, data: string) {
-		this.deleteData(offset, count);
-		this.insertData(offset, data);
+	replaceData(offset: number, count: number, data?: string) {
+		const { _data } = this;
+		const { length } = _data;
+		let b = "";
+		if (offset < 0) {
+			offset = new Uint32Array([offset])[0];
+		}
+		if (offset > length) {
+			throw new Error("IndexSizeError: offset > length");
+		}
+		if (count < 0) {
+			count = new Uint32Array([count])[0];
+		}
+
+		if (offset + count > length) {
+			// b = _data.slice(offset);
+			//pass;
+		} else {
+			b = _data.slice(offset + count);
+		}
+
+		if (data) {
+			this._data = _data.slice(0, offset) + data + b;
+		} else {
+			this._data = _data.slice(0, offset) + b;
+		}
 	}
 	substringData(offset: number, count: number) {
-		this.data = this.data.substr(offset, count);
+		const { _data } = this;
+		const { length } = _data;
+
+		if (arguments.length < 2) {
+			throw new TypeError("Expecting 2 arguments");
+		}
+
+		offset = new Uint32Array([offset])[0];
+
+		if (offset > length) {
+			throw new Error("IndexSizeError: offset > length");
+		}
+
+		count = new Uint32Array([count])[0];
+
+		if (offset + count > length) {
+			// b = _data.slice(offset);
+			//pass;
+			return _data.substr(offset);
+		} else {
+			return _data.substr(offset, count);
+		}
 	}
 	get length() {
-		return this.data.length;
+		return this._data.length;
 	}
 
 	get nodeLength() {
-		return this.data.length;
+		return this._data.length;
 	}
+
+	cloneNode(deep?: boolean) {
+		const { ownerDocument, data } = this;
+		const node = new (this.constructor as any)(data);
+		if (node) node.ownerDocument = node;
+		return node;
+	}
+
 	// Extra
 }
 
@@ -56,7 +128,19 @@ export class Text extends CharacterData {
 		return "#text";
 	}
 	toString() {
-		return escape(this.data);
+		return escape(this._data);
+	}
+}
+
+export class CDATASection extends Text {
+	toString() {
+		return `<![CDATA[${this._data}]]>`;
+	}
+	get nodeName() {
+		return "#cdata-section";
+	}
+	get nodeType() {
+		return 4;
 	}
 }
 
@@ -70,17 +154,34 @@ export class Comment extends CharacterData {
 	}
 	// Extra
 	toString() {
-		return `<!--${this.data}-->`;
+		return `<!--${this._data}-->`;
 	}
 }
 
-
-export class CDATASection extends Text {
-	toString() {
-		return `<![CDATA[${this.data}]]>`;
+export class ProcessingInstruction extends CharacterData {
+	readonly target: string;
+	constructor(target: string, data: string) {
+		super(data);
+		this.target = target;
+	}
+	//// Dom
+	get nodeType() {
+		return 7;
 	}
 	get nodeName() {
-		return "#cdata-section";
+		return this.target;
+	}
+	// Extra
+	toString() {
+		const { target, _data } = this;
+		return `<? ${target} ${_data} ?>`;
+	}
+
+	cloneNode() {
+		const { ownerDocument, target, data } = this;
+		const node = new ProcessingInstruction(target, data);
+		if (node) node.ownerDocument = ownerDocument;
+		return node;
 	}
 }
 

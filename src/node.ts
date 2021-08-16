@@ -2,6 +2,7 @@ export const NEXT = Symbol("next");
 export const PREV = Symbol("prev");
 export const START = Symbol("start");
 export const END = Symbol("end");
+export const PARENT = Symbol();
 
 export abstract class Node extends EventTarget {
 	[NEXT]?: Node;
@@ -46,7 +47,7 @@ export abstract class Node extends EventTarget {
 		this.endNode[NEXT] = undefined;
 
 		if (parentNode) {
-			this.parentNode = undefined;
+			this.parentNode = null;
 			// moCallback(this, parentNode);
 			// if (nodeType === ELEMENT_NODE) disconnectedCallback(this);
 		}
@@ -56,7 +57,7 @@ export abstract class Node extends EventTarget {
 
 	//// DOM
 	ownerDocument?: Document;
-	parentNode?: ParentNode;
+	parentNode?: ParentNode | null;
 	abstract get nodeType(): number;
 	abstract get nodeName(): string;
 	get nodeValue(): string | null {
@@ -106,6 +107,11 @@ export abstract class Node extends EventTarget {
 	appendChild(node: Node) {
 		throw new Error(`HierarchyRequestError: Not implemented`);
 	}
+	contains(node?: ChildNode) {
+		return false;
+		// return this === node;
+	}
+
 	abstract cloneNode(deep?: boolean): Node;
 	/// DOM constants
 	static ELEMENT_NODE = 1;
@@ -132,6 +138,7 @@ export abstract class Node extends EventTarget {
 // };
 
 import { EndNode, ParentNode } from "./parent-node.js";
+import { ChildNode } from "./child-node.js";
 import { Document } from "./document.js";
 import { EventTarget } from "./event-target.js";
 

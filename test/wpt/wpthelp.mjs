@@ -1,9 +1,17 @@
 import { parseDOM, DOMParser } from "../../dist/dom-parse.js";
+import { Node } from "../../dist/node.js";
+import { Document } from "../../dist/document.js";
+import { Window } from "../../dist/window.js";
 import tap from "tap";
+
+global.Node = Node;
+global.Document = Document;
 
 const parser = new DOMParser();
 global.loadDOM = function (xml) {
-  return (global.document = parser.parseFromString(xml, "text/html"));
+  const doc = (global.document = parser.parseFromString(xml, "text/html"));
+  global.window = new Window(doc);
+  return doc;
 };
 
 let current_t = null;
@@ -31,6 +39,11 @@ global.assert_equals = function (a, b, msg) {
 global.assert_true = function (a, msg) {
   (current_t || tap).strictSame(a, true, msg);
 };
+global.assert_false = function (a, msg) {
+  (current_t || tap).strictSame(a, false, msg);
+};
+
+
 
 global.assert_array_equals = function (a, b, msg) {
   (current_t || tap).match(a, b, msg);
@@ -51,7 +64,8 @@ global.assert_throws_js = function (constructor, func, description) {
     "assert_throws_js",
   ]);
 };
-const NULL = undefined;
+// const NULL = undefined;
+const NULL = null;
 global.testRemove = function (node, parent, type) {
   test(function () {
     assert_true("remove" in node);

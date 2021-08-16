@@ -43,6 +43,12 @@ export abstract class Document extends NonElementParentNode {
 			firstChild
 		) as DocumentType;
 	}
+	get body() {
+		for (const cur of this.getElementsByTagName("body")) {
+			return cur as Element;
+		}
+		return null;
+	}
 
 	get implementation() {
 		const doc = this;
@@ -226,11 +232,11 @@ export abstract class DOMImplementationA extends DOMImplementation {
 	) {
 		var doc = Document.fromNS(namespace);
 		if (doctype) {
-			if (doctype.ownerDocument) {
-				throw new Error(
-					"the object is in the wrong Document, a call to importNode is required"
-				);
-			}
+			// if (doctype.ownerDocument) {
+			// 	throw new Error(
+			// 		"the object is in the wrong Document, a call to importNode is required"
+			// 	);
+			// }
 			doctype.ownerDocument = doc;
 			doc.appendChild(doctype);
 		}

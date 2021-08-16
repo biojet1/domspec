@@ -85,6 +85,23 @@ export abstract class ParentNode extends ChildNode {
 					);
 				}
 			}
+			switch (node.nodeType) {
+				case 1: // ELEMENT_NODE
+				case 11: {
+					// DOCUMENT_FRAGMENT_NODE
+					// this._before(ref, (node as ParentNode).childNodes);
+					// node._link(ref[PREV] || this, ref, this);
+					// continue;
+				}
+				case 3: // TEXT_NODE
+				case 4: // CDATA_SECTION_NODE
+				case 7: // PROCESSING_INSTRUCTION_NODE
+				case 8: // COMMENT_NODE
+				case 10: // DOCUMENT_TYPE_NODE
+					break;
+				default:
+					throw new Error(`HierarchyRequestError`);
+			}
 			if (node !== ref) {
 				node.remove();
 				// node._link(prev, prev[NEXT] || this[END], this);
@@ -92,26 +109,26 @@ export abstract class ParentNode extends ChildNode {
 			}
 		}
 	}
-	_after(ref: ChildNode | EndNode, nodes: Iterable<ChildNode>) {
-		if (ref.parentNode != this) {
-			throw new Error("NotFoundError: unexpected reference child parent");
-		}
-		for (const node of nodes) {
-			if (node instanceof ParentNode) {
-				if (node.contains(this)) {
-					throw new Error(
-						"HierarchyRequestError: node is ansector of parent."
-					);
-				}
-			}
-			if (node !== ref) {
-				node.remove();
-				const prev: Node = ref.endNode;
-				node._link(prev, prev[NEXT] || this[END], this);
-				ref = node;
-			}
-		}
-	}
+	// _after(ref: ChildNode | EndNode, nodes: Iterable<ChildNode>) {
+	// 	if (ref.parentNode != this) {
+	// 		throw new Error("NotFoundError: unexpected reference child parent");
+	// 	}
+	// 	for (const node of nodes) {
+	// 		if (node instanceof ParentNode) {
+	// 			if (node.contains(this)) {
+	// 				throw new Error(
+	// 					"HierarchyRequestError: node is ansector of parent."
+	// 				);
+	// 			}
+	// 		}
+	// 		if (node !== ref) {
+	// 			node.remove();
+	// 			const prev: Node = ref.endNode;
+	// 			node._link(prev, prev[NEXT] || this[END], this);
+	// 			ref = node;
+	// 		}
+	// 	}
+	// }
 
 	insertBefore(node: ChildNode, before?: ChildNode | EndNode | null) {
 		if (node === this) {
@@ -127,34 +144,57 @@ export abstract class ParentNode extends ChildNode {
 		} else if (node === before) {
 			before = node.nextSibling || this[END];
 			// this.insertBefore(node, node.nextSibling);
-			// } else {
+		} else if (before.parentNode != this) {
+			throw new Error("NotFoundError: unexpected reference child parent");
 		}
-		if (this.nodeType === 9) {
-			switch (node.nodeType) {
-				case 1:
-					if (this.firstElementChild) {
+		switch (this.nodeType) {
+			case 9: // DOCUMENT
+				switch (node.nodeType) {
+					case 1:
+						if (this.firstElementChild) {
+							throw new Error(
+								`HierarchyRequestError: Only one child element for document`
+							);
+						}
+						break;
+					case 3:
 						throw new Error(
-							`HierarchyRequestError: Only one child element for document`
+							`HierarchyRequestError: nodeType == ${node.nodeType} not Allowed`
 						);
-					}
-					break;
-				case 3:
-					throw new Error(
-						`HierarchyRequestError: nodeType == ${node.nodeType} not Allowed`
-					);
-			}
+				}
+				break;
+			// case 10: // DOCUMENT_TYPE_NODE
+			// 	break;
+			case 11:
+			case 1:
+				switch (node.nodeType) {
+					case 1:
+					case 3:
+					case 4:
+					case 7: // PROCESSING_INSTRUCTION_NODE
+					case 8:
+						break;
+					default:
+						throw new Error(
+							`HierarchyRequestError: nodeType == ${node.nodeType} not Allowed in Element`
+						);
+				}
+				break;
+			default:
+				throw new Error(`HierarchyRequestError`);
 		}
 		node.remove();
 		node._link(before[PREV] || this, before, this);
-
 		return node;
 	}
 
 	appendChild(node: ChildNode) {
-		return this.insertBefore(node);
+		this._before(this[END], [node]);
+		return node;
+		// return this.insertBefore(node);
 	}
 
-	contains(node?: ChildNode) {
+	contains(node?: ChildNode | null) {
 		while (node && node !== this) node = node.parentNode;
 		return node === this;
 	}
@@ -273,6 +313,11 @@ export abstract class ParentNode extends ChildNode {
 	querySelectorAll(selectors: string): Element[] {
 		const test = prepareMatch(this, selectors);
 		return Array.from(iterQuery(test, this));
+	}
+
+	set textContent(data: string | null) {
+		const { ownerDocument: doc } = this;
+		doc && this.replaceChildren(doc.createTextNode(data || ""));
 	}
 }
 

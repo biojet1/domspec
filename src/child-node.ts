@@ -3,6 +3,10 @@ import { Node, NEXT, PREV, END } from "./node.js";
 export abstract class ChildNode extends Node {
 	//// Tree
 	//// Dom
+	constructor() {
+		super();
+		this.parentNode = null;
+	}
 	get nextSibling(): ChildNode | null {
 		const node = this.endNode[NEXT];
 		if (node instanceof EndNode) {
@@ -63,8 +67,37 @@ export abstract class ChildNode extends Node {
 		return null;
 	}
 
+	protected viableNextSibling(nodes: Array<string | ChildNode>) {
+		let next = this.nextSibling;
+		while (next) {
+			if (nodes.indexOf(next) < 0) {
+				break;
+			} else {
+				next = next.nextSibling;
+			}
+		}
+		return next;
+	}
+
+	protected viablePreviousSibling(nodes: Array<string | ChildNode>) {
+		let cur = this.previousSibling;
+		while (cur) {
+			if (nodes.indexOf(cur) < 0) {
+				break;
+			} else {
+				cur = cur.previousSibling;
+			}
+		}
+		return cur;
+	}
+
 	after(...nodes: Array<string | ChildNode>) {
-		this.parentNode?._after(this, this._toNodes(nodes));
+		// this.parentNode?._after(this, this._toNodes(nodes));
+		const { parentNode: node } = this;
+		node?._before(
+			this.viableNextSibling(nodes) || node[END],
+			this._toNodes(nodes)
+		);
 	}
 
 	before(...nodes: Array<string | ChildNode>) {
@@ -74,14 +107,7 @@ export abstract class ChildNode extends Node {
 	replaceWith(...nodes: Array<string | ChildNode>) {
 		const { parentNode: node } = this;
 		if (node) {
-			let next = this.nextSibling;
-			while (next) {
-				if (nodes.indexOf(next) < 0) {
-					break;
-				} else {
-					next = next.nextSibling;
-				}
-			}
+			const next = this.viableNextSibling(nodes);
 			this.remove();
 			node._before(next || node[END], this._toNodes(nodes));
 		}
@@ -108,13 +134,15 @@ export abstract class ChildNode extends Node {
 			}
 		}
 	}
-	// protected *_nodes(
-	// 	nodes: Iterable<string | ChildNode>
-	// ): IterableIterator<ChildNode> {
+	// protected convertNodes(
+	// 	nodes: Array<string | ChildNode>
+	// ) {
 	// 	const { ownerDocument: doc } = this;
 	// 	for (const node of nodes) {
 	// 		if (typeof node === "string") {
 	// 			if (doc) yield doc.createTextNode(node) as ChildNode;
+	// 		} else if (!node) {
+	// 			if (doc) yield doc.createTextNode(String(node)) as ChildNode;
 	// 		} else if (11 === node.nodeType) {
 	// 			// DOCUMENT_FRAGMENT_NODE (11).
 	// 			for (const cur of node._toNodes(
@@ -123,11 +151,13 @@ export abstract class ChildNode extends Node {
 	// 				yield cur;
 	// 			}
 	// 		} else {
-	// 			node.remove();
 	// 			yield node;
 	// 		}
 	// 	}
 	// }
+	contains(node?: ChildNode) {
+		return this === node;
+	}
 }
 
 import { ParentNode, EndNode } from "./parent-node.js";

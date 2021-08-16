@@ -66,16 +66,6 @@ export function* enumXMLDump(start: Node, end: Node) {
 		ownerDocument.isHTML &&
 		/^(?:area|base|br|col|embed|hr|img|input|keygen|link|menuitem|meta|param|source|track|wbr)$/i;
 
-	// if (ownerDocument && ownerDocument.isHTML) {
-	// 	function tagOf(elem:Element){
-	// 		if(elem.namespaceURI){
-	// 			return elem.tagName;
-	// 		}else{
-	// 			return elem.tagName;
-	// 		}
-	// 	}
-	// }
-
 	do {
 		switch (cur.nodeType) {
 			case 2: // ATTRIBUTE_NODE

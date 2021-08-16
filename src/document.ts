@@ -169,6 +169,12 @@ export abstract class Document extends NonElementParentNode {
 		}
 		return node;
 	}
+	adoptNode(node: Node) {
+		let { startNode: cur, endNode: end } = node;
+		do {
+			cur.ownerDocument = this;
+		} while (cur !== end && (cur = cur[NEXT] || end));
+	}
 }
 
 function validateAndExtract(
@@ -210,9 +216,19 @@ export class HTMLDocument extends Document {
 	get isHTML() {
 		return true;
 	}
-	// makeElementNS(ns: string | null, qName: string) {
-
-	// }
+	static setup(titleText?: string) {
+		const d = new HTMLDocument();
+		const root = d.createElement("html");
+		const head = d.createElement("head");
+		const title = d.createElement("title");
+		d.appendChild(new DocumentType("html"));
+		title.appendChild(d.createTextNode(titleText || ""));
+		head.appendChild(title);
+		root.appendChild(head);
+		root.appendChild(d.createElement("body"));
+		d.appendChild(root);
+		return d;
+	}
 }
 
 export class SVGDocument extends Document {
@@ -248,17 +264,7 @@ export abstract class DOMImplementationA extends DOMImplementation {
 		return doc;
 	}
 	createHTMLDocument(titleText = "") {
-		const d = new HTMLDocument();
-		const root = d.createElement("html");
-		const head = d.createElement("head");
-		const title = d.createElement("title");
-		d.appendChild(new DocumentType("html"));
-		title.appendChild(d.createTextNode(titleText));
-		head.appendChild(title);
-		root.appendChild(head);
-		root.appendChild(d.createElement("body"));
-		d.appendChild(root);
-		return d;
+		return HTMLDocument.setup(titleText);
 	}
 }
 

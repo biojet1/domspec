@@ -81,7 +81,7 @@ export abstract class ParentNode extends ChildNode {
 			if (node instanceof ParentNode) {
 				if (node.contains(this)) {
 					throw new Error(
-						"HierarchyRequestError: node is ansector of parent."
+						"HierarchyRequestError: node is ancestor of parent."
 					);
 				}
 			}
@@ -100,10 +100,14 @@ export abstract class ParentNode extends ChildNode {
 				case 10: // DOCUMENT_TYPE_NODE
 					break;
 				default:
-					throw new Error(`HierarchyRequestError`);
+					if (node instanceof ChildNode) {
+						throw new Error(`HierarchyRequestError`);
+					} else {
+						throw new TypeError();
+					}
 			}
 			if (node !== ref) {
-				node.remove();
+				node.unlink(this.ownerDocument);
 				// node._link(prev, prev[NEXT] || this[END], this);
 				node._link(ref[PREV] || this, ref, this);
 			}

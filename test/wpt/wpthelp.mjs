@@ -11,6 +11,7 @@ const parser = new DOMParser();
 global.loadDOM = function (xml) {
   const doc = (global.document = parser.parseFromString(xml, "text/html"));
   global.window = new Window(doc);
+  global.frames = global.window.frames
   return doc;
 };
 

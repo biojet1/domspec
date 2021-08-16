@@ -158,6 +158,14 @@ export abstract class ChildNode extends Node {
 	contains(node?: ChildNode) {
 		return this === node;
 	}
+
+	appendChild(node: Node) {
+		if (node) {
+			throw new Error(`HierarchyRequestError: Not implemented`);
+		} else {
+			throw new TypeError();
+		}
+	}
 }
 
 import { ParentNode, EndNode } from "./parent-node.js";

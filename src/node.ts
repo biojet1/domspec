@@ -31,7 +31,7 @@ export abstract class Node extends EventTarget {
 		node[PREV] = this;
 		return this;
 	}
-	unlink() {
+	unlink(owner?: Document) {
 		const {
 			[PREV]: prev,
 			endNode: { [NEXT]: next },
@@ -50,6 +50,9 @@ export abstract class Node extends EventTarget {
 			this.parentNode = null;
 			// moCallback(this, parentNode);
 			// if (nodeType === ELEMENT_NODE) disconnectedCallback(this);
+		}
+		if (owner) {
+			owner.adoptNode(this);
 		}
 		return this;
 	}
@@ -104,14 +107,13 @@ export abstract class Node extends EventTarget {
 			? (root as Document).documentElement || root
 			: root;
 	}
-	appendChild(node: Node) {
-		throw new Error(`HierarchyRequestError: Not implemented`);
-	}
 	contains(node?: ChildNode) {
 		return false;
 		// return this === node;
 	}
-
+	appendChild(node: Node) {
+		throw new TypeError(`Not implemented`);
+	}
 	abstract cloneNode(deep?: boolean): Node;
 	/// DOM constants
 	static ELEMENT_NODE = 1;

@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      WPT_ROOT: ~/.wpt
+      WPT_ROOT: .wpt
       WPT_URL: https://github.com/web-platform-tests/wpt/archive/refs/tags/merge_pr_30022.tar.gz
 
     steps:
@@ -28,7 +28,7 @@ jobs:
         with:
           # npm cache files are stored in `~/.npm` on Linux/macOS
           path: ~/.npm
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('package.json') }}
 
       - run: npm i
 
@@ -43,13 +43,16 @@ jobs:
       - name: Cache WPT
         uses: actions/cache@v2
         env:
-          cache-name: https://github.com/web-platform-tests/wpt/archive/refs/tags/merge_pr_30022.tar.gz
+          cache-name: wpt
         with:
           # npm cache files are stored in `~/.npm` on Linux/macOS
-          path: ~/.wpt
-          key: ${{ runner.os }}-build-${{ env.WPT_URL }}-${{ hashFiles('README.md') }}
+          path: ${{ env.WPT_ROOT }}
+          key: ${{ runner.os }}-${{ env.cache-name }}-${{ env.WPT_URL }}
 
       - run: |
+          echo [$HOME]
+          ls
+          [ -d "$WPT_ROOT" ] || mkdir -vp "$WPT_ROOT"
           cd "$WPT_ROOT"
           [ -f README.md ] || ( curl -L "$WPT_URL" | tar xvzf - --strip-components 1 )
 

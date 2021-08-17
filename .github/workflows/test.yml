@@ -67,7 +67,7 @@ jobs:
       - run: |
           mkdir -p coverage
           npm run c8report
-          cat coverage/lcov.info
+          # cat coverage/lcov.info
 
       - name: Codecov
         uses: codecov/codecov-action@v2

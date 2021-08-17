@@ -1,3 +1,6 @@
+import { Node, PREV, NEXT, START, END } from "./node.js";
+import { ChildNode } from "./child-node.js";
+
 export abstract class ParentNode extends ChildNode {
 	[END]: EndNode;
 
@@ -27,11 +30,11 @@ export abstract class ParentNode extends ChildNode {
 		return null;
 	}
 
-	get firstElementChild(): ParentNode | null {
+	get firstElementChild(): Element | null {
 		let { firstChild: cur }: { firstChild: Node | null } = this;
 		for (; cur instanceof ChildNode; cur = cur.nextSibling) {
 			if (cur instanceof ParentNode && cur.nodeType === 1) {
-				return cur;
+				return cur as Element;
 			}
 		}
 		return null;
@@ -54,11 +57,11 @@ export abstract class ParentNode extends ChildNode {
 		return null;
 	}
 
-	get lastElementChild(): ChildNode | null {
+	get lastElementChild(): Element | null {
 		let { lastChild: cur }: { lastChild: Node | null } = this;
 		for (; cur instanceof ChildNode; cur = cur.previousSibling) {
 			if (cur instanceof ParentNode && cur.nodeType === 1) {
-				return cur;
+				return cur as Element;
 			}
 		}
 		return null;
@@ -81,29 +84,78 @@ export abstract class ParentNode extends ChildNode {
 			if (node instanceof ParentNode) {
 				if (node.contains(this)) {
 					throw new Error(
-						"HierarchyRequestError: node is ansector of parent."
+						"HierarchyRequestError: node is ancestor of parent."
 					);
 				}
 			}
 			switch (node.nodeType) {
-				case 1: // ELEMENT_NODE
 				case 11: {
 					// DOCUMENT_FRAGMENT_NODE
+					if (this.nodeType === 9) {
+						if ((this as ParentNode).firstElementChild) {
+							if ((node as ParentNode).firstElementChild) {
+								throw new Error(`HierarchyRequestError`);
+							}
+						} else {
+							// const first =
+							// 	doc.firstElementChild as unknown as Node;
+							// if (first && !first.isSameNode(ref)) {
+							// 	throw new Error(`HierarchyRequestError`);
+							// }
+							// break;
+						}
+					}
 					// this._before(ref, (node as ParentNode).childNodes);
 					// node._link(ref[PREV] || this, ref, this);
 					// continue;
+					break;
 				}
+				case 1: // ELEMENT_NODE
+					if (this.nodeType === 9) {
+						if ((this as unknown as Document).firstElementChild) {
+							throw new Error(`HierarchyRequestError`);
+						}
+					}
+					break;
+
 				case 3: // TEXT_NODE
-				case 4: // CDATA_SECTION_NODE
+					if (this.nodeType === 9) {
+						throw new Error(`HierarchyRequestError`);
+					}
+					break;
+
+				case 4: {
+					// CDATA_SECTION_NODE
+					// switch (this.nodeType) {
+					// 	case 9: // DOCUMENT_NODE
+					// 		throw new Error(`HierarchyRequestError`);
+					// }
+				}
 				case 7: // PROCESSING_INSTRUCTION_NODE
 				case 8: // COMMENT_NODE
-				case 10: // DOCUMENT_TYPE_NODE
 					break;
+				case 10: // DOCUMENT_TYPE_NODE
+					if (this.nodeType === 9) {
+						const doc = this as unknown as Document;
+						if (doc.doctype) {
+							throw new Error(`HierarchyRequestError`);
+						}
+						const first = doc.firstElementChild as unknown as Node;
+						if (first && !first.isSameNode(ref)) {
+							throw new Error(`HierarchyRequestError`);
+						}
+						break;
+					}
+				// fall
 				default:
-					throw new Error(`HierarchyRequestError`);
+					if (node instanceof ChildNode) {
+						throw new Error(`HierarchyRequestError`);
+					} else {
+						throw new TypeError();
+					}
 			}
 			if (node !== ref) {
-				node.remove();
+				node.unlink(this.ownerDocument);
 				// node._link(prev, prev[NEXT] || this[END], this);
 				node._link(ref[PREV] || this, ref, this);
 			}
@@ -206,9 +258,12 @@ export abstract class ParentNode extends ChildNode {
 	}
 
 	replaceChild(node: ChildNode, child: ChildNode) {
-		this.insertBefore(node, child.endNode[NEXT] as ChildNode);
+		const ref = child.nextSibling || this[END];
 		child.remove();
-		return child;
+		this._before(ref, [node]);
+		return node;
+		// this.insertBefore(node, child.endNode[NEXT] as ChildNode);
+		// return child;
 	}
 
 	hasChildNodes() {
@@ -225,7 +280,7 @@ export abstract class ParentNode extends ChildNode {
 	}
 
 	get children() {
-		const nodes = new NodeList();
+		const nodes = new HTMLCollection();
 		let { firstElementChild: cur } = this;
 		for (; cur; cur = cur.nextElementSibling) {
 			nodes.push(cur);
@@ -243,20 +298,28 @@ export abstract class ParentNode extends ChildNode {
 	}
 
 	replaceChildren(...nodes: Array<string | ChildNode>) {
-		let { [NEXT]: next, [END]: end, ownerDocument: doc } = this;
-		let child;
-		while (next && next !== end) {
-			next = (child = next).endNode[NEXT];
-			if (child instanceof ChildNode) {
-				child.remove();
-				/* c8 ignore start */
-			} else if (child instanceof EndNode) {
-				throw new Error("Unexpected following EndNode node");
-				/* c8 ignore stop */
-			}
-		}
-
+		// console.log("replaceChild", node, child);
+		// console.log("replaceChildren", nodes);
+		// let { [NEXT]: next, [END]: end, ownerDocument: doc } = this;
+		// let child;
+		// while (next && next !== end) {
+		// 	next = (child = next).endNode[NEXT];
+		// 	if (child instanceof ChildNode) {
+		// 		child.remove();
+		// 		/* c8 ignore start */
+		// 	} else if (child instanceof EndNode) {
+		// 		throw new Error("Unexpected following EndNode node");
+		// 		/* c8 ignore stop */
+		// 	}
+		// }
+		// this._before(end, this._toNodes(nodes));
+		let { firstChild: cur, lastChild: fin, [END]: end } = this;
 		this._before(end, this._toNodes(nodes));
+		if (cur && fin) {
+			do {
+				cur.remove();
+			} while (cur !== fin && (cur = cur.nextSibling));
+		}
 	}
 
 	get textContent(): string | null {
@@ -295,11 +358,11 @@ export abstract class ParentNode extends ChildNode {
 	}
 
 	getElementsByTagName(name: string) {
-		return ElementList.from(this.elementsByTagName(name));
+		return HTMLCollection.from(this.elementsByTagName(name));
 	}
 
 	getElementsByClassName(name: string) {
-		return ElementList.from(this.elementsByClassName(name));
+		return HTMLCollection.from(this.elementsByClassName(name));
 	}
 
 	querySelector(selectors: string): Element | null {
@@ -357,10 +420,9 @@ export class NodeCollection<T> extends Array<T> {
 	}
 }
 export class NodeList extends NodeCollection<ChildNode> {}
-export class ElementList extends NodeCollection<Element> {}
+export class HTMLCollection extends NodeCollection<Element> {}
 
-import { Node, PREV, NEXT, START, END } from "./node.js";
-import { ChildNode } from "./child-node.js";
 import { NonElementParentNode } from "./non-element-parent-node.js";
 import { Element } from "./element.js";
 import { prepareMatch } from "./css/match.js";
+// import { Document } from "./document.js";

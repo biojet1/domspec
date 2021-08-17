@@ -30,7 +30,15 @@ export class DocumentFragment extends NonElementParentNode {
 	}
 
 	cloneNode(deep?: boolean): Node {
-		throw new Error(`Not implemented`);
+		if (deep) {
+			throw new Error(`Not implemented`);
+		} else {
+			const { ownerDocument } = this;
+			if (ownerDocument) {
+				return ownerDocument.createDocumentFragment();
+			}
+			return new DocumentFragment();
+		}
 	}
 }
 import { ChildNode } from "./child-node.js";

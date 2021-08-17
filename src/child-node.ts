@@ -124,6 +124,20 @@ export abstract class ChildNode extends Node {
 				if (doc) yield doc.createTextNode(String(node)) as ChildNode;
 			} else if (11 === node.nodeType) {
 				// DOCUMENT_FRAGMENT_NODE (11).
+				if (this.nodeType === 9) {
+					if ((this as unknown as ParentNode).firstElementChild) {
+						if ((node as ParentNode).firstElementChild) {
+							throw new Error(`HierarchyRequestError`);
+						}
+					} else {
+						if (
+							(node as ParentNode).firstElementChild
+								?.nextElementSibling
+						) {
+							throw new Error(`HierarchyRequestError`);
+						}
+					}
+				}
 				for (const cur of node._toNodes(
 					(node as ParentNode).childNodes
 				)) {
@@ -157,6 +171,14 @@ export abstract class ChildNode extends Node {
 	// }
 	contains(node?: ChildNode) {
 		return this === node;
+	}
+
+	appendChild(node: Node) {
+		if (node) {
+			throw new Error(`HierarchyRequestError: Not implemented`);
+		} else {
+			throw new TypeError();
+		}
 	}
 }
 

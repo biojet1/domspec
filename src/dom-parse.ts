@@ -28,7 +28,7 @@ function domParse(str: string, doc: Document, top: ParentNode) {
 		top.appendChild(node);
 	});
 	parser.on("text", (str: string) => {
-		top.appendChild(doc.createTextNode(str));
+		if (top.nodeType !== 9) top.appendChild(doc.createTextNode(str));
 	});
 	parser.on("comment", (str: string) => {
 		top.appendChild(doc.createComment(str));
@@ -120,6 +120,13 @@ export class DOMParser {
 				doc = new XMLDocument();
 		}
 		domParse(markup, doc, doc);
+		switch (type) {
+			case "text/html":
+				if (!doc.doctype) {
+					doc.insertBefore(new DocumentType("html"), doc.firstChild);
+				}
+		}
+
 		return doc;
 	}
 }
@@ -163,3 +170,4 @@ import {
 	SVGDocument,
 	XMLDocument,
 } from "./document.js";
+import { DocumentType } from "./document-type.js";

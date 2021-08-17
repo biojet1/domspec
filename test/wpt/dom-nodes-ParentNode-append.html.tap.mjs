@@ -1,6 +1,10 @@
 import "./wpthelp.mjs"
 const html = "<html><head><meta charset=\"utf-8\"/>\n<title>ParentNode.append</title>\n<link rel=\"help\" href=\"https://dom.spec.whatwg.org/#dom-parentnode-append\"/>\n<script src=\"/resources/testharness.js\"/>\n<script src=\"/resources/testharnessreport.js\"/>\n<script src=\"pre-insertion-validation-hierarchy.js\"/>\n<script/>\n</head></html>"
 const document = loadDOM(html)
+import fs from "fs";
+import vm from "vm";
+const script1 = `${process.env.WPT_ROOT}/dom/nodes/pre-insertion-validation-hierarchy.js`
+vm.runInThisContext(fs.readFileSync(script1, "utf8"), script1)
 
 preInsertionValidateHierarchy("append");
 

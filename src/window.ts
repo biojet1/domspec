@@ -6,6 +6,8 @@ import { DOMTokenList } from "./token-list.js";
 import { DOMImplementation } from "./dom-implementation.js";
 import { EventTarget } from "./event-target.js";
 import { Attr } from "./attr.js";
+import * as html_elements from "./html/element.js";
+
 // """
 
 /*
@@ -26,6 +28,7 @@ Object.getOwnPropertyNames(window).filter(s=>/^[A-Z]\w+$/.test(s))
 export class Window extends EventTarget {
 	_document?: Document;
 	_frames?: any;
+
 	constructor(doc?: Document) {
 		super();
 		// const doc = new Document();
@@ -42,6 +45,9 @@ export class Window extends EventTarget {
 		// 		return img;
 		// 	}
 		// };
+		for (const k of Object.getOwnPropertyNames(html_elements)) {
+			Reflect.set(this, k, Reflect.get(html_elements, k));
+		}
 	}
 	get self() {
 		return this;

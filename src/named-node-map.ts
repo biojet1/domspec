@@ -1,8 +1,10 @@
 export class NamedNodeMap {
 	ownerElement: Element;
+	[i: number]: Attr;
 
 	constructor(ownerElement: Element) {
 		this.ownerElement = ownerElement;
+		this.length;
 	}
 
 	getNamedItem(name: string): Attr | null {
@@ -38,13 +40,18 @@ export class NamedNodeMap {
 				}
 			}
 		}
+		return null;
 	}
 
 	get length() {
 		let n = 0;
 		let attr = this.ownerElement[NEXT];
 		for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
+			this[n] = attr;
 			n++;
+		}
+		for (; n in this; ) {
+			delete this[n++];
 		}
 		return n;
 	}

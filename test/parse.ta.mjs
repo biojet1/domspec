@@ -39,7 +39,7 @@ const parser = new DOMParser();
 const serializer = new XMLSerializer();
 
 for (let [i, [xml, expected, msg]] of data.entries()) {
-    const doc = parser.parseFromString(xml);
+    const doc = parser.parseFromString(xml, "text/html");
     const top = doc.documentElement;
     const extra = [i, top && Array.from(enumFlatDOM(top))];
 

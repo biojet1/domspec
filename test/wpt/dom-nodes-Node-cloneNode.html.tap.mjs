@@ -1,6 +1,10 @@
+import * as all from "../../dist/all.js";
+for (const [k, v] of Object.entries(all)) {
+  global[k] = v;
+}
 import "./wpthelp.mjs"
 const html = "<html><head><meta charset=\"utf-8\"/>\n<title>Node.cloneNode</title>\n<link rel=\"help\" href=\"https://dom.spec.whatwg.org/#dom-node-clonenode\"/>\n<script src=\"/resources/testharness.js\"/>\n<script src=\"/resources/testharnessreport.js\"/>\n</head><body><div id=\"log\"/>\n<script/>\n</body></html>"
-const document = loadDOM(html)
+const document = loadDOM(html, `text/html`)
 
 function assert_equal_node(nodeA, nodeB) {
   assert_equals(nodeB.nodeType, nodeA.nodeType, "nodeType");

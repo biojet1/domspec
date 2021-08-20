@@ -3,12 +3,13 @@ import { NonElementParentNode } from "./non-element-parent-node.js";
 export abstract class Document extends NonElementParentNode {
 	//// Dom
 	contentType: string;
+	documentURI: string;
 	defaultView?: Window;
-	documentURI?: string;
-	characterSet?: string;
+	// characterSet?: string;
 
 	protected constructor(contentType?: string) {
 		super();
+		this.documentURI = "about:blank";
 		this.contentType =
 			contentType && contentType !== "" ? contentType : "application/xml";
 	}
@@ -19,6 +20,10 @@ export abstract class Document extends NonElementParentNode {
 	get compatMode() {
 		return "CSS1Compat";
 	}
+	get charset() {
+		return "UTF-8";
+	}
+
 	get nodeType() {
 		return 9;
 	}
@@ -31,6 +36,7 @@ export abstract class Document extends NonElementParentNode {
 	get textContent() {
 		return null;
 	}
+	set textContent(text: string | null) {}
 	get doctype() {
 		const { firstChild } = this;
 		for (let cur = firstChild; cur; cur = cur.nextSibling) {
@@ -50,6 +56,13 @@ export abstract class Document extends NonElementParentNode {
 		}
 		return null;
 	}
+	get title() {
+		for (const cur of this.getElementsByTagName("title")) {
+			return cur.textContent;
+		}
+		return "";
+	}
+
 
 	get implementation() {
 		const doc = this;
@@ -81,7 +94,10 @@ export abstract class Document extends NonElementParentNode {
 		return node;
 	}
 
-	createElementNS(ns: string | null | undefined, qualifiedName: string) {
+	createElementNS(
+		ns: string | null | undefined,
+		qualifiedName: string
+	): Element {
 		const node = newElement(this.contentType, qualifiedName, ns);
 		node.ownerDocument = this;
 		return node;
@@ -117,6 +133,16 @@ export abstract class Document extends NonElementParentNode {
 		node.ownerDocument = this;
 		return node;
 	}
+	createAttributeNS(ns: string | null | undefined, qualifiedName: string) {
+		const node = Attr.create(qualifiedName, ns, this.contentType);
+		node.ownerDocument = this;
+		return node;
+	}
+
+	createRange() {
+		return {};
+	}
+
 	static fromNS(ns?: string) {
 		switch (ns) {
 			case "text/html":
@@ -138,13 +164,13 @@ export abstract class Document extends NonElementParentNode {
 	}
 
 	cloneNode(deep?: boolean) {
-		const { contentType, defaultView, documentURI, characterSet } = this;
+		const { contentType, defaultView, documentURI } = this;
 		const node = new (this.constructor as any)();
 
 		if (contentType) node.contentType = contentType;
 		if (defaultView) node.defaultView = defaultView;
 		if (documentURI) node.documentURI = documentURI;
-		if (characterSet) node.characterSet = characterSet;
+		// if (characterSet) node.characterSet = characterSet;
 		if (deep) {
 			const end = node[END];
 			const fin = this[END];
@@ -155,7 +181,7 @@ export abstract class Document extends NonElementParentNode {
 					case 7: // PROCESSING_INSTRUCTION_NODE
 					case 8: // COMMENT_NODE
 					case 10: // DOCUMENT_TYPE_NODE
-						cur.cloneNode()._link(end[PREV] || node, end, node);
+						cur.cloneNode()._attach(end[PREV] || node, end, node);
 						break;
 					case 3: // TEXT_NODE
 					case 4: // CDATA_SECTION_NODE

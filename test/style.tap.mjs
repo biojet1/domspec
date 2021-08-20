@@ -3,7 +3,7 @@ import { Document } from "../dist/document.js";
 import { ParentNode } from "../dist/parent-node.js";
 import { DOMParser } from "../dist/dom-parse.js";
 const parser = new DOMParser();
-const document = parser.parseFromString("<html/>");
+const document = parser.parseFromString("<html/>", "text/html");
 
 function assert(a, b, msg){
     test.strictSame(a, b, {}, msg);

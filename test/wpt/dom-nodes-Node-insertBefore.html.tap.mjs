@@ -1,6 +1,12 @@
 import "./wpthelp.mjs"
 const html = "<html><head><title>Node.insertBefore</title>\n<script src=\"/resources/testharness.js\"/>\n<script src=\"/resources/testharnessreport.js\"/>\n</head><body><div id=\"log\"/>\n<!-- First test shared pre-insertion checks that work similarly for replaceChild\n     and insertBefore -->\n<script/>\n<script src=\"pre-insertion-validation-notfound.js\"/>\n<script src=\"pre-insertion-validation-hierarchy.js\"/>\n<script/>\n</body></html>"
 const document = loadDOM(html)
+import fs from "fs";
+import vm from "vm";
+const src0 = `${process.env.WPT_ROOT}/dom/nodes/pre-insertion-validation-notfound.js`;
+vm.runInThisContext(fs.readFileSync(src0, "utf8"), src0)
+const src1 = `${process.env.WPT_ROOT}/dom/nodes/pre-insertion-validation-hierarchy.js`;
+vm.runInThisContext(fs.readFileSync(src1, "utf8"), src1)
 
   var insertFunc = Node.prototype.insertBefore;
 

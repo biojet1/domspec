@@ -12,9 +12,9 @@ WPT_DEST = environ.get("WPT_DEST") or "test/wpt"
 
 
 def ofHTML(path, opt):
-
-    full = join(WPT_ROOT, path)
-    tree = html.parse(full)
+    full = Path(join(WPT_ROOT, path))
+    is_xml = ".htm" not in full.suffix
+    tree = (is_xml and etree or html).parse(str(full))
 
     dest = join(WPT_DEST, "-".join([n for n in Path(path).parts if n]) + ".tap.mjs")
     if exists(dest) and stat(dest).st_size < 2:
@@ -25,13 +25,13 @@ def ofHTML(path, opt):
     root = tree.getroot()
     js = []
     inc_scripts = []
-    for script in root.xpath(r"//script"):
+    for script in root.iter("{*}script"):
         src = script.get("src")
         if src:
             if "testharness" in src:
                 pass
             else:
-                src = Path(full).parent / src
+                src = full.parent / src
                 inc_scripts.append(src.resolve())
         else:
             js.append(script.text)
@@ -41,19 +41,30 @@ def ofHTML(path, opt):
         fh = open(dest, "w")
     else:
         fh = stdout
+
     with fh as w:
-        w.write('import "./wpthelp.mjs"\n')
-        w.write(f"const html = {dumps(etree.tostring(root).decode('UTF-8'))}\n")
-        w.write(f"const document = loadDOM(html)\n")
+
+        def line(s):
+            w.write(s)
+            w.write("\n")
+
+        line(r'import * as all from "../../dist/all.js";')
+        line(r"for (const [k, v] of Object.entries(all)) {")
+        line(r"  global[k] = v;")
+        line(r"}")
+        line('import "./wpthelp.mjs"')
+        line(f"const html = {dumps(etree.tostring(root).decode('UTF-8'))}")
+        line(
+            f"const document = loadDOM(html, {is_xml and '`application/xml`' or '`text/html`'})"
+        )
+
         for i, src in enumerate(inc_scripts):
             if i < 1:
-                w.write(f'import fs from "fs";\n')
-                w.write(f'import vm from "vm";\n')
+                line(f'import fs from "fs";')
+                line(f'import vm from "vm";')
             src = src.relative_to(WPT_ROOT)
-            w.write(f"const src{i} = `${{process.env.WPT_ROOT}}/{src}`;\n")
-            w.write(
-                f'vm.runInThisContext(fs.readFileSync(src{i}, "utf8"), src{i})\n'
-            )
+            line(f"const src{i} = `${{process.env.WPT_ROOT}}/{src}`;")
+            line(f'vm.runInThisContext(fs.readFileSync(src{i}, "utf8"), src{i})')
         w.write("\n".join(js))
 
 

@@ -160,9 +160,9 @@ export class StyleAttr extends Attr {
 		return super.remove();
 	}
 
-	dumpXML() {
+	formatXML() {
 		let { mapq: map } = this;
-		return map && map.size > 0 ? super.dumpXML() : "";
+		return map && map.size > 0 ? super.formatXML() : "";
 	}
 
 

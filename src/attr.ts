@@ -10,11 +10,43 @@ export abstract class Attr extends Node {
 	namespaceURI?: string;
 	prefix?: string;
 	// [VALUE]?: string;
-	constructor(qname: string, lname?: string) {
+	// private constructor(qname: string, lname?: string) {
+	// 	super();
+	// 	this.name = qname;
+	// 	this.localName = lname || qname;
+	// }
+	constructor(
+		qualifiedName: string,
+		namespace?: string | null,
+		contentType?: string
+	) {
 		super();
-		this.name = qname;
-		this.localName = lname || qname;
+		let prefix, localName, tag;
+		const ns = namespace && namespace !== "" ? namespace : undefined;
+		const pos = qualifiedName.indexOf(":");
+
+		if (pos >= 0) {
+			prefix = qualifiedName.substring(0, pos);
+			localName = qualifiedName.substring(pos + 1);
+		} else {
+			localName = qualifiedName;
+		}
+		if (
+			(prefix && !ns) ||
+			(prefix === "xml" && ns !== XML) ||
+			((prefix === "xmlns" || qualifiedName === "xmlns") &&
+				ns !== XMLNS) ||
+			(ns === XMLNS && !(prefix === "xmlns" || qualifiedName === "xmlns"))
+		) {
+			throw new Error("NamespaceError");
+		}
+
+		this.localName = localName;
+		this.name = prefix ? `${prefix}:${localName}` : localName;
+		if (ns) this.namespaceURI = ns;
+		if (prefix) this.prefix = prefix;
 	}
+
 	get textContent() {
 		// https://dom.spec.whatwg.org/#dom-node-textcontent
 		return this.value;
@@ -61,18 +93,25 @@ export abstract class Attr extends Node {
 		const { name, value } = this;
 		return `${name}="${value.replace(/[<>&"\xA0]/g, rep)}"`;
 	}
-	dumpXML() {
+
+	formatXML() {
 		const { name, value } = this;
 		return `${name}="${value.replace(/[<>&"\xA0]/g, rep)}"`;
 	}
-	static create(qname: string, lname?: string) {
-		return new StringAttr(qname, lname);
+
+	static create(
+		qualifiedName: string,
+		namespace?: string | null,
+		contentType?: string
+	) {
+		return new StringAttr(qualifiedName, namespace, contentType);
 	}
+
 	cloneNode(deep?: boolean) {
 		const { ownerDocument, name, namespaceURI, value, localName, prefix } =
 			this;
 
-		const attr = new (this.constructor as any)(name, localName);
+		const attr = new (this.constructor as any)(name, namespaceURI);
 		if (ownerDocument) attr.ownerDocument = ownerDocument;
 		if (namespaceURI) attr.namespaceURI = namespaceURI;
 		// if (localName) attr.localName = localName;
@@ -92,9 +131,9 @@ export class StringAttr extends Attr {
 	set value(value: string) {
 		this[VALUE] = value;
 	}
-	dumpXML() {
+	formatXML() {
 		const { [VALUE]: val } = this;
-		return val ? super.dumpXML() : "";
+		return val ? super.formatXML() : "";
 	}
 }
 export abstract class Typed {
@@ -122,9 +161,9 @@ export class TypedAttr<T extends Typed> extends Attr {
 	// 	// 	? (this[VALUE] = T.parse(val))
 	// 	// 	: val || (this[VALUE] = T.parse());
 	// }
-	dumpXML() {
+	formatXML() {
 		const { [VALUE]: val } = this;
-		return val ? super.dumpXML() : "";
+		return val ? super.formatXML() : "";
 	}
 }
 
@@ -149,3 +188,4 @@ import { Node } from "./node.js";
 // <   &lt;
 // >   &gt;
 // &   &amp;
+import { XMLNS, XML } from "./namespace.js";

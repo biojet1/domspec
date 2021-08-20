@@ -13,10 +13,16 @@ export abstract class CharacterData extends ChildNode {
 		// https://dom.spec.whatwg.org/#dom-node-nodevalue
 		return this._data;
 	}
+
 	get textContent() {
 		// https://dom.spec.whatwg.org/#dom-node-textcontent
 		return this._data;
 	}
+
+	formatXML() {
+		return escape(this._data);
+	}
+
 	get data() {
 		return this._data;
 	}
@@ -29,10 +35,13 @@ export abstract class CharacterData extends ChildNode {
 				this._data = data + "";
 		}
 	}
+
 	set textContent(data: string) {
 		this.data = data;
 	}
-
+	set nodeValue(data: string) {
+		this.data = data;
+	}
 	appendData(data: string) {
 		switch (data) {
 			case undefined:
@@ -136,6 +145,9 @@ export class CDATASection extends Text {
 	toString() {
 		return `<![CDATA[${this._data}]]>`;
 	}
+	formatXML() {
+		return `<![CDATA[${this._data}]]>`;
+	}
 	get nodeName() {
 		return "#cdata-section";
 	}
@@ -156,6 +168,9 @@ export class Comment extends CharacterData {
 	toString() {
 		return `<!--${this._data}-->`;
 	}
+	formatXML() {
+		return `<!--${this._data}-->`;
+	}
 }
 
 export class ProcessingInstruction extends CharacterData {
@@ -173,6 +188,10 @@ export class ProcessingInstruction extends CharacterData {
 	}
 	// Extra
 	toString() {
+		const { target, _data } = this;
+		return `<? ${target} ${_data} ?>`;
+	}
+	formatXML() {
 		const { target, _data } = this;
 		return `<? ${target} ${_data} ?>`;
 	}

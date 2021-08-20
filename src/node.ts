@@ -17,12 +17,12 @@ export abstract class Node extends EventTarget {
 		// Always this
 		return this;
 	}
-	_link(prev: Node, next: Node, parent: ParentNode) {
+	_attach(prev: Node, next: Node, parent: ParentNode) {
 		this.parentNode = parent;
-		prev.linkRight(this.startNode);
-		return this.endNode.linkRight(next);
+		prev._linkr(this.startNode);
+		return this.endNode._linkr(next);
 	}
-	linkRight(node: Node) {
+	_linkr(node: Node) {
 		// [THIS]<->node
 		if (node === this) {
 			throw new Error(`Same node`);
@@ -31,7 +31,7 @@ export abstract class Node extends EventTarget {
 		node[PREV] = this;
 		return this;
 	}
-	unlink(owner?: Document) {
+	_detach(newOwner?: Document) {
 		const {
 			[PREV]: prev,
 			endNode: { [NEXT]: next },
@@ -41,7 +41,7 @@ export abstract class Node extends EventTarget {
 		// remove(prev, this, next);
 		// [PREV]<->[THIS]<->[NEXT] => [PREV]<->[NEXT]
 
-		prev && next && prev.linkRight(next);
+		prev && next && prev._linkr(next);
 
 		this[PREV] = undefined;
 		this.endNode[NEXT] = undefined;
@@ -51,13 +51,18 @@ export abstract class Node extends EventTarget {
 			// moCallback(this, parentNode);
 			// if (nodeType === ELEMENT_NODE) disconnectedCallback(this);
 		}
-		if (owner) {
-			owner.adoptNode(this);
+		if (newOwner) {
+			newOwner.adoptNode(this);
 		}
 		return this;
 	}
 	/// Extra
-
+	formatXML(): string {
+		throw new Error(`Not implemented for ${this.nodeType}`);
+	}
+	toString(): string {
+		return this.formatXML();
+	}
 	//// DOM
 	ownerDocument?: Document;
 	parentNode?: ParentNode | null;
@@ -66,9 +71,12 @@ export abstract class Node extends EventTarget {
 	get nodeValue(): string | null {
 		return null;
 	}
+	set nodeValue(data: string | null) {}
+
 	get textContent(): string | null {
 		return null;
 	}
+	set textContent(data: string | null) {}
 
 	isSameNode(node: Node) {
 		return this === node;
@@ -97,7 +105,7 @@ export abstract class Node extends EventTarget {
 		return null;
 	}
 	remove() {
-		this.unlink();
+		this._detach();
 	}
 
 	getRootNode(): Node {
@@ -112,8 +120,22 @@ export abstract class Node extends EventTarget {
 		// return this === node;
 	}
 	appendChild(node: Node) {
-		throw new TypeError(`Not implemented`);
+		throw new Error(`Not implemented`);
 	}
+
+	get firstChild(): ChildNode | null {
+		return null;
+	}
+	get lastChild(): ChildNode | null {
+		return null;
+	}
+	get previousSibling(): ChildNode | null {
+		return null;
+	}
+	get nextSibling(): ChildNode | null {
+		return null;
+	}
+
 	abstract cloneNode(deep?: boolean): Node;
 	/// DOM constants
 	static ELEMENT_NODE = 1;
@@ -139,10 +161,10 @@ export abstract class Node extends EventTarget {
 // 	if (next) next[PREV] = prev;
 // };
 
-import { EndNode, ParentNode } from "./parent-node.js";
-import { ChildNode } from "./child-node.js";
-import { Document } from "./document.js";
 import { EventTarget } from "./event-target.js";
+import { ChildNode } from "./child-node.js";
+import { EndNode, ParentNode } from "./parent-node.js";
+import { Document } from "./document.js";
 
 // Tag, Attr, Child, End
 // <Tag><Child><End><Tag><End><Tag><Attr><End><Child><Tag><Attr><Child><End>

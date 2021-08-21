@@ -62,7 +62,13 @@ global.assert_false = function (a, msg) {
 };
 
 global.assert_array_equals = function (a, b, msg) {
-  (current_t || tap).match(a, b, msg);
+  const t = current_t || tap;
+  t.strictSame(a.length, b.length, `len not eq: ${msg}`);
+  let n = b.length;
+
+  while (n-- > 0) {
+    t.strictSame(a[n], b[n], ` ${n}: ${msg}`);
+  }
 };
 
 global.assert_not_equals = function (actual, expected, description) {

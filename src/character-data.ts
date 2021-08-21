@@ -6,7 +6,7 @@ export abstract class CharacterData extends ChildNode {
 	_data: string;
 	constructor(data: string) {
 		super();
-		this._data = data;
+		this._data = data + "";
 	}
 
 	get nodeValue() {
@@ -142,6 +142,12 @@ export class Text extends CharacterData {
 }
 
 export class CDATASection extends Text {
+	constructor(data: string) {
+		super(data);
+		if (this._data.indexOf("]]>") >= 0) {
+			throw new Error(`InvalidCharacterError`);
+		}
+	}
 	toString() {
 		return `<![CDATA[${this._data}]]>`;
 	}
@@ -177,6 +183,10 @@ export class ProcessingInstruction extends CharacterData {
 	readonly target: string;
 	constructor(target: string, data: string) {
 		super(data);
+		if (this._data.indexOf("?>") >= 0 || !/^[a-zA-Z][^\s]*$/.test(target) ) {
+			throw new Error(`InvalidCharacterError`);
+		}
+
 		this.target = target;
 	}
 	//// Dom

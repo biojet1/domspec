@@ -5,11 +5,20 @@ export class HTMLTemplateElement extends HTMLElement {
 		return DocumentFragment.fromTemplate(this);
 	}
 }
+export class HTMLAnchorElement extends HTMLElement {
+	get href() {
+		const link = this.getAttributeNS(null, "href");
+		return link ? link : "";
+		// return link ? decodeURI(link) : "";
+	}
+	set href(value: string) {
+		this.setAttributeNS(null, "href", encodeURI(value));
+	}
+}
 
 import { Element } from "../element.js";
 import { DocumentFragment } from "../document-fragment.js";
 
-export class HTMLAnchorElement extends HTMLElement {}
 export class HTMLAreaElement extends HTMLElement {}
 export class HTMLAudioElement extends HTMLElement {}
 export class HTMLBRElement extends HTMLElement {}

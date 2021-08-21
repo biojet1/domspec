@@ -9,4 +9,5 @@ export * from "./document-type.js";
 export * from "./document-fragment.js";
 export * from "./window.js";
 export * from "./dom-parse.js";
+export * from "./dom-implementation.js";
 export * from "./html/element.js";

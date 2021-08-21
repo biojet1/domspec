@@ -301,30 +301,30 @@ export abstract class ParentNode extends ChildNode {
 		}
 	}
 
-	*elementsByTagName(name: string) {
-		let { [NEXT]: next, [END]: end } = this;
-		for (; next && next !== end; next = next[NEXT]) {
-			if (next.nodeType === 1) {
-				const el = next as any as Element;
-				const { localName } = el;
-				if (localName === name) {
-					yield el;
-				}
-			}
-		}
-	}
+	// *elementsByTagName(name: string) {
+	// 	let { [NEXT]: next, [END]: end } = this;
+	// 	for (; next && next !== end; next = next[NEXT]) {
+	// 		if (next.nodeType === 1) {
+	// 			const el = next as any as Element;
+	// 			const { localName } = el;
+	// 			if (localName === name) {
+	// 				yield el;
+	// 			}
+	// 		}
+	// 	}
+	// }
 
-	*elementsByClassName(name: string) {
-		let { [NEXT]: next, [END]: end } = this;
-		for (; next && next !== end; next = next[NEXT]) {
-			if (next.nodeType === 1) {
-				const el = next as any as Element;
-				if (el.hasAttribute("class") && el.classList.contains(name)) {
-					yield el;
-				}
-			}
-		}
-	}
+	// *elementsByClassName(name: string) {
+	// 	let { [NEXT]: next, [END]: end } = this;
+	// 	for (; next && next !== end; next = next[NEXT]) {
+	// 		if (next.nodeType === 1) {
+	// 			const el = next as any as Element;
+	// 			if (el.hasAttribute("class") && el.classList.contains(name)) {
+	// 				yield el;
+	// 			}
+	// 		}
+	// 	}
+	// }
 
 	getElementsByTagName(name: string) {
 		// return HTMLCollection.from(this.elementsByTagName(name));
@@ -348,17 +348,21 @@ export abstract class ParentNode extends ChildNode {
 	getElementsByClassName(name: string) {
 		// return HTMLCollection.from(this.elementsByClassName(name));
 		const self = this;
+		const names = (name + "")
+			.split(/[\t\n\f\r ]+/)
+			.filter((v) => v && v.length > 0);
 		return new (class extends HTMLCollection {
 			*[Symbol.iterator]() {
 				let { [NEXT]: next, [END]: end } = self;
+
 				for (; next && next !== end; next = next[NEXT]) {
 					if (next.nodeType === 1) {
 						const el = next as any as Element;
-						if (
-							el.hasAttribute("class") &&
-							el.classList.contains(name)
-						) {
-							yield el;
+						if (el.hasAttribute("class")) {
+							const cl = el.classList;
+							if (names.some((v) => cl.contains(v))) {
+								yield el;
+							}
 						}
 					}
 				}
@@ -445,94 +449,9 @@ export class EndNode extends Node {
 	}
 }
 
-// https://dom.spec.whatwg.org/#interface-nodelist
-export class NodeCollection<T> extends Array<T> {
-	// constructor(self: ParentNode) {
-	// 	let { firstElementChild: cur } = self;
-	// 	for (; cur; cur = cur.nextElementSibling) {
-	// 		nodes.push(cur);
-	// 	}
-	// 	return nodes;
-	// }
-	item(i: number): T | null {
-		return i < this.length ? this[i] : null;
-	}
-
-	// get length(): number {
-	// 	let { firstChild: cur } = this;
-	// 	let n = 0;
-	// 	for (; cur; cur = cur.nextSibling) {
-	// 		this[n++];
-	// 	}
-	// 	return (super.length = n);
-	// }
-}
-
-export class NodeList extends NodeCollection<ChildNode> {}
-// export class HTMLCollection extends NodeCollection<Element> {}
-// export class HTMLCollection {
-// 	[i: number]: Element;
-// 	self: ParentNode;
-// 	constructor(self: ParentNode) {
-// 		this.self = self;
-// 		const n = this.length;
-// 	}
-// 	item(index: number) {
-// 		if (index >= 0) {
-// 			let { firstElementChild: cur } = this.self;
-// 			for (; cur; cur = cur.nextElementSibling) {
-// 				if (index-- === 0) {
-// 					return cur;
-// 				}
-// 			}
-// 		}
-// 		return null;
-// 	}
-// 	get length() {
-// 		let i = 0;
-// 		let { firstElementChild: cur } = this.self;
-// 		for (; cur; cur = cur.nextElementSibling) {
-// 			this[i++] = cur;
-// 		}
-// 		const n = i;
-// 		while (i in this) {
-// 			delete this[i++];
-// 		}
-// 		return n;
-// 	}
-// }
-
-// export class HTMLCollectionI {
-// 	[i: number]: Element;
-// 	iter: Iterable<Element>;
-// 	constructor(iter: Iterable<Element>) {
-// 		this.iter = iter;
-// 		const n = this.length;
-// 	}
-// 	item(index: number) {
-// 		if (index >= 0) {
-// 			for (const cur of this.iter) {
-// 				if (index-- === 0) {
-// 					return cur;
-// 				}
-// 			}
-// 		}
-// 		return null;
-// 	}
-// 	get length() {
-// 		let i = 0;
-// 		for (const cur of this.iter) {
-// 			this[i++] = cur;
-// 		}
-// 		const n = i;
-// 		while (i in this) {
-// 			delete this[i++];
-// 		}
-// 		return n;
-// 	}
-// }
 export abstract class HTMLCollection {
 	[i: number]: Element;
+	// [id: string]: Element;
 	constructor() {
 		const n = this.length;
 	}
@@ -543,13 +462,29 @@ export abstract class HTMLCollection {
 					return cur;
 				}
 			}
+		} else if (index) {
+			return this.namedItem(index + "");
 		}
 		return null;
 	}
+
+	namedItem(name: string) {
+		for (const cur of this) {
+			if (cur.id == name) {
+				return cur;
+			}
+		}
+		return null;
+	}
+
 	get length() {
 		let i = 0;
+		let id;
 		for (const cur of this) {
 			this[i++] = cur;
+			if ((id = cur.id) && id.length > 0) {
+				(this as any)[id] = cur;
+			}
 		}
 		const n = i;
 		while (i in this) {
@@ -559,7 +494,7 @@ export abstract class HTMLCollection {
 	}
 	abstract [Symbol.iterator](): Iterator<Element>;
 }
-import { Node, PREV, NEXT, START, END } from "./node.js";
+import { Node, NodeList, PREV, NEXT, START, END } from "./node.js";
 import { ChildNode } from "./child-node.js";
 import { NonElementParentNode } from "./non-element-parent-node.js";
 import { Element } from "./element.js";

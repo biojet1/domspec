@@ -5,7 +5,7 @@ export abstract class Document extends NonElementParentNode {
 	contentType: string;
 	documentURI: string;
 	defaultView?: Window;
-	// characterSet?: string;
+	_domImpl?: DOMImplementationA;
 
 	protected constructor(contentType?: string) {
 		super();
@@ -20,8 +20,18 @@ export abstract class Document extends NonElementParentNode {
 	get compatMode() {
 		return "CSS1Compat";
 	}
-	get charset() {
+	get location() {
+		return null;
+	}
+	get characterSet() {
 		return "UTF-8";
+	}
+
+	get charset() {
+		return this.characterSet;
+	}
+	get inputEncoding() {
+		return this.characterSet;
 	}
 
 	get nodeType() {
@@ -63,24 +73,9 @@ export abstract class Document extends NonElementParentNode {
 		return "";
 	}
 
-
 	get implementation() {
-		const doc = this;
-		return new (class extends DOMImplementationA {
-			createDocumentType(
-				qualifiedName: string,
-				publicId: string,
-				systemId: string
-			) {
-				const node = super.createDocumentType(
-					qualifiedName,
-					publicId,
-					systemId
-				);
-				node.ownerDocument = doc;
-				return node;
-			}
-		})();
+		const { _domImpl } = this;
+		return _domImpl || (this._domImpl = new DOMImplementationA(this));
 	}
 
 	lookupNamespaceURI(prefix: string | null): string | null {
@@ -117,8 +112,10 @@ export abstract class Document extends NonElementParentNode {
 		node.ownerDocument = this;
 		return node;
 	}
-
 	createCDATASection(text: string) {
+		if (this.isHTML) {
+			throw new Error(`NotSupportedError`);
+		}
 		const node = new CDATASection(text);
 		node.ownerDocument = this;
 		return node;
@@ -129,7 +126,7 @@ export abstract class Document extends NonElementParentNode {
 		return node;
 	}
 	createAttribute(name: string) {
-		const node = Attr.create(name);
+		const node = Attr.create(name + "", null, this.contentType);
 		node.ownerDocument = this;
 		return node;
 	}
@@ -201,6 +198,10 @@ export abstract class Document extends NonElementParentNode {
 		do {
 			cur.ownerDocument = this;
 		} while (cur !== end && (cur = cur[NEXT] || end));
+		return node;
+	}
+	importNode(node: Node, deep = false) {
+		return this.adoptNode(node.cloneNode(deep));
 	}
 }
 
@@ -267,7 +268,25 @@ export class SVGDocument extends Document {
 	}
 }
 
-export abstract class DOMImplementationA extends DOMImplementation {
+export class DOMImplementationA extends DOMImplementation {
+	ownerDocument: Document;
+	constructor(ownerDocument: Document) {
+		super();
+		this.ownerDocument = ownerDocument;
+	}
+	createDocumentType(
+		qualifiedName: string,
+		publicId: string,
+		systemId: string
+	) {
+		const node = super.createDocumentType(
+			qualifiedName,
+			publicId,
+			systemId
+		);
+		node.ownerDocument = this.ownerDocument;
+		return node;
+	}
 	createDocument(
 		namespace?: string,
 		qualifiedName?: string,

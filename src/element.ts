@@ -63,6 +63,10 @@ export class Element extends ParentNode {
 		const node = this.getAttributeNode(name);
 		return node ? node.value : null;
 	}
+	getAttributeNS(ns: string | null, localName: string) {
+		const node = this.getAttributeNodeNS(ns, localName);
+		return node ? node.value : null;
+	}
 
 	getAttributeNode(name: string) {
 		let attr = this[NEXT];
@@ -100,7 +104,7 @@ export class Element extends ParentNode {
 		const node = Attr.create(qname);
 		node.value = value;
 		node.parentNode = this;
-
+		node.ownerDocument = this.ownerDocument;
 		// (attr && attr instanceof Attr ? attr : this).insertRight(node);
 		const ref = attr && attr instanceof Attr ? attr : this;
 		node._attach(ref, ref[NEXT] || this[END], this);
@@ -135,6 +139,7 @@ export class Element extends ParentNode {
 		const node = Attr.create(qname, ns);
 		node.value = value;
 		node.parentNode = this;
+		node.ownerDocument = this.ownerDocument;
 		// node.namespaceURI = ns;
 		// if (prefix) node.prefix = prefix;
 		//  (attr && attr instanceof Attr ? attr : this).insertRight(node);
@@ -217,7 +222,7 @@ export class Element extends ParentNode {
 	//// DOM: </Attributes>
 	//// DOM: </Content>
 
-	formatXML() : string {
+	formatXML(): string {
 		return Array.from(enumXMLDump(this, this[END])).join("");
 	}
 

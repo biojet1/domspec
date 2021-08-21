@@ -76,7 +76,6 @@ export function* enumXMLDump(start: Node, end: Node) {
 					if (s !== "") yield ` ${cur.formatXML()}`;
 				}
 				break;
-
 			case 3: // TEXT_NODE
 			case 4: // CDATA_SECTION_NODE
 			case 7: // PROCESSING_INSTRUCTION_NODE
@@ -119,8 +118,9 @@ export function* enumXMLDump(start: Node, end: Node) {
 				isOpened = true;
 				break;
 
-			// case 10: // DOCUMENT_TYPE_NODE
-			// 	break;
+			case 10: // DOCUMENT_TYPE_NODE
+				yield cur.formatXML();
+			 	break;
 			case 9: // DOCUMENT_NODE
 				break;
 			// ENTITY_REFERENCE_NODE 	5

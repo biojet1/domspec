@@ -12,11 +12,13 @@ WPT_DEST = environ.get("WPT_DEST") or "test/wpt"
 
 
 def ofHTML(path, opt):
-    full = Path(join(WPT_ROOT, path))
+    full = Path(path).resolve()
+
+    # full = Path(join(WPT_ROOT, path)).resolve()
     is_xml = ".htm" not in full.suffix
     tree = (is_xml and etree or html).parse(str(full))
 
-    dest = join(WPT_DEST, "-".join([n for n in Path(path).parts if n]) + ".tap.mjs")
+    dest = join(WPT_DEST, "-".join([n for n in full.relative_to(Path(WPT_ROOT)).parts if n]) + ".tap.mjs")
     if exists(dest) and stat(dest).st_size < 2:
         if opt.force is not True:
             print("SKIP", dest, file=stderr)
@@ -34,7 +36,7 @@ def ofHTML(path, opt):
                 src = full.parent / src
                 inc_scripts.append(src.resolve())
         else:
-            js.append(script.text)
+            script.text  and js.append(script.text)
             # print(script)
             script.text = None
     if opt.dry_run is False:

@@ -31,7 +31,7 @@ export abstract class Node extends EventTarget {
 		node[PREV] = this;
 		return this;
 	}
-	_detach(newOwner?: Document) {
+	_detach(newOwner?: Document | null) {
 		const {
 			[PREV]: prev,
 			endNode: { [NEXT]: next },
@@ -64,10 +64,19 @@ export abstract class Node extends EventTarget {
 		return this.formatXML();
 	}
 	//// DOM
-	ownerDocument?: Document;
+	_owner?: Document;
 	parentNode?: ParentNode | null;
 	abstract get nodeType(): number;
 	abstract get nodeName(): string;
+
+	get ownerDocument(): Document | null {
+		const { _owner } = this;
+		return _owner || null;
+	}
+	set ownerDocument(doc: Document | null) {
+		if (doc) this._owner = doc;
+		else delete this._owner;
+	}
 	get nodeValue(): string | null {
 		return null;
 	}
@@ -135,6 +144,18 @@ export abstract class Node extends EventTarget {
 	get nextSibling(): ChildNode | null {
 		return null;
 	}
+	get childNodes() {
+		return new NodeList();
+	}
+	hasChildNodes() {
+		return false;
+	}
+
+	get baseURI() {
+		const { ownerDocument } = this;
+		return ownerDocument ? ownerDocument.documentURI : "";
+		// return documentBaseURLSerialized(this._ownerDocument);
+	}
 
 	abstract cloneNode(deep?: boolean): Node;
 	/// DOM constants
@@ -152,14 +173,17 @@ export abstract class Node extends EventTarget {
 	static NOTATION_NODE = 12;
 }
 
+// https://dom.spec.whatwg.org/#interface-nodelist
+export class NodeCollection<T> extends Array<T> {
+	item(i: number): T | null {
+		return i < this.length ? this[i] : null;
+	}
+}
+export class NodeList extends NodeCollection<ChildNode> {}
+
 // Node <- ChildNode <- ParentNode
 // Node <- EndNode
 // Node <- AttrNode
-
-// export const setAdjacent = (prev: Node, next: Node) => {
-// 	if (prev) prev[NEXT] = next;
-// 	if (next) next[PREV] = prev;
-// };
 
 import { EventTarget } from "./event-target.js";
 import { ChildNode } from "./child-node.js";

@@ -8,6 +8,7 @@ function domParse(str: string, doc: Document, top: ParentNode) {
 	parser.on("error", (err) => {
 		throw new Error(`SaxesParser ${err.message}`);
 	});
+
 	parser.on("doctype", (dt) => {
 		let [name, pub, sys] = ["html", "", ""];
 
@@ -27,12 +28,15 @@ function domParse(str: string, doc: Document, top: ParentNode) {
 		node.ownerDocument = doc;
 		top.appendChild(node);
 	});
+
 	parser.on("text", (str: string) => {
 		if (top.nodeType !== 9) top.appendChild(doc.createTextNode(str));
 	});
+
 	parser.on("comment", (str: string) => {
 		top.appendChild(doc.createComment(str));
 	});
+
 	parser.on("cdata", (data) => {
 		top.appendChild(doc.createCDATASection(data));
 	});
@@ -130,29 +134,6 @@ export class DOMParser {
 		return doc;
 	}
 }
-
-// export interface Handler {
-//     onparserinit(parser: Parser): void;
-
-//     onreset(): void;
-
-//     onend(): void;
-//     onerror(error: Error): void;
-//     onclosetag(name: string): void;
-//     onopentagname(name: string): void;
-//     onattribute(
-//         name: string,
-//         value: string,
-//         quote?: string | undefined | null
-//     ): void;
-//     onopentag(name: string, attribs: { [s: string]: string }): void;
-//     ontext(data: string): void;
-//     oncomment(data: string): void;
-//     oncdatastart(): void;
-//     oncdataend(): void;
-//     oncommentend(): void;
-//     onprocessinginstruction(name: string, data: string): void;
-// }
 
 const ROOT_TAG = "parser_root";
 

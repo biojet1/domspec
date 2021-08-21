@@ -7,8 +7,8 @@ export abstract class Attr extends Node {
 	//// Dom
 	name: string;
 	localName: string;
-	namespaceURI?: string;
-	prefix?: string;
+	_ns?: string;
+	_prefix?: string;
 	// [VALUE]?: string;
 	// private constructor(qname: string, lname?: string) {
 	// 	super();
@@ -21,30 +21,54 @@ export abstract class Attr extends Node {
 		contentType?: string
 	) {
 		super();
-		let prefix, localName, tag;
 		const ns = namespace && namespace !== "" ? namespace : undefined;
-		const pos = qualifiedName.indexOf(":");
+		if (ns) {
+			let prefix, localName, tag;
+			const pos = qualifiedName.indexOf(":");
 
-		if (pos >= 0) {
-			prefix = qualifiedName.substring(0, pos);
-			localName = qualifiedName.substring(pos + 1);
+			if (pos >= 0) {
+				prefix = qualifiedName.substring(0, pos);
+				localName = qualifiedName.substring(pos + 1);
+			} else {
+				localName = qualifiedName;
+			}
+			if (
+				(prefix && !ns) ||
+				(prefix === "xml" && ns !== XML) ||
+				((prefix === "xmlns" || qualifiedName === "xmlns") &&
+					ns !== XMLNS) ||
+				(ns === XMLNS &&
+					!(prefix === "xmlns" || qualifiedName === "xmlns"))
+			) {
+				throw new Error("NamespaceError");
+			}
+
+			if (ns) this._ns = ns;
+			if (prefix) this._prefix = prefix;
+
+			switch (contentType) {
+				case "text/html":
+					this.localName = localName.toLowerCase();
+					this.name = (
+						prefix ? `${prefix}:${localName}` : localName
+					).toLowerCase();
+
+					break;
+				default:
+					this.localName = localName;
+					this.name = prefix ? `${prefix}:${localName}` : localName;
+			}
 		} else {
-			localName = qualifiedName;
+			switch (contentType) {
+				case "text/html":
+					this.name = this.localName = qualifiedName.toLowerCase();
+					break;
+				default:
+					this.name = this.localName = qualifiedName;
+			}
 		}
-		if (
-			(prefix && !ns) ||
-			(prefix === "xml" && ns !== XML) ||
-			((prefix === "xmlns" || qualifiedName === "xmlns") &&
-				ns !== XMLNS) ||
-			(ns === XMLNS && !(prefix === "xmlns" || qualifiedName === "xmlns"))
-		) {
-			throw new Error("NamespaceError");
-		}
-
-		this.localName = localName;
-		this.name = prefix ? `${prefix}:${localName}` : localName;
-		if (ns) this.namespaceURI = ns;
-		if (prefix) this.prefix = prefix;
+		if (!/^[_:A-Za-z][\w:_-]*$/.test(this.name))
+			throw new Error(`InvalidCharacterErr: '${this.name}'`);
 	}
 
 	get textContent() {
@@ -66,6 +90,12 @@ export abstract class Attr extends Node {
 	get specified() {
 		return true;
 	}
+	get namespaceURI() {
+		return this._ns || null;
+	}
+	get prefix() {
+		return this._prefix || null;
+	}
 	get nodeName() {
 		return this.name;
 	}
@@ -73,6 +103,14 @@ export abstract class Attr extends Node {
 		const { parentNode: node } = this;
 		return node || null;
 	}
+	// get ownerDocument(): Document | null {
+	// 	const { parentNode: node } = this;
+	// 	return node ? node.ownerDocument : null;
+	// }
+	// set ownerDocument(doc: Document | null) {
+	// 	const { parentNode: node } = this;
+	// 	if (node && doc) node.ownerDocument = doc;
+	// }
 	// isDefaultNamespace(namespaceURI?: string) {
 	// 	const { ownerElement } = this;
 	// 	return ownerElement && ownerElement.isDefaultNamespace(namespaceURI);
@@ -108,14 +146,13 @@ export abstract class Attr extends Node {
 	}
 
 	cloneNode(deep?: boolean) {
-		const { ownerDocument, name, namespaceURI, value, localName, prefix } =
-			this;
+		const { ownerDocument, name, _ns, value, localName, _prefix } = this;
 
-		const attr = new (this.constructor as any)(name, namespaceURI);
+		const attr = new (this.constructor as any)(name, _ns);
 		if (ownerDocument) attr.ownerDocument = ownerDocument;
-		if (namespaceURI) attr.namespaceURI = namespaceURI;
+		if (_ns) attr._ns = _ns;
 		// if (localName) attr.localName = localName;
-		if (prefix) attr.prefix = prefix;
+		if (_prefix) attr._prefix = _prefix;
 		if (value) attr.value = value;
 
 		return attr;
@@ -189,3 +226,4 @@ import { Node } from "./node.js";
 // >   &gt;
 // &   &amp;
 import { XMLNS, XML } from "./namespace.js";
+import { Document } from "./document.js";

@@ -1,4 +1,3 @@
-// export class Property extends Node {}
 export const VALUE = Symbol();
 
 export abstract class Attr extends Node {
@@ -9,12 +8,13 @@ export abstract class Attr extends Node {
 	localName: string;
 	_ns?: string;
 	_prefix?: string;
-	// [VALUE]?: string;
-	// private constructor(qname: string, lname?: string) {
-	// 	super();
-	// 	this.name = qname;
-	// 	this.localName = lname || qname;
-	// }
+	static create(
+		qualifiedName: string,
+		namespace?: string | null,
+		contentType?: string
+	) {
+		return new StringAttr(qualifiedName, namespace, contentType);
+	}
 	constructor(
 		qualifiedName: string,
 		namespace?: string | null,
@@ -103,14 +103,6 @@ export abstract class Attr extends Node {
 		const { parentNode: node } = this;
 		return node || null;
 	}
-	// get ownerDocument(): Document | null {
-	// 	const { parentNode: node } = this;
-	// 	return node ? node.ownerDocument : null;
-	// }
-	// set ownerDocument(doc: Document | null) {
-	// 	const { parentNode: node } = this;
-	// 	if (node && doc) node.ownerDocument = doc;
-	// }
 	// isDefaultNamespace(namespaceURI?: string) {
 	// 	const { ownerElement } = this;
 	// 	return ownerElement && ownerElement.isDefaultNamespace(namespaceURI);
@@ -119,14 +111,14 @@ export abstract class Attr extends Node {
 	// 	const { ownerElement } = this;
 	// 	return ownerElement && ownerElement.lookupNamespaceURI(prefix);
 	// }
-	// lookupPrefix(namespaceURI: string) {
+	// lookupPrefix(ns: string) {
 	// 	const { ownerElement } = this;
-	// 	return ownerElement && ownerElement.lookupNamespacePrefix(prefix);
+	// 	return ownerElement && ownerElement.lookupPrefix(ns);
 	// }
-	lookupNamespaceURI(prefix: string | null): string | null {
-		const { ownerElement: node } = this;
-		return node ? node.lookupNamespaceURI(prefix) : null;
-	}
+	// lookupNamespaceURI(prefix: string | null): string | null {
+	// 	const { ownerElement: node } = this;
+	// 	return node ? node.lookupNamespaceURI(prefix) : null;
+	// }
 	toString() {
 		const { name, value } = this;
 		return `${name}="${value.replace(/[<>&"\xA0]/g, rep)}"`;
@@ -136,15 +128,6 @@ export abstract class Attr extends Node {
 		const { name, value } = this;
 		return `${name}="${value.replace(/[<>&"\xA0]/g, rep)}"`;
 	}
-
-	static create(
-		qualifiedName: string,
-		namespace?: string | null,
-		contentType?: string
-	) {
-		return new StringAttr(qualifiedName, namespace, contentType);
-	}
-
 	cloneNode(deep?: boolean) {
 		const { ownerDocument, name, _ns, value, localName, _prefix } = this;
 
@@ -173,6 +156,7 @@ export class StringAttr extends Attr {
 		return val ? super.formatXML() : "";
 	}
 }
+
 export abstract class Typed {
 	abstract toString(): string;
 	// abstract constructor (value?:string) : Typed;
@@ -206,6 +190,7 @@ export class TypedAttr<T extends Typed> extends Attr {
 
 const rep = function (m: string) {
 	switch (m) {
+		// '   &apos;
 		// case "\xA0":
 		// 	return "&nbsp;";
 		case "&":
@@ -219,11 +204,7 @@ const rep = function (m: string) {
 	}
 	return m;
 };
+
 import { Node } from "./node.js";
-// "   &quot;
-// '   &apos;
-// <   &lt;
-// >   &gt;
-// &   &amp;
 import { XMLNS, XML } from "./namespace.js";
 import { Document } from "./document.js";

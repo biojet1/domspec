@@ -139,6 +139,40 @@ export class Text extends CharacterData {
 	toString() {
 		return escape(this._data);
 	}
+	splitText(offset: number) {
+		const { length, ownerDocument, parentNode } = this;
+
+		if (offset > length) {
+			throw new Error("IndexSizeError: offset > length");
+		}
+
+		const count = length - offset;
+
+		const text = this.substringData(offset, count);
+
+		if (parentNode) {
+			this.after(text);
+		} else {
+			const node = new Text(text);
+			const next = this.nextSibling;
+			this._linkr(node);
+			next && node._linkr(next);
+		}
+
+		this.replaceData(offset, count, "");
+		return this.nextSibling || this;
+	}
+	get wholeText() {
+		let wholeText = this.textContent;
+		let cur: Node | undefined;
+		for (cur = this; (cur = cur[PREV]) && cur.nodeType === 3; ) {
+			wholeText = (cur as Text).textContent + wholeText;
+		}
+		for (cur = this; (cur = cur[NEXT]) && cur.nodeType === 3; ) {
+			wholeText += (cur as Text).textContent;
+		}
+		return wholeText;
+	}
 }
 
 export class CDATASection extends Text {
@@ -163,6 +197,12 @@ export class CDATASection extends Text {
 }
 
 export class Comment extends CharacterData {
+	constructor(data: string) {
+		super(data);
+		// if (this._data.indexOf("--") >= 0) {
+		// 	throw new Error(`InvalidCharacterError`);
+		// }
+	}
 	//// Dom
 	get nodeType() {
 		return 8;
@@ -183,7 +223,7 @@ export class ProcessingInstruction extends CharacterData {
 	readonly target: string;
 	constructor(target: string, data: string) {
 		super(data);
-		if (this._data.indexOf("?>") >= 0 || !/^[a-zA-Z][^\s]*$/.test(target) ) {
+		if (this._data.indexOf("?>") >= 0 || !/^[a-zA-Z][^\s]*$/.test(target)) {
 			throw new Error(`InvalidCharacterError`);
 		}
 
@@ -214,6 +254,7 @@ export class ProcessingInstruction extends CharacterData {
 	}
 }
 
+import { NEXT, PREV, Node } from "./node.js";
 import { ChildNode } from "./child-node.js";
 
 // escape

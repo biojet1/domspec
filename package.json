@@ -11,11 +11,11 @@
     "c8test": "c8 npx tap --no-coverage --reporter=terse 'test/**/*.tap.?js'",
     "wpt": "c8 npx tap --no-coverage --reporter=terse 'test/wpt/**/*.tap.?js'",
     "c8report": "c8 report -r text-lcov > coverage/lcov.info",
+    "c8rephtml": "c8 report -r html",
     "html:switch": "env SWITCH=html node test/elements.js",
     "html:class": "env CLASS=html node test/elements.js",
     "html:import": "env IMPORT=html node test/elements.js",
     "compile": "tsc --sourcemap"
-
   },
   "author": "",
   "type": "module",

@@ -1,5 +1,8 @@
 export abstract class ParentNode extends ChildNode {
 	[END]: EndNode;
+	_children?: NodeArray;
+	// _children?: NodeCollection;
+	// _children?: NodeList;
 
 	//// Tree
 	constructor() {
@@ -73,7 +76,6 @@ export abstract class ParentNode extends ChildNode {
 	}
 
 	_before(ref: ChildNode | EndNode, nodes: Iterable<ChildNode>) {
-		let prev: Node = ref.endNode || this;
 		if (ref.parentNode != this) {
 			throw new Error("NotFoundError: unexpected reference child parent");
 		}
@@ -179,7 +181,6 @@ export abstract class ParentNode extends ChildNode {
 			}
 			if (node !== ref) {
 				node._detach(this.ownerDocument);
-				// node._attach(prev, prev[NEXT] || this[END], this);
 				node._attach(ref[PREV] || this, ref, this);
 			}
 		}
@@ -223,10 +224,16 @@ export abstract class ParentNode extends ChildNode {
 	}
 
 	replaceChild(node: ChildNode, child: ChildNode) {
+		// if (!node) throw new Error("NotFoundError");
+		if (!node || !child) {
+			throw new TypeError();
+		} else if (child.parentNode !== this) {
+			throw new Error("NotFoundError");
+		}
 		const ref = child.nextSibling || this[END];
 		child.remove();
 		this._before(ref, [node]);
-		return node;
+		return child;
 		// this.insertBefore(node, child.endNode[NEXT] as ChildNode);
 		// return child;
 	}
@@ -236,12 +243,37 @@ export abstract class ParentNode extends ChildNode {
 	}
 
 	get childNodes() {
-		const nodes = new NodeList();
+		let { _children } = this;
+		if (_children) {
+			let i = 0;
+			let { firstChild: cur } = this;
+			for (; cur; cur = cur.nextSibling) {
+				_children[i++] = cur;
+			}
+			_children.length = i;
+			return _children;
+		}
+		const nodes = (this._children = new NodeArray());
 		let { firstChild: cur } = this;
 		for (; cur; cur = cur.nextSibling) {
 			nodes.push(cur);
 		}
 		return nodes;
+		// const nodes = (this._children = new NodeList());
+		// let { firstChild: cur } = this;
+		// for (; cur; cur = cur.nextSibling) {
+		// 	nodes.push(cur);
+		// }
+		// return nodes;
+		// const self = this;
+		// return (this._children = new (class extends NodeCollection {
+		// 	*list() {
+		// 		let { firstChild: cur } = self;
+		// 		for (; cur; cur = cur.nextSibling) {
+		// 			yield cur;
+		// 		}
+		// 	}
+		// })());
 	}
 
 	get children() {
@@ -418,6 +450,31 @@ export abstract class ParentNode extends ChildNode {
 		this.replaceChildren();
 		parseDOM(html, this);
 	}
+
+	*_toNodes(nodes: Array<string | ChildNode>): IterableIterator<ChildNode> {
+		const { ownerDocument: doc } = this;
+		for (const node of nodes) {
+			if (typeof node === "string" || !node) {
+				if (doc) {
+					yield doc.createTextNode(node + "") as ChildNode;
+				}
+			} else
+				switch (node.nodeType) {
+					case undefined:
+						throw new Error(`Unexpected ${node}`);
+					case 11: {
+						for (const cur of (node as ParentNode).childNodes) {
+							yield cur;
+						}
+						break;
+					}
+					// case 1: {
+					// }
+					default:
+						yield node;
+				}
+		}
+	}
 }
 
 function* iterQuery(test: (node: Element) => boolean, elem: ParentNode) {
@@ -444,10 +501,13 @@ export class EndNode extends Node {
 	get nodeName() {
 		return "#end";
 	}
-	cloneNode(deep?: boolean): Node {
-		throw new Error("Not implemented");
-	}
 }
+
+// export class EmptyNodeCollection  {
+// 	[Symbol.iterator](){
+// 		return NodeCollection.empty;
+// 	}
+// }
 
 export abstract class HTMLCollection {
 	[i: number]: Element;
@@ -482,7 +542,7 @@ export abstract class HTMLCollection {
 		let id;
 		for (const cur of this) {
 			this[i++] = cur;
-			if ((id = cur.id) && id.length > 0) {
+			if (cur.nodeType === 1 && (id = cur.id) && id.length > 0) {
 				(this as any)[id] = cur;
 			}
 		}
@@ -494,7 +554,16 @@ export abstract class HTMLCollection {
 	}
 	abstract [Symbol.iterator](): Iterator<Element>;
 }
-import { Node, NodeList, PREV, NEXT, START, END } from "./node.js";
+
+import {
+	Node,
+	PREV,
+	NEXT,
+	START,
+	END,
+	NodeCollection,
+	NodeArray,
+} from "./node.js";
 import { ChildNode } from "./child-node.js";
 import { NonElementParentNode } from "./non-element-parent-node.js";
 import { Element } from "./element.js";

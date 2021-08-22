@@ -144,8 +144,8 @@ export abstract class Node extends EventTarget {
 	get nextSibling(): ChildNode | null {
 		return null;
 	}
-	get childNodes() {
-		return new NodeList();
+	get childNodes(): NodeArray {
+		return NodeArray.empty;
 	}
 	hasChildNodes() {
 		return false;
@@ -156,8 +156,9 @@ export abstract class Node extends EventTarget {
 		return ownerDocument ? ownerDocument.documentURI : "";
 		// return documentBaseURLSerialized(this._ownerDocument);
 	}
-
-	abstract cloneNode(deep?: boolean): Node;
+	cloneNode(deep?: boolean): Node {
+		throw new Error("Not implemented");
+	}
 	/// DOM constants
 	static ELEMENT_NODE = 1;
 	static ATTRIBUTE_NODE = 2;
@@ -174,12 +175,64 @@ export abstract class Node extends EventTarget {
 }
 
 // https://dom.spec.whatwg.org/#interface-nodelist
-export class NodeCollection<T> extends Array<T> {
-	item(i: number): T | null {
+// export class NodeCollection<T> extends Array<T> {
+// 	item(i: number): T | null {
+// 		return i < this.length ? this[i] : null;
+// 	}
+// }
+// export class NodeList extends NodeCollection<ChildNode> {}
+export class NodeArray extends Array<ChildNode> {
+	item(i: number): ChildNode | null {
 		return i < this.length ? this[i] : null;
 	}
+	static empty = new (class extends NodeArray {
+		get length() {
+			return 0;
+		}
+	})();
 }
-export class NodeList extends NodeCollection<ChildNode> {}
+
+export abstract class NodeCollection extends Array<ChildNode> {
+	// [i: number]: ChildNode;
+	constructor() {
+		super();
+		Object.setPrototypeOf(this, Array.prototype);
+		const n = this.length;
+	}
+	item(index: number) {
+		if (index >= 0) {
+			for (const cur of this.list()) {
+				if (index-- === 0) {
+					return cur;
+				}
+			}
+		}
+		return null;
+	}
+
+	get length() {
+		console.log("LEN", Array.from(this.list()));
+		let i = 0;
+		for (const cur of this.list()) {
+			super[i++] = cur;
+		}
+		return (super.length = i);
+		// const n = i;
+		// while (i in this) {
+		// 	delete this[i++];
+		// }
+		// return n;
+	}
+
+	set length(x: number) {
+		super.length = x;
+	}
+
+	abstract list(): IterableIterator<ChildNode>;
+	static empty = new (class extends NodeCollection {
+		*list() {}
+	})();
+}
 
 // Node <- ChildNode <- ParentNode
 // Node <- EndNode

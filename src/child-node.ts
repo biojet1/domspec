@@ -79,29 +79,30 @@ export abstract class ChildNode extends Node {
 		return next;
 	}
 
-	protected viablePreviousSibling(nodes: Array<string | ChildNode>) {
-		let cur = this.previousSibling;
-		while (cur) {
-			if (nodes.indexOf(cur) < 0) {
-				break;
-			} else {
-				cur = cur.previousSibling;
-			}
-		}
-		return cur;
-	}
+	// protected viablePreviousSibling(nodes: Array<string | ChildNode>) {
+	// 	let cur = this.previousSibling;
+	// 	while (cur) {
+	// 		if (nodes.indexOf(cur) < 0) {
+	// 			break;
+	// 		} else {
+	// 			cur = cur.previousSibling;
+	// 		}
+	// 	}
+	// 	return cur;
+	// }
 
 	after(...nodes: Array<string | ChildNode>) {
 		// this.parentNode?._after(this, this._toNodes(nodes));
 		const { parentNode: node } = this;
 		node?._before(
 			this.viableNextSibling(nodes) || node[END],
-			this._toNodes(nodes)
+			node._toNodes(nodes)
 		);
 	}
 
 	before(...nodes: Array<string | ChildNode>) {
-		this.parentNode?._before(this, this._toNodes(nodes));
+		const { parentNode: node } = this;
+		node?._before(this, node._toNodes(nodes));
 	}
 
 	replaceWith(...nodes: Array<string | ChildNode>) {
@@ -109,66 +110,10 @@ export abstract class ChildNode extends Node {
 		if (node) {
 			const next = this.viableNextSibling(nodes);
 			this.remove();
-			node._before(next || node[END], this._toNodes(nodes));
+			node._before(next || node[END], node._toNodes(nodes));
 		}
 	}
 
-	protected *_toNodes(
-		nodes: Iterable<string | ChildNode>
-	): IterableIterator<ChildNode> {
-		const { ownerDocument: doc } = this;
-		for (const node of nodes) {
-			if (typeof node === "string") {
-				if (doc) yield doc.createTextNode(node) as ChildNode;
-			} else if (!node) {
-				if (doc) yield doc.createTextNode(String(node)) as ChildNode;
-			} else if (11 === node.nodeType) {
-				// DOCUMENT_FRAGMENT_NODE (11).
-				if (this.nodeType === 9) {
-					if ((this as unknown as ParentNode).firstElementChild) {
-						if ((node as ParentNode).firstElementChild) {
-							throw new Error(`HierarchyRequestError`);
-						}
-					} else {
-						if (
-							(node as ParentNode).firstElementChild
-								?.nextElementSibling
-						) {
-							throw new Error(`HierarchyRequestError`);
-						}
-					}
-				}
-				for (const cur of node._toNodes(
-					(node as ParentNode).childNodes
-				)) {
-					yield cur;
-				}
-			} else {
-				yield node;
-			}
-		}
-	}
-	// protected convertNodes(
-	// 	nodes: Array<string | ChildNode>
-	// ) {
-	// 	const { ownerDocument: doc } = this;
-	// 	for (const node of nodes) {
-	// 		if (typeof node === "string") {
-	// 			if (doc) yield doc.createTextNode(node) as ChildNode;
-	// 		} else if (!node) {
-	// 			if (doc) yield doc.createTextNode(String(node)) as ChildNode;
-	// 		} else if (11 === node.nodeType) {
-	// 			// DOCUMENT_FRAGMENT_NODE (11).
-	// 			for (const cur of node._toNodes(
-	// 				(node as ParentNode).childNodes
-	// 			)) {
-	// 				yield cur;
-	// 			}
-	// 		} else {
-	// 			yield node;
-	// 		}
-	// 	}
-	// }
 	contains(node?: ChildNode) {
 		return this === node;
 	}
@@ -185,3 +130,5 @@ export abstract class ChildNode extends Node {
 import { ParentNode, EndNode } from "./parent-node.js";
 import { Element } from "./element.js";
 // import { Element } from "./element.js";
+// import { Text } from "./character-data.js";
+import { Document } from "./document.js";

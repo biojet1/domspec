@@ -9,6 +9,7 @@ export abstract class Document extends NonElementParentNode {
 
 	protected constructor(contentType?: string) {
 		super();
+		this.ownerDocument = this;
 		this.documentURI = "about:blank";
 		this.contentType =
 			contentType && contentType !== "" ? contentType : "application/xml";
@@ -203,6 +204,61 @@ export abstract class Document extends NonElementParentNode {
 	importNode(node: Node, deep = false) {
 		return this.adoptNode(node.cloneNode(deep));
 	}
+	*_toNodes(nodes: Array<string | ChildNode>): IterableIterator<ChildNode> {
+		for (const [i, node] of nodes.entries()) {
+			if (typeof node === "string" || !node) {
+				yield this.createTextNode(node + "") as ChildNode;
+			} else
+				switch (node.nodeType) {
+					case undefined:
+						throw new Error(`Unexpected ${node}`);
+					case 11:
+						{
+							if (this.firstElementChild) {
+								if ((node as ParentNode).firstElementChild) {
+									throw new Error(`HierarchyRequestError`);
+								}
+							} else {
+								if (
+									(node as ParentNode).firstElementChild
+										?.nextElementSibling
+								) {
+									throw new Error(`HierarchyRequestError`);
+								}
+							}
+							for (const cur of (node as ParentNode).childNodes) {
+								yield cur;
+							}
+							yield node;
+						}
+						break;
+					case 10: {
+						// DOCUMENT_TYPE_NODE
+						if (this.doctype) {
+							throw new Error(`HierarchyRequestError`);
+						}
+						yield node;
+						break;
+					}
+					case 1: {
+						let j = i;
+						for (const C = nodes.length; ++j < C; ) {
+							const n = nodes[j];
+							if (
+								n &&
+								typeof n !== "string" &&
+								n.nodeType === 1
+							) {
+								throw new Error(`HierarchyRequestError`);
+							}
+						}
+					}
+
+					default:
+						yield node;
+				}
+		}
+	}
 }
 
 function validateAndExtract(
@@ -315,6 +371,7 @@ export class DOMImplementationA extends DOMImplementation {
 }
 
 import { XMLNS, XML } from "./namespace.js";
+import { ChildNode } from "./child-node.js";
 import { EndNode, ParentNode } from "./parent-node.js";
 import { Element } from "./element.js";
 import { newElement } from "./elements.js";

@@ -27,8 +27,8 @@ global.loadDOM = function (xml, mime = "text/html") {
 };
 
 let current_t = null;
-global.test = function (fn, msg) {
-  tap.test(msg, function (t) {
+global.test = function (fn, msg, opt={}) {
+  tap.test(msg, opt, function (t) {
     current_t = t;
     const self = {
       add_cleanup: function (fn) {

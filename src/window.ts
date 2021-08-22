@@ -1,12 +1,9 @@
 /*
 s = """*/
-import { Node } from "./node.js";
 import { Document, HTMLDocument } from "./document.js";
-import { DOMTokenList } from "./token-list.js";
-import { DOMImplementation } from "./dom-implementation.js";
 import { EventTarget } from "./event-target.js";
-import { Attr } from "./attr.js";
 import * as html_elements from "./html/element.js";
+import * as all from "./all.js";
 
 // """
 
@@ -45,15 +42,18 @@ export class Window extends EventTarget {
 		// 		return img;
 		// 	}
 		// };
-		for (const k of Object.getOwnPropertyNames(html_elements)) {
-			Reflect.set(this, k, Reflect.get(html_elements, k));
+		if (!("HTMLDocument" in Window)) {
+			for (const k of Object.getOwnPropertyNames(html_elements)) {
+				Reflect.set(this, k, Reflect.get(html_elements, k));
+			}
+			for (const k of Object.getOwnPropertyNames(all)) {
+				Reflect.set(this, k, Reflect.get(all, k));
+			}
 		}
 	}
+
 	get self() {
 		return this;
-	}
-	get Node() {
-		return Node;
 	}
 
 	private setDocument(doc?: Document) {
@@ -70,25 +70,6 @@ export class Window extends EventTarget {
 	get document() {
 		let { _document } = this;
 		return _document || this.setDocument();
-	}
-
-	get DOMTokenList() {
-		return DOMTokenList;
-	}
-
-	get DOMImplementation() {
-		return DOMImplementation;
-	}
-
-	get EventTarget() {
-		return EventTarget;
-	}
-	get HTMLCollection() {
-		return HTMLCollection;
-	}
-
-	get Attr() {
-		return Attr;
 	}
 
 	get frames() {
@@ -120,6 +101,7 @@ export class Window extends EventTarget {
 		return _frames;
 	}
 }
+
 const frmwm = new WeakMap();
 
 export class TSDOM {
@@ -137,11 +119,3 @@ export class JSDOM extends TSDOM {
 	// 	this.document = window.document;
 	// }
 }
-// import { XMLNS, XML } from "./namespace.js";
-import { Element } from "./element.js";
-import { HTMLCollection } from "./parent-node.js";
-
-// import { Attr } from "./attr.js";
-// import { Comment, Text, CDATASection } from "./character-data.js";
-// import { DocumentFragment } from "./document-fragment.js";
-// import { DOMImplementation } from "./dom-implementation.js";

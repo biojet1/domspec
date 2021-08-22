@@ -34,7 +34,7 @@ jobs:
 
       - run: npm i codecov c8 typescript@rc --save-dev
 
-      - run: cat package-lock.json
+      # - run: cat package-lock.json
 
       - run: npm run build --if-present
 

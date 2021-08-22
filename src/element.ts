@@ -6,6 +6,7 @@ export class Element extends ParentNode {
 	//// Parse
 	_parsed_closed?: boolean;
 	//// Tree
+
 	//// DOM
 	localName: string;
 	tagName: string;

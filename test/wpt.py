@@ -9,7 +9,7 @@ from os import environ, stat
 
 WPT_ROOT = environ.get("WPT_ROOT")
 WPT_DEST = environ.get("WPT_DEST") or "test/wpt"
-
+SUFFIX = ".tap.mjs"
 
 def ofHTML(path, opt):
     full = Path(path).resolve()
@@ -18,7 +18,7 @@ def ofHTML(path, opt):
     is_xml = ".htm" not in full.suffix
     tree = (is_xml and etree or html).parse(str(full))
 
-    dest = join(WPT_DEST, "-".join([n for n in full.relative_to(Path(WPT_ROOT)).parts if n]) + ".tap.mjs")
+    dest = join(WPT_DEST, "-".join([n for n in full.relative_to(Path(WPT_ROOT)).parts if n]) + SUFFIX)
     if exists(dest) and stat(dest).st_size < 2:
         if opt.force is not True:
             print("SKIP", dest, file=stderr)

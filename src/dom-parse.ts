@@ -56,18 +56,18 @@ function domParse(str: string, doc: Document, top: ParentNode) {
 
 		const attrs = Object.entries(attributes);
 
-		attrs.sort(function (a, b) {
-			var nameA = a[0];
-			var nameB = b[0];
-			if (nameA < nameB) {
-				return 1;
-			}
-			if (nameA > nameB) {
-				return -1;
-			}
-			// names must be equal
-			return 0;
-		});
+		// attrs.sort(function (a, b) {
+		// 	var nameA = a[0];
+		// 	var nameB = b[0];
+		// 	if (nameA < nameB) {
+		// 		return 1;
+		// 	}
+		// 	if (nameA > nameB) {
+		// 		return -1;
+		// 	}
+		// 	// names must be equal
+		// 	return 0;
+		// });
 
 		for (const [key, { uri, value }] of attrs) {
 			tag.setAttributeNS(uri, key, value);
@@ -96,6 +96,32 @@ function domParse(str: string, doc: Document, top: ParentNode) {
 
 	parser.write(str);
 }
+
+// function domParse(str: string, doc: Document, top: ParentNode) {
+// 	const handler = {
+// 		onopentagname: function (name /*: string */) {
+// 			const pos = name.indexOf(":");
+// 			if (pos < 0) {
+// 				const tag = doc.createElement(name);
+// 				top.appendChild(tag);
+// 				top = tag;
+// 			}else{
+
+// 			}
+// 			// prefix =
+// 		},
+// 		onattribute(name /*: string */, value /*: string */) {},
+// 		onclosetag: function (name /*: string */) {},
+// 	};
+
+// 	// ontext(text /*: string */)
+// 	// onprocessinginstruction(name /*: string */, data /*: string */)
+// 	// oncomment(data /*: string */)
+// 	// oncommentend()
+// 	// oncdatastart()
+// 	// oncdataend()
+// 	// onerror(error /*: Error */)
+// }
 
 export const parseDOM = function (
 	str: string,

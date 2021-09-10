@@ -1,4 +1,9 @@
-export class HTMLElement extends Element {}
+export class HTMLElement extends Element {
+	hasAttribute(qName: string) {
+		return super.hasAttribute(qName.toLowerCase());
+	}
+
+}
 export class HTMLDivElement extends HTMLElement {}
 export class HTMLTemplateElement extends HTMLElement {
 	get content() {

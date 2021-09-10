@@ -1,75 +1,68 @@
 export const VALUE = Symbol();
-
+export const RE_NAME = /^[_:A-Za-z][\w:_-]*$/;
 export abstract class Attr extends Node {
 	//// Tree
 
 	//// Dom
 	name: string;
 	localName: string;
-	_ns?: string;
-	_prefix?: string;
-	static create(
-		qualifiedName: string,
-		namespace?: string | null,
-		contentType?: string
-	) {
-		return new StringAttr(qualifiedName, namespace, contentType);
-	}
-	constructor(
-		qualifiedName: string,
-		namespace?: string | null,
-		contentType?: string
-	) {
+	_ns?: string | null;
+	_prefix?: string | null;
+	// static create(qualifiedName: string, contentType?: string) {
+	// 	return new StringAttr(qualifiedName, undefined, contentType);
+	// }
+	// static createNS(
+	// 	qualifiedName: string,
+	// 	namespace?: string | null,
+	// 	contentType?: string
+	// ) {
+	// 	return new StringAttr(qualifiedName, namespace, contentType);
+	// }
+	// static new(name: string) {
+
+	// }
+	constructor(name: string, localName?: string) {
 		super();
-		const ns = namespace && namespace !== "" ? namespace : undefined;
-		if (ns) {
-			let prefix, localName, tag;
-			const pos = qualifiedName.indexOf(":");
-
-			if (pos >= 0) {
-				prefix = qualifiedName.substring(0, pos);
-				localName = qualifiedName.substring(pos + 1);
-			} else {
-				localName = qualifiedName;
-			}
-			if (
-				(prefix && !ns) ||
-				(prefix === "xml" && ns !== XML) ||
-				((prefix === "xmlns" || qualifiedName === "xmlns") &&
-					ns !== XMLNS) ||
-				(ns === XMLNS &&
-					!(prefix === "xmlns" || qualifiedName === "xmlns"))
-			) {
-				throw new Error("NamespaceError");
-			}
-
-			if (ns) this._ns = ns;
-			if (prefix) this._prefix = prefix;
-
-			switch (contentType) {
-				case "text/html":
-					this.localName = localName.toLowerCase();
-					this.name = (
-						prefix ? `${prefix}:${localName}` : localName
-					).toLowerCase();
-
-					break;
-				default:
-					this.localName = localName;
-					this.name = prefix ? `${prefix}:${localName}` : localName;
-			}
-		} else {
-			switch (contentType) {
-				case "text/html":
-					this.name = this.localName = qualifiedName.toLowerCase();
-					break;
-				default:
-					this.name = this.localName = qualifiedName;
-			}
-		}
-		if (!/^[_:A-Za-z][\w:_-]*$/.test(this.name))
-			throw new Error(`InvalidCharacterErr: '${this.name}'`);
+		this.name = name;
+		this.localName = localName || name;
 	}
+	// protected constructor(
+	// 	qualifiedName: string,
+	// 	namespace?: string | null,
+	// 	contentType?: string
+	// ) {
+	// 	super();
+	// 	if (!namespace) {
+	// 		switch (contentType) {
+	// 			case "text/html":
+	// 				this.name = this.localName = qualifiedName.toLowerCase();
+	// 				break;
+	// 			default:
+	// 				this.name = this.localName = qualifiedName;
+	// 		}
+	// 	} else {
+	// 		const [ns, prefix, localName] = validateAndExtract(
+	// 			namespace,
+	// 			qualifiedName
+	// 		);
+	// 		if (ns) this._ns = ns;
+	// 		if (prefix) this._prefix = prefix;
+	// 		switch (contentType) {
+	// 			case "text/html":
+	// 				this.localName = localName.toLowerCase();
+	// 				this.name = (
+	// 					prefix ? `${prefix}:${localName}` : localName
+	// 				).toLowerCase();
+	// 				break;
+	// 			default:
+	// 				this.localName = localName;
+	// 				this.name = prefix ? `${prefix}:${localName}` : localName;
+	// 		}
+	// 	}
+	// 	// console.log("Attr:", qualifiedName, namespace, contentType);
+	// 	// if (!/^[_:A-Za-z][\w:_-]*$/.test(this.name))
+	// 	// 	throw new Error(`InvalidCharacterErr: '${this.name}'`);
+	// }
 
 	get textContent() {
 		// https://dom.spec.whatwg.org/#dom-node-textcontent
@@ -103,22 +96,20 @@ export abstract class Attr extends Node {
 		const { parentNode: node } = this;
 		return node || null;
 	}
-	// isDefaultNamespace(namespaceURI?: string) {
-	// 	const { ownerElement } = this;
-	// 	return ownerElement && ownerElement.isDefaultNamespace(namespaceURI);
-	// }
-	// lookupNamespaceURI(prefix?: string) {
-	// 	const { ownerElement } = this;
-	// 	return ownerElement && ownerElement.lookupNamespaceURI(prefix);
-	// }
-	// lookupPrefix(ns: string) {
-	// 	const { ownerElement } = this;
-	// 	return ownerElement && ownerElement.lookupPrefix(ns);
-	// }
-	// lookupNamespaceURI(prefix: string | null): string | null {
-	// 	const { ownerElement: node } = this;
-	// 	return node ? node.lookupNamespaceURI(prefix) : null;
-	// }
+
+	isDefaultNamespace(namespaceURI: string) {
+		const { parentElement:node } = this;
+		return node ? node.isDefaultNamespace(namespaceURI) : false;
+	}
+	lookupNamespaceURI(prefix: string) {
+		const { parentElement:node } = this;
+		return node && node.lookupNamespaceURI(prefix);
+	}
+	lookupPrefix(ns: string) {
+		const { parentElement:node } = this;
+		return node && node.lookupPrefix(ns);
+	}
+
 	toString() {
 		const { name, value } = this;
 		return `${name}="${value.replace(/[<>&"\xA0]/g, rep)}"`;
@@ -131,14 +122,40 @@ export abstract class Attr extends Node {
 	cloneNode(deep?: boolean) {
 		const { ownerDocument, name, _ns, value, localName, _prefix } = this;
 
-		const attr = new (this.constructor as any)(name, _ns);
+		const attr = new (this.constructor as any)(name, localName);
 		if (ownerDocument) attr.ownerDocument = ownerDocument;
-		if (_ns) attr._ns = _ns;
+		if (_ns || _ns === null) attr._ns = _ns;
 		// if (localName) attr.localName = localName;
-		if (_prefix) attr._prefix = _prefix;
+		if (_prefix || _prefix === null) attr._prefix = _prefix;
 		if (value) attr.value = value;
 
 		return attr;
+	}
+
+	isEqualNode(node: Node) {
+		if (this === node) {
+			return true;
+		} else if (!node || this.nodeType !== node.nodeType) {
+			return false;
+		}
+		let {
+			namespaceURI: nsB,
+			prefix: prefixB,
+			localName: localB,
+			value: valB,
+		} = node as Attr;
+		let {
+			namespaceURI: nsA,
+			prefix: prefixA,
+			localName: localA,
+			value: valA,
+		} = this;
+		return (
+			(localA ? localA === localB : !localB) &&
+			(nsA ? nsA === nsB : !nsB) &&
+			// (prefixA ? prefixA === prefixB : !!prefixB) &&
+			valA === valB
+		);
 	}
 }
 
@@ -206,5 +223,8 @@ const rep = function (m: string) {
 };
 
 import { Node } from "./node.js";
-import { XMLNS, XML } from "./namespace.js";
+import { validateAndExtract } from "./namespace.js";
 import { Document } from "./document.js";
+// test/wpt/dom-nodes-Document-createAttribute.html.tap.mjs
+// test/wpt/dom-nodes-Document-importNode.html.tap.mjs
+// test/wpt/dom-nodes-Node-cloneNode.html.tap.mjs

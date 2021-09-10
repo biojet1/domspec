@@ -3,16 +3,15 @@ import { NonElementParentNode } from "./non-element-parent-node.js";
 export abstract class Document extends NonElementParentNode {
 	//// Dom
 	contentType: string;
-	documentURI: string;
+	documentURI?: string;
 	defaultView?: Window;
 	_domImpl?: DOMImplementationA;
 
 	protected constructor(contentType?: string) {
 		super();
-		this.ownerDocument = this;
+		// this.ownerDocument = this;
 		this.documentURI = "about:blank";
-		this.contentType =
-			contentType && contentType !== "" ? contentType : "application/xml";
+		this.contentType = contentType || "application/xml";
 	}
 
 	get URL() {
@@ -79,22 +78,39 @@ export abstract class Document extends NonElementParentNode {
 		return _domImpl || (this._domImpl = new DOMImplementationA(this));
 	}
 
-	lookupNamespaceURI(prefix: string | null): string | null {
+	lookupNamespaceURI(prefix: string): string | null {
+		if (!prefix) {
+			return HTML;
+		}
 		const { documentElement: node } = this;
 		return node && node.lookupNamespaceURI(prefix);
 	}
+	isDefaultNamespace(ns: string) {
+		if (this.isHTML) {
+			return HTML === ns;
+		}
+		const { documentElement: node } = this;
+		return node ? node.isDefaultNamespace(ns) : false;
+	}
+	lookupPrefix(ns: string) {
+		const { documentElement: node } = this;
+		return node && node.lookupPrefix(ns);
+	}
 
 	createElement(localName: string) {
-		const node = newElement(this.contentType, localName);
+		// const node = newElement(this.contentType, localName);
+		const node = createElement(this, localName);
 		node.ownerDocument = this;
 		return node;
+		// return
 	}
 
 	createElementNS(
 		ns: string | null | undefined,
 		qualifiedName: string
 	): Element {
-		const node = newElement(this.contentType, qualifiedName, ns);
+		// const node = newElement(this.contentType, qualifiedName, ns);
+		const node = createElement(this, qualifiedName, ns || "");
 		node.ownerDocument = this;
 		return node;
 	}
@@ -127,12 +143,33 @@ export abstract class Document extends NonElementParentNode {
 		return node;
 	}
 	createAttribute(name: string) {
-		const node = Attr.create(name + "", null, this.contentType);
+		// console.log("createAttribute:", name, this.contentType);
+		// const node = Attr.create(name + "", this.contentType);
+		if (!name) {
+			name += "";
+			if (!name) {
+				throw new Error(`InvalidCharacterErr: name='${name}'`);
+			}
+		}
+		checkName(name);
+		if (this.isHTML) {
+			name = name.toLowerCase();
+		}
+
+		const node = new StringAttr(
+			name,
+			this.isHTML ? name.toLowerCase() : name
+		);
 		node.ownerDocument = this;
 		return node;
 	}
-	createAttributeNS(ns: string | null | undefined, qualifiedName: string) {
-		const node = Attr.create(qualifiedName, ns, this.contentType);
+	createAttributeNS(nsu: string | null, qualifiedName: string) {
+		const [ns, prefix, localName] = validateAndExtract(nsu, qualifiedName);
+		const node = new StringAttr(qualifiedName, localName);
+		node._ns = ns;
+		node._prefix = prefix;
+		// console.log("createAttributeNS:", ns, qualifiedName, this.contentType);
+		// const node = Attr.createNS(qualifiedName + "", ns, this.contentType);
 		node.ownerDocument = this;
 		return node;
 	}
@@ -155,10 +192,10 @@ export abstract class Document extends NonElementParentNode {
 	}
 
 	get isHTML() {
-		return false;
+		return this.contentType == "text/html";
 	}
 	get isSVG() {
-		return false;
+		return this.contentType == "image/svg+xml";
 	}
 
 	cloneNode(deep?: boolean) {
@@ -181,24 +218,46 @@ export abstract class Document extends NonElementParentNode {
 					case 10: // DOCUMENT_TYPE_NODE
 						cur.cloneNode()._attach(end[PREV] || node, end, node);
 						break;
-					case 3: // TEXT_NODE
-					case 4: // CDATA_SECTION_NODE
-					case 2: // ATTRIBUTE_NODE
-					case 9: // DOCUMENT_NODE
-					case 11: // DOCUMENT_FRAGMENT_NODE
-					case -1:
+					// case 3: // TEXT_NODE
+					// case 4: // CDATA_SECTION_NODE
+					// case 2: // ATTRIBUTE_NODE
+					// case 9: // DOCUMENT_NODE
+					// case 11: // DOCUMENT_FRAGMENT_NODE
+					// case -1:
+					default:
 						throw new Error(`Unexpected ${cur.nodeType}`);
-						break;
+					// break;
 				}
 			}
 		}
 		return node;
 	}
 	adoptNode(node: Node) {
-		let { startNode: cur, endNode: end } = node;
-		do {
-			cur.ownerDocument = this;
-		} while (cur !== end && (cur = cur[NEXT] || end));
+		switch (node.nodeType) {
+			// case 10: // DOCUMENT_TYPE_NODE
+			// 	node.remove();
+			// 	break;
+			case 9: // DOCUMENT_NODE
+			case -1:
+				throw new Error(`NotSupportedError`);
+		}
+		let { startNode: cur, endNode: end, parentNode, ownerDocument } = node;
+		parentNode && node.remove();
+		/*if (this.isHTML && (!ownerDocument || !ownerDocument.isHTML)) {
+			do {
+				cur.ownerDocument = this;
+				if (cur instanceof Element) {
+					const { tagName, namespaceURI } = cur;
+					if (namespaceURI === "http://www.w3.org/1999/xhtml") {
+						cur.tagName = tagName.toUpperCase();
+					}
+				}
+			} while (cur !== end && (cur = cur[NEXT] || end));
+		} else*/ {
+			do {
+				cur.ownerDocument = this;
+			} while (cur !== end && (cur = cur[NEXT] || end));
+		}
 		return node;
 	}
 	importNode(node: Node, deep = false) {
@@ -261,32 +320,6 @@ export abstract class Document extends NonElementParentNode {
 	}
 }
 
-function validateAndExtract(
-	namespace: string | null,
-	qualifiedName: string
-): [string | null, string | null, string] {
-	let prefix = null,
-		localName = qualifiedName,
-		pos = qualifiedName.indexOf(":");
-
-	const ns = namespace === "" || !namespace ? null : namespace;
-
-	if (pos >= 0) {
-		prefix = qualifiedName.substring(0, pos);
-		localName = qualifiedName.substring(pos + 1);
-	}
-	if (
-		(prefix !== null && ns === null) ||
-		(prefix === "xml" && ns !== XML) ||
-		((prefix === "xmlns" || qualifiedName === "xmlns") && ns !== XMLNS) ||
-		(ns === XMLNS && !(prefix === "xmlns" || qualifiedName === "xmlns"))
-	) {
-		throw new Error("NamespaceError");
-	}
-
-	return [ns, prefix, localName];
-}
-
 export class XMLDocument extends Document {
 	constructor(mimeType: string = "application/xml") {
 		super(mimeType);
@@ -300,14 +333,19 @@ export class HTMLDocument extends Document {
 	get isHTML() {
 		return true;
 	}
+	// createElement(localName: string) {
+	// 	return this.createElementNS(HTML, localName);
+	// }
 	static setup(titleText?: string) {
 		const d = new HTMLDocument();
 		const root = d.createElement("html");
 		const head = d.createElement("head");
 		const title = d.createElement("title");
 		d.appendChild(new DocumentType("html"));
-		title.appendChild(d.createTextNode(titleText || ""));
-		head.appendChild(title);
+		if (titleText) {
+			title.appendChild(d.createTextNode(titleText || ""));
+			head.appendChild(title);
+		}
 		root.appendChild(head);
 		root.appendChild(d.createElement("body"));
 		d.appendChild(root);
@@ -322,6 +360,9 @@ export class SVGDocument extends Document {
 	get isSVG() {
 		return true;
 	}
+	// createElement(localName: string) {
+	// 	return this.createElementNS(SVG, localName);
+	// }
 }
 
 export class DOMImplementationA extends DOMImplementation {
@@ -348,7 +389,8 @@ export class DOMImplementationA extends DOMImplementation {
 		qualifiedName?: string,
 		doctype?: DocumentType
 	) {
-		var doc = Document.fromNS(namespace);
+		// const doc = Document.fromNS(namespace);
+		const doc = new XMLDocument();
 		if (doctype) {
 			// if (doctype.ownerDocument) {
 			// 	throw new Error(
@@ -363,6 +405,14 @@ export class DOMImplementationA extends DOMImplementation {
 				doc.createElementNS(namespace || null, qualifiedName)
 			);
 		}
+		switch (namespace) {
+			case "http://www.w3.org/1999/xhtml":
+				doc.contentType = "application/xhtml+xml";
+				break;
+			case "http://www.w3.org/2000/svg":
+				doc.contentType = "image/svg+xml";
+				break;
+		}
 		return doc;
 	}
 	createHTMLDocument(titleText = "") {
@@ -370,12 +420,12 @@ export class DOMImplementationA extends DOMImplementation {
 	}
 }
 
-import { XMLNS, XML } from "./namespace.js";
+import { HTML, SVG, validateAndExtract, checkName } from "./namespace.js";
 import { ChildNode } from "./child-node.js";
 import { EndNode, ParentNode } from "./parent-node.js";
 import { Element } from "./element.js";
-import { newElement } from "./elements.js";
-import { Attr } from "./attr.js";
+import { newElement, createElement } from "./elements.js";
+import { Attr, StringAttr } from "./attr.js";
 import {
 	Comment,
 	Text,

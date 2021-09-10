@@ -9,27 +9,36 @@ export class Element extends ParentNode {
 
 	//// DOM
 	localName: string;
-	tagName: string;
-	namespaceURI?: string;
-	prefix?: string;
+	_tag?: string;
+	_ns?: string;
+	_prefix?: string;
 	[DATASET]?: any;
 
-	// constructor() {
-	// 	super();
-	// 	this.localName = this.tagName = "";
-	// }
 	constructor(name: string, ns?: string, prefix?: string, tag?: string) {
 		super();
 		this.localName = name;
-		this.tagName = tag || (prefix && `${prefix}:${name}`) || name;
+		// this.tagName = tag || (prefix && `${prefix}:${name}`) || name;
 		if (ns) {
-			this.namespaceURI = ns;
-			if (prefix) this.prefix = prefix;
+			this._ns = ns;
+			if (prefix) this._prefix = prefix;
 		}
 	}
+	#tagName() {
+		const qName = this.qualifiedName;
+		return this?.ownerDocument?.isHTML && this._ns === HTML
+			? qName.toUpperCase()
+			: qName;
+	}
+
 	get qualifiedName() {
 		const { localName, prefix } = this;
 		return prefix ? `${prefix}:${localName}` : localName;
+	}
+	get prefix() {
+		return this._prefix || null;
+	}
+	get namespaceURI() {
+		return this._ns || null;
 	}
 
 	//// DOM: <specialGetters>
@@ -40,6 +49,10 @@ export class Element extends ParentNode {
 
 	get nodeName() {
 		return this.tagName;
+	}
+
+	get tagName() {
+		return this._tag || (this._tag = this.#tagName());
 	}
 
 	get id() {
@@ -64,100 +77,102 @@ export class Element extends ParentNode {
 		const node = this.getAttributeNode(name);
 		return node ? node.value : null;
 	}
+
 	getAttributeNS(ns: string | null, localName: string) {
 		const node = this.getAttributeNodeNS(ns, localName);
 		return node ? node.value : null;
 	}
 
 	getAttributeNode(name: string) {
+		if (this.ownerDocument?.isHTML && this._ns === HTML) {
+			name = name.toLowerCase();
+		}
 		let attr = this[NEXT];
 		for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
-			if (!attr.namespaceURI && attr.name === name) return attr;
+			// if (attr.name === name) return attr;
+			// if (attr.localName === name) return attr;
+			if (attr.name === name) return attr;
 		}
 		return null;
 	}
 
-	getAttributeNodeNS(ns: string | null, localName: string) {
-		if (ns && ns != "") {
-			let attr = this[NEXT];
-			for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
-				if (attr.namespaceURI === ns) {
-					if (attr.localName === localName) {
-						return attr;
-					}
+	getAttributeNodeNS(nsu: string | null, localName: string) {
+		// console.log("getAttributeNodeNS:", [localName, ns]);
+
+		// const [ns, prefix, lname] = validateAndExtract(nsu, localName);
+
+		let attr = this[NEXT];
+		for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
+			if (attr.localName === localName) {
+				if (nsu ? attr.namespaceURI === nsu : !attr.namespaceURI) {
+					return attr;
 				}
 			}
-		} else {
-			return this.getAttributeNode(localName);
 		}
+
 		return null;
 	}
-	setAttribute(qname: string, value: string) {
+	setAttribute(name: string, value: string) {
+		let lname;
 		let attr = this[NEXT];
+		if (this.ownerDocument?.isHTML && this._ns === HTML) {
+			name = name.toLowerCase();
+		}
+		checkName(name);
 		for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
-			const { namespaceURI, name } = attr;
-			if (!namespaceURI && qname === name) {
+			// if (name === attr.localName) {
+			// 	attr.value = value;
+			// 	return;
+			// }
+			if (name === attr.name) {
 				attr.value = value;
 				return;
 			}
 		}
-
-		const node = Attr.create(qname);
+		const node = new StringAttr(name);
 		node.value = value;
-		node.parentNode = this;
 		node.ownerDocument = this.ownerDocument;
-		// (attr && attr instanceof Attr ? attr : this).insertRight(node);
-		const ref = attr && attr instanceof Attr ? attr : this;
+		const ref =
+			(attr && (attr instanceof Attr ? attr : attr[PREV])) || this;
 		node._attach(ref, ref[NEXT] || this[END], this);
 	}
-	setAttributeNS(ns: string | null, qname: string, value: string) {
-		let prefix, lname;
-		if (ns === "" || !ns) {
-			return this.setAttribute(qname, value);
-			// } else if (qname.length <= 0) {
-			// 	throw new Error("Empty attribute name");
-			// } else {
-			// 	const pos = qname.indexOf(":");
-			// 	if (pos < 0) {
-			// 		prefix = null;
-			// 		lname = qname;
-			// 	} else {
-			// 		prefix = qname.substring(0, pos);
-			// 		lname = qname.substring(pos + 1);
-			// 	}
-			// 	if (prefix === "" || !prefix) prefix = null;
-		}
-
+	setAttributeNS(nms: string | null, qname: string, value: string) {
 		let attr = this[NEXT];
-
+		const [ns, prefix, lname] = validateAndExtract(nms, qname);
 		for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
-			const { namespaceURI, name } = attr;
-			if (namespaceURI === ns && name === qname) {
+			const { namespaceURI, localName } = attr;
+			if (namespaceURI === ns && localName === lname) {
 				attr.value = value;
 				return;
 			}
+			// if (namespaceURI === ns && localName === qname) {
+			// 	attr.value = value;
+			// 	return;
+			// }
 		}
-		const node = Attr.create(qname, ns);
+
+		const node = new StringAttr(qname, lname);
+		node._ns = ns;
+		node._prefix = prefix;
 		node.value = value;
-		node.parentNode = this;
 		node.ownerDocument = this.ownerDocument;
-		// node.namespaceURI = ns;
-		// if (prefix) node.prefix = prefix;
-		//  (attr && attr instanceof Attr ? attr : this).insertRight(node);
-		const ref = attr && attr instanceof Attr ? attr : this;
+		const ref =
+			(attr && (attr instanceof Attr ? attr : attr[PREV])) || this;
 		node._attach(ref, ref[NEXT] || this[END], this);
-		// node._attach(attr, attr[NEXT], this);
 	}
 	setAttributeNode(node: Attr) {
 		return this.setAttributeNodeNS(node);
 	}
 	setAttributeNodeNS(node: Attr) {
+		const { parentNode } = node;
 		const prev = this.getAttributeNodeNS(
 			node.namespaceURI || null,
 			node.localName
 		);
 		if (node === prev) {
 			return node;
+		} else if (parentNode) {
+			throw new Error(`InuseAttributeError`);
 		} else if (prev) {
 			// prev.insertLeft(node).remove();
 			const ref = prev[PREV] || this;
@@ -172,7 +187,8 @@ export class Element extends ParentNode {
 			// 	// attr.insertLeft(node);
 
 			// }
-			const ref = attr && attr instanceof Attr ? attr : this;
+			const ref =
+				(attr && (attr instanceof Attr ? attr : attr[PREV])) || this;
 			node.remove();
 			node._attach(ref, ref[NEXT] || this[END], this);
 		}
@@ -195,14 +211,29 @@ export class Element extends ParentNode {
 		this.removeAttributeNS(node.namespaceURI || null, node.localName);
 	}
 
-	hasAttribute(qName: string) {
-		return !!this.getAttributeNode(qName);
+	hasAttribute(name: string) {
+		if (this.ownerDocument?.isHTML && this.namespaceURI === HTML) {
+			name = name.toLowerCase();
+		}
+		let attr = this[NEXT];
+		for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
+			// if (attr.name === name || attr.localName === name) return true;
+			if (attr.name === name) return true;
+		}
+		return false;
 	}
+
+	hasAttributes() {
+		let attr = this[NEXT];
+		return attr && attr instanceof Attr;
+	}
+
 	hasAttributeNS(ns: string, localName: string) {
 		return !!this.getAttributeNodeNS(ns, localName);
 	}
 
 	toggleAttribute(name: string, force?: boolean) {
+		checkName(name);
 		if (this.hasAttribute(name)) {
 			if (!force) {
 				this.removeAttribute(name);
@@ -219,22 +250,32 @@ export class Element extends ParentNode {
 	get attributes() {
 		return new NamedNodeMap(this);
 	}
+	getAttributeNames() {
+		return Array.from(this.attributes).map((a) => a.name);
+	}
 
 	//// DOM: </Attributes>
+	// <selectors>
+	matches(selectors: string) {
+		const test = prepareMatch(this, selectors + "");
+		return test(this);
+	}
+	closest(selectors: string) {
+		let parentElement: Element | null = this;
+		const test = prepareMatch(parentElement, selectors + "");
+		do {
+			if (test(parentElement)) {
+				return parentElement;
+			}
+		} while ((parentElement = parentElement.parentElement));
+		return null;
+	}
+	// </selectors>
+
 	//// DOM: </Content>
 
 	formatXML(): string {
 		return Array.from(enumXMLDump(this, this[END])).join("");
-	}
-
-	get outerHTML() {
-		return Array.from(enumXMLDump(this, this[END])).join("");
-	}
-
-	set outerHTML(html: string) {
-		this.replaceChildren();
-		parseDOM(html, this);
-		this.replaceWith(...this.children);
 	}
 
 	get innerText() {
@@ -243,11 +284,11 @@ export class Element extends ParentNode {
 
 	//// DOM: </Content>
 
-	lookupNamespaceURI(prefix: string | null): string | null {
-		if (prefix === "" || !prefix) prefix = null;
-		const { namespaceURI } = this;
+	lookupNamespaceURI(prefix: string): string | null {
+		const { namespaceURI, prefix: this_prefix } = this;
 
-		if (namespaceURI && this.prefix === prefix) return namespaceURI;
+		if (namespaceURI && this_prefix ? this_prefix === prefix : !prefix)
+			return namespaceURI || null;
 
 		let attr = this[NEXT];
 		for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
@@ -264,6 +305,30 @@ export class Element extends ParentNode {
 		const { parentElement: parent } = this;
 
 		return parent ? parent.lookupNamespaceURI(prefix) : null;
+	}
+	lookupPrefix(ns: string): string | null {
+		if (!ns) return null;
+		const { namespaceURI, prefix } = this;
+
+		if (namespaceURI === ns && prefix) return prefix;
+
+		let attr = this[NEXT];
+		for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
+			if (attr.namespaceURI === XMLNS) {
+				const { prefix: prefixA, value: valueA } = attr;
+				if (prefixA === "xmlns" && valueA === ns) {
+					return attr.localName;
+				}
+			}
+		}
+		const { parentElement: parent } = this;
+
+		return parent ? parent.lookupPrefix(ns) : null;
+	}
+
+	isDefaultNamespace(namespaceURI: string) {
+		const ns1 = this.lookupNamespaceURI("");
+		return ns1 ? ns1 === namespaceURI : !namespaceURI;
 	}
 
 	insertAdjacentElement(position: string, element: ChildNode) {
@@ -347,7 +412,9 @@ export class Element extends ParentNode {
 			return node.proxy;
 		}
 	}
-
+	set style(value: string) {
+		this.setAttribute("style", value);
+	}
 	get classList() {
 		const attr = this.getAttributeNode("class");
 		if (!attr) {
@@ -442,6 +509,82 @@ export class Element extends ParentNode {
 		}
 		return node;
 	}
+
+	isEqualNode(node: Node) {
+		// console.log("isEqualNode", this.nodeName, node.nodeName);
+		if (this === node) {
+			return true;
+		} else if (!node || this.nodeType !== node.nodeType) {
+			return false;
+		}
+		let {
+			namespaceURI: nsB,
+			prefix: prefixB,
+			localName: localB,
+			attributes: attrsB,
+		} = node as Element;
+		let {
+			namespaceURI: nsA,
+			prefix: prefixA,
+			localName: localA,
+			attributes: attrsA,
+		} = this;
+		if (
+			!localA !== !localB ||
+			localA !== localB ||
+			!nsA !== !nsB ||
+			nsA !== nsB ||
+			!prefixA !== !prefixB ||
+			prefixA !== prefixB ||
+			attrsB.length !== attrsA.length
+		) {
+			return false;
+		}
+
+		A: for (const a of attrsA) {
+			for (const b of attrsB) {
+				if (a.isEqualNode(b)) {
+					continue A;
+				}
+			}
+			return false;
+		}
+
+		let { firstChild: curB } = node as ParentNode;
+		let { firstChild: curA } = this;
+
+		for (;;) {
+			if (curA && curB) {
+				if (!curA.isEqualNode(curB)) {
+					return false;
+				}
+				curA = curA.nextSibling;
+				curB = curB.nextSibling;
+			} else {
+				return !!curA === !!curB;
+			}
+		}
+
+		// return true;
+	}
+}
+
+// function checkName(name: string) {
+// 	if (!RE_NAME.test(name)) {
+// 		throw new Error(`InvalidCharacterErr: '${name}'`);
+// 	}
+// 	return true;
+// }
+
+function checkQName(name: string) {
+	if (!name) {
+		throw new Error(`InvalidCharacterErr: !'${name}'`);
+	} else if (name.indexOf(":") < 0) {
+		return checkName(name);
+	} else if (!/^[_A-Za-z]\w*:[_A-Za-z][\w_-]*$/.test(name)) {
+		throw new Error(`InvalidCharacterErr: '${name}'`);
+	}
+	return true;
 }
 
 function toCamelCase(name: string) {
@@ -518,10 +661,12 @@ export const dsHandler = {
 };
 
 import { XMLNS } from "./namespace.js";
-import { Attr } from "./attr.js";
+import { StringAttr, Attr } from "./attr.js";
 import { ChildNode } from "./child-node.js";
 import { parseDOM } from "./dom-parse.js";
 import { StyleAttr } from "./attr-style.js";
 import { ClassAttr } from "./attr-class.js";
 import { NamedNodeMap } from "./named-node-map.js";
 import { enumXMLDump } from "./dom-serialize.js";
+import { validateAndExtract, checkName, HTML } from "./namespace.js";
+import { prepareMatch } from "./css/match.js";

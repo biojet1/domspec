@@ -1,6 +1,6 @@
 export abstract class ParentNode extends ChildNode {
 	[END]: EndNode;
-	_children?: NodeArray;
+	// _children?: NodeList;
 	// _children?: NodeCollection;
 	// _children?: NodeList;
 
@@ -76,8 +76,11 @@ export abstract class ParentNode extends ChildNode {
 	}
 
 	_before(ref: ChildNode | EndNode, nodes: Iterable<ChildNode>) {
+		let { ownerDocument, nodeType } = this;
 		if (ref.parentNode != this) {
 			throw new Error("NotFoundError: unexpected reference child parent");
+		} else if (nodeType === 9) {
+			ownerDocument = this as unknown as Document;
 		}
 		for (const node of nodes) {
 			if (node instanceof ParentNode) {
@@ -90,7 +93,7 @@ export abstract class ParentNode extends ChildNode {
 			switch (node.nodeType) {
 				case 11: {
 					// DOCUMENT_FRAGMENT_NODE
-					if (this.nodeType === 9) {
+					if (nodeType === 9) {
 						const doc = this as unknown as Document;
 						let cur = node.firstChild;
 						while (cur) {
@@ -125,7 +128,7 @@ export abstract class ParentNode extends ChildNode {
 					break;
 				}
 				case 1: // ELEMENT_NODE
-					if (this.nodeType === 9) {
+					if (nodeType === 9) {
 						if ((this as unknown as Document).firstElementChild) {
 							throw new Error(`HierarchyRequestError`);
 						}
@@ -144,7 +147,7 @@ export abstract class ParentNode extends ChildNode {
 					break;
 
 				case 3: // TEXT_NODE
-					if (this.nodeType === 9) {
+					if (nodeType === 9) {
 						throw new Error(`HierarchyRequestError`);
 					}
 					break;
@@ -160,7 +163,7 @@ export abstract class ParentNode extends ChildNode {
 				case 8: // COMMENT_NODE
 					break;
 				case 10: // DOCUMENT_TYPE_NODE
-					if (this.nodeType === 9) {
+					if (nodeType === 9) {
 						const doc = this as unknown as Document;
 						if (doc.doctype) {
 							throw new Error(`HierarchyRequestError`);
@@ -180,10 +183,13 @@ export abstract class ParentNode extends ChildNode {
 					}
 			}
 			if (node !== ref) {
-				node._detach(this.ownerDocument);
+				node._detach(ownerDocument);
 				node._attach(ref[PREV] || this, ref, this);
 			}
 		}
+		// let { _children } = this;
+		// _children && this.childNodes;
+		// _children_map.get(this)?.putChildren(this);
 	}
 
 	insertBefore(node: ChildNode, before?: ChildNode | EndNode | null) {
@@ -218,12 +224,20 @@ export abstract class ParentNode extends ChildNode {
 	}
 
 	removeChild(node: ChildNode) {
+		if (!node || !(node instanceof ChildNode)) throw new TypeError();
 		if (node.parentNode !== this) throw new Error("NotFoundError");
 		node.remove();
+		// const { _children } = this;
+		// _children && _children.putChildren(this);
 		return node;
 	}
 
 	replaceChild(node: ChildNode, child: ChildNode) {
+		// console.error(
+		// 	"replaceChild child.parentNode",
+		// 	child.nodeName,
+		// 	child.parentNode && child.parentNode.nodeName
+		// );
 		// if (!node) throw new Error("NotFoundError");
 		if (!node || !child) {
 			throw new TypeError();
@@ -238,42 +252,34 @@ export abstract class ParentNode extends ChildNode {
 		// return child;
 	}
 
+	_on_child_detached(node: Node) {
+		// _children_map?.get(this)?.putChildren(this);
+		// _children_map?.get(this)?.length;
+	}
+	_on_child_attached(node: Node) {
+		// _children_map?.get(this)?.putChildren(this);
+		// _children_map?.get(this)?.length;
+	}
+
 	hasChildNodes() {
 		return !!this.lastChild;
 	}
 
-	get childNodes() {
-		let { _children } = this;
-		if (_children) {
-			let i = 0;
-			let { firstChild: cur } = this;
-			for (; cur; cur = cur.nextSibling) {
-				_children[i++] = cur;
-			}
-			_children.length = i;
-			return _children;
-		}
-		const nodes = (this._children = new NodeArray());
-		let { firstChild: cur } = this;
-		for (; cur; cur = cur.nextSibling) {
-			nodes.push(cur);
-		}
-		return nodes;
-		// const nodes = (this._children = new NodeList());
-		// let { firstChild: cur } = this;
-		// for (; cur; cur = cur.nextSibling) {
-		// 	nodes.push(cur);
-		// }
-		// return nodes;
-		// const self = this;
-		// return (this._children = new (class extends NodeCollection {
-		// 	*list() {
-		// 		let { firstChild: cur } = self;
-		// 		for (; cur; cur = cur.nextSibling) {
-		// 			yield cur;
-		// 		}
-		// 	}
-		// })());
+	get childNodes(): Children /*NodeList */ {
+		// let { _children } = this;
+		// return (_children || (this._children = new NodeList())).putChildren(
+		// 	this
+		// );
+
+		let cm;
+
+		return (
+			_children_map.get(this) ||
+			// (_children_map.set(this, (cm = new NodeList()).putChildren(this)),
+			// cm)
+			// (_children_map.set(this, (cm = NodeList.create(this))), cm)
+			(_children_map.set(this, (cm = new Children(this))), cm)
+		);
 	}
 
 	get children() {
@@ -386,7 +392,6 @@ export abstract class ParentNode extends ChildNode {
 		return new (class extends HTMLCollection {
 			*[Symbol.iterator]() {
 				let { [NEXT]: next, [END]: end } = self;
-
 				for (; next && next !== end; next = next[NEXT]) {
 					if (next.nodeType === 1) {
 						const el = next as any as Element;
@@ -403,16 +408,24 @@ export abstract class ParentNode extends ChildNode {
 	}
 
 	querySelector(selectors: string): Element | null {
-		const test = prepareMatch(this, selectors);
-		for (const node of iterQuery(test, this)) {
-			return node;
+		if (arguments.length > 0) {
+			const test = prepareMatch(this, selectors + "");
+			for (const node of iterQuery(test, this)) {
+				return node;
+			}
+		} else {
+			throw new TypeError();
 		}
 		return null;
 	}
 
 	querySelectorAll(selectors: string): Element[] {
-		const test = prepareMatch(this, selectors);
-		return Array.from(iterQuery(test, this));
+		if (arguments.length > 0) {
+			const test = prepareMatch(this, selectors + "");
+			return Array.from(iterQuery(test, this));
+		} else {
+			throw new TypeError();
+		}
 	}
 
 	get textContent(): string | null {
@@ -451,31 +464,57 @@ export abstract class ParentNode extends ChildNode {
 		parseDOM(html, this);
 	}
 
-	*_toNodes(nodes: Array<string | ChildNode>): IterableIterator<ChildNode> {
-		const { ownerDocument: doc } = this;
-		for (const node of nodes) {
-			if (typeof node === "string" || !node) {
-				if (doc) {
-					yield doc.createTextNode(node + "") as ChildNode;
-				}
-			} else
-				switch (node.nodeType) {
-					case undefined:
-						throw new Error(`Unexpected ${node}`);
-					case 11: {
-						for (const cur of (node as ParentNode).childNodes) {
-							yield cur;
-						}
-						break;
-					}
-					// case 1: {
-					// }
-					default:
-						yield node;
-				}
+	// static childrenOf(parent: ParentNode) {
+	// 	const cm = ParentNode._children_map.get(parent);
+	// 	if(cm){
+
+	// 	}
+
+	// 	const nodes = (this._children = new NodeList());
+	// 	let { firstChild: cur } = this;
+	// 	for (; cur; cur = cur.nextSibling) {
+	// 		nodes.push(cur);
+	// 	}
+	// 	return nodes;
+	// }
+
+	isEqualNode(node: Node) {
+		if (this === node) {
+			return true;
+		} else if (!node || this.nodeType !== node.nodeType) {
+			return false;
 		}
+
+		let { firstChild: curB } = node as ParentNode;
+		let { firstChild: curA } = this;
+		for (;;) {
+			if (curA && curB) {
+				if (!curA.isEqualNode(curB)) {
+					return false;
+				}
+				curA = curA.nextSibling;
+				curB = curB.nextSibling;
+			} else {
+				return !curA === !curB;
+			}
+		}
+
+		return false;
+	}
+	get qualifiedName() {
+		return this.nodeName;
+	}
+	get outerHTML() {
+		return Array.from(enumXMLDump(this, this[END])).join("");
+	}
+
+	set outerHTML(html: string) {
+		this.replaceChildren();
+		parseDOM(html, this);
+		this.replaceWith(...this.children);
 	}
 }
+const _children_map = new WeakMap<ParentNode>();
 
 function* iterQuery(test: (node: Element) => boolean, elem: ParentNode) {
 	let { [NEXT]: next, [END]: end } = elem;
@@ -500,6 +539,18 @@ export class EndNode extends Node {
 	}
 	get nodeName() {
 		return "#end";
+	}
+	isEqualNode(node: Node) {
+		if (this === node) {
+			return true;
+		} else if (!node || this.nodeType !== node.nodeType) {
+			return false;
+		}
+		let { parentNode: parentB } = node as EndNode;
+		let { parentNode: parentA } = this;
+		return parentA && parentB
+			? parentA.isEqualNode(parentB)
+			: !parentA === !parentB;
 	}
 }
 
@@ -546,6 +597,8 @@ export abstract class HTMLCollection {
 				(this as any)[id] = cur;
 			}
 		}
+		// this.splice(i);
+		// return i;
 		const n = i;
 		while (i in this) {
 			delete this[i++];
@@ -562,7 +615,8 @@ import {
 	START,
 	END,
 	NodeCollection,
-	NodeArray,
+	NodeList,
+	Children,
 } from "./node.js";
 import { ChildNode } from "./child-node.js";
 import { NonElementParentNode } from "./non-element-parent-node.js";
@@ -570,3 +624,4 @@ import { Element } from "./element.js";
 import { prepareMatch } from "./css/match.js";
 import { enumXMLDump } from "./dom-serialize.js";
 import { parseDOM } from "./dom-parse.js";
+import { Document } from "./document.js";

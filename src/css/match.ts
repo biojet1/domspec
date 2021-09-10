@@ -59,12 +59,12 @@ const adapter = {
 	},
 
 	getChildren: function (node: ChildNode) {
-		return node instanceof ParentNode ? node.childNodes : [];
+		return node instanceof ParentNode ? Array.from(node.childNodes) : [];
 	},
 
 	getSiblings: function (elem: ChildNode) {
 		const { parentNode } = elem;
-		return parentNode ? parentNode.childNodes : [elem];
+		return parentNode ? Array.from(parentNode.childNodes) : [elem];
 	},
 
 	findOne: function (

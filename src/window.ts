@@ -100,8 +100,20 @@ export class Window extends EventTarget {
 		}
 		return _frames;
 	}
-}
 
+	requestAnimationFrame(callback:any) {
+		const now = new globalThis.Date().getTime();
+		const timeToCall = Math.max(0, 16 - (now - lastTime));
+		return globalThis.setTimeout(() => {
+			lastTime = now + timeToCall;
+			callback(lastTime);
+		}, timeToCall);
+	}
+	cancelAnimationFrame(id: number) {
+		globalThis.clearTimeout(id);
+	}
+}
+let lastTime = 0;
 const frmwm = new WeakMap();
 
 export class TSDOM {

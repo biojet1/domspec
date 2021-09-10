@@ -4,8 +4,9 @@ export abstract class CharacterData extends ChildNode {
 	//// Dom
 	// https://dom.spec.whatwg.org/#interface-characterdata
 	_data: string;
-	constructor(data: string) {
+	constructor(data?: string) {
 		super();
+		// this._data = data ? data + "" : data === undefined ? "" : data + "";
 		this._data = data + "";
 	}
 
@@ -26,6 +27,7 @@ export abstract class CharacterData extends ChildNode {
 	get data() {
 		return this._data;
 	}
+
 	set data(data: string) {
 		switch (data) {
 			case null:
@@ -39,9 +41,11 @@ export abstract class CharacterData extends ChildNode {
 	set textContent(data: string) {
 		this.data = data;
 	}
+
 	set nodeValue(data: string) {
 		this.data = data;
 	}
+
 	appendData(data: string) {
 		switch (data) {
 			case undefined:
@@ -53,12 +57,15 @@ export abstract class CharacterData extends ChildNode {
 				this._data = _data + data;
 		}
 	}
+
 	deleteData(offset: number, count: number) {
 		this.replaceData(offset, count);
 	}
+
 	insertData(offset: number, data: string) {
 		this.replaceData(offset, 0, data);
 	}
+
 	replaceData(offset: number, count: number, data?: string) {
 		const { _data } = this;
 		const { length } = _data;
@@ -86,6 +93,7 @@ export abstract class CharacterData extends ChildNode {
 			this._data = _data.slice(0, offset) + b;
 		}
 	}
+
 	substringData(offset: number, count: number) {
 		const { _data } = this;
 		const { length } = _data;
@@ -110,6 +118,7 @@ export abstract class CharacterData extends ChildNode {
 			return _data.substr(offset, count);
 		}
 	}
+
 	get length() {
 		return this._data.length;
 	}
@@ -125,11 +134,22 @@ export abstract class CharacterData extends ChildNode {
 		return node;
 	}
 
+	isEqualNode(node: Node): boolean {
+		if (this === node) {
+			return true;
+		} else if (!node ) {
+			return false;
+		}
+		const { nodeType, data } = this;
+		const { nodeType:nodeType2, data:data2 } = (node as CharacterData);
+		return nodeType2 === nodeType && data ? (data === data2):!data2;
+
+		// return this.data === (node as CharacterData).data;
+	}
+
 	// Extra
 }
-
-export class Text extends CharacterData {
-	//// Dom
+export class TextNode extends CharacterData {
 	get nodeType() {
 		return 3;
 	}
@@ -172,6 +192,13 @@ export class Text extends CharacterData {
 			wholeText += (cur as Text).textContent;
 		}
 		return wholeText;
+	}
+}
+
+export class Text extends TextNode {
+	constructor(data?: string) {
+		super(data);
+		this.ownerDocument = globalThis.document as any as Document;
 	}
 }
 
@@ -252,10 +279,21 @@ export class ProcessingInstruction extends CharacterData {
 		if (node) node.ownerDocument = ownerDocument;
 		return node;
 	}
+
+	isEqualNode(node: Node) {
+		if (this === node) {
+			return true;
+		} else if (!node || this.nodeType !== node.nodeType) {
+			return false;
+		}
+		const { target, data } = node as ProcessingInstruction;
+		return this.data === data && this.target === target;
+	}
 }
 
 import { NEXT, PREV, Node } from "./node.js";
 import { ChildNode } from "./child-node.js";
+import { Document } from "./document.js";
 
 // escape
 

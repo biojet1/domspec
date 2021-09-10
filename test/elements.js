@@ -139,6 +139,25 @@ switch (process.env.SWITCH) {
 				.join("")
 		);
 		break;
+	case "svg":
+		import("../dist/all.js").then(function (m) {
+			const x = Object.entries(m)
+				.filter(([k, v]) => /^SVG.+/.test(k) && v?.TAGS)
+				.map(
+					([k, v]) =>
+						(v.TAGS.length > 0
+							? v.TAGS.map((x) => `\t\t\t\tcase "${x}":\n`).join(
+									""
+							  )
+							: `\t\t\t\tdefault:\n`) +
+						`\t\t\t\t\treturn new ${k}(localName, ns, prefix, tag);\n`
+				)
+				.join("");
+
+			console.log(x);
+			// console.log(x.map(([k, v]) => [k, v, v.TAGS]));
+		});
+		break;
 }
 switch (process.env.CLASS) {
 	case "html":
@@ -163,4 +182,17 @@ switch (process.env.IMPORT) {
 				.join("\n")
 		);
 		break;
+	case "svg":
+		import("../dist/all.js").then(function (m) {
+			const x = Object.entries(m)
+				.filter(([k, v]) => /^SVG.+/.test(k) && v?.TAGS)
+				.map(([k, v]) => k)
+				.sort()
+				.map((x) => `\t${x},`)
+				.join("\n")
+			console.log(x);
+			// console.log(x.map(([k, v]) => [k, v, v.TAGS]));
+		});
+		break;
+
 }

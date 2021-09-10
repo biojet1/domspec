@@ -5,6 +5,7 @@ from pathlib import Path
 from sys import stdout, stderr
 from json import dumps
 from os import environ, stat
+from tempfile import gettempdir
 
 
 WPT_ROOT = environ.get("WPT_ROOT")
@@ -12,6 +13,11 @@ WPT_DEST = environ.get("WPT_DEST") or "test/wpt"
 SUFFIX = ".tap.mjs"
 
 def ofHTML(path, opt):
+    print("CONV", path, file=stderr)
+    if opt.exec:
+        wpt_dest = Path(gettempdir())/"wpt"
+    else:
+        wpt_dest = Path(WPT_DEST)
     full = Path(path).resolve()
 
     # full = Path(join(WPT_ROOT, path)).resolve()
@@ -23,23 +29,25 @@ def ofHTML(path, opt):
         if opt.force is not True:
             print("SKIP", dest, file=stderr)
             return
-    # print("MAKE", dest, file=stderr)
     root = tree.getroot()
     js = []
     inc_scripts = []
+    seen_testharness = None
     for script in root.iter("{*}script"):
         src = script.get("src")
         if src:
             if "testharness" in src:
-                pass
+                seen_testharness = True
             else:
-                src = full.parent / src
+                src = full.parent / src.lstrip('/')
                 inc_scripts.append(src.resolve())
         else:
             script.text  and js.append(script.text)
             # print(script)
             script.text = None
-    if opt.dry_run is False:
+    if not seen_testharness:
+        return
+    elif opt.dry_run is False:
         fh = open(dest, "w")
     else:
         fh = stdout
@@ -54,7 +62,7 @@ def ofHTML(path, opt):
         line(r"for (const [k, v] of Object.entries(all)) {")
         line(r"  global[k] = v;")
         line(r"}")
-        line('import "./wpthelp.mjs"')
+        line(f'import "../wpthelp.mjs"')
         line(f"const html = {dumps(etree.tostring(root).decode('UTF-8'))}")
         line(
             f"const document = loadDOM(html, {is_xml and '`application/xml`' or '`text/html`'})"
@@ -68,6 +76,10 @@ def ofHTML(path, opt):
             line(f"const src{i} = `${{process.env.WPT_ROOT}}/{src}`;")
             line(f'vm.runInThisContext(fs.readFileSync(src{i}, "utf8"), src{i})')
         w.write("\n".join(js))
+
+    # if opt.exec:
+    #     pass
+
 
 
 # ;
@@ -83,6 +95,8 @@ parser = argparse.ArgumentParser(description="Convert WPT test o tap")
 #                    help='sum the integers (default: find the max)')
 
 parser.add_argument("--force", action="store_true", default=False, help="Overwrite!")
+parser.add_argument("--files", action="store", help="Files!")
+parser.add_argument("--exec", action="store_true", default=False, help="Exec")
 parser.add_argument("--dry-run", action="store_true", default=False, help="Test run")
 parser.add_argument("paths", nargs="*")
 
@@ -90,11 +104,15 @@ args = parser.parse_args()
 if args.paths:
     for p in args.paths:
         ofHTML(p, args)
+elif args.files:
+    for l in open(args.files):
+        ofHTML(l.strip(), args)
 else:
     parser.print_help()
 
 
 # print args.accumulate(args.integers)
 
+# env -C $WPT_ROOT find dom/nodes -maxdepth 1 -name '*.*htm*' -or -name '*.svg' > /tmp/toscr.txt
 
 # ofHTML("dom/nodes/CharacterData-appendData.html")

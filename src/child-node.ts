@@ -42,10 +42,6 @@ export abstract class ChildNode extends Node {
 		return null;
 	}
 
-	get parentElement(): Element | null {
-		const { parentNode: node } = this;
-		return node && node.nodeType == 1 ? (node as Element) : null;
-	}
 
 	get nextElementSibling(): Element | null {
 		let { nextSibling: node } = this;
@@ -106,11 +102,21 @@ export abstract class ChildNode extends Node {
 	}
 
 	replaceWith(...nodes: Array<string | ChildNode>) {
-		const { parentNode: node } = this;
-		if (node) {
+		const { parentNode: parent } = this;
+		if (parent) {
 			const next = this.viableNextSibling(nodes);
 			this.remove();
-			node._before(next || node[END], node._toNodes(nodes));
+			parent._before(next || parent[END], parent._toNodes(nodes));
+		} else {
+			// throw new Error(`No parent: ${this.nodeName}`);
+			// const { ownerDocument, [PREV]: prev } = this;
+			// for (const node of this._toNodes(nodes)) {
+			// 	const { startNode, endNode } = node;
+			// 	node._detach(ownerDocument);
+			// 	this._linkl(endNode);
+			// 	startNode._linkl(prev);
+			// }
+			// this.remove();
 		}
 	}
 
@@ -123,6 +129,33 @@ export abstract class ChildNode extends Node {
 			throw new Error(`HierarchyRequestError: Not implemented`);
 		} else {
 			throw new TypeError();
+		}
+	}
+
+	*_toNodes(nodes: Array<string | ChildNode>): IterableIterator<ChildNode> {
+		const { ownerDocument: doc } = this;
+		for (const node of nodes) {
+			if (typeof node === "string" || !node) {
+				if (doc) {
+					yield doc.createTextNode(node + "") as ChildNode;
+				}
+			} else {
+				switch (node.nodeType) {
+					case undefined:
+						throw new Error(`Unexpected ${node}`);
+					case 11: {
+						let { firstChild: cur } = node;
+						while (cur) {
+							const next = cur.nextSibling;
+							yield cur;
+							cur = next;
+						}
+						break;
+					}
+					default:
+						yield node;
+				}
+			}
 		}
 	}
 }

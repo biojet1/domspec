@@ -33,7 +33,7 @@ test(function() {
   var result = [];
   for (var p in list) {
     if (list.hasOwnProperty(p)) {
-      result.push(p);
+      result.push(p+'');
     }
   }
   assert_array_equals(result, ['0', '1', '2', '3', '4', '5']);

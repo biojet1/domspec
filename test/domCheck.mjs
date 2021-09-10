@@ -116,7 +116,7 @@ export function checkParentNode(t, parent) {
         parent.hasChildNodes()
             ? childNodes.length > 0
             : childNodes.length === 0,
-        `hasChildNodes() vs childElementCount ${name}`
+        `hasChildNodes() vs childElementCount ${name} ${childNodes.length} ${parent.hasChildNodes()}`
     );
 
     if (lastChild) {

@@ -31,9 +31,15 @@ export class DocumentFragment extends NonElementParentNode {
 
 			this._linkr(this[END]); // close
 			prev._linkr(first);
-			return last.endNode._linkr(next);
+			if (parent) {
+				let cur: ChildNode | null = first;
+				do {
+					this._on_child_detached(cur);
+				} while (cur !== last && (cur = cur.nextSibling || last));
+			}
+			last.endNode._linkr(next);
 		}
-		return next;
+		// return next;
 	}
 
 	cloneNode(deep?: boolean): Node {

@@ -66,7 +66,7 @@ export function* enumXMLDump(start: Node, end: Node) {
 	let voidElements =
 		ownerDocument &&
 		ownerDocument.isHTML &&
-		/^(?:area|base|br|col|embed|hr|img|input|keygen|link|menuitem|meta|param|source|track|wbr)$/i;
+		/^(?:\w+:)?(?:area|base|br|col|embed|hr|img|input|keygen|link|menuitem|meta|param|source|track|wbr)$/i;
 
 	do {
 		switch (cur.nodeType) {
@@ -89,39 +89,56 @@ export function* enumXMLDump(start: Node, end: Node) {
 
 			case -1: // End Tag
 				const { [PREV]: prev, parentNode: start } = cur as EndNode;
-				if (start.nodeType === 1) {
-					if (prev === start || prev instanceof Attr) {
-						if (
-							!voidElements ||
-							voidElements.test((start as Element).localName)
-						) {
-							yield `/>`;
+				switch (start.nodeType) {
+					default:
+						throw new Error(
+							`Unexpected nodeType ${start.nodeType}`
+						);
+					case 11: // DOCUMENT_FRAGMENT_NODE
+					case 1: // ELEMENT_NODE
+					case 9: {
+						// DOCUMENT_NODE
+						if (prev === start || prev instanceof Attr) {
+							if (
+								!voidElements ||
+								voidElements.test(
+									(start as ParentNode).qualifiedName
+								)
+							) {
+								yield `/>`;
+							} else {
+								yield `></${
+									(start as ParentNode).qualifiedName
+								}>`;
+							}
+						} else if (isOpened) {
+							yield `></${(start as ParentNode).qualifiedName}>`;
 						} else {
-							yield `></${(start as Element).qualifiedName}>`;
+							yield `</${(start as ParentNode).qualifiedName}>`;
 						}
-					} else if (isOpened) {
-						yield `></${(start as Element).qualifiedName}>`;
-					} else {
-						yield `</${(start as Element).qualifiedName}>`;
+						isOpened = false;
 					}
-					isOpened = false;
 				}
 				break;
 
 			case 11: // DOCUMENT_FRAGMENT_NODE
 			case 1: // ELEMENT_NODE
+			case 9: // DOCUMENT_NODE
 				if (isOpened) {
-					yield `><${(cur as Element).qualifiedName}`;
+					yield `><${(cur as ParentNode).qualifiedName}`;
 				} else {
-					yield `<${(cur as Element).qualifiedName}`;
+					yield `<${(cur as ParentNode).qualifiedName}`;
 				}
 				isOpened = true;
 				break;
 
 			case 10: // DOCUMENT_TYPE_NODE
+				if (isOpened) {
+					yield ">";
+					isOpened = false;
+				}
 				yield cur.formatXML();
-			 	break;
-			case 9: // DOCUMENT_NODE
+				break;
 				break;
 			// ENTITY_REFERENCE_NODE 	5
 			// ENTITY_NODE 	6

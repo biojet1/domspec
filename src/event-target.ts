@@ -77,7 +77,7 @@ export class EventTarget {
 		if (typeof options === "boolean") {
 			entry = { capture: options };
 		} else {
-			entry = options;
+			entry = options || {};
 		}
 		entry.listener = callback;
 
@@ -92,26 +92,6 @@ export class EventTarget {
 			this._listeners = { [type]: [entry] };
 		}
 	}
-
-	// _dispatchEvent(event: Event) {
-	// 	let { _listeners } = this;
-	// 	if (_listeners) {
-	// 		const { [event.type]: stack } = _listeners;
-	// 		if (stack) {
-	// 			event.target = this;
-	// 			for (const { listener } of stack) {
-	// 				// el.handleEvent(event);
-	// 				if (typeof listener === "function") {
-	// 					listener.call(event.currentTarget, event);
-	// 				} else if (listener) {
-	// 					listener.handleEvent(event);
-	// 				}
-	// 			}
-	// 			return !event.defaultPrevented;
-	// 		}
-	// 	}
-	// 	return true;
-	// }
 
 	removeEventListener(type: string, callback: EventListener | CallBack) {
 		let { _listeners } = this;

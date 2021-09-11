@@ -1,4 +1,4 @@
-import { XMLNS, XML, HTML, SVG } from "./namespace.js";
+import { XMLNS, XML_NS, HTML_NS, SVG_NS } from "./namespace.js";
 import { Element } from "./element.js";
 import {
 	SVGElement,
@@ -121,7 +121,7 @@ export function newElement(
 	}
 	if (
 		(prefix && !ns) ||
-		(prefix === "xml" && ns !== XML) ||
+		(prefix === "xml" && ns !== XML_NS) ||
 		((prefix === "xmlns" || qualifiedName === "xmlns") && ns !== XMLNS) ||
 		(ns === XMLNS && !(prefix === "xmlns" || qualifiedName === "xmlns"))
 	) {
@@ -131,7 +131,7 @@ export function newElement(
 	switch (ns || contentType) {
 		case "text/html":
 		case "application/xhtml+xml":
-		case HTML:
+		case HTML_NS:
 			tag = prefix ? `${prefix}:${localName}` : localName;
 			if ("text/html" === contentType) {
 				tag = tag.toUpperCase();
@@ -435,16 +435,17 @@ export function createElement(
 		switch (contentType) {
 			case "text/html":
 			case "application/xhtml+xml":
-				ns = HTML;
+				ns = HTML_NS;
 				break;
-			case "image/svg+xml":
-				ns = SVG;
-				break;
+			// case "image/svg+xml":
+			// 	ns = SVG_NS;
+			// 	break;
 		}
 	} else {
 		// The internal createElementNS steps,
 
-		ns = namespace ? namespace : isHTML ? HTML : undefined;
+		// ns = namespace ? namespace : isHTML ? HTML_NS : undefined;
+		ns = namespace ? namespace : undefined;
 		const pos = name.indexOf(":");
 
 		if (pos >= 0) {
@@ -455,7 +456,7 @@ export function createElement(
 		}
 		if (
 			(prefix && !ns) ||
-			(prefix === "xml" && ns !== XML) ||
+			(prefix === "xml" && ns !== XML_NS) ||
 			((prefix === "xmlns" || name === "xmlns") && ns !== XMLNS) ||
 			(ns === XMLNS && !(prefix === "xmlns" || name === "xmlns"))
 		) {
@@ -465,7 +466,7 @@ export function createElement(
 
 	// https://dom.spec.whatwg.org/#concept-create-element
 	switch (ns) {
-		case HTML:
+		case HTML_NS:
 			tag = prefix ? `${prefix}:${localName}` : localName;
 			if (isHTML) {
 				tag = tag.toUpperCase();

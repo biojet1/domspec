@@ -118,7 +118,11 @@ global.assert_throws_js = function (constructor, func, description) {
   );
 };
 
-global.async_test = function (func, name, properties) {};
+global.async_test = function (func, name, properties) {
+  return {
+    done: function () {},
+  };
+};
 
 /*
  * Convert a value to a nice, human-readable string

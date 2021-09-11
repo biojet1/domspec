@@ -3,7 +3,7 @@ import { Document } from "../document.js";
 // export class HTMLDocument extends Document {
 // 	constructor() {
 // 		super('text/html');
-// 		// this.namespaceURI = HTML;
+// 		// this.namespaceURI = HTML_NS;
 // 	}
 
 // 	// get contentType{
@@ -11,4 +11,4 @@ import { Document } from "../document.js";
 // 	// }
 // }
 
-// import { HTML } from "../namespace.js";
+// import { HTML_NS } from "../namespace.js";

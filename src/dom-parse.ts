@@ -47,12 +47,16 @@ function domParse(str: string, doc: Document, top: ParentNode) {
 
 		const { local, attributes, uri, prefix, name } = node;
 		if (name === ROOT_TAG) return;
-		let ns = !uri || uri === "" ? null : uri;
-		if (!ns && prefix && prefix != "") {
+		let ns = uri || null;
+		if (!ns && prefix) {
 			ns = top.lookupNamespaceURI(prefix);
 		}
-
-		const tag = doc.createElementNS(ns, name);
+		let tag;
+		if (ns) {
+			tag = doc.createElementNS(ns, name);
+		} else {
+			tag = doc.createElement(name);
+		}
 
 		const attrs = Object.entries(attributes);
 
@@ -68,7 +72,6 @@ function domParse(str: string, doc: Document, top: ParentNode) {
 		// 	// names must be equal
 		// 	return 0;
 		// });
-
 		for (const [key, { uri, value }] of attrs) {
 			tag.setAttributeNS(uri, key, value);
 		}
@@ -140,14 +143,15 @@ export class DOMParser {
 	parseFromString(markup: string, type?: string) {
 		let doc: Document;
 		switch (type) {
+			case "application/xhtml+xml":
 			case "text/html":
-				doc = new HTMLDocument();
+				doc = new HTMLDocument(type);
 				break;
 			case "image/svg+xml":
 				doc = new SVGDocument();
 				break;
 			default:
-				doc = new XMLDocument();
+				doc = new XMLDocument(type);
 		}
 		domParse(markup, doc, doc);
 		switch (type) {

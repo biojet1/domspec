@@ -25,8 +25,8 @@ export class Element extends ParentNode {
 	}
 	#tagName() {
 		const qName = this.qualifiedName;
-		return this?.ownerDocument?.isHTML && this._ns === HTML
-			? qName.toUpperCase()
+		return this?.ownerDocument?.isHTML && this._ns === HTML_NS
+			? qName.replace(/([a-z]+)/g, (m, a) => a.toUpperCase())
 			: qName;
 	}
 
@@ -84,7 +84,7 @@ export class Element extends ParentNode {
 	}
 
 	getAttributeNode(name: string) {
-		if (this.ownerDocument?.isHTML && this._ns === HTML) {
+		if (this.ownerDocument?.isHTML && this._ns === HTML_NS) {
 			name = name.toLowerCase();
 		}
 		let attr = this[NEXT];
@@ -115,7 +115,7 @@ export class Element extends ParentNode {
 	setAttribute(name: string, value: string) {
 		let lname;
 		let attr = this[NEXT];
-		if (this.ownerDocument?.isHTML && this._ns === HTML) {
+		if (this.ownerDocument?.isHTML && this._ns === HTML_NS) {
 			name = name.toLowerCase();
 		}
 		checkName(name);
@@ -212,7 +212,7 @@ export class Element extends ParentNode {
 	}
 
 	hasAttribute(name: string) {
-		if (this.ownerDocument?.isHTML && this.namespaceURI === HTML) {
+		if (this.ownerDocument?.isHTML && this.namespaceURI === HTML_NS) {
 			name = name.toLowerCase();
 		}
 		let attr = this[NEXT];
@@ -569,13 +569,6 @@ export class Element extends ParentNode {
 	}
 }
 
-// function checkName(name: string) {
-// 	if (!RE_NAME.test(name)) {
-// 		throw new Error(`InvalidCharacterErr: '${name}'`);
-// 	}
-// 	return true;
-// }
-
 function checkQName(name: string) {
 	if (!name) {
 		throw new Error(`InvalidCharacterErr: !'${name}'`);
@@ -668,5 +661,5 @@ import { StyleAttr } from "./attr-style.js";
 import { ClassAttr } from "./attr-class.js";
 import { NamedNodeMap } from "./named-node-map.js";
 import { enumXMLDump } from "./dom-serialize.js";
-import { validateAndExtract, checkName, HTML } from "./namespace.js";
+import { validateAndExtract, checkName, HTML_NS } from "./namespace.js";
 import { prepareMatch } from "./css/match.js";

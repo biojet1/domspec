@@ -312,7 +312,7 @@ const pe = function (m: string) {
 };
 
 /**
- * Safely escape HTML entities such as `&`, `<`, `>` only.
+ * Safely escape HTML_NS entities such as `&`, `<`, `>` only.
  * @param {string} es the input to safely escape
  * @returns {string} the escaped input, and it **throws** an error if
  *  the input type is unexpected, except for boolean and numbers,

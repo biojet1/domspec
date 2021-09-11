@@ -211,52 +211,34 @@ export abstract class Node extends EventTarget {
 			n;
 		for (n = this; n; n = n.parentNode) these.push(n);
 		for (n = that; n; n = n.parentNode) those.push(n);
-		these.reverse(); // So we start with the outermost
-		those.reverse();
-		if (these[0] !== those[0])
+		let aN = these.length;
+		let bN = those.length;
+		if (these[--aN] !== those[--bN]) {
 			// No common ancestor
-			return (
-				Node.DOCUMENT_POSITION_DISCONNECTED +
-				Node.DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC
-			);
-		const c = Math.min(these.length, those.length);
-		for (let i = 1; i < c; i++) {
-			if (these[i] !== those[i]) {
-				// const p = these[i - 1];
-				let a = these[i].previousSibling;
-				let b = those[i].previousSibling;
-				for (;;) {
-					if (a && b) {
-						a = a.previousSibling;
-						b = b.previousSibling;
-					} else if (!a) {
-						return Node.DOCUMENT_POSITION_FOLLOWING;
-					} else {
-						// !b
-						return Node.DOCUMENT_POSITION_PRECEDING;
+			return 1 + 32; // DISCONNECTED + IMPLEMENTATION_SPECIFIC
+		}
+		for (;;) {
+			let a: Node | null = these[--aN];
+			let b: Node | null = those[--bN];
+			if (a && b) {
+				if (a !== b) {
+					for (;;) {
+						if (a && b) {
+							a = a.previousSibling;
+							b = b.previousSibling;
+						} else if (!a) {
+							return 4; // FOLLOWING;
+						} else {
+							return 2; // PRECEDING; // !b
+						}
 					}
 				}
-
-				// We found two different ancestors, so compare
-				// their positions
-				// if (these[i].index < those[i].index)
-				// 	return Node.DOCUMENT_POSITION_FOLLOWING;
-				// else return Node.DOCUMENT_POSITION_PRECEDING;
+			} else if (b) {
+				return 4 + 16; // FOLLOWING + CONTAINED_BY
+			} else {
+				return 2 + 8; // PRECEDING + CONTAINS
 			}
 		}
-
-		// If we get to here, then one of the nodes (the one with the
-		// shorter list of ancestors) contains the other one.
-		if (these.length < those.length)
-			return (
-				Node.DOCUMENT_POSITION_FOLLOWING +
-				Node.DOCUMENT_POSITION_CONTAINED_BY
-			);
-		else
-			return (
-				Node.DOCUMENT_POSITION_PRECEDING +
-				Node.DOCUMENT_POSITION_CONTAINS
-			);
 	}
 	/// DOM constants
 	static get ELEMENT_NODE() {

@@ -225,7 +225,7 @@ import { Element } from "../element.js";
 // Object.getOwnPropertyNames(window)
 // 	.filter(
 // 		(k) =>
-// 			/^SVG.+Element$/.test(k) &&
+// 			/^SVG_NS.+Element$/.test(k) &&
 // 			!excl.test(k) &&
 // 			Object.getPrototypeOf(window[k]) === SVGGeometryElement
 // 	)
@@ -242,7 +242,7 @@ import { Element } from "../element.js";
 // Object.getOwnPropertyNames(window)
 // 	.filter(
 // 		(k) =>
-// 			/^SVG.+Element$/.test(k) &&
+// 			/^SVG_NS.+Element$/.test(k) &&
 // 			!excl.test(k) &&
 // 			Object.getPrototypeOf(window[k]) === SVGGraphicsElement
 // 	)
@@ -261,7 +261,7 @@ import { Element } from "../element.js";
 // Object.getOwnPropertyNames(window)
 // 	.filter(
 // 		(k) =>
-// 			/^SVG.+Element$/.test(k) &&
+// 			/^SVG_NS.+Element$/.test(k) &&
 // 			!excl.test(k) &&
 // 			Object.getPrototypeOf(window[k]) === SVGElement
 // 	)

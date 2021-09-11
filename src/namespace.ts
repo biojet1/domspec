@@ -1,9 +1,9 @@
-export const HTML = "http://www.w3.org/1999/xhtml";
-export const XML = "http://www.w3.org/XML/1998/namespace";
 export const XMLNS = "http://www.w3.org/2000/xmlns/";
-export const MATHML = "http://www.w3.org/1998/Math/MathML";
-export const SVG = "http://www.w3.org/2000/svg";
-export const XLINK = "http://www.w3.org/1999/xlink";
+export const HTML_NS = "http://www.w3.org/1999/xhtml";
+export const XML_NS = "http://www.w3.org/XML/1998/namespace";
+export const MATHML_NS = "http://www.w3.org/1998/Math/MathML";
+export const SVG_NS = "http://www.w3.org/2000/svg";
+export const XLINK_NS = "http://www.w3.org/1999/xlink";
 
 export const NCNameRE = /^[_A-Za-z][\w_-]*$/;
 export const NameRE = /^[:A-Z_a-z][:A-Z_a-z0-9.-]*$/;
@@ -49,12 +49,14 @@ export function validateAndExtract(
 		}
 		if (
 			(prefix && !ns) ||
-			(prefix === "xml" && ns !== XML) ||
+			(prefix === "xml" && ns !== XML_NS) ||
 			((prefix === "xmlns" || qualifiedName === "xmlns") &&
 				ns !== XMLNS) ||
 			(ns === XMLNS && !(prefix === "xmlns" || qualifiedName === "xmlns"))
 		) {
-			throw new Error("NamespaceError");
+			throw new Error(
+				`NamespaceError: NS[${ns}] QN[${qualifiedName}] LN[${localName}] P[${prefix}]`
+			);
 		}
 
 		return [ns, prefix, localName];
@@ -64,7 +66,7 @@ export function validateAndExtract(
 				throw new Error(`InvalidCharacterErr: name '${qualifiedName}'`);
 			}
 			return [null, null, qualifiedName];
-		}else{
+		} else {
 			throw new Error("NamespaceError");
 		}
 	}

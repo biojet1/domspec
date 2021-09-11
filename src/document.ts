@@ -80,14 +80,14 @@ export abstract class Document extends NonElementParentNode {
 
 	lookupNamespaceURI(prefix: string): string | null {
 		if (!prefix) {
-			return HTML;
+			return HTML_NS;
 		}
 		const { documentElement: node } = this;
 		return node && node.lookupNamespaceURI(prefix);
 	}
 	isDefaultNamespace(ns: string) {
 		if (this.isHTML) {
-			return HTML === ns;
+			return HTML_NS === ns;
 		}
 		const { documentElement: node } = this;
 		return node ? node.isDefaultNamespace(ns) : false;
@@ -321,20 +321,20 @@ export abstract class Document extends NonElementParentNode {
 }
 
 export class XMLDocument extends Document {
-	constructor(mimeType: string = "application/xml") {
+	constructor(mimeType = "application/xml") {
 		super(mimeType);
 	}
 }
 
 export class HTMLDocument extends Document {
-	constructor() {
-		super("text/html");
+	constructor(contentType = "text/html") {
+		super(contentType);
 	}
 	get isHTML() {
 		return true;
 	}
 	// createElement(localName: string) {
-	// 	return this.createElementNS(HTML, localName);
+	// 	return this.createElementNS(HTML_NS, localName);
 	// }
 	static setup(titleText?: string) {
 		const d = new HTMLDocument();
@@ -361,7 +361,7 @@ export class SVGDocument extends Document {
 		return true;
 	}
 	// createElement(localName: string) {
-	// 	return this.createElementNS(SVG, localName);
+	// 	return this.createElementNS(SVG_NS, localName);
 	// }
 }
 
@@ -420,7 +420,7 @@ export class DOMImplementationA extends DOMImplementation {
 	}
 }
 
-import { HTML, SVG, validateAndExtract, checkName } from "./namespace.js";
+import { HTML_NS, SVG_NS, validateAndExtract, checkName } from "./namespace.js";
 import { ChildNode } from "./child-node.js";
 import { EndNode, ParentNode } from "./parent-node.js";
 import { Element } from "./element.js";

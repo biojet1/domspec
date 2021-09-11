@@ -367,14 +367,84 @@ export abstract class ParentNode extends ChildNode {
 	getElementsByTagName(name: string) {
 		// return HTMLCollection.from(this.elementsByTagName(name));
 		const self = this;
+		if (name === "*") {
+			return new (class extends HTMLCollection {
+				*[Symbol.iterator]() {
+					let { [NEXT]: next, [END]: end } = self;
+					for (; next && next !== end; next = next[NEXT]) {
+						if (next.nodeType === 1) {
+							yield next as any as Element;
+						}
+					}
+				}
+			})();
+		}
+		const pos = name.indexOf(":");
+		if (this.ownerDocument?.isHTML) {
+			let p: string;
+			let n: string;
+			let l: string;
+			if (pos < 0) {
+				n = name;
+			} else {
+				name = name.replace(/([A-Z]+)/g, (m, a) => a.toLowerCase());
+				p = name.substring(0, pos);
+				n = name.substring(pos + 1);
+				// l = n.replace(/([A-Z]+)/, (m, a) => a.toLowerCase());
+			}
+			return new (class extends HTMLCollection {
+				*[Symbol.iterator]() {
+					let { [NEXT]: next, [END]: end } = self;
+					for (; next && next !== end; next = next[NEXT]) {
+						if (next.nodeType === 1) {
+							const el = next as any as Element;
+							let { localName, namespaceURI, prefix } = el;
+							if (namespaceURI === HTML_NS) {
+								localName = localName.replace(
+									/([A-Z]+)/g,
+									(m, a) => a.toLowerCase()
+								);
+								if (prefix) {
+									prefix = prefix.replace(
+										/([A-Z]+)/g,
+										(m, a) => a.toLowerCase()
+									);
+								}
+							}
+							if (p === undefined) {
+								if (localName === n) {
+									yield el;
+								}
+							} else {
+								if (localName === n && prefix === p) {
+									yield el;
+								}
+							}
+						}
+					}
+				}
+			})();
+		}
+
+		let p: string;
+		let n: string;
+		if (pos < 0) {
+			n = name;
+		} else {
+			p = name.substring(0, pos);
+			n = name.substring(pos + 1);
+		}
 		return new (class extends HTMLCollection {
 			*[Symbol.iterator]() {
 				let { [NEXT]: next, [END]: end } = self;
 				for (; next && next !== end; next = next[NEXT]) {
 					if (next.nodeType === 1) {
 						const el = next as any as Element;
-						const { localName } = el;
-						if (localName === name) {
+						const { localName, prefix } = el;
+						if (
+							localName === n &&
+							(p === undefined || (p ? prefix === p : !prefix))
+						) {
 							yield el;
 						}
 					}
@@ -625,3 +695,4 @@ import { prepareMatch } from "./css/match.js";
 import { enumXMLDump } from "./dom-serialize.js";
 import { parseDOM } from "./dom-parse.js";
 import { Document } from "./document.js";
+import { HTML_NS } from "./namespace.js";

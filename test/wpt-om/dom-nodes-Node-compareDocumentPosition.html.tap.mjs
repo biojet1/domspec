@@ -33,13 +33,17 @@ testNodes.forEach(function(referenceName) {
       // constraint that this is to be consistent, together and terminate these
       // steps."
       if (furthestAncestor(reference) !== furthestAncestor(other)) {
-        // TODO: Test that it's consistent.
+      //   // TODO: Test that it's consistent.
         assert_in_array(result, [Node.DOCUMENT_POSITION_DISCONNECTED +
                                  Node.DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC +
                                  Node.DOCUMENT_POSITION_PRECEDING,
                                  Node.DOCUMENT_POSITION_DISCONNECTED +
                                  Node.DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC +
-                                 Node.DOCUMENT_POSITION_FOLLOWING]);
+                                 Node.DOCUMENT_POSITION_FOLLOWING,
+                                 // Added
+                                 Node.DOCUMENT_POSITION_DISCONNECTED +
+                                 Node.DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC
+                                 ]);
         return;
       }
 

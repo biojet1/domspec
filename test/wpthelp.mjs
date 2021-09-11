@@ -86,6 +86,14 @@ global.assert_not_equals = function (actual, expected, description) {
   (current_t || tap).not(actual, expected, description);
 };
 
+global.assert_in_array = function (actual, expected, description) {
+  (current_t || tap).ok(
+    expected.indexOf(actual) >= 0,
+    `value ${actual} not in array ${expected}`,
+    { actual: actual, expected: expected }
+  );
+};
+
 // t.afterEach(fn(childTest))
 //     this.add_cleanup(function() { document.body.removeChild(element) });
 

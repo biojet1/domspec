@@ -202,6 +202,62 @@ export abstract class Node extends EventTarget {
 			}
 		}
 	}
+	compareDocumentPosition(that: Node) {
+		if (this === that) return 0;
+
+		// Get arrays of ancestors for this and that
+		let these = [],
+			those = [],
+			n;
+		for (n = this; n; n = n.parentNode) these.push(n);
+		for (n = that; n; n = n.parentNode) those.push(n);
+		these.reverse(); // So we start with the outermost
+		those.reverse();
+		if (these[0] !== those[0])
+			// No common ancestor
+			return (
+				Node.DOCUMENT_POSITION_DISCONNECTED +
+				Node.DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC
+			);
+		const c = Math.min(these.length, those.length);
+		for (let i = 1; i < c; i++) {
+			if (these[i] !== those[i]) {
+				// const p = these[i - 1];
+				let a = these[i].previousSibling;
+				let b = those[i].previousSibling;
+				for (;;) {
+					if (a && b) {
+						a = a.previousSibling;
+						b = b.previousSibling;
+					} else if (!a) {
+						return Node.DOCUMENT_POSITION_FOLLOWING;
+					} else {
+						// !b
+						return Node.DOCUMENT_POSITION_PRECEDING;
+					}
+				}
+
+				// We found two different ancestors, so compare
+				// their positions
+				// if (these[i].index < those[i].index)
+				// 	return Node.DOCUMENT_POSITION_FOLLOWING;
+				// else return Node.DOCUMENT_POSITION_PRECEDING;
+			}
+		}
+
+		// If we get to here, then one of the nodes (the one with the
+		// shorter list of ancestors) contains the other one.
+		if (these.length < those.length)
+			return (
+				Node.DOCUMENT_POSITION_FOLLOWING +
+				Node.DOCUMENT_POSITION_CONTAINED_BY
+			);
+		else
+			return (
+				Node.DOCUMENT_POSITION_PRECEDING +
+				Node.DOCUMENT_POSITION_CONTAINS
+			);
+	}
 	/// DOM constants
 	static get ELEMENT_NODE() {
 		return 1;

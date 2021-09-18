@@ -684,7 +684,7 @@ import {
 	NEXT,
 	START,
 	END,
-	NodeCollection,
+	// NodeCollection,
 	NodeList,
 	Children,
 } from "./node.js";

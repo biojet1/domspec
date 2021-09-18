@@ -334,99 +334,99 @@ export abstract class NodeList {
 	abstract get length(): number;
 }
 
-export class NodeList2 extends Array<ChildNode> {
-	item(i: number): ChildNode | null {
-		return i < this.length ? this[i] : null;
-	}
+// export class NodeList2 extends Array<ChildNode> {
+// 	item(i: number): ChildNode | null {
+// 		return i < this.length ? this[i] : null;
+// 	}
 
-	parent?: ChildNode;
-	// constructor(parent: ChildNode) {
-	// 	super();
-	// 	this.parent = parent;
-	// 	this.length;
-	// }
-	static create(parent: ChildNode): NodeList2 {
-		const o = Object.create(NodeList2.prototype);
-		o.parent = parent;
-		o.length;
-		return o;
-	}
-	// putChildren(parent: ParentNode) {
-	// 	let i = 0;
-	// 	let { firstChild: cur } = parent;
-	// 	for (; cur; cur = cur.nextSibling) {
-	// 		this[i++] = cur;
-	// 	}
-	// 	this.length = i;
-	// 	return this;
-	// }
-	override get length(): number {
-		const { parent } = this;
-		let i = 0;
-		if (parent) {
-			let { firstChild: cur } = parent;
-			for (; cur; cur = cur.nextSibling) {
-				this[i++] = cur;
-			}
-			super.length = i;
-			// this.splice(i);
-		}
-		console.error(`NodeList2.length ${i} ${parent && parent.nodeName}`);
-		return i;
-	}
-	override set length(n: number) {}
+// 	parent?: ChildNode;
+// 	// constructor(parent: ChildNode) {
+// 	// 	super();
+// 	// 	this.parent = parent;
+// 	// 	this.length;
+// 	// }
+// 	static create(parent: ChildNode): NodeList2 {
+// 		const o = Object.create(NodeList2.prototype);
+// 		o.parent = parent;
+// 		o.length;
+// 		return o;
+// 	}
+// 	// putChildren(parent: ParentNode) {
+// 	// 	let i = 0;
+// 	// 	let { firstChild: cur } = parent;
+// 	// 	for (; cur; cur = cur.nextSibling) {
+// 	// 		this[i++] = cur;
+// 	// 	}
+// 	// 	this.length = i;
+// 	// 	return this;
+// 	// }
+// 	override get length(): number {
+// 		const { parent } = this;
+// 		let i = 0;
+// 		if (parent) {
+// 			let { firstChild: cur } = parent;
+// 			for (; cur; cur = cur.nextSibling) {
+// 				this[i++] = cur;
+// 			}
+// 			super.length = i;
+// 			// this.splice(i);
+// 		}
+// 		console.error(`NodeList2.length ${i} ${parent && parent.nodeName}`);
+// 		return i;
+// 	}
+// 	override set length(n: number) {}
 
-	static empty = new (class extends NodeList2 {
-		constructor() {
-			super(0 as unknown as ChildNode);
-		}
-		get length() {
-			return 0;
-		}
-	})();
-}
+// 	static empty = new (class extends NodeList2 {
+// 		constructor() {
+// 			super(0 as unknown as ChildNode);
+// 		}
+// 		get length() {
+// 			return 0;
+// 		}
+// 	})();
+// }
 
-export abstract class NodeCollection extends Array<ChildNode> {
-	// [i: number]: ChildNode;
-	constructor() {
-		super();
-		Object.setPrototypeOf(this, Array.prototype);
-		const n = this.length;
-	}
-	item(index: number) {
-		if (index >= 0) {
-			for (const cur of this.list()) {
-				if (index-- === 0) {
-					return cur;
-				}
-			}
-		}
-		return null;
-	}
+// export abstract class NodeCollection extends Array<ChildNode> {
+// 	// [i: number]: ChildNode;
+// 	constructor() {
+// 		super();
+// 		Object.setPrototypeOf(this, Array.prototype);
+// 		const n = this.length;
+// 	}
+// 	item(index: number) {
+// 		if (index >= 0) {
+// 			for (const cur of this.list()) {
+// 				if (index-- === 0) {
+// 					return cur;
+// 				}
+// 			}
+// 		}
+// 		return null;
+// 	}
 
-	get length() {
-		// console.log("LEN", Array.from(this.list()));
-		let i = 0;
-		for (const cur of this.list()) {
-			super[i++] = cur;
-		}
-		return (super.length = i);
-		// const n = i;
-		// while (i in this) {
-		// 	delete this[i++];
-		// }
-		// return n;
-	}
+// 	get length() {
+// 		// console.log("LEN", Array.from(this.list()));
+// 		let i = 0;
+// 		for (const cur of this.list()) {
+// 			super[i++] = cur;
+// 		}
+// 		return (super.length = i);
+// 		// const n = i;
+// 		// while (i in this) {
+// 		// 	delete this[i++];
+// 		// }
+// 		// return n;
+// 	}
 
-	set length(x: number) {
-		super.length = x;
-	}
+// 	set length(x: number) {
+// 		super.length = x;
+// 	}
 
-	abstract list(): IterableIterator<ChildNode>;
-	static empty = new (class extends NodeCollection {
-		*list() {}
-	})();
-}
+// 	abstract list(): IterableIterator<ChildNode>;
+// 	static empty = new (class extends NodeCollection {
+// 		*list() {}
+// 	})();
+// }
 
 export class Children extends NodeList {
 	parent: ChildNode;

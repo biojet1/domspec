@@ -59,7 +59,7 @@ export class DocumentFragment extends NonElementParentNode {
 	}
 }
 
-class TemplateFragment extends DocumentFragment {
+export class TemplateFragment extends DocumentFragment {
 	self: ParentNode;
 	constructor(self: ParentNode) {
 		super();

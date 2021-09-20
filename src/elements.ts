@@ -671,6 +671,8 @@ export function createElement(
 				case "video":
 					return new HTMLVideoElement(localName, ns, prefix, tag);
 				/////////////
+				case "svg":
+					return new SVGSVGElement(localName, ns, prefix, tag);
 			}
 			return new HTMLUnknownElement(localName, ns, prefix, tag);
 		case "http://www.w3.org/2000/svg":

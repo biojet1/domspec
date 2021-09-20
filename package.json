@@ -34,6 +34,9 @@
     "image-size": "",
     "saxes": "^5.0.1"
   },
+  "peerDependencies": {
+    "svggeom": "git://github.com/biojet1/svggeom#main"
+  },
   "files": [
     "dist"
   ],

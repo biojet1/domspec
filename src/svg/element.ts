@@ -1,4 +1,13 @@
+import { Point, Box, Matrix, Path } from "svggeom";
 /// Base Elements //////////
+let _id_int = 0;
+function nextUniqueId() {
+	if (_id_int == 0) {
+		_id_int = new Date().getTime();
+		return _id_int == 0 ? ++_id_int : _id_int;
+	}
+	return ++_id_int == 0 ? ++_id_int : _id_int;
+}
 
 export class SVGElement extends Element {
 	get _isViewportElement() {
@@ -24,6 +33,20 @@ export class SVGElement extends Element {
 		}
 		return null;
 	}
+	letId() {
+		let id = this.getAttribute("id");
+		if (!id) {
+			this.setAttribute("id", (id = nextUniqueId().toString(36)));
+		}
+		return id;
+	}
+}
+
+interface IBBoxParam {
+	fill?: boolean;
+	stroke?: boolean;
+	markers?: boolean;
+	clipped?: boolean;
 }
 
 export class SVGGraphicsElement extends SVGElement {
@@ -46,6 +69,93 @@ export class SVGGraphicsElement extends SVGElement {
 		}
 		return farthest;
 	}
+
+	get transformM() {
+		return Matrix.parse(this.getAttribute("transform") || "");
+	}
+
+	get clip(): SVGGraphicsElement | undefined {
+		const id = this.getAttribute("clip-path");
+		if (id) {
+			return this.ownerDocument?.getElementById(id) as SVGGraphicsElement;
+		}
+	}
+
+	set clip(target: SVGElement | undefined) {
+		target && this.setAttribute("clip-path", target.letId());
+	}
+
+	refElement() {
+		const id =
+			this.getAttributeNS("http://www.w3.org/1999/xlink", "href") ||
+			this.getAttribute("href");
+		if (id) {
+			const h = id.indexOf("#");
+			return this.ownerDocument?.getElementById(
+				h < 0 ? id : id.substr(h + 1)
+			);
+		}
+	}
+
+	composedTransform(): Matrix {
+		const { parentNode: parent, transformM } = this;
+		if (parent) {
+			if (parent instanceof SVGGraphicsElement) {
+				return parent.composedTransform().multiply(transformM);
+			}
+		}
+		return transformM;
+	}
+
+	shapeBox(T?: Matrix | boolean) {
+		// e.shapeBox(M) = e.shapeBox(M)
+		// e.shapeBox(true) = e.shapeBox(e.composedTransform())
+		// e.shapeBox() = e.shapeBox(e.transformM)
+		const E =
+			T === true
+				? this.composedTransform()
+				: T
+				? T.multiply(this.transformM)
+				: this.transformM;
+		let box = Box.new();
+		for (const sub of this.children) {
+			if (sub instanceof SVGGraphicsElement) {
+				box = box.merge(sub.boundingBox(E));
+			}
+		}
+		return box.isValid() ? box : Box.empty();
+	}
+
+	// def shape_box(self, transform=None):
+	//     bbox = None
+	//     effective_transform = Transform(transform) * self.transform
+	//     for child in self:
+	//         if isinstance(child, ShapeElement):
+	//             child_bbox = child.bounding_box(transform=effective_transform)
+	//             if child_bbox is not None:
+	//                 bbox += child_bbox
+	//     return bbox
+
+	boundingBox(M?: Matrix | boolean): Box {
+		const { clip } = this;
+		if (clip) {
+			if (M === true) {
+				return this.shapeBox(true).overlap(
+					clip.boundingBox(this.composedTransform())
+				);
+			} else {
+				return this.shapeBox(M).overlap(clip.boundingBox(M));
+			}
+		} else {
+			return this.shapeBox(M);
+		}
+	}
+
+	getBBox() {
+		const box = this.shapeBox(true);
+		// return this.shapeBox(true);
+		return box.isValid() ? box : Box.empty();
+	}
 }
 
 export class SVGTextContentElement extends SVGGraphicsElement {}
@@ -53,6 +163,30 @@ export class SVGTextContentElement extends SVGGraphicsElement {}
 export class SVGGeometryElement extends SVGGraphicsElement {
 	describe(): string {
 		throw new Error("NotImplemented");
+	}
+
+	get path() {
+		try {
+			return Path.parse(this.describe());
+		} catch (err) {
+			return Path.new();
+		}
+	}
+
+	shapeBox(T?: Matrix | boolean) {
+		let { path } = this;
+		if (path.firstPoint) {
+			if (T === true) {
+				path = path.transform(this.composedTransform());
+			} else {
+				path = path.transform(this.transformM);
+				if (T) {
+					path = path.transform(T);
+				}
+			}
+			return path.bbox();
+		}
+		return Box.not();
 	}
 }
 
@@ -118,18 +252,21 @@ export class SVGEllipseElement extends SVGGeometryElement {
 export class SVGPolygonElement extends SVGGeometryElement {
 	static TAGS = ["polygon"];
 	describe() {
-		return `M ${this.getAttribute("points")} Z`;
+		const p = this.getAttribute("points");
+		return p ? `M ${p} Z` : "";
 	}
 }
 
 export class SVGPolylineElement extends SVGGeometryElement {
 	static TAGS = ["polyline"];
 	describe() {
-		return `M ${this.getAttribute("points")}`;
+		const p = this.getAttribute("points");
+		return p ? `M ${p}` : "";
 	}
 }
 
 /// SVGGraphicsElement //////////
+// ‘a’, ‘clipPath’, ‘defs’, ‘g’, ‘marker’, ‘mask’, ‘pattern’, ‘svg’, ‘switch’ and ‘symbol’.
 
 export class SVGAElement extends SVGGraphicsElement {
 	static TAGS = ["a"];
@@ -137,6 +274,10 @@ export class SVGAElement extends SVGGraphicsElement {
 
 export class SVGDefsElement extends SVGGraphicsElement {
 	static TAGS = ["defs"];
+
+	getBBox() {
+		return Box.empty();
+	}
 }
 
 export class SVGForeignObjectElement extends SVGGraphicsElement {
@@ -155,6 +296,16 @@ export class SVGImageElement extends SVGGraphicsElement {
 	get _isViewportElement() {
 		return 1;
 	}
+	shapeBox(T?: Matrix | boolean) {
+		let width = this.getAttribute("width");
+		let height = this.getAttribute("height");
+		let x = this.getAttribute("x");
+		let y = this.getAttribute("y");
+		if (x && y && width && height) {
+			return Box.new(`${x} ${y} ${width} ${height}`);
+		}
+		return Box.not();
+	}
 }
 
 export class SVGSVGElement extends SVGGraphicsElement {
@@ -170,6 +321,33 @@ export class SVGSwitchElement extends SVGGraphicsElement {
 
 export class SVGUseElement extends SVGGraphicsElement {
 	static TAGS = ["use"];
+
+	get transformM() {
+		const m = Matrix.parse(this.getAttribute("transform") || "");
+		const x = this.getAttribute("x");
+		const y = this.getAttribute("y");
+		if (x || y) {
+			return Matrix.translate(
+				parseFloat(x || "0"),
+				parseFloat(y || "0")
+			).multiply(m);
+		}
+		return m;
+	}
+
+	shapeBox(T?: Matrix | boolean) {
+		const E =
+			T === true
+				? this.composedTransform()
+				: T
+				? T.multiply(this.transformM)
+				: this.transformM;
+		const ref = this.refElement();
+		if (ref) {
+			return (ref as SVGGraphicsElement).shapeBox(true).transform(E);
+		}
+		return Box.empty();
+	}
 }
 
 /// SVGTextContentElement //////////

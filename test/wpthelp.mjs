@@ -277,3 +277,31 @@ global.format_value = function (val, seen) {
 };
 
 // global.async_test = function (func, name, properties) {};
+
+global.assert_approx_equals = function (
+  actual,
+  expected,
+  epsilon,
+  description
+) {
+  /*
+   * Test if two primitive numbers are equal within +/- epsilon
+   */
+  const t = current_t || tap;
+  t.ok(
+    typeof actual === "number",
+    `assert_approx_equals '${description}' expected a number but got a  ${typeof actual}`
+  );
+
+  // The epsilon math below does not place nice with NaN and Infinity
+  // But in this case Infinity = Infinity and NaN = NaN
+  if (Number.isFinite(actual) || Number.isFinite(expected)) {
+    t.ok(
+      Math.abs(actual - expected) <= epsilon,
+      `assert_approx_equals '${description}' expected ${expected} +/- ${epsilon} but got ${actual}`,
+      { expected: expected, actual: actual, epsilon: epsilon }
+    );
+  } else {
+    assert_equals(actual, expected);
+  }
+};

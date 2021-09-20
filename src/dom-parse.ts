@@ -1,8 +1,9 @@
-function domParse(str: string, doc: Document, top: ParentNode) {
+function domParse(str: string, doc: Document, top: ParentNode, opt={}) {
 	const parser = new SaxesParser({
 		// lowercase: true,
 		xmlns: true,
 		strictEntities: true,
+		...opt
 	});
 
 	parser.on("error", (err) => {
@@ -46,7 +47,7 @@ function domParse(str: string, doc: Document, top: ParentNode) {
 		// console.dir(top, { depth: 1 });
 
 		const { local, attributes, uri, prefix, name } = node;
-		if (name === ROOT_TAG) return;
+		// if (name === ROOT_TAG) return;
 		let ns = uri || null;
 		if (!ns && prefix) {
 			ns = top.lookupNamespaceURI(prefix);
@@ -80,7 +81,7 @@ function domParse(str: string, doc: Document, top: ParentNode) {
 	});
 
 	parser.on("closetag", (node) => {
-		if (node.name === ROOT_TAG) return;
+		// if (node.name === ROOT_TAG) return;
 		// console.log("closetag",  node.name, top.nodeName);
 		// !top.lastChild && console.log("Empty",  node.name, top.nodeName);
 		// node.isSelfClosing && console.log("isSelfClosing",  node.name, top.nodeName);
@@ -135,7 +136,8 @@ export const parseDOM = function (
 	} else {
 		const doc = parent.ownerDocument;
 		// sax expects a root element but we also missuse it to parse fragments
-		if (doc) domParse(`<${ROOT_TAG}>${str}</${ROOT_TAG}>`, doc, parent);
+		// if (doc) domParse(`<${ROOT_TAG}>${str}</${ROOT_TAG}>`, doc, parent);
+		if (doc) domParse(str, doc, parent, {fragment:true});
 	}
 };
 

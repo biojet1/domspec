@@ -1,4 +1,5 @@
 import { Point, Box, Matrix, Path } from "svggeom";
+import { userUnit } from "./units.js";
 /// Base Elements //////////
 let _id_int = 0;
 function nextUniqueId() {
@@ -85,6 +86,12 @@ export class SVGGraphicsElement extends SVGElement {
 		target && this.setAttribute("clip-path", target.letId());
 	}
 
+	canRender() {
+		if (this.getAttribute("display") === "none") {
+			return false;
+		}
+		return true;
+	}
 	refElement() {
 		const id =
 			this.getAttributeNS("http://www.w3.org/1999/xlink", "href") ||
@@ -108,9 +115,7 @@ export class SVGGraphicsElement extends SVGElement {
 	}
 
 	shapeBox(T?: Matrix | boolean) {
-		// e.shapeBox(M) = e.shapeBox(M)
-		// e.shapeBox(true) = e.shapeBox(e.composedTransform())
-		// e.shapeBox() = e.shapeBox(e.transformM)
+		// if (this.canRender()) {
 		const E =
 			T === true
 				? this.composedTransform()
@@ -119,11 +124,13 @@ export class SVGGraphicsElement extends SVGElement {
 				: this.transformM;
 		let box = Box.new();
 		for (const sub of this.children) {
-			if (sub instanceof SVGGraphicsElement) {
+			if (sub instanceof SVGGraphicsElement && sub.canRender()) {
 				box = box.merge(sub.boundingBox(E));
 			}
 		}
-		return box.isValid() ? box : Box.empty();
+		return box;
+		// }
+		// return Box.not();
 	}
 
 	// def shape_box(self, transform=None):
@@ -187,6 +194,21 @@ export class SVGGeometryElement extends SVGGraphicsElement {
 			return path.bbox();
 		}
 		return Box.not();
+	}
+
+	toPathElement() {
+		let { ownerDocument } = this;
+		if (ownerDocument) {
+			const p = ownerDocument.createElement("path");
+			let s;
+			(s = this.describe()) && p.setAttribute("d", s);
+			(s = this.getAttribute("style")) && p.setAttribute("style", s);
+			(s = this.getAttribute("class")) && p.setAttribute("class", s);
+			(s = this.getAttribute("transform")) &&
+				p.setAttribute("transform", s);
+			return p;
+		}
+		throw new Error(`No ownerDocument`);
 	}
 }
 
@@ -313,6 +335,20 @@ export class SVGSVGElement extends SVGGraphicsElement {
 	get _isViewportElement() {
 		return 1;
 	}
+
+	defs() {
+		let { ownerDocument, children } = this;
+		if (ownerDocument) {
+			for (const sub of children) {
+				if (sub.localName == "defs") {
+					return sub;
+				}
+			}
+			const defs = ownerDocument.createElement("defs");
+			return defs;
+		}
+		throw new Error(`No ownerDocument`);
+	}
 }
 
 export class SVGSwitchElement extends SVGGraphicsElement {
@@ -346,7 +382,7 @@ export class SVGUseElement extends SVGGraphicsElement {
 		if (ref) {
 			return (ref as SVGGraphicsElement).shapeBox(true).transform(E);
 		}
-		return Box.empty();
+		return Box.not();
 	}
 }
 
@@ -354,10 +390,52 @@ export class SVGUseElement extends SVGGraphicsElement {
 
 export class SVGTextElement extends SVGTextContentElement {
 	static TAGS = ["text"];
+	shapeBox(T?: Matrix | boolean) {
+		const E =
+			T === true
+				? this.composedTransform()
+				: T
+				? T.multiply(this.transformM)
+				: this.transformM;
+		let s;
+		const x = (s = this.getAttribute("x")) ? userUnit(s, 0) : 0;
+		const y = (s = this.getAttribute("y")) ? userUnit(s, 0) : 0;
+		let box = Box.new();
+		box = box.merge(
+			Box.new(Point.at(x, y).transform(E).toArray().concat([0, 0]))
+		);
+		for (const sub of this.children) {
+			if (sub instanceof SVGGraphicsElement && sub.localName == "tspan") {
+				box = sub.boundingBox(E).merge(box);
+			}
+		}
+		return box;
+	}
 }
 
 export class SVGTSpanElement extends SVGTextContentElement {
 	static TAGS = ["tspan"];
+	shapeBox(T?: Matrix | boolean) {
+		let box = Box.new();
+		// Returns a horrible bounding box that just contains the coord points
+		// of the text without width or height (which is impossible to calculate)
+		const E =
+			T === true
+				? this.composedTransform()
+				: T
+				? T.multiply(this.transformM)
+				: this.transformM;
+		let s;
+		const x1 = (s = this.getAttribute("x")) ? userUnit(s, 0) : 0;
+		const y1 = (s = this.getAttribute("y")) ? userUnit(s, 0) : 0;
+		const fontsize = 16;
+		const x2 = x1 + 0; // This is impossible to calculate!
+		const y2 = y1 + fontsize;
+		const a = Point.at(x1, y1).transform(E);
+		const b = Point.at(x2, y2).transform(E).sub(a);
+		box = box.merge(Box.new([a.x, a.y, Math.abs(b.x), Math.abs(b.y)]));
+		return box;
+	}
 }
 
 export class SVGTRefElement extends SVGTextContentElement {

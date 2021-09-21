@@ -30,6 +30,7 @@ jobs:
           path: ~/.npm
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('package.json') }}
 
+      - run: npm i "git://github.com/biojet1/svggeom#main"
       - run: npm i
 
       - run: npm i codecov c8 typescript@rc --save-dev

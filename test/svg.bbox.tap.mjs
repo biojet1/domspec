@@ -1,7 +1,7 @@
 "uses strict";
 import test from "tap";
-import { Document } from "../dist/document.js";
-import { DOMParser } from "../dist/dom-parse.js";
+import { Document, SVGGraphicsElement, DOMParser, Box } from "../dist/all.js";
+// import { DOMParser } from "../dist/dom-parse.js";
 
 const CI = true;
 const parser = new DOMParser();
@@ -57,6 +57,12 @@ test.test(`ParentNode`, { bail: !CI }, function (t) {
     // );
 
     // getBBox
+    // let box = Box.new();
+    // for(const e of   doc.getElementById("group-1").children){
+    //     box = box.merge(e.getBBox())
+    //     console.log("group-1 / ", e.id, e.getBBox().toArray(), e.canRender(), e instanceof SVGGraphicsElement, box);
+
+    // }
 
     t.same(doc.getElementById("rect-1").getBBox().toArray(), [20, 20, 40, 40]);
     t.same(
@@ -69,11 +75,6 @@ test.test(`ParentNode`, { bail: !CI }, function (t) {
         "group-2"
     );
     t.same(
-        doc.getElementById("group-1").getBBox().toArray(),
-        [30, 30, 40, 40],
-        "group-1"
-    );
-    t.same(
         doc.getElementById("defs-1").getBBox().toArray(),
         [0, 0, 0, 0],
         "defs-1"
@@ -83,34 +84,10 @@ test.test(`ParentNode`, { bail: !CI }, function (t) {
         [30, 30, 40, 40],
         "use-1"
     );
-
-    // "defs-1"    {0, 0, 0, 0}
-    // "group-1"   {30, 30, 40, 40}
-
-    // t.strictSame(top.localName, `div`);
-    // t.strictSame(top.firstChild.localName, `br`);
-    // t.strictSame(top.lastChild.localName, `br`);
-    // t.strictSame(top.firstChild, top.lastChild);
-    // t.strictSame(doc.firstChild, doc.lastChild);
-    // t.strictSame(top.firstElementChild, top.lastChild);
-    // t.strictSame(top.lastElementChild, top.firstChild);
-    // t.strictSame(top.firstElementChild, top.lastElementChild);
-    // t.strictSame(top.parentNode, doc);
-    // t.strictSame(top.firstElementChild.parentNode, top);
-    // t.strictSame(top.lastElementChild.parentNode, top);
-    // t.strictSame(top.firstChild.parentNode, top);
-    // t.strictSame(top.lastChild.parentNode, top);
-    // t.notOk(doc.nextSibling);
-    // t.notOk(doc.previousSibling);
-    // t.notOk(doc.parentNode);
-    // t.notOk(doc.parentElement);
-    // t.strictSame(top.lastChild.parentElement, top.firstChild.parentElement);
-    // t.strictSame(top.lastChild.parentNode, top.firstChild.parentNode);
-
-    // t.strictSame(doc.firstChild, top);
-    // t.strictSame(doc.lastChild, top);
-    // t.strictSame(doc.firstElementChild, top);
-    // t.strictSame(doc.lastElementChild, top);
-
+    t.same(
+        doc.getElementById("group-1").getBBox().toArray(),
+        [30, 30, 40, 40],
+        "group-1"
+    );
     t.end();
 });

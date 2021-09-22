@@ -6,59 +6,6 @@ export class XMLSerializer {
 	}
 }
 
-// export function* enumDOMStr(node: Node) {
-// 	let isOpened = false;
-// 	const { endNode: end } = node;
-// 	let cur: Node | null | undefined = node;
-// 	do {
-// 		if (cur instanceof Attr) {
-// 			const xml = cur.formatXML();
-// 			if (xml.length > 0) yield ` ${xml}`;
-// 		} else if (cur instanceof Element) {
-// 			if (isOpened) {
-// 				yield `><${cur.tagName}`;
-// 			} else {
-// 				yield `<${cur.tagName}`;
-// 			}
-// 			isOpened = true;
-// 		} else if (cur instanceof EndNode) {
-// 			const { [PREV]: prev, parentNode: start } = cur;
-// 			if (prev === start || prev instanceof Attr) {
-// 				if (start instanceof Element) {
-// 					if (start._parsed_closed) {
-// 						yield `/>`;
-// 					} else {
-// 						yield `></${start.tagName}>`;
-// 					}
-// 				}
-// 			} else if (start instanceof NonElementParentNode) {
-// 				// pass;
-// 			} else if (!(start instanceof Element)) {
-// 				throw new Error(`Unexpected parent node`);
-// 			} else if (isOpened) {
-// 				yield `></${start.tagName}>`;
-// 			} else {
-// 				yield `</${start.tagName}>`;
-// 			}
-// 			isOpened = false;
-// 		} else if (cur instanceof ParentNode) {
-// 			if (cur instanceof NonElementParentNode) {
-// 				// pass
-// 			} else {
-// 				throw new Error(`Unexpected ParentNode`);
-// 			}
-// 		} else if (cur instanceof ChildNode) {
-// 			if (isOpened) {
-// 				yield ">";
-// 				isOpened = false;
-// 			}
-// 			yield cur.toString();
-// 		} else {
-// 			throw new Error(`Invalid node ${cur}`);
-// 		}
-// 	} while (cur !== end && (cur = cur[NEXT]));
-// }
-
 export function* enumXMLDump(start: Node, end: Node) {
 	let isOpened = false;
 	let cur: Node | undefined = start;
@@ -72,8 +19,14 @@ export function* enumXMLDump(start: Node, end: Node) {
 		switch (cur.nodeType) {
 			case 2: // ATTRIBUTE_NODE
 				{
-					const s = cur.formatXML();
-					if (s !== "") yield ` ${cur.formatXML()}`;
+					// const s = cur.formatXML();
+					// if (s !== "") yield ` ${cur.formatXML()}`;
+					const { name, nodeValue } = cur as Attr;
+					if (name && null !== nodeValue)
+						yield ` ${name}="${nodeValue.toString().replace(
+							/[<>&"\xA0]/g,
+							rep
+						)}"`;
 				}
 				break;
 			case 3: // TEXT_NODE
@@ -84,7 +37,7 @@ export function* enumXMLDump(start: Node, end: Node) {
 					yield ">";
 					isOpened = false;
 				}
-				yield cur.formatXML();
+				yield cur.toString();
 				break;
 
 			case -1: // End Tag
@@ -137,8 +90,7 @@ export function* enumXMLDump(start: Node, end: Node) {
 					yield ">";
 					isOpened = false;
 				}
-				yield cur.formatXML();
-				break;
+				yield cur.toString();
 				break;
 			// ENTITY_REFERENCE_NODE 	5
 			// ENTITY_NODE 	6
@@ -173,6 +125,23 @@ export function* enumFlatDOM(node: Node) {
 		}
 	} while (cur !== end && (cur = cur[NEXT]));
 }
+
+const rep = function (m: string) {
+	switch (m) {
+		// '   &apos;
+		// case "\xA0":
+		// 	return "&nbsp;";
+		case "&":
+			return "&amp;";
+		case "<":
+			return "&lt;";
+		case ">":
+			return "&gt;";
+		case '"':
+			return "&quot;";
+	}
+	return m;
+};
 
 import { NEXT, PREV, END, Node } from "./node.js";
 import { ChildNode } from "./child-node.js";

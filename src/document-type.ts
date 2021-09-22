@@ -21,7 +21,7 @@ export class DocumentType extends ChildNode {
 		const { name, publicId, systemId } = this;
 		return new DocumentType(name, publicId, systemId);
 	}
-	formatXML() {
+	toString() {
 		const { name, publicId, systemId } = this;
 		return `<!DOCTYPE ${name}${
 			publicId !== "" ? ` PUBLIC ${publicId}` : ""

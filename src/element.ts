@@ -567,6 +567,14 @@ export class Element extends ParentNode {
 
 		// return true;
 	}
+
+	letId() {
+		let id = this.getAttribute("id");
+		if (!id) {
+			this.setAttribute("id", (id = nextUniqueId().toString(36)));
+		}
+		return id;
+	}
 }
 
 function checkQName(name: string) {
@@ -652,6 +660,15 @@ export const dsHandler = {
 		};
 	},
 };
+
+let _id_int = 0;
+function nextUniqueId() {
+	if (_id_int == 0) {
+		_id_int = new Date().getTime();
+		return _id_int == 0 ? ++_id_int : _id_int;
+	}
+	return ++_id_int == 0 ? ++_id_int : _id_int;
+}
 
 import { XMLNS } from "./namespace.js";
 import { StringAttr, Attr } from "./attr.js";

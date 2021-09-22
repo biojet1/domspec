@@ -8,61 +8,12 @@ export abstract class Attr extends Node {
 	localName: string;
 	_ns?: string | null;
 	_prefix?: string | null;
-	// static create(qualifiedName: string, contentType?: string) {
-	// 	return new StringAttr(qualifiedName, undefined, contentType);
-	// }
-	// static createNS(
-	// 	qualifiedName: string,
-	// 	namespace?: string | null,
-	// 	contentType?: string
-	// ) {
-	// 	return new StringAttr(qualifiedName, namespace, contentType);
-	// }
-	// static new(name: string) {
 
-	// }
 	constructor(name: string, localName?: string) {
 		super();
 		this.name = name;
 		this.localName = localName || name;
 	}
-	// protected constructor(
-	// 	qualifiedName: string,
-	// 	namespace?: string | null,
-	// 	contentType?: string
-	// ) {
-	// 	super();
-	// 	if (!namespace) {
-	// 		switch (contentType) {
-	// 			case "text/html":
-	// 				this.name = this.localName = qualifiedName.toLowerCase();
-	// 				break;
-	// 			default:
-	// 				this.name = this.localName = qualifiedName;
-	// 		}
-	// 	} else {
-	// 		const [ns, prefix, localName] = validateAndExtract(
-	// 			namespace,
-	// 			qualifiedName
-	// 		);
-	// 		if (ns) this._ns = ns;
-	// 		if (prefix) this._prefix = prefix;
-	// 		switch (contentType) {
-	// 			case "text/html":
-	// 				this.localName = localName.toLowerCase();
-	// 				this.name = (
-	// 					prefix ? `${prefix}:${localName}` : localName
-	// 				).toLowerCase();
-	// 				break;
-	// 			default:
-	// 				this.localName = localName;
-	// 				this.name = prefix ? `${prefix}:${localName}` : localName;
-	// 		}
-	// 	}
-	// 	// console.log("Attr:", qualifiedName, namespace, contentType);
-	// 	// if (!/^[_:A-Za-z][\w:_-]*$/.test(this.name))
-	// 	// 	throw new Error(`InvalidCharacterErr: '${this.name}'`);
-	// }
 
 	get textContent() {
 		// https://dom.spec.whatwg.org/#dom-node-textcontent
@@ -74,10 +25,10 @@ export abstract class Attr extends Node {
 	get nodeType() {
 		return 2;
 	}
-	get nodeValue() {
-		// https://dom.spec.whatwg.org/#dom-node-nodevalue
-		return this.value;
-	}
+	// get nodeValue() {
+	// 	// https://dom.spec.whatwg.org/#dom-node-nodevalue
+	// 	return this.value;
+	// }
 	abstract get value(): string;
 	abstract set value(value: string);
 	get specified() {
@@ -98,27 +49,28 @@ export abstract class Attr extends Node {
 	}
 
 	isDefaultNamespace(namespaceURI: string) {
-		const { parentElement:node } = this;
+		const { parentElement: node } = this;
 		return node ? node.isDefaultNamespace(namespaceURI) : false;
 	}
 	lookupNamespaceURI(prefix: string) {
-		const { parentElement:node } = this;
+		const { parentElement: node } = this;
 		return node && node.lookupNamespaceURI(prefix);
 	}
 	lookupPrefix(ns: string) {
-		const { parentElement:node } = this;
+		const { parentElement: node } = this;
 		return node && node.lookupPrefix(ns);
 	}
 
-	toString() {
-		const { name, value } = this;
-		return `${name}="${value.replace(/[<>&"\xA0]/g, rep)}"`;
-	}
+	// toString() {
+	// 	const { name, value } = this;
+	// 	return `${name}="${value.replace(/[<>&"\xA0]/g, rep)}"`;
+	// }
 
-	formatXML() {
-		const { name, value } = this;
-		return `${name}="${value.replace(/[<>&"\xA0]/g, rep)}"`;
-	}
+	// formatXML() {
+	// 	const { name, value } = this;
+	// 	return `${name}="${value.toString().replace(/[<>&"\xA0]/g, rep)}"`;
+	// }
+
 	cloneNode(deep?: boolean) {
 		const { ownerDocument, name, _ns, value, localName, _prefix } = this;
 
@@ -162,16 +114,19 @@ export abstract class Attr extends Node {
 export class StringAttr extends Attr {
 	//// Dom
 	[VALUE]?: string;
+	get nodeValue() {
+		return this[VALUE] ?? null;
+	}
 	get value() {
 		return this[VALUE] || "";
 	}
 	set value(value: string) {
 		this[VALUE] = value;
 	}
-	formatXML() {
-		const { [VALUE]: val } = this;
-		return val ? super.formatXML() : "";
-	}
+	// formatXML() {
+	// 	const { [VALUE]: val } = this;
+	// 	return val ? super.formatXML() : "";
+	// }
 }
 
 export abstract class Typed {
@@ -199,10 +154,10 @@ export class TypedAttr<T extends Typed> extends Attr {
 	// 	// 	? (this[VALUE] = T.parse(val))
 	// 	// 	: val || (this[VALUE] = T.parse());
 	// }
-	formatXML() {
-		const { [VALUE]: val } = this;
-		return val ? super.formatXML() : "";
-	}
+	// formatXML() {
+	// 	const { [VALUE]: val } = this;
+	// 	return val ? super.formatXML() : "";
+	// }
 }
 
 const rep = function (m: string) {

@@ -25,6 +25,7 @@ Object.getOwnPropertyNames(window).filter(s=>/^[A-Z]\w+$/.test(s))
 export class Window extends EventTarget {
 	_document?: Document;
 	_frames?: any;
+	_performance?: any;
 
 	constructor(doc?: Document) {
 		super();
@@ -56,7 +57,7 @@ export class Window extends EventTarget {
 		return this;
 	}
 
-	private setDocument(doc?: Document) {
+	setDocument(doc?: Document) {
 		if (doc) {
 			// pass
 		} else {
@@ -101,7 +102,7 @@ export class Window extends EventTarget {
 		return _frames;
 	}
 
-	requestAnimationFrame(callback:any) {
+	requestAnimationFrame(callback: any) {
 		const now = new globalThis.Date().getTime();
 		const timeToCall = Math.max(0, 16 - (now - lastTime));
 		return globalThis.setTimeout(() => {
@@ -109,25 +110,23 @@ export class Window extends EventTarget {
 			callback(lastTime);
 		}, timeToCall);
 	}
+
 	cancelAnimationFrame(id: number) {
 		globalThis.clearTimeout(id);
 	}
-}
-let lastTime = 0;
-const frmwm = new WeakMap();
 
-export class TSDOM {
-	document?: Document;
-	window?: Window;
-	constructor() {
-		const win = new Window();
-		this.window = win;
-		this.document = win.document;
+	get performance() {
+		let { _performance } = this;
+		if (!_performance) {
+			const nowOffset = globalThis.Date.now();
+			this._performance = _performance = {
+				now: () => Date.now() - nowOffset,
+			};
+		}
+		return _performance;
 	}
 }
-export class JSDOM extends TSDOM {
-	// constructor() {
-	// 	this.window = new Window();
-	// 	this.document = window.document;
-	// }
-}
+
+let lastTime = 0;
+
+const frmwm = new WeakMap();

@@ -21,9 +21,14 @@ export class ClassAttr extends Attr {
 		return this.value;
 	}
 
-	formatXML() {
+	// formatXML() {
+	// 	let { tokensQ: tokens } = this;
+	// 	return tokens && tokens.size > 0 ? super.formatXML() : "";
+	// }
+
+	get nodeValue() {
 		let { tokensQ: tokens } = this;
-		return tokens && tokens.size > 0 ? super.formatXML() : "";
+		return tokens && tokens.size > 0 ? tokens.format() : null;
 	}
 }
 

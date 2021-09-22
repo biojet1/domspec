@@ -20,7 +20,7 @@ export abstract class CharacterData extends ChildNode {
 		return this._data;
 	}
 
-	formatXML() {
+	toString() {
 		return escape(this._data);
 	}
 
@@ -212,9 +212,6 @@ export class CDATASection extends Text {
 	toString() {
 		return `<![CDATA[${this._data}]]>`;
 	}
-	formatXML() {
-		return `<![CDATA[${this._data}]]>`;
-	}
 	get nodeName() {
 		return "#cdata-section";
 	}
@@ -241,9 +238,6 @@ export class Comment extends CharacterData {
 	toString() {
 		return `<!--${this._data}-->`;
 	}
-	formatXML() {
-		return `<!--${this._data}-->`;
-	}
 }
 
 export class ProcessingInstruction extends CharacterData {
@@ -265,10 +259,6 @@ export class ProcessingInstruction extends CharacterData {
 	}
 	// Extra
 	toString() {
-		const { target, _data } = this;
-		return `<? ${target} ${_data} ?>`;
-	}
-	formatXML() {
 		const { target, _data } = this;
 		return `<? ${target} ${_data} ?>`;
 	}

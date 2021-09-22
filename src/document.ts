@@ -333,9 +333,6 @@ export class HTMLDocument extends Document {
 	get isHTML() {
 		return true;
 	}
-	// createElement(localName: string) {
-	// 	return this.createElementNS(HTML_NS, localName);
-	// }
 	static setup(titleText?: string) {
 		const d = new HTMLDocument();
 		const root = d.createElement("html");
@@ -360,9 +357,6 @@ export class SVGDocument extends Document {
 	get isSVG() {
 		return true;
 	}
-	// createElement(localName: string) {
-	// 	return this.createElementNS(SVG_NS, localName);
-	// }
 }
 
 export class DOMImplementationA extends DOMImplementation {

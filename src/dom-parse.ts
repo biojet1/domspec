@@ -1,9 +1,9 @@
-function domParse(str: string, doc: Document, top: ParentNode, opt={}) {
+function domParse(doc: Document, top: ParentNode, opt = {}) {
 	const parser = new SaxesParser({
 		// lowercase: true,
 		xmlns: true,
 		strictEntities: true,
-		...opt
+		...opt,
 	});
 
 	parser.on("error", (err) => {
@@ -47,7 +47,6 @@ function domParse(str: string, doc: Document, top: ParentNode, opt={}) {
 		// console.dir(top, { depth: 1 });
 
 		const { local, attributes, uri, prefix, name } = node;
-		// if (name === ROOT_TAG) return;
 		let ns = uri || null;
 		if (!ns && prefix) {
 			ns = top.lookupNamespaceURI(prefix);
@@ -81,7 +80,6 @@ function domParse(str: string, doc: Document, top: ParentNode, opt={}) {
 	});
 
 	parser.on("closetag", (node) => {
-		// if (node.name === ROOT_TAG) return;
 		// console.log("closetag",  node.name, top.nodeName);
 		// !top.lastChild && console.log("Empty",  node.name, top.nodeName);
 		// node.isSelfClosing && console.log("isSelfClosing",  node.name, top.nodeName);
@@ -98,7 +96,8 @@ function domParse(str: string, doc: Document, top: ParentNode, opt={}) {
 		}
 	});
 
-	parser.write(str);
+	return parser;
+	// .write(str);
 }
 
 // function domParse(str: string, doc: Document, top: ParentNode) {
@@ -132,12 +131,14 @@ export const parseDOM = function (
 	parent: ParentNode // Element | Document | DocumentFragment
 ) {
 	if (parent instanceof Document) {
-		domParse(str, parent, parent);
+		domParse( parent, parent).write(str);
 	} else {
 		const doc = parent.ownerDocument;
-		// sax expects a root element but we also missuse it to parse fragments
-		// if (doc) domParse(`<${ROOT_TAG}>${str}</${ROOT_TAG}>`, doc, parent);
-		if (doc) domParse(str, doc, parent, {fragment:true});
+		if (doc) {
+			domParse( doc, parent, { fragment: true }).write(str);
+		} else {
+			throw new Error(`No ownerDocument`);
+		}
 	}
 };
 
@@ -155,7 +156,7 @@ export class DOMParser {
 			default:
 				doc = new XMLDocument(type);
 		}
-		domParse(markup, doc, doc);
+		domParse(doc, doc).write(markup);
 		switch (type) {
 			case "text/html":
 				if (!doc.doctype) {
@@ -166,8 +167,6 @@ export class DOMParser {
 		return doc;
 	}
 }
-
-const ROOT_TAG = "parser_root";
 
 const HTML5_DOCTYPE = /<!doctype html>/i;
 const PUBLIC_DOCTYPE = /<!doctype\s+([^\s]+)\s+public\s+"([^"]+)"\s+"([^"]+)"/i;

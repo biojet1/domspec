@@ -1,14 +1,6 @@
 import { Point, Box, Matrix, Path } from "svggeom";
 import { userUnit } from "./units.js";
 /// Base Elements //////////
-let _id_int = 0;
-function nextUniqueId() {
-	if (_id_int == 0) {
-		_id_int = new Date().getTime();
-		return _id_int == 0 ? ++_id_int : _id_int;
-	}
-	return ++_id_int == 0 ? ++_id_int : _id_int;
-}
 
 export class SVGElement extends Element {
 	get _isViewportElement() {
@@ -34,13 +26,7 @@ export class SVGElement extends Element {
 		}
 		return null;
 	}
-	letId() {
-		let id = this.getAttribute("id");
-		if (!id) {
-			this.setAttribute("id", (id = nextUniqueId().toString(36)));
-		}
-		return id;
-	}
+
 }
 
 interface IBBoxParam {
@@ -73,6 +59,10 @@ export class SVGGraphicsElement extends SVGElement {
 
 	get transformM() {
 		return Matrix.parse(this.getAttribute("transform") || "");
+	}
+
+	set transformM(T: Matrix ) {
+		this.setAttribute("transform", T.toString());
 	}
 
 	get clip(): SVGGraphicsElement | undefined {

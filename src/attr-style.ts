@@ -138,7 +138,7 @@ export class StyleAttr extends Attr {
 		// this.val = value;
 	}
 	get value() {
-		return this.format();
+		return this.format() || "";
 		// return typeof val === "string" ? val : this.format();
 	}
 	[Symbol.iterator]() {
@@ -160,18 +160,28 @@ export class StyleAttr extends Attr {
 		return super.remove();
 	}
 
-	formatXML() {
+	// formatXML() {
+	// 	let { mapq: map } = this;
+	// 	return map && map.size > 0 ? super.formatXML() : "";
+	// }
+	get nodeValue() {
 		let { mapq: map } = this;
-		return map && map.size > 0 ? super.formatXML() : "";
+		return map && map.size > 0 ? this.format() : null;
 	}
-
-
 }
 
 const handler = {
 	get(attr: StyleAttr, key: string) {
 		if (key in StyleAttr.prototype) return (attr as any)[key];
 		if (key === "length") return attr.map.size;
+		if (key === "setProperty") {
+			return function (propertyName: string, value = "", priority = "") {
+				attr.map.set(
+					propertyName,
+					value + (priority ? ` !${priority}` : "")
+				);
+			};
+		}
 		if (/^-?\d+$/.test(key)) {
 			let i = parseInt(key);
 			for (const v of attr.map.keys()) {

@@ -69,6 +69,9 @@ global.assert_true = function (a, msg) {
 global.assert_false = function (a, msg) {
   (current_t || tap).strictSame(a, false, msg);
 };
+global.assert_object_equals = function (actual, expected, description) {
+  (current_t || tap).same(actual, expected, description);
+};
 
 global.assert_array_equals = function (a, b, msg) {
   const t = current_t || tap;

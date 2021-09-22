@@ -26,7 +26,7 @@ export class ClassAttr extends Attr {
 	// 	return tokens && tokens.size > 0 ? super.formatXML() : "";
 	// }
 
-	get nodeValue() {
+	valueOf() {
 		let { tokensQ: tokens } = this;
 		return tokens && tokens.size > 0 ? tokens.format() : null;
 	}

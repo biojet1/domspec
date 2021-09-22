@@ -60,6 +60,7 @@ export const cssToMap = function (css: string) {
 			})
 			.map(function (el): [string, string] {
 				const a = el.split(/\s*:\s*/);
+
 				return [a[0], a[1] || ""];
 			})
 	);
@@ -80,7 +81,11 @@ export const mapToCss = function (myMap: Map<string, string>) {
 	return arr.join("; ");
 };
 
-class CSSMap extends Map<string, string> {}
+class CSSMap extends Map<string, String> {}
+
+class CSSValue extends String {
+	priority?: string;
+}
 
 export class StyleAttr extends Attr {
 	val?: CSSMap;
@@ -100,10 +105,16 @@ export class StyleAttr extends Attr {
 				case "":
 					break;
 				default:
-					arr.push(`${deCamelize(key)}:${v}`);
+					if (typeof v === "object") {
+						const p = (v as CSSValue).priority;
+						if (p) {
+							arr.push(`${deCamelize(key)}: ${v} !${p};`);
+						}
+					}
+					arr.push(`${deCamelize(key)}: ${v};`);
 			}
 		}
-		return arr.join(";");
+		return arr.join(" ");
 	}
 
 	parse(css: string) {
@@ -111,18 +122,34 @@ export class StyleAttr extends Attr {
 		map.clear();
 		for (const s of css.split(/\s*;\s*/)) {
 			if (s) {
-				const a = s.split(/\s*:\s*/);
-				a[0] && map.set(a[0], a[1] || "");
+				const i = s.indexOf(":");
+				if (i > 0) {
+					const k = s.substring(0, i).trim();
+					const v = s.substring(i + 1).trim();
+					if (k && v) {
+						const m = v.match(/(.+)\s*!\s*(\w+)$/);
+						if (m) {
+							const u = new CSSValue(m[1]);
+							u.priority = m[2];
+							map.set(k, u);
+						} else {
+							map.set(k, v);
+						}
+					}
+				}
+				// const [k, v] = s.split(/\s*:\s*/);
+
+				// if (a[0]) {
+				// 	map.set(a[0], a[1] || "");
+				// }
 			}
 		}
 	}
 	get map() {
 		return this.val || (this.val = new CSSMap());
-		// return typeof val === "string" ? (this.val = new CSSMap(val)) : val;
 	}
 	get mapq() {
 		return this.val || null;
-		// return val && (typeof val === "string" ? (this.val = new CSSMap(val)) : val) || null;
 	}
 
 	get cssText() {
@@ -139,11 +166,12 @@ export class StyleAttr extends Attr {
 	}
 	get value() {
 		return this.format() || "";
-		// return typeof val === "string" ? val : this.format();
 	}
 	[Symbol.iterator]() {
-		return this.map.keys();
+		const { mapq: map } = this;
+		return map ? map.keys() : [].values();
 	}
+
 	get proxy() {
 		return (
 			this._proxy || (this._proxy = new Proxy<StyleAttr>(this, handler))
@@ -155,36 +183,107 @@ export class StyleAttr extends Attr {
 	}
 
 	remove() {
-		let { mapq: map } = this;
+		const { mapq: map } = this;
 		map && map.clear();
 		return super.remove();
+	}
+
+	setProperty(name: string, value?: String, priority?: string) {
+		return setProperty(this.map, name, value, priority);
+	}
+	getPropertyPriority(name: string) {
+		const { mapq: map } = this;
+		if (map && map.size > 0) {
+			const v = map.get(name);
+			if (typeof v === "object") {
+				return (v as CSSValue).priority || "";
+			}
+		}
+		return "";
+	}
+	getPropertyValue(name: string) {
+		const { mapq: map } = this;
+		return (map && map.size > 0 && map.get(name)?.valueOf()) || "";
+	}
+	removeProperty(name: string) {
+		const { mapq: map } = this;
+		if (map && map.size > 0) {
+			const v = map.get(name);
+			if (v !== undefined) {
+				map.delete(name);
+				return v;
+			}
+		}
+		return null;
 	}
 
 	// formatXML() {
 	// 	let { mapq: map } = this;
 	// 	return map && map.size > 0 ? super.formatXML() : "";
 	// }
-	get nodeValue() {
+	get valueOf() {
 		let { mapq: map } = this;
 		return map && map.size > 0 ? this.format() : null;
 	}
 }
 
 const handler = {
-	get(attr: StyleAttr, key: string) {
-		if (key in StyleAttr.prototype) return (attr as any)[key];
-		if (key === "length") return attr.map.size;
-		if (key === "setProperty") {
-			return function (propertyName: string, value = "", priority = "") {
-				attr.map.set(
-					propertyName,
-					value + (priority ? ` !${priority}` : "")
-				);
-			};
+	get(self: StyleAttr, key: string, receiver?: any) {
+		switch (key) {
+			case "setProperty":
+				return (name: string, value?: string, priority?: string) =>
+					setProperty(self.map, name, value, priority);
+
+			case "getPropertyValue":
+				return (name: string) => {
+					const { mapq: map } = self;
+					return (
+						(map && map.size > 0 && map.get(name)?.valueOf()) || ""
+					);
+				};
+			case "removeProperty":
+				return (name: string) => {
+					const { mapq: map } = self;
+					if (map && map.size > 0) {
+						const v = map.get(name);
+						if (v !== undefined) {
+							map.delete(name);
+							return v;
+						}
+					}
+					return null;
+				};
+
+			case "getPropertyPriority":
+				return (name: string) => {
+					const { mapq: map } = self;
+					if (map && map.size > 0) {
+						const v = map.get(name);
+						if (typeof v === "object") {
+							return (v as CSSValue).priority || "";
+						}
+					}
+					return "";
+				};
+
+			case "length":
+				return self.map.size;
+			case "cssText":
+				return self.cssText;
 		}
-		if (/^-?\d+$/.test(key)) {
+		if (typeof key === "symbol") {
+			if (key === Symbol.iterator) {
+				return () => {
+					const { mapq: map } = self;
+					return map ? map.keys() : [].values();
+				};
+			}
+			// return self[Symbol.iterator];
+			console.log(`handler: symbol ${key}`);
+			return undefined;
+		} else if (/^-?\d+$/.test(key)) {
 			let i = parseInt(key);
-			for (const v of attr.map.keys()) {
+			for (const v of self.map.keys()) {
 				if (0 === i--) {
 					return v;
 				} else if (i < 0) {
@@ -194,26 +293,70 @@ const handler = {
 			return undefined;
 		}
 		key = deCamelize(key);
-		return attr.map.get(key);
+		return self.map.get(key);
 	},
-	set(attr: StyleAttr, key: string, value: string) {
-		if (key === "cssText") {
-			attr.parse(value);
+	set(self: StyleAttr, key: string, value: string) {
+		if (key in StyleAttr.prototype) {
+			throw new Error(`cant set "${key}"`);
+			// (StyleAttr.prototype as any)[key];
 		} else {
-			key = deCamelize(key);
-			switch (value) {
-				case null:
-				case undefined:
-				case "":
-					attr.map.delete(key);
-					break;
-				default:
-					attr.map.set(key, value);
-			}
+			setProperty(self.map, deCamelize(key), value);
 		}
 		return true;
 	},
 };
+
+function setProperty(
+	map: CSSMap,
+	name: string,
+	value?: String,
+	priority?: string
+) {
+	switch (value) {
+		case undefined:
+			break;
+		case null:
+			map.set(name, "");
+			break;
+		case "":
+			map.delete(name);
+			break;
+		default:
+			const v = map.get(name);
+			if (v === undefined) {
+				if (priority) {
+					const v = new CSSValue(value);
+					v.priority = priority;
+					map.set(name, v);
+				} else {
+					map.set(name, value);
+				}
+			} else if (typeof v === "object") {
+				if (v.toString() === value) {
+					if (priority !== (v as CSSValue).priority) {
+						(v as CSSValue).priority = priority;
+					}
+				} else {
+					if (priority) {
+						const u = new CSSValue(value);
+						u.priority = priority;
+						map.set(name, u);
+					} else if ((v as CSSValue).priority) {
+						const u = new CSSValue(value);
+						u.priority = (v as CSSValue).priority;
+						map.set(name, u);
+					} else {
+						map.set(name, value);
+					}
+				}
+				return;
+			} else if (v === value) {
+				return;
+			} else {
+				map.set(name, value);
+			}
+	}
+}
 
 import { Element } from "./element.js";
 import { Attr } from "./attr.js";

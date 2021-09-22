@@ -25,10 +25,10 @@ export abstract class Attr extends Node {
 	get nodeType() {
 		return 2;
 	}
-	// get nodeValue() {
-	// 	// https://dom.spec.whatwg.org/#dom-node-nodevalue
-	// 	return this.value;
-	// }
+	get nodeValue() {
+		// https://dom.spec.whatwg.org/#dom-node-nodevalue
+		return this.value;
+	}
 	abstract get value(): string;
 	abstract set value(value: string);
 	get specified() {
@@ -114,7 +114,7 @@ export abstract class Attr extends Node {
 export class StringAttr extends Attr {
 	//// Dom
 	[VALUE]?: string;
-	get nodeValue() {
+	valueOf() {
 		return this[VALUE] ?? null;
 	}
 	get value() {

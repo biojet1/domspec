@@ -21,12 +21,12 @@ export function* enumXMLDump(start: Node, end: Node) {
 				{
 					// const s = cur.formatXML();
 					// if (s !== "") yield ` ${cur.formatXML()}`;
-					const { name, nodeValue } = cur as Attr;
-					if (name && null !== nodeValue)
-						yield ` ${name}="${nodeValue.toString().replace(
-							/[<>&"\xA0]/g,
-							rep
-						)}"`;
+					const v = cur.valueOf();
+					if (v !== null) {
+						const { name } = cur as Attr;
+						if (name)
+							yield ` ${name}="${(v as string).replace(/[<>&"\xA0]/g, rep)}"`;
+					}
 				}
 				break;
 			case 3: // TEXT_NODE

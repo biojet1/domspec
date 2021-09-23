@@ -51,35 +51,35 @@ export function deCamelize(s: string) {
 // 	});
 // }
 
-export const cssToMap = function (css: string) {
-	return new Map<string, string>(
-		css
-			.split(/\s*;\s*/)
-			.filter(function (el) {
-				return !!el;
-			})
-			.map(function (el): [string, string] {
-				const a = el.split(/\s*:\s*/);
+// export const cssToMap = function (css: string) {
+// 	return new Map<string, string>(
+// 		css
+// 			.split(/\s*;\s*/)
+// 			.filter(function (el) {
+// 				return !!el;
+// 			})
+// 			.map(function (el): [string, string] {
+// 				const a = el.split(/\s*:\s*/);
 
-				return [a[0], a[1] || ""];
-			})
-	);
-};
+// 				return [a[0], a[1] || ""];
+// 			})
+// 	);
+// };
 
-export const mapToCss = function (myMap: Map<string, string>) {
-	const arr: string[] = [];
-	for (const [key, val] of myMap) {
-		switch (val) {
-			case null:
-			case undefined:
-			case "":
-				break;
-			default:
-				arr.push(`${deCamelize(key)} : ${val}`);
-		}
-	}
-	return arr.join("; ");
-};
+// export const mapToCss = function (myMap: Map<string, string>) {
+// 	const arr: string[] = [];
+// 	for (const [key, val] of myMap) {
+// 		switch (val) {
+// 			case null:
+// 			case undefined:
+// 			case "":
+// 				break;
+// 			default:
+// 				arr.push(`${deCamelize(key)} : ${val}`);
+// 		}
+// 	}
+// 	return arr.join("; ");
+// };
 
 class CSSMap extends Map<string, String> {}
 

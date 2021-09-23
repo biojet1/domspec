@@ -20,9 +20,9 @@ export abstract class CharacterData extends ChildNode {
 		return this._data;
 	}
 
-	toString() {
-		return escape(this._data);
-	}
+	// toString() {
+	// 	return escape(this._data);
+	// }
 
 	get data() {
 		return this._data;
@@ -123,9 +123,9 @@ export abstract class CharacterData extends ChildNode {
 		return this._data.length;
 	}
 
-	get nodeLength() {
-		return this._data.length;
-	}
+	// get nodeLength() {
+	// 	return this._data.length;
+	// }
 
 	cloneNode(deep?: boolean) {
 		const { ownerDocument, data } = this;
@@ -137,12 +137,12 @@ export abstract class CharacterData extends ChildNode {
 	isEqualNode(node: Node): boolean {
 		if (this === node) {
 			return true;
-		} else if (!node ) {
+		} else if (!node) {
 			return false;
 		}
-		const { nodeType, data } = this;
-		const { nodeType:nodeType2, data:data2 } = (node as CharacterData);
-		return nodeType2 === nodeType && data ? (data === data2):!data2;
+		const { nodeType: type1, data: data1 } = this;
+		const { nodeType: type2, data: data2 } = node as CharacterData;
+		return type2 === type1 && data1 ? data1 === data2 : !data2;
 
 		// return this.data === (node as CharacterData).data;
 	}
@@ -170,17 +170,17 @@ export class TextNode extends CharacterData {
 
 		const text = this.substringData(offset, count);
 
+		const next = this.nextSibling;
 		if (parentNode) {
 			this.after(text);
 		} else {
 			const node = new Text(text);
-			const next = this.nextSibling;
 			this._linkr(node);
-			next && node._linkr(next);
+			next /* c8 ignore next */ && node._linkr(next);
 		}
 
 		this.replaceData(offset, count, "");
-		return this.nextSibling || this;
+		return this.nextSibling /* c8 ignore next */ || this;
 	}
 	get wholeText() {
 		let wholeText = this.textContent;
@@ -245,7 +245,7 @@ export class ProcessingInstruction extends CharacterData {
 	constructor(target: string, data: string) {
 		super(data);
 		if (this._data.indexOf("?>") >= 0 || !/^[a-zA-Z][^\s]*$/.test(target)) {
-			throw new Error(`InvalidCharacterError`);
+			throw new Error(`InvalidCharacterError: ${target} ${data}`);
 		}
 
 		this.target = target;
@@ -298,6 +298,7 @@ const pe = function (m: string) {
 		case ">":
 			return "&gt;";
 	}
+	/* c8 ignore next */
 	return m;
 };
 

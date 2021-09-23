@@ -175,21 +175,22 @@ export abstract class Document extends NonElementParentNode {
 	}
 
 	createRange() {
+		// TODO
 		return {};
 	}
 
-	static fromNS(ns?: string) {
-		switch (ns) {
-			case "text/html":
-			case "http://www.w3.org/1999/xhtml":
-				return new HTMLDocument();
-			case "image/svg+xml":
-			case "http://www.w3.org/2000/svg":
-				return new SVGDocument();
-			default:
-				return new XMLDocument();
-		}
-	}
+	// static fromNS(ns?: string) {
+	// 	switch (ns) {
+	// 		case "text/html":
+	// 		case "http://www.w3.org/1999/xhtml":
+	// 			return new HTMLDocument();
+	// 		case "image/svg+xml":
+	// 		case "http://www.w3.org/2000/svg":
+	// 			return new SVGDocument();
+	// 		default:
+	// 			return new XMLDocument();
+	// 	}
+	// }
 
 	get isHTML() {
 		return this.contentType == "text/html";

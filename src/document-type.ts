@@ -14,9 +14,9 @@ export class DocumentType extends ChildNode {
 	get nodeName() {
 		return this.name;
 	}
-	get nodeLength() {
-		return 0;
-	}
+	// get nodeLength() {
+	// 	return 0;
+	// }
 	cloneNode(deep?: boolean) {
 		const { name, publicId, systemId } = this;
 		return new DocumentType(name, publicId, systemId);

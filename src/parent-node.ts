@@ -583,6 +583,10 @@ export abstract class ParentNode extends ChildNode {
 		parseDOM(html, this);
 		this.replaceWith(...this.children);
 	}
+
+	toString() {
+		return this.outerHTML;
+	}
 }
 const _children_map = new WeakMap<ParentNode>();
 

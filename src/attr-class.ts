@@ -21,11 +21,6 @@ export class ClassAttr extends Attr {
 		return this.value;
 	}
 
-	// formatXML() {
-	// 	let { tokensQ: tokens } = this;
-	// 	return tokens && tokens.size > 0 ? super.formatXML() : "";
-	// }
-
 	valueOf() {
 		let { tokensQ: tokens } = this;
 		return tokens && tokens.size > 0 ? tokens.format() : null;

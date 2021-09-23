@@ -1,43 +1,43 @@
-export const fullHex = function (hex: string) {
-	return hex.length === 4
-		? [
-				"#",
-				hex.substring(1, 2),
-				hex.substring(1, 2),
-				hex.substring(2, 3),
-				hex.substring(2, 3),
-				hex.substring(3, 4),
-				hex.substring(3, 4),
-		  ].join("")
-		: hex;
-};
+// export const fullHex = function (hex: string) {
+// 	return hex.length === 4
+// 		? [
+// 				"#",
+// 				hex.substring(1, 2),
+// 				hex.substring(1, 2),
+// 				hex.substring(2, 3),
+// 				hex.substring(2, 3),
+// 				hex.substring(3, 4),
+// 				hex.substring(3, 4),
+// 		  ].join("")
+// 		: hex;
+// };
 
-export const hexToRGB = function (
-	valOrMap: string
-	// | Map<string, string>
-): string {
-	/*if (valOrMap instanceof Map) {
-		for (const [key, val] of valOrMap) {
-			valOrMap.set(key, hexToRGB(val));
-		}
-		return valOrMap;
-	} else */
+// export const hexToRGB = function (
+// 	valOrMap: string
+// 	// | Map<string, string>
+// ): string {
+// if (valOrMap instanceof Map) {
+// 	for (const [key, val] of valOrMap) {
+// 		valOrMap.set(key, hexToRGB(val));
+// 	}
+// 	return valOrMap;
+// } else
 
-	if (/#[0-9a-f]{3,6}/.test(valOrMap)) {
-		valOrMap = fullHex(valOrMap);
-		return (
-			"rgb(" +
-			[
-				parseInt(valOrMap.slice(1, 3), 16),
-				parseInt(valOrMap.slice(3, 5), 16),
-				parseInt(valOrMap.slice(5, 7), 16),
-			].join(",") +
-			")"
-		);
-	} else {
-		return valOrMap;
-	}
-};
+// 	if (/#[0-9a-f]{3,6}/.test(valOrMap)) {
+// 		valOrMap = fullHex(valOrMap);
+// 		return (
+// 			"rgb(" +
+// 			[
+// 				parseInt(valOrMap.slice(1, 3), 16),
+// 				parseInt(valOrMap.slice(3, 5), 16),
+// 				parseInt(valOrMap.slice(5, 7), 16),
+// 			].join(",") +
+// 			")"
+// 		);
+// 	} else {
+// 		return valOrMap;
+// 	}
+// };
 
 export function deCamelize(s: string) {
 	return String(s).replace(/([a-z])([A-Z])/g, function (m, g1, g2) {
@@ -45,11 +45,11 @@ export function deCamelize(s: string) {
 	});
 }
 
-export function camelCase(s: string) {
-	return String(s).replace(/([a-z])-([a-z])/g, function (m, g1, g2) {
-		return g1 + g2.toUpperCase();
-	});
-}
+// export function camelCase(s: string) {
+// 	return String(s).replace(/([a-z])-([a-z])/g, function (m, g1, g2) {
+// 		return g1 + g2.toUpperCase();
+// 	});
+// }
 
 export const cssToMap = function (css: string) {
 	return new Map<string, string>(
@@ -217,13 +217,8 @@ export class StyleAttr extends Attr {
 		return null;
 	}
 
-	// formatXML() {
-	// 	let { mapq: map } = this;
-	// 	return map && map.size > 0 ? super.formatXML() : "";
-	// }
-	get valueOf() {
-		let { mapq: map } = this;
-		return map && map.size > 0 ? this.format() : null;
+	valueOf() {
+		return this.format() || null;
 	}
 }
 
@@ -270,6 +265,10 @@ const handler = {
 				return self.map.size;
 			case "cssText":
 				return self.cssText;
+			case "toString":
+				return () => {
+					return self.cssText;
+				};
 		}
 		if (typeof key === "symbol") {
 			if (key === Symbol.iterator) {
@@ -297,7 +296,13 @@ const handler = {
 	},
 	set(self: StyleAttr, key: string, value: string) {
 		if (key in StyleAttr.prototype) {
-			throw new Error(`cant set "${key}"`);
+			switch (key) {
+				case "cssText":
+					self.cssText = value;
+					break;
+				default:
+					throw new Error(`cant set "${key}"`);
+			}
 			// (StyleAttr.prototype as any)[key];
 		} else {
 			setProperty(self.map, deCamelize(key), value);
@@ -312,14 +317,61 @@ function setProperty(
 	value?: String,
 	priority?: string
 ) {
+	L1: switch (name) {
+		case "margin":
+		case "padding": {
+			switch (value) {
+				case undefined:
+					break;
+				case null:
+					map.set(name, "");
+					break;
+				case "inherit":
+				case "initial":
+				case "unset":
+				case "revert":
+					break L1;
+				case "":
+					map.delete(`${name}-top`);
+					map.delete(`${name}-right`);
+					map.delete(`${name}-bottom`);
+					map.delete(`${name}-left`);
+					break;
+				default:
+					const a = value.split(/\s+/);
+					if (a.length > 3) {
+						setProperty(map, `${name}-top`, a[0], priority);
+						setProperty(map, `${name}-right`, a[1], priority);
+						setProperty(map, `${name}-bottom`, a[2], priority);
+						setProperty(map, `${name}-left`, a[3], priority);
+					} else if (a.length > 2) {
+						setProperty(map, `${name}-top`, a[0], priority);
+						setProperty(map, `${name}-right`, a[1], priority);
+						setProperty(map, `${name}-bottom`, a[2], priority);
+						setProperty(map, `${name}-left`, a[1], priority);
+					} else if (a.length > 1) {
+						setProperty(map, `${name}-top`, a[0], priority);
+						setProperty(map, `${name}-right`, a[1], priority);
+						setProperty(map, `${name}-bottom`, a[0], priority);
+						setProperty(map, `${name}-left`, a[1], priority);
+					} else if (a.length > 0) {
+						setProperty(map, `${name}-top`, a[0], priority);
+						setProperty(map, `${name}-right`, a[0], priority);
+						setProperty(map, `${name}-bottom`, a[0], priority);
+						setProperty(map, `${name}-left`, a[0], priority);
+					}
+			}
+			return;
+		}
+	}
 	switch (value) {
 		case undefined:
 			break;
-		case null:
-			map.set(name, "");
-			break;
 		case "":
 			map.delete(name);
+			break;
+		case null:
+			map.set(name, "");
 			break;
 		default:
 			const v = map.get(name);
@@ -332,7 +384,7 @@ function setProperty(
 					map.set(name, value);
 				}
 			} else if (typeof v === "object") {
-				if (v.toString() === value) {
+				if (v.toString() == value) {
 					if (priority !== (v as CSSValue).priority) {
 						(v as CSSValue).priority = priority;
 					}
@@ -341,19 +393,24 @@ function setProperty(
 						const u = new CSSValue(value);
 						u.priority = priority;
 						map.set(name, u);
-					} else if ((v as CSSValue).priority) {
-						const u = new CSSValue(value);
-						u.priority = (v as CSSValue).priority;
-						map.set(name, u);
 					} else {
 						map.set(name, value);
 					}
 				}
-				return;
 			} else if (v === value) {
-				return;
+				if (priority) {
+					const u = new CSSValue(value);
+					u.priority = priority;
+					map.set(name, u);
+				}
 			} else {
-				map.set(name, value);
+				if (priority) {
+					const u = new CSSValue(value);
+					u.priority = priority;
+					map.set(name, u);
+				} else {
+					map.set(name, value);
+				}
 			}
 	}
 }

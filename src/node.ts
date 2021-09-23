@@ -81,13 +81,6 @@ export abstract class Node extends EventTarget {
 		}
 		return this;
 	}
-	/// Extra
-	// formatXML(): string {
-	// 	throw new Error(`Not implemented for ${this.nodeType}`);
-	// }
-	// toString(): string {
-	// 	return this.formatXML();
-	// }
 	//// DOM
 	_owner?: Document;
 	parentNode?: ParentNode | null;

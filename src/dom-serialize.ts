@@ -19,8 +19,6 @@ export function* enumXMLDump(start: Node, end: Node) {
 		switch (cur.nodeType) {
 			case 2: // ATTRIBUTE_NODE
 				{
-					// const s = cur.formatXML();
-					// if (s !== "") yield ` ${cur.formatXML()}`;
 					const v = cur.valueOf();
 					if (v !== null) {
 						const { name } = cur as Attr;

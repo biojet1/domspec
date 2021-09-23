@@ -274,9 +274,6 @@ export class Element extends ParentNode {
 
 	//// DOM: </Content>
 
-	formatXML(): string {
-		return Array.from(enumXMLDump(this, this[END])).join("");
-	}
 
 	get innerText() {
 		return this.textContent;

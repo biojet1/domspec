@@ -61,16 +61,6 @@ export abstract class Attr extends Node {
 		return node && node.lookupPrefix(ns);
 	}
 
-	// toString() {
-	// 	const { name, value } = this;
-	// 	return `${name}="${value.replace(/[<>&"\xA0]/g, rep)}"`;
-	// }
-
-	// formatXML() {
-	// 	const { name, value } = this;
-	// 	return `${name}="${value.toString().replace(/[<>&"\xA0]/g, rep)}"`;
-	// }
-
 	cloneNode(deep?: boolean) {
 		const { ownerDocument, name, _ns, value, localName, _prefix } = this;
 
@@ -123,10 +113,6 @@ export class StringAttr extends Attr {
 	set value(value: string) {
 		this[VALUE] = value;
 	}
-	// formatXML() {
-	// 	const { [VALUE]: val } = this;
-	// 	return val ? super.formatXML() : "";
-	// }
 }
 
 export abstract class Typed {
@@ -154,28 +140,24 @@ export class TypedAttr<T extends Typed> extends Attr {
 	// 	// 	? (this[VALUE] = T.parse(val))
 	// 	// 	: val || (this[VALUE] = T.parse());
 	// }
-	// formatXML() {
-	// 	const { [VALUE]: val } = this;
-	// 	return val ? super.formatXML() : "";
-	// }
 }
 
-const rep = function (m: string) {
-	switch (m) {
-		// '   &apos;
-		// case "\xA0":
-		// 	return "&nbsp;";
-		case "&":
-			return "&amp;";
-		case "<":
-			return "&lt;";
-		case ">":
-			return "&gt;";
-		case '"':
-			return "&quot;";
-	}
-	return m;
-};
+// const rep = function (m: string) {
+// 	switch (m) {
+// 		// '   &apos;
+// 		// case "\xA0":
+// 		// 	return "&nbsp;";
+// 		case "&":
+// 			return "&amp;";
+// 		case "<":
+// 			return "&lt;";
+// 		case ">":
+// 			return "&gt;";
+// 		case '"':
+// 			return "&quot;";
+// 	}
+// 	return m;
+// };
 
 import { Node } from "./node.js";
 import { validateAndExtract } from "./namespace.js";

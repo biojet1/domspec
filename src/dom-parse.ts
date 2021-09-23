@@ -1,13 +1,15 @@
-function domParse(str: string, doc: Document, top: ParentNode) {
+function domParse(doc: Document, top: ParentNode, opt = {}) {
 	const parser = new SaxesParser({
 		// lowercase: true,
 		xmlns: true,
 		strictEntities: true,
+		...opt,
 	});
 
 	parser.on("error", (err) => {
 		throw new Error(`SaxesParser ${err.message}`);
 	});
+
 	parser.on("doctype", (dt) => {
 		let [name, pub, sys] = ["html", "", ""];
 
@@ -27,12 +29,15 @@ function domParse(str: string, doc: Document, top: ParentNode) {
 		node.ownerDocument = doc;
 		top.appendChild(node);
 	});
+
 	parser.on("text", (str: string) => {
-		top.appendChild(doc.createTextNode(str));
+		if (top.nodeType !== 9) top.appendChild(doc.createTextNode(str));
 	});
+
 	parser.on("comment", (str: string) => {
 		top.appendChild(doc.createComment(str));
 	});
+
 	parser.on("cdata", (data) => {
 		top.appendChild(doc.createCDATASection(data));
 	});
@@ -42,29 +47,31 @@ function domParse(str: string, doc: Document, top: ParentNode) {
 		// console.dir(top, { depth: 1 });
 
 		const { local, attributes, uri, prefix, name } = node;
-		if (name === ROOT_TAG) return;
-		let ns = !uri || uri === "" ? null : uri;
-		if (!ns && prefix && prefix != "") {
+		let ns = uri || null;
+		if (!ns && prefix) {
 			ns = top.lookupNamespaceURI(prefix);
 		}
-
-		const tag = doc.createElementNS(ns, name);
+		let tag;
+		if (ns) {
+			tag = doc.createElementNS(ns, name);
+		} else {
+			tag = doc.createElement(name);
+		}
 
 		const attrs = Object.entries(attributes);
 
-		attrs.sort(function (a, b) {
-			var nameA = a[0];
-			var nameB = b[0];
-			if (nameA < nameB) {
-				return 1;
-			}
-			if (nameA > nameB) {
-				return -1;
-			}
-			// names must be equal
-			return 0;
-		});
-
+		// attrs.sort(function (a, b) {
+		// 	var nameA = a[0];
+		// 	var nameB = b[0];
+		// 	if (nameA < nameB) {
+		// 		return 1;
+		// 	}
+		// 	if (nameA > nameB) {
+		// 		return -1;
+		// 	}
+		// 	// names must be equal
+		// 	return 0;
+		// });
 		for (const [key, { uri, value }] of attrs) {
 			tag.setAttributeNS(uri, key, value);
 		}
@@ -73,7 +80,6 @@ function domParse(str: string, doc: Document, top: ParentNode) {
 	});
 
 	parser.on("closetag", (node) => {
-		if (node.name === ROOT_TAG) return;
 		// console.log("closetag",  node.name, top.nodeName);
 		// !top.lastChild && console.log("Empty",  node.name, top.nodeName);
 		// node.isSelfClosing && console.log("isSelfClosing",  node.name, top.nodeName);
@@ -90,19 +96,49 @@ function domParse(str: string, doc: Document, top: ParentNode) {
 		}
 	});
 
-	parser.write(str);
+	return parser;
+	// .write(str);
 }
+
+// function domParse(str: string, doc: Document, top: ParentNode) {
+// 	const handler = {
+// 		onopentagname: function (name /*: string */) {
+// 			const pos = name.indexOf(":");
+// 			if (pos < 0) {
+// 				const tag = doc.createElement(name);
+// 				top.appendChild(tag);
+// 				top = tag;
+// 			}else{
+
+// 			}
+// 			// prefix =
+// 		},
+// 		onattribute(name /*: string */, value /*: string */) {},
+// 		onclosetag: function (name /*: string */) {},
+// 	};
+
+// 	// ontext(text /*: string */)
+// 	// onprocessinginstruction(name /*: string */, data /*: string */)
+// 	// oncomment(data /*: string */)
+// 	// oncommentend()
+// 	// oncdatastart()
+// 	// oncdataend()
+// 	// onerror(error /*: Error */)
+// }
 
 export const parseDOM = function (
 	str: string,
 	parent: ParentNode // Element | Document | DocumentFragment
 ) {
 	if (parent instanceof Document) {
-		domParse(str, parent, parent);
+		domParse( parent, parent).write(str);
 	} else {
 		const doc = parent.ownerDocument;
-		// sax expects a root element but we also missuse it to parse fragments
-		if (doc) domParse(`<${ROOT_TAG}>${str}</${ROOT_TAG}>`, doc, parent);
+		if (doc) {
+			domParse( doc, parent, { fragment: true }).write(str);
+		} else {
+			throw new Error(`No ownerDocument`);
+		}
 	}
 };
 
@@ -110,44 +146,27 @@ export class DOMParser {
 	parseFromString(markup: string, type?: string) {
 		let doc: Document;
 		switch (type) {
+			case "application/xhtml+xml":
 			case "text/html":
-				doc = new HTMLDocument();
+				doc = new HTMLDocument(type);
 				break;
 			case "image/svg+xml":
 				doc = new SVGDocument();
 				break;
 			default:
-				doc = new XMLDocument();
+				doc = new XMLDocument(type);
 		}
-		domParse(markup, doc, doc);
+		domParse(doc, doc).write(markup);
+		switch (type) {
+			case "text/html":
+				if (!doc.doctype) {
+					doc.insertBefore(new DocumentType("html"), doc.firstChild);
+				}
+		}
+
 		return doc;
 	}
 }
-
-// export interface Handler {
-//     onparserinit(parser: Parser): void;
-
-//     onreset(): void;
-
-//     onend(): void;
-//     onerror(error: Error): void;
-//     onclosetag(name: string): void;
-//     onopentagname(name: string): void;
-//     onattribute(
-//         name: string,
-//         value: string,
-//         quote?: string | undefined | null
-//     ): void;
-//     onopentag(name: string, attribs: { [s: string]: string }): void;
-//     ontext(data: string): void;
-//     oncomment(data: string): void;
-//     oncdatastart(): void;
-//     oncdataend(): void;
-//     oncommentend(): void;
-//     onprocessinginstruction(name: string, data: string): void;
-// }
-
-const ROOT_TAG = "parser_root";
 
 const HTML5_DOCTYPE = /<!doctype html>/i;
 const PUBLIC_DOCTYPE = /<!doctype\s+([^\s]+)\s+public\s+"([^"]+)"\s+"([^"]+)"/i;
@@ -163,3 +182,4 @@ import {
 	SVGDocument,
 	XMLDocument,
 } from "./document.js";
+import { DocumentType } from "./document-type.js";

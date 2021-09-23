@@ -2,29 +2,44 @@
   "name": "svgdom-ts",
   "version": "1.0.0",
   "description": "SVG DOM Implementation",
-  "main": "dist/index.js",
+  "main": "dist/all.js",
   "scripts": {
     "test": "tap test/parse.mjs",
     "madge": "node test/madge.cjs",
     "test_xml": "python test/gen.py > test/test.xml",
     "rm-map": "find dist -name '*.js.map' -type f -delete",
-    "c8test": "c8 npx tap --no-coverage --reporter=min 'test/**/*.tap.*js'",
-    "wpt": "c8 npx tap --no-coverage --reporter=min test/wpt/**/*.tap.*js",
+    "c8test": "c8 npx tap --no-coverage --reporter=terse 'test/*.tap.?js' 'test/wpt-o?/*.tap.?js'",
+    "wpt": "c8 npx tap --no-coverage --reporter=terse 'test/wpt-o?/*.tap.?js'",
     "c8report": "c8 report -r text-lcov > coverage/lcov.info",
-    "compile": "tsc --sourcemap"
+    "c8rephtml": "c8 report -r html",
+    "html:switch": "env SWITCH=html node test/elements.js",
+    "html:class": "env CLASS=html node test/elements.js",
+    "html:import": "env IMPORT=html node test/elements.js",
+    "svg:switch": "env SWITCH=svg node test/elements.js",
+    "svg:import": "env IMPORT=svg node test/elements.js",
+    "compile": "tsc -d --sourcemap",
+    "prepare": "tsc -d",
+    "up": "python -B -m ghdevapi up -A biojet1/svgdom-ts . -m . -r main -a"
   },
   "author": "",
   "type": "module",
   "exports": {
-    ".": "./dist/index.js"
+    ".": "./dist/all.js"
   },
   "license": "ISC",
   "dependencies": {
     "@types/sax": "^1.2.3",
     "css-select": "^4.1.3",
+    "htmlparser2": "^7.1.1",
     "image-size": "",
     "saxes": "^5.0.1"
   },
+  "peerDependencies": {
+    "svggeom": "git://github.com/biojet1/svggeom#main"
+  },
+  "files": [
+    "dist"
+  ],
   "c8": {
     "reports-dir": "/tmp/.c8/rep",
     "temp-directory": "/tmp/.c8/tmp",

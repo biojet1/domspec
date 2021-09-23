@@ -4,22 +4,30 @@ export abstract class CharacterData extends ChildNode {
 	//// Dom
 	// https://dom.spec.whatwg.org/#interface-characterdata
 	_data: string;
-	constructor(data: string) {
+	constructor(data?: string) {
 		super();
-		this._data = data;
+		// this._data = data ? data + "" : data === undefined ? "" : data + "";
+		this._data = data + "";
 	}
 
 	get nodeValue() {
 		// https://dom.spec.whatwg.org/#dom-node-nodevalue
 		return this._data;
 	}
+
 	get textContent() {
 		// https://dom.spec.whatwg.org/#dom-node-textcontent
 		return this._data;
 	}
+
+	toString() {
+		return escape(this._data);
+	}
+
 	get data() {
 		return this._data;
 	}
+
 	set data(data: string) {
 		switch (data) {
 			case null:
@@ -29,7 +37,12 @@ export abstract class CharacterData extends ChildNode {
 				this._data = data + "";
 		}
 	}
+
 	set textContent(data: string) {
+		this.data = data;
+	}
+
+	set nodeValue(data: string) {
 		this.data = data;
 	}
 
@@ -44,12 +57,15 @@ export abstract class CharacterData extends ChildNode {
 				this._data = _data + data;
 		}
 	}
+
 	deleteData(offset: number, count: number) {
 		this.replaceData(offset, count);
 	}
+
 	insertData(offset: number, data: string) {
 		this.replaceData(offset, 0, data);
 	}
+
 	replaceData(offset: number, count: number, data?: string) {
 		const { _data } = this;
 		const { length } = _data;
@@ -77,6 +93,7 @@ export abstract class CharacterData extends ChildNode {
 			this._data = _data.slice(0, offset) + b;
 		}
 	}
+
 	substringData(offset: number, count: number) {
 		const { _data } = this;
 		const { length } = _data;
@@ -101,6 +118,7 @@ export abstract class CharacterData extends ChildNode {
 			return _data.substr(offset, count);
 		}
 	}
+
 	get length() {
 		return this._data.length;
 	}
@@ -116,11 +134,22 @@ export abstract class CharacterData extends ChildNode {
 		return node;
 	}
 
+	isEqualNode(node: Node): boolean {
+		if (this === node) {
+			return true;
+		} else if (!node ) {
+			return false;
+		}
+		const { nodeType, data } = this;
+		const { nodeType:nodeType2, data:data2 } = (node as CharacterData);
+		return nodeType2 === nodeType && data ? (data === data2):!data2;
+
+		// return this.data === (node as CharacterData).data;
+	}
+
 	// Extra
 }
-
-export class Text extends CharacterData {
-	//// Dom
+export class TextNode extends CharacterData {
 	get nodeType() {
 		return 3;
 	}
@@ -130,9 +159,56 @@ export class Text extends CharacterData {
 	toString() {
 		return escape(this._data);
 	}
+	splitText(offset: number) {
+		const { length, ownerDocument, parentNode } = this;
+
+		if (offset > length) {
+			throw new Error("IndexSizeError: offset > length");
+		}
+
+		const count = length - offset;
+
+		const text = this.substringData(offset, count);
+
+		if (parentNode) {
+			this.after(text);
+		} else {
+			const node = new Text(text);
+			const next = this.nextSibling;
+			this._linkr(node);
+			next && node._linkr(next);
+		}
+
+		this.replaceData(offset, count, "");
+		return this.nextSibling || this;
+	}
+	get wholeText() {
+		let wholeText = this.textContent;
+		let cur: Node | undefined;
+		for (cur = this; (cur = cur[PREV]) && cur.nodeType === 3; ) {
+			wholeText = (cur as Text).textContent + wholeText;
+		}
+		for (cur = this; (cur = cur[NEXT]) && cur.nodeType === 3; ) {
+			wholeText += (cur as Text).textContent;
+		}
+		return wholeText;
+	}
+}
+
+export class Text extends TextNode {
+	constructor(data?: string) {
+		super(data);
+		this.ownerDocument = globalThis.document as any as Document;
+	}
 }
 
 export class CDATASection extends Text {
+	constructor(data: string) {
+		super(data);
+		if (this._data.indexOf("]]>") >= 0) {
+			throw new Error(`InvalidCharacterError`);
+		}
+	}
 	toString() {
 		return `<![CDATA[${this._data}]]>`;
 	}
@@ -145,6 +221,12 @@ export class CDATASection extends Text {
 }
 
 export class Comment extends CharacterData {
+	constructor(data: string) {
+		super(data);
+		// if (this._data.indexOf("--") >= 0) {
+		// 	throw new Error(`InvalidCharacterError`);
+		// }
+	}
 	//// Dom
 	get nodeType() {
 		return 8;
@@ -162,6 +244,10 @@ export class ProcessingInstruction extends CharacterData {
 	readonly target: string;
 	constructor(target: string, data: string) {
 		super(data);
+		if (this._data.indexOf("?>") >= 0 || !/^[a-zA-Z][^\s]*$/.test(target)) {
+			throw new Error(`InvalidCharacterError: ${target} ${data}`);
+		}
+
 		this.target = target;
 	}
 	//// Dom
@@ -183,9 +269,21 @@ export class ProcessingInstruction extends CharacterData {
 		if (node) node.ownerDocument = ownerDocument;
 		return node;
 	}
+
+	isEqualNode(node: Node) {
+		if (this === node) {
+			return true;
+		} else if (!node || this.nodeType !== node.nodeType) {
+			return false;
+		}
+		const { target, data } = node as ProcessingInstruction;
+		return this.data === data && this.target === target;
+	}
 }
 
+import { NEXT, PREV, Node } from "./node.js";
 import { ChildNode } from "./child-node.js";
+import { Document } from "./document.js";
 
 // escape
 
@@ -204,7 +302,7 @@ const pe = function (m: string) {
 };
 
 /**
- * Safely escape HTML entities such as `&`, `<`, `>` only.
+ * Safely escape HTML_NS entities such as `&`, `<`, `>` only.
  * @param {string} es the input to safely escape
  * @returns {string} the escaped input, and it **throws** an error if
  *  the input type is unexpected, except for boolean and numbers,

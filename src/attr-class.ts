@@ -21,9 +21,9 @@ export class ClassAttr extends Attr {
 		return this.value;
 	}
 
-	dumpXML() {
+	valueOf() {
 		let { tokensQ: tokens } = this;
-		return tokens && tokens.size > 0 ? super.dumpXML() : "";
+		return tokens && tokens.size > 0 ? tokens.format() : null;
 	}
 }
 

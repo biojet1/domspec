@@ -1,20 +1,20 @@
-// export class Property extends Node {}
 export const VALUE = Symbol();
-
+export const RE_NAME = /^[_:A-Za-z][\w:_-]*$/;
 export abstract class Attr extends Node {
 	//// Tree
 
 	//// Dom
 	name: string;
 	localName: string;
-	namespaceURI?: string;
-	prefix?: string;
-	// [VALUE]?: string;
-	constructor(qname: string, lname?: string) {
+	_ns?: string | null;
+	_prefix?: string | null;
+
+	constructor(name: string, localName?: string) {
 		super();
-		this.name = qname;
-		this.localName = lname || qname;
+		this.name = name;
+		this.localName = localName || name;
 	}
+
 	get textContent() {
 		// https://dom.spec.whatwg.org/#dom-node-textcontent
 		return this.value;
@@ -34,6 +34,12 @@ export abstract class Attr extends Node {
 	get specified() {
 		return true;
 	}
+	get namespaceURI() {
+		return this._ns || null;
+	}
+	get prefix() {
+		return this._prefix || null;
+	}
 	get nodeName() {
 		return this.name;
 	}
@@ -41,62 +47,74 @@ export abstract class Attr extends Node {
 		const { parentNode: node } = this;
 		return node || null;
 	}
-	// isDefaultNamespace(namespaceURI?: string) {
-	// 	const { ownerElement } = this;
-	// 	return ownerElement && ownerElement.isDefaultNamespace(namespaceURI);
-	// }
-	// lookupNamespaceURI(prefix?: string) {
-	// 	const { ownerElement } = this;
-	// 	return ownerElement && ownerElement.lookupNamespaceURI(prefix);
-	// }
-	// lookupPrefix(namespaceURI: string) {
-	// 	const { ownerElement } = this;
-	// 	return ownerElement && ownerElement.lookupNamespacePrefix(prefix);
-	// }
-	lookupNamespaceURI(prefix: string | null): string | null {
-		const { ownerElement: node } = this;
-		return node ? node.lookupNamespaceURI(prefix) : null;
+
+	isDefaultNamespace(namespaceURI: string) {
+		const { parentElement: node } = this;
+		return node ? node.isDefaultNamespace(namespaceURI) : false;
 	}
-	toString() {
-		const { name, value } = this;
-		return `${name}="${value.replace(/[<>&"\xA0]/g, rep)}"`;
+	lookupNamespaceURI(prefix: string) {
+		const { parentElement: node } = this;
+		return node && node.lookupNamespaceURI(prefix);
 	}
-	dumpXML() {
-		const { name, value } = this;
-		return `${name}="${value.replace(/[<>&"\xA0]/g, rep)}"`;
+	lookupPrefix(ns: string) {
+		const { parentElement: node } = this;
+		return node && node.lookupPrefix(ns);
 	}
-	static create(qname: string, lname?: string) {
-		return new StringAttr(qname, lname);
-	}
+
 	cloneNode(deep?: boolean) {
-		const { ownerDocument, name, namespaceURI, value, localName, prefix } =
-			this;
+		const { ownerDocument, name, _ns, value, localName, _prefix } = this;
 
 		const attr = new (this.constructor as any)(name, localName);
 		if (ownerDocument) attr.ownerDocument = ownerDocument;
-		if (namespaceURI) attr.namespaceURI = namespaceURI;
+		if (_ns || _ns === null) attr._ns = _ns;
 		// if (localName) attr.localName = localName;
-		if (prefix) attr.prefix = prefix;
+		if (_prefix || _prefix === null) attr._prefix = _prefix;
 		if (value) attr.value = value;
 
 		return attr;
+	}
+
+	isEqualNode(node: Node) {
+		if (this === node) {
+			return true;
+		} else if (!node || this.nodeType !== node.nodeType) {
+			return false;
+		}
+		let {
+			namespaceURI: nsB,
+			prefix: prefixB,
+			localName: localB,
+			value: valB,
+		} = node as Attr;
+		let {
+			namespaceURI: nsA,
+			prefix: prefixA,
+			localName: localA,
+			value: valA,
+		} = this;
+		return (
+			(localA ? localA === localB : !localB) &&
+			(nsA ? nsA === nsB : !nsB) &&
+			// (prefixA ? prefixA === prefixB : !!prefixB) &&
+			valA === valB
+		);
 	}
 }
 
 export class StringAttr extends Attr {
 	//// Dom
 	[VALUE]?: string;
+	valueOf() {
+		return this[VALUE] ?? null;
+	}
 	get value() {
 		return this[VALUE] || "";
 	}
 	set value(value: string) {
 		this[VALUE] = value;
 	}
-	dumpXML() {
-		const { [VALUE]: val } = this;
-		return val ? super.dumpXML() : "";
-	}
 }
+
 export abstract class Typed {
 	abstract toString(): string;
 	// abstract constructor (value?:string) : Typed;
@@ -122,30 +140,28 @@ export class TypedAttr<T extends Typed> extends Attr {
 	// 	// 	? (this[VALUE] = T.parse(val))
 	// 	// 	: val || (this[VALUE] = T.parse());
 	// }
-	dumpXML() {
-		const { [VALUE]: val } = this;
-		return val ? super.dumpXML() : "";
-	}
 }
 
-const rep = function (m: string) {
-	switch (m) {
-		// case "\xA0":
-		// 	return "&nbsp;";
-		case "&":
-			return "&amp;";
-		case "<":
-			return "&lt;";
-		case ">":
-			return "&gt;";
-		case '"':
-			return "&quot;";
-	}
-	return m;
-};
+// const rep = function (m: string) {
+// 	switch (m) {
+// 		// '   &apos;
+// 		// case "\xA0":
+// 		// 	return "&nbsp;";
+// 		case "&":
+// 			return "&amp;";
+// 		case "<":
+// 			return "&lt;";
+// 		case ">":
+// 			return "&gt;";
+// 		case '"':
+// 			return "&quot;";
+// 	}
+// 	return m;
+// };
+
 import { Node } from "./node.js";
-// "   &quot;
-// '   &apos;
-// <   &lt;
-// >   &gt;
-// &   &amp;
+import { validateAndExtract } from "./namespace.js";
+import { Document } from "./document.js";
+// test/wpt/dom-nodes-Document-createAttribute.html.tap.mjs
+// test/wpt/dom-nodes-Document-importNode.html.tap.mjs
+// test/wpt/dom-nodes-Node-cloneNode.html.tap.mjs

@@ -1,11 +1,10 @@
 /*
 s = """*/
-import { Node } from "./node.js";
 import { Document, HTMLDocument } from "./document.js";
-import { DOMTokenList } from "./token-list.js";
-import { DOMImplementation } from "./dom-implementation.js";
 import { EventTarget } from "./event-target.js";
-import { Attr } from "./attr.js";
+import * as html_elements from "./html/element.js";
+import * as all from "./all.js";
+
 // """
 
 /*
@@ -26,6 +25,8 @@ Object.getOwnPropertyNames(window).filter(s=>/^[A-Z]\w+$/.test(s))
 export class Window extends EventTarget {
 	_document?: Document;
 	_frames?: any;
+	_performance?: any;
+
 	constructor(doc?: Document) {
 		super();
 		// const doc = new Document();
@@ -42,15 +43,21 @@ export class Window extends EventTarget {
 		// 		return img;
 		// 	}
 		// };
+		if (!("HTMLDocument" in Window)) {
+			for (const k of Object.getOwnPropertyNames(html_elements)) {
+				Reflect.set(this, k, Reflect.get(html_elements, k));
+			}
+			for (const k of Object.getOwnPropertyNames(all)) {
+				Reflect.set(this, k, Reflect.get(all, k));
+			}
+		}
 	}
+
 	get self() {
 		return this;
 	}
-	get Node() {
-		return Node;
-	}
 
-	private setDocument(doc?: Document) {
+	setDocument(doc?: Document) {
 		if (doc) {
 			// pass
 		} else {
@@ -64,22 +71,6 @@ export class Window extends EventTarget {
 	get document() {
 		let { _document } = this;
 		return _document || this.setDocument();
-	}
-
-	get DOMTokenList() {
-		return DOMTokenList;
-	}
-
-	get DOMImplementation() {
-		return DOMImplementation;
-	}
-
-	get EventTarget() {
-		return EventTarget;
-	}
-
-	get Attr() {
-		return Attr;
 	}
 
 	get frames() {
@@ -110,27 +101,32 @@ export class Window extends EventTarget {
 		}
 		return _frames;
 	}
-}
-const frmwm = new WeakMap();
 
-export class TSDOM {
-	document?: Document;
-	window?: Window;
-	constructor() {
-		const win = new Window();
-		this.window = win;
-		this.document = win.document;
+	requestAnimationFrame(callback: any) {
+		const now = new globalThis.Date().getTime();
+		const timeToCall = Math.max(0, 16 - (now - lastTime));
+		return globalThis.setTimeout(() => {
+			lastTime = now + timeToCall;
+			callback(lastTime);
+		}, timeToCall);
+	}
+
+	cancelAnimationFrame(id: number) {
+		globalThis.clearTimeout(id);
+	}
+
+	get performance() {
+		let { _performance } = this;
+		if (!_performance) {
+			const nowOffset = globalThis.Date.now();
+			this._performance = _performance = {
+				now: () => Date.now() - nowOffset,
+			};
+		}
+		return _performance;
 	}
 }
-export class JSDOM extends TSDOM {
-	// constructor() {
-	// 	this.window = new Window();
-	// 	this.document = window.document;
-	// }
-}
-// import { XMLNS, XML } from "./namespace.js";
-// import { Element } from "./element.js";
-// import { Attr } from "./attr.js";
-// import { Comment, Text, CDATASection } from "./character-data.js";
-// import { DocumentFragment } from "./document-fragment.js";
-// import { DOMImplementation } from "./dom-implementation.js";
+
+let lastTime = 0;
+
+const frmwm = new WeakMap();

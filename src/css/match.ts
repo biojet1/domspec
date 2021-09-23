@@ -1,8 +1,12 @@
 import { Node, NEXT, END } from "../node.js";
+import { ChildNode } from "../child-node.js";
 import { ParentNode } from "../parent-node.js";
 import { compile, is } from "css-select";
 
-function* iterAll(test: (node: Element) => boolean, nodes: Iterable<Node>) {
+function* iterAll(
+	test: (node: Element) => boolean,
+	nodes: Iterable<ChildNode>
+) {
 	for (const node of nodes) {
 		if (node.nodeType === 1) {
 			if (test(node as Element)) {
@@ -20,7 +24,7 @@ function* iterAll(test: (node: Element) => boolean, nodes: Iterable<Node>) {
 }
 
 const adapter = {
-	isTag: function (node: Node): node is Element {
+	isTag: function (node: ChildNode): node is Element {
 		// return node is Element;
 		return node.nodeType === 1;
 	},
@@ -33,7 +37,7 @@ const adapter = {
 		return elem.hasAttribute(name);
 	},
 
-	getText: function (node: Node) {
+	getText: function (node: ChildNode) {
 		switch (node.nodeType) {
 			case 3:
 				return node.nodeValue || "";
@@ -54,18 +58,18 @@ const adapter = {
 			: null;
 	},
 
-	getChildren: function (node: Node) {
-		return node instanceof ParentNode ? node.childNodes : [];
+	getChildren: function (node: ChildNode) {
+		return node instanceof ParentNode ? Array.from(node.childNodes) : [];
 	},
 
-	getSiblings: function (elem: Node) {
+	getSiblings: function (elem: ChildNode) {
 		const { parentNode } = elem;
-		return parentNode ? (parentNode.childNodes as Array<Node>) : [elem];
+		return parentNode ? Array.from(parentNode.childNodes) : [elem];
 	},
 
 	findOne: function (
 		test: (node: Element) => boolean,
-		nodes: Iterable<Node>
+		nodes: Iterable<ChildNode>
 	) {
 		for (const node of iterAll(test, nodes)) {
 			return node;
@@ -75,14 +79,14 @@ const adapter = {
 
 	findAll: function (
 		test: (node: Element) => boolean,
-		nodes: Iterable<Node>
+		nodes: Iterable<ChildNode>
 	) {
 		return Array.from(iterAll(test, nodes));
 	},
 
 	existsOne: function (
 		test: (node: Element) => boolean,
-		elements: Iterable<Node>
+		elements: Iterable<ChildNode>
 	) {
 		for (const node of iterAll(test, elements)) {
 			return true;
@@ -90,7 +94,7 @@ const adapter = {
 		return false;
 	},
 
-	removeSubsets: function (nodes: Node[]) {
+	removeSubsets: function (nodes: ChildNode[]) {
 		let { length } = nodes;
 		while (length-- > 0) {
 			const node = nodes[length];

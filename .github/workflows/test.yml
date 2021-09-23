@@ -46,7 +46,6 @@ jobs:
         env:
           cache-name: wpt
         with:
-          # npm cache files are stored in `~/.npm` on Linux/macOS
           path: ${{ env.WPT_ROOT }}
           key: ${{ runner.os }}-${{ env.cache-name }}-${{ env.WPT_URL }}
 
@@ -55,13 +54,15 @@ jobs:
           ls
           [ -d "$WPT_ROOT" ] || mkdir -vp "$WPT_ROOT"
           cd "$WPT_ROOT"
-          [ -f README.md ] || ( curl -L "$WPT_URL" | tar xvzf - --strip-components 1 )
-          patch dom/nodes/Document-createProcessingInstruction.js - << 'EOD'
+          if [ ! -f README.md ]; then
+            curl -L "$WPT_URL" | tar xvzf - --strip-components 1
+            patch dom/nodes/Document-createProcessingInstruction.js - << 'EOD'
           27c27
           <   for (var i = 0, il = valid.length; i < il; ++i) {
           ---
           >   for (let i = 0, il = valid.length; i < il; ++i) {
           EOD
+          fi
       # - name: Archive production artifacts
       #   uses: actions/upload-artifact@v2
       #   with:

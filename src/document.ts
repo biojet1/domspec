@@ -175,21 +175,23 @@ export abstract class Document extends NonElementParentNode {
 	}
 
 	createRange() {
+		// TODO
+		/* c8 ignore next */
 		return {};
 	}
 
-	static fromNS(ns?: string) {
-		switch (ns) {
-			case "text/html":
-			case "http://www.w3.org/1999/xhtml":
-				return new HTMLDocument();
-			case "image/svg+xml":
-			case "http://www.w3.org/2000/svg":
-				return new SVGDocument();
-			default:
-				return new XMLDocument();
-		}
-	}
+	// static fromNS(ns?: string) {
+	// 	switch (ns) {
+	// 		case "text/html":
+	// 		case "http://www.w3.org/1999/xhtml":
+	// 			return new HTMLDocument();
+	// 		case "image/svg+xml":
+	// 		case "http://www.w3.org/2000/svg":
+	// 			return new SVGDocument();
+	// 		default:
+	// 			return new XMLDocument();
+	// 	}
+	// }
 
 	get isHTML() {
 		return this.contentType == "text/html";
@@ -209,14 +211,21 @@ export abstract class Document extends NonElementParentNode {
 		if (deep) {
 			const end = node[END];
 			const fin = this[END];
-			let cur: Node = this[NEXT] || fin;
-			for (; cur != fin; cur = cur.endNode[NEXT] || fin) {
+			for (
+				let cur: Node = this[NEXT] /* c8 ignore next */ || fin;
+				cur != fin;
+				cur = cur.endNode[NEXT] /* c8 ignore next */ || fin
+			) {
 				switch (cur.nodeType) {
 					case 1: // ELEMENT_NODE
 					case 7: // PROCESSING_INSTRUCTION_NODE
 					case 8: // COMMENT_NODE
 					case 10: // DOCUMENT_TYPE_NODE
-						cur.cloneNode()._attach(end[PREV] || node, end, node);
+						cur.cloneNode()._attach(
+							end[PREV] /* c8 ignore next */ || node,
+							end,
+							node
+						);
 						break;
 					// case 3: // TEXT_NODE
 					// case 4: // CDATA_SECTION_NODE
@@ -224,6 +233,7 @@ export abstract class Document extends NonElementParentNode {
 					// case 9: // DOCUMENT_NODE
 					// case 11: // DOCUMENT_FRAGMENT_NODE
 					// case -1:
+					/* c8 ignore next 2*/
 					default:
 						throw new Error(`Unexpected ${cur.nodeType}`);
 					// break;
@@ -242,7 +252,7 @@ export abstract class Document extends NonElementParentNode {
 				throw new Error(`NotSupportedError`);
 		}
 		let { startNode: cur, endNode: end, parentNode, ownerDocument } = node;
-		parentNode && node.remove();
+		parentNode /* c8 ignore next */ && node.remove();
 		/*if (this.isHTML && (!ownerDocument || !ownerDocument.isHTML)) {
 			do {
 				cur.ownerDocument = this;
@@ -256,7 +266,10 @@ export abstract class Document extends NonElementParentNode {
 		} else*/ {
 			do {
 				cur.ownerDocument = this;
-			} while (cur !== end && (cur = cur[NEXT] || end));
+			} while (
+				cur !== end &&
+				(cur = cur[NEXT] || /* c8 ignore next */ end)
+			);
 		}
 		return node;
 	}
@@ -340,7 +353,7 @@ export class HTMLDocument extends Document {
 		const title = d.createElement("title");
 		d.appendChild(new DocumentType("html"));
 		if (titleText) {
-			title.appendChild(d.createTextNode(titleText || ""));
+			title.appendChild(d.createTextNode(titleText));
 			head.appendChild(title);
 		}
 		root.appendChild(head);

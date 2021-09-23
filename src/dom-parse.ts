@@ -26,7 +26,7 @@ function domParse(doc: Document, top: ParentNode, opt = {}) {
 			}
 		}
 		let node = doc.implementation.createDocumentType(name, pub, sys);
-		node.ownerDocument = doc;
+		// node.ownerDocument = doc;
 		top.appendChild(node);
 	});
 
@@ -80,10 +80,6 @@ function domParse(doc: Document, top: ParentNode, opt = {}) {
 	});
 
 	parser.on("closetag", (node) => {
-		// console.log("closetag",  node.name, top.nodeName);
-		// !top.lastChild && console.log("Empty",  node.name, top.nodeName);
-		// node.isSelfClosing && console.log("isSelfClosing",  node.name, top.nodeName);
-
 		const { parentNode } = top;
 		// console.dir(top, { depth: 1 });
 		if (node.isSelfClosing) {
@@ -92,6 +88,7 @@ function domParse(doc: Document, top: ParentNode, opt = {}) {
 		if (parentNode) {
 			top = parentNode;
 		} else {
+			/* c8 ignore next */
 			throw new Error(`unexpected null parentNode of ${top}`);
 		}
 	});
@@ -131,11 +128,11 @@ export const parseDOM = function (
 	parent: ParentNode // Element | Document | DocumentFragment
 ) {
 	if (parent instanceof Document) {
-		domParse( parent, parent).write(str);
+		domParse(parent, parent).write(str);
 	} else {
 		const doc = parent.ownerDocument;
 		if (doc) {
-			domParse( doc, parent, { fragment: true }).write(str);
+			domParse(doc, parent, { fragment: true }).write(str);
 		} else {
 			throw new Error(`No ownerDocument`);
 		}

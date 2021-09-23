@@ -141,6 +141,7 @@ export abstract class ChildNode extends Node {
 				}
 			} else {
 				switch (node.nodeType) {
+					/* c8 ignore next 2*/
 					case undefined:
 						throw new Error(`Unexpected ${node}`);
 					case 11: {

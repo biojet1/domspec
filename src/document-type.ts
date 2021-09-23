@@ -14,9 +14,6 @@ export class DocumentType extends ChildNode {
 	get nodeName() {
 		return this.name;
 	}
-	get nodeLength() {
-		return 0;
-	}
 	cloneNode(deep?: boolean) {
 		const { name, publicId, systemId } = this;
 		return new DocumentType(name, publicId, systemId);
@@ -24,8 +21,8 @@ export class DocumentType extends ChildNode {
 	toString() {
 		const { name, publicId, systemId } = this;
 		return `<!DOCTYPE ${name}${
-			publicId !== "" ? ` PUBLIC ${publicId}` : ""
-		}${systemId !== "" ? ` "${systemId}"` : ""}>`;
+			publicId  ? ` PUBLIC "${publicId}"` : ""
+		}${systemId  ? ` "${systemId}"` : ""}>`;
 	}
 	isEqualNode(node: Node) {
 		if (this === node) {

@@ -72,6 +72,13 @@ export abstract class Document extends NonElementParentNode {
 		}
 		return "";
 	}
+	get head() {
+		for (const cur of this.getElementsByTagName("head")) {
+			return cur;
+		}
+		return "";
+	}
+
 
 	get implementation() {
 		const { _domImpl } = this;
@@ -176,9 +183,12 @@ export abstract class Document extends NonElementParentNode {
 
 	createRange() {
 		// TODO
+		/* c8 ignore next */
 		return {};
 	}
-
+	createEvent(name: string) {
+		return createEvent(name);
+	}
 	// static fromNS(ns?: string) {
 	// 	switch (ns) {
 	// 		case "text/html":
@@ -210,14 +220,21 @@ export abstract class Document extends NonElementParentNode {
 		if (deep) {
 			const end = node[END];
 			const fin = this[END];
-			let cur: Node = this[NEXT] || fin;
-			for (; cur != fin; cur = cur.endNode[NEXT] || fin) {
+			for (
+				let cur: Node = this[NEXT] /* c8 ignore next */ || fin;
+				cur != fin;
+				cur = cur.endNode[NEXT] /* c8 ignore next */ || fin
+			) {
 				switch (cur.nodeType) {
 					case 1: // ELEMENT_NODE
 					case 7: // PROCESSING_INSTRUCTION_NODE
 					case 8: // COMMENT_NODE
 					case 10: // DOCUMENT_TYPE_NODE
-						cur.cloneNode()._attach(end[PREV] || node, end, node);
+						cur.cloneNode()._attach(
+							end[PREV] /* c8 ignore next */ || node,
+							end,
+							node
+						);
 						break;
 					// case 3: // TEXT_NODE
 					// case 4: // CDATA_SECTION_NODE
@@ -225,6 +242,7 @@ export abstract class Document extends NonElementParentNode {
 					// case 9: // DOCUMENT_NODE
 					// case 11: // DOCUMENT_FRAGMENT_NODE
 					// case -1:
+					/* c8 ignore next 2*/
 					default:
 						throw new Error(`Unexpected ${cur.nodeType}`);
 					// break;
@@ -243,7 +261,7 @@ export abstract class Document extends NonElementParentNode {
 				throw new Error(`NotSupportedError`);
 		}
 		let { startNode: cur, endNode: end, parentNode, ownerDocument } = node;
-		parentNode && node.remove();
+		parentNode /* c8 ignore next */ && node.remove();
 		/*if (this.isHTML && (!ownerDocument || !ownerDocument.isHTML)) {
 			do {
 				cur.ownerDocument = this;
@@ -257,7 +275,10 @@ export abstract class Document extends NonElementParentNode {
 		} else*/ {
 			do {
 				cur.ownerDocument = this;
-			} while (cur !== end && (cur = cur[NEXT] || end));
+			} while (
+				cur !== end &&
+				(cur = cur[NEXT] || /* c8 ignore next */ end)
+			);
 		}
 		return node;
 	}
@@ -341,7 +362,7 @@ export class HTMLDocument extends Document {
 		const title = d.createElement("title");
 		d.appendChild(new DocumentType("html"));
 		if (titleText) {
-			title.appendChild(d.createTextNode(titleText || ""));
+			title.appendChild(d.createTextNode(titleText));
 			head.appendChild(title);
 		}
 		root.appendChild(head);
@@ -432,3 +453,4 @@ import { DOMImplementation } from "./dom-implementation.js";
 import { Window } from "./window.js";
 import { DocumentType } from "./document-type.js";
 import { NEXT, PREV, END, Node } from "./node.js";
+import { createEvent } from "./event.js";

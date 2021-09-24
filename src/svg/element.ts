@@ -200,6 +200,9 @@ export class SVGGeometryElement extends SVGGraphicsElement {
 		}
 		throw new Error(`No ownerDocument`);
 	}
+	getTotalLength(){
+		return this.path.length;
+	}
 }
 
 /// SVGGeometryElement //////////

@@ -8,46 +8,6 @@ export interface CustomEventInit extends EventInit {
 	detail?: any;
 }
 
-export class Event {
-	static CAPTURING_PHASE = 1;
-	static AT_TARGET = 2;
-	static BUBBLING_PHASE = 3;
-	readonly type: string;
-	target: EventTarget | null;
-	currentTarget: EventTarget | null;
-	eventPhase: number;
-	bubbles: boolean;
-	cancelable: boolean;
-	composed: boolean;
-	isTrusted: boolean;
-	defaultPrevented: boolean;
-	timeStamp: number;
-	_propagationStopped: boolean;
-	_immediatePropagationStopped: boolean;
-	_initialized: boolean;
-	_dispatching: boolean;
-	constructor(type: string, dictionary: EventInit) {
-		// Initialize basic event properties
-		this.type = type || "";
-		this.target = null;
-		this.currentTarget = null;
-		this.eventPhase = 2; // AT_TARGET
-		this.bubbles = dictionary?.bubbles || false;
-		this.cancelable = dictionary?.cancelable || false;
-		this.composed = dictionary?.composed || false;
-		this.isTrusted = false;
-		this.defaultPrevented = false;
-		this.timeStamp = Date.now();
-
-		// Initialize internal flags
-		// XXX: Would it be better to inherit these defaults from the prototype?
-		this._propagationStopped = false;
-		this._immediatePropagationStopped = false;
-		this._initialized = true;
-		this._dispatching = false;
-	}
-}
-
 export interface EventListener {
 	handleEvent(event: Event): undefined;
 }
@@ -238,6 +198,8 @@ export class EventTarget {
 		event._dispatching = false;
 		event.eventPhase = Event.AT_TARGET;
 		event.currentTarget = null;
+		event._propagationStopped = false;
+		event._immediatePropagationStopped = false;
 
 		// Deal with mouse events and figure out when
 		// a click has happened
@@ -299,5 +261,110 @@ export class EventTarget {
 	}
 	get DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC() {
 		return 32;
+	}
+}
+
+export class Event {
+	static NONE = 0;
+	static CAPTURING_PHASE = 1;
+	static AT_TARGET = 2;
+	static BUBBLING_PHASE = 3;
+	type: string;
+	target: EventTarget | null;
+	currentTarget: EventTarget | null;
+	eventPhase: number;
+	bubbles: boolean;
+	cancelable: boolean;
+	composed: boolean;
+	isTrusted: boolean;
+	defaultPrevented: boolean;
+	timeStamp: number;
+	_propagationStopped: boolean;
+	_immediatePropagationStopped: boolean;
+	_initialized: boolean;
+	_dispatching: boolean;
+	constructor(type?: string, dictionary?: EventInit) {
+		// Initialize basic event properties
+		this.type = type || "";
+		this.target = null;
+		this.currentTarget = null;
+		this.eventPhase = 2; // AT_TARGET
+		this.bubbles = dictionary?.bubbles || false;
+		this.cancelable = dictionary?.cancelable || false;
+		this.composed = dictionary?.composed || false;
+		this.isTrusted = false;
+		this.defaultPrevented = false;
+		this.timeStamp = Date.now();
+
+		// Initialize internal flags
+		// XXX: Would it be better to inherit these defaults from the prototype?
+		this._propagationStopped = false;
+		this._immediatePropagationStopped = false;
+		this._initialized = true;
+		this._dispatching = false;
+	}
+	initEvent(
+		type: string,
+		bubbles: boolean = false,
+		cancelable: boolean = false
+	) {
+		this._initialized = true;
+		if (this._dispatching) return;
+
+		this._propagationStopped = false;
+		this._immediatePropagationStopped = false;
+		this.defaultPrevented = false;
+		this.isTrusted = false;
+
+		this.target = null;
+		this.type = type;
+		this.bubbles = bubbles;
+		this.cancelable = cancelable;
+		if (type === undefined) {
+			throw new TypeError();
+		}
+	}
+	stopImmediatePropagation() {
+		this._propagationStopped = true;
+		this._immediatePropagationStopped = true;
+	}
+
+	stopPropagation() {
+		this._propagationStopped = true;
+	}
+	preventDefault() {
+		if (this.cancelable) {
+			this.defaultPrevented = true;
+			// this._retval = b;
+		}
+	}
+	get cancelBubble() {
+		return this._propagationStopped || false;
+	}
+	set cancelBubble(cancel: boolean) {
+		this._propagationStopped = cancel;
+	}
+	get srcElement() {
+		return this.target || null;
+	}
+	get returnValue() {
+		return this.cancelable ? !this.defaultPrevented : true;
+	}
+	set returnValue(b: boolean) {
+		if (this.cancelable && !this.defaultPrevented) {
+			this.defaultPrevented = !this.defaultPrevented;
+		}
+	}
+	get CAPTURING_PHASE() {
+		return 1;
+	}
+	get AT_TARGET() {
+		return 2;
+	}
+	get BUBBLING_PHASE() {
+		return 3;
+	}
+	get NONE() {
+		return 0;
 	}
 }

@@ -45,7 +45,7 @@ export class Window extends EventTarget {
 	}
 	setDocument(doc?: Document) {
 		if (!doc) {
-			doc = HTMLDocument.setup();
+			doc = DOMImplementation.createHTMLDocument();
 		}
 		doc.defaultView = this;
 		return (this._document = doc);
@@ -59,7 +59,9 @@ export class Window extends EventTarget {
 	get self() {
 		return this;
 	}
-
+	get window() {
+		return this;
+	}
 	get parent(): Window {
 		return this._parent || this;
 	}
@@ -126,13 +128,6 @@ export class Window extends EventTarget {
 			return document.location;
 		}
 		return null;
-
-		// return (
-		// 	this._location ||
-		// 	(this._location = new (class extends Location {})(
-		// 		this.document.URL || "about:blank"
-		// 	))
-		// );
 	}
 
 	requestAnimationFrame(callback: any) {
@@ -148,6 +143,51 @@ export class Window extends EventTarget {
 	cancelAnimationFrame(id: number) {
 		globalThis.clearTimeout(id);
 	}
+
+	async loadURL(url: string) {
+		let doc;
+		function mimeTypeFor(s: string) {
+			if (/\.svg$/.test(s)) {
+				return "image/svg+xml";
+			} else if (/\.xhtml?$/.test(s)) {
+				return "application/xhtml+xml";
+			} else if (/\.html?$/.test(s)) {
+				return "application/xhtml+xml";
+			} else if (/\.xml$/.test(s)) {
+				return "application/xml";
+			}
+		}
+		if (url.indexOf("file:") === 0) {
+			const file = fileURLToPath(url);
+			doc = Document.new(mimeTypeFor(url));
+			doc._location = url;
+			const sax = pushDOMParser(this.setDocument(doc));
+
+			sax.write(fs.readFileSync(file, "utf8"));
+			sax.close();
+		} else {
+			const response = await Document.fetch(url);
+			if (response) {
+				doc = Document.new(
+					response.headers.get("content-type") || mimeTypeFor(url)
+				);
+				const { body } = response;
+				if (body) {
+					doc._location = url;
+					const sax = pushDOMParser(this.setDocument(doc));
+					for await (const chunk of body) {
+						sax.write(chunk.toString());
+					}
+					sax.close();
+				} else {
+					throw new Error(`No response body ${url}`);
+				}
+			} else {
+				throw new Error(`Failed to fetch ${url}`);
+			}
+		}
+		return doc;
+	}
 }
 
 let lastTime = 0;
@@ -162,3 +202,8 @@ export class Location extends URL {
 		return super.href;
 	}
 }
+
+import { DOMImplementation } from "./dom-implementation.js";
+import { pushDOMParser } from "./dom-parse.js";
+import { fileURLToPath, pathToFileURL } from "url";
+import fs from "fs";

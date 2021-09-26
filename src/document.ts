@@ -5,7 +5,7 @@ export abstract class Document extends NonElementParentNode {
 	contentType: string;
 	defaultView?: Window;
 	currentScript?: Element;
-	_domImpl?: DOMImplementationA;
+	_domImpl?: DOMImplementation;
 	_location?: URL | string;
 	// documentURI?: string;
 
@@ -79,7 +79,7 @@ export abstract class Document extends NonElementParentNode {
 	}
 	get implementation() {
 		const { _domImpl } = this;
-		return _domImpl || (this._domImpl = new DOMImplementationA(this));
+		return _domImpl || (this._domImpl = new DOMImplementation(this));
 	}
 	lookupNamespaceURI(prefix: string): string | null {
 		if (!prefix) {
@@ -340,6 +340,9 @@ export abstract class Document extends NonElementParentNode {
 		throw new Error(`Not implemented`);
 	}
 
+	get baseURI() {
+		return documentBaseURL(this);
+	}
 	static _fetcher?: (
 		url: RequestInfo,
 		init?: RequestInit
@@ -354,7 +357,7 @@ export abstract class Document extends NonElementParentNode {
 		});
 	}
 
-	static new(mimeType: string) {
+	static new(mimeType?: string) {
 		switch (mimeType) {
 			case "image/svg+xml":
 				return new SVGDocument(mimeType);
@@ -386,21 +389,6 @@ export class HTMLDocument extends Document {
 	get isHTML() {
 		return true;
 	}
-	static setup(titleText?: string) {
-		const d = new HTMLDocument();
-		const root = d.createElement("html");
-		const head = d.createElement("head");
-		const title = d.createElement("title");
-		d.appendChild(new DocumentType("html"));
-		if (titleText) {
-			title.appendChild(d.createTextNode(titleText));
-			head.appendChild(title);
-		}
-		root.appendChild(head);
-		root.appendChild(d.createElement("body"));
-		d.appendChild(root);
-		return d;
-	}
 }
 
 export class SVGDocument extends Document {
@@ -409,61 +397,6 @@ export class SVGDocument extends Document {
 	}
 	get isSVG() {
 		return true;
-	}
-}
-
-export class DOMImplementationA extends DOMImplementation {
-	ownerDocument: Document;
-	constructor(ownerDocument: Document) {
-		super();
-		this.ownerDocument = ownerDocument;
-	}
-	createDocumentType(
-		qualifiedName: string,
-		publicId: string,
-		systemId: string
-	) {
-		const node = super.createDocumentType(
-			qualifiedName,
-			publicId,
-			systemId
-		);
-		node.ownerDocument = this.ownerDocument;
-		return node;
-	}
-	createDocument(
-		namespace?: string,
-		qualifiedName?: string,
-		doctype?: DocumentType
-	) {
-		// const doc = Document.fromNS(namespace);
-		const doc = new XMLDocument();
-		if (doctype) {
-			// if (doctype.ownerDocument) {
-			// 	throw new Error(
-			// 		"the object is in the wrong Document, a call to importNode is required"
-			// 	);
-			// }
-			doctype.ownerDocument = doc;
-			doc.appendChild(doctype);
-		}
-		if (qualifiedName) {
-			doc.appendChild(
-				doc.createElementNS(namespace || null, qualifiedName)
-			);
-		}
-		switch (namespace) {
-			case "http://www.w3.org/1999/xhtml":
-				doc.contentType = "application/xhtml+xml";
-				break;
-			case "http://www.w3.org/2000/svg":
-				doc.contentType = "image/svg+xml";
-				break;
-		}
-		return doc;
-	}
-	createHTMLDocument(titleText = "") {
-		return HTMLDocument.setup(titleText);
 	}
 }
 
@@ -480,8 +413,9 @@ import {
 	ProcessingInstruction,
 } from "./character-data.js";
 import { DocumentFragment } from "./document-fragment.js";
-import { DOMImplementation } from "./dom-implementation.js";
+import { DOMImplementation, documentBaseURL } from "./dom-implementation.js";
 import { Window } from "./window.js";
 import { DocumentType } from "./document-type.js";
 import { NEXT, PREV, END, Node } from "./node.js";
 import { createEvent } from "./event.js";
+export { DOMImplementation };

@@ -15,41 +15,47 @@ export abstract class DOMImplementation {
 		qualifiedName?: string,
 		doctype?: DocumentType
 	): Document;
-	// createDocument(
-	// 	namespace?: string,
-	// 	qualifiedName?: string,
-	// 	doctype?: DocumentType
-	// ) {
-	// 	var doc = new Document(namespace);
-	// 	if (doctype) {
-	// 		if (doctype.ownerDocument) {
-	// 			throw new Error(
-	// 				"the object is in the wrong Document, a call to importNode is required"
-	// 			);
-	// 		}
-	// 		doctype.ownerDocument = doc;
-	// 		doc.appendChild(doctype);
-	// 	}
-	// 	if (qualifiedName) {
-	// 		doc.appendChild(doc.createElementNS(namespace||null, qualifiedName));
-	// 	}
-	// 	return doc;
-	// }
-	abstract createHTMLDocument(titleText:string): Document;
-	// createHTMLDocument(titleText = "") {
-	// 	const d = new HTMLDocument();
-	// 	const root = d.createElement("html");
-	// 	const head = d.createElement("head");
-	// 	const title = d.createElement("title");
-	// 	title.appendChild(d.createTextNode(titleText));
-	// 	head.appendChild(title);
-	// 	root.appendChild(head);
-	// 	root.appendChild(d.createElement("body"));
-	// 	d.appendChild(root);
-	// 	return d;
-	// }
+	abstract createHTMLDocument(titleText: string): Document;
 }
 
+function documentBaseURL(document: Document): string | undefined {
+	// https://html.spec.whatwg.org/multipage/infrastructure.html#document-base-url
+
+	const firstBase = document.querySelector("base[href]");
+	const fallbackBaseURI = fallbackBaseURL(document);
+
+	if (firstBase === null) {
+		return fallbackBaseURI;
+	} else if (fallbackBaseURI) {
+		return frozenBaseURL(firstBase, fallbackBaseURI);
+	}
+}
+
+function fallbackBaseURL(document: Document) {
+	// https://html.spec.whatwg.org/multipage/infrastructure.html#fallback-base-url
+
+	// Unimplemented: <iframe srcdoc>
+	const { URL, defaultView } = document;
+
+	if (URL === "about:blank" && defaultView) {
+		const { _parent } = defaultView;
+		if (_parent && _parent !== defaultView) {
+			const { document } = _parent;
+			return documentBaseURL(document);
+		}
+	}
+
+	return document.documentURI;
+}
+
+function frozenBaseURL(baseElement: Element, fallbackBaseURL: string) {
+	// https://html.spec.whatwg.org/multipage/semantics.html#frozen-base-url
+	// The spec is eager (setting the frozen base URL when things change); we are lazy (getting it when we need to)
+
+	const href = baseElement.getAttributeNS(null, "href");
+	return href ? new URL(href, fallbackBaseURL).href : fallbackBaseURL;
+}
+
+import { Element } from "./element.js";
 import { Document } from "./document.js";
-// import { HTMLDocument } from "./html/document.js";
 import { DocumentType } from "./document-type.js";

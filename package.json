@@ -45,6 +45,9 @@
     "temp-directory": "/tmp/.c8/tmp",
     "src": "dist"
   },
+  "tap": {
+    "coverage": false
+  },
   "devDependencies": {
     "chai": "^4.3.4",
     "jsdom": "^16.6.0",

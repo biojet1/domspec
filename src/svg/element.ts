@@ -26,7 +26,6 @@ export class SVGElement extends Element {
 		}
 		return null;
 	}
-
 }
 
 interface IBBoxParam {
@@ -61,7 +60,7 @@ export class SVGGraphicsElement extends SVGElement {
 		return Matrix.parse(this.getAttribute("transform") || "");
 	}
 
-	set transformM(T: Matrix ) {
+	set transformM(T: Matrix) {
 		this.setAttribute("transform", T.toString());
 	}
 
@@ -200,7 +199,7 @@ export class SVGGeometryElement extends SVGGraphicsElement {
 		}
 		throw new Error(`No ownerDocument`);
 	}
-	getTotalLength(){
+	getTotalLength() {
 		return this.path.length;
 	}
 }
@@ -466,6 +465,70 @@ export class SVGGlyphElement extends SVGElement {
 
 export class SVGPatternElement extends SVGElement {
 	static TAGS = ["pattern"];
+}
+
+export class SVGScriptElement extends SVGElement {
+	static TAGS = ["script"];
+	_alreadyStarted?: boolean;
+	_do(...args: any[]) {
+		switch (arguments[0]) {
+			case "eval": {
+				const { ownerDocument: doc } = this;
+				if (doc) {
+					const { defaultView: win } = doc;
+					if (win) {
+					}
+				}
+				break;
+			}
+		}
+	}
+
+	_eval() {
+		if (this._alreadyStarted) {
+			return;
+		}
+
+		// TODO: this text check doesn't seem completely the same as the spec, which e.g. will try to execute scripts with
+		// child element nodes. Spec bug? https://github.com/whatwg/html/issues/3419
+		const src = this.getAttributeNS(null, "src");
+		let text = !src && this.textContent;
+
+		if (!text || !src) {
+			return;
+		}
+
+		// if (!this._attached) {
+		// 	return;
+		// }
+
+		// const scriptBlocksTypeString = this._getTypeString();
+		// const type = getType(scriptBlocksTypeString);
+
+		// if (type !== "classic") {
+		// 	// TODO: implement modules, and then change the check to `type === null`.
+		// 	return;
+		// }
+
+		this._alreadyStarted = true;
+
+		// TODO: implement nomodule here, **but only after we support modules**.
+
+		// At this point we completely depart from the spec.
+
+		if (src) {
+			// this._fetchExternalScript();
+		} else {
+			// this._fetchInternalScript();
+		}
+	}
+
+	// _fetchExternalScript(src: string) {
+	// 	const { ownerDocument: document, defaultView, } = this.ownerDocument;
+	// 	const resourceLoader = document._fetcher;
+	// 		// const { URL, defaultView } = document;
+
+	// }
 }
 
 import { Element } from "../element.js";

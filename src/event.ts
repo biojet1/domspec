@@ -59,3 +59,21 @@ export function createEvent(name: string) {
 // "keyboardevent" 	KeyboardEvent 	[UIEVENTS]
 // "textevent" 	CompositionEvent 	[UIEVENTS]
 // "touchevent" 	TouchEvent 	[TOUCH-EVENTS]
+
+// function runScript(){
+//     const src = script.getAttributeNode("src");
+
+//     // if (src) {
+//     //     let file = src.substring(1);
+//     //     // console.log("file", file.substring(1));
+//     //     file = new URL(file, WPT_ROOT_URL);
+//     //     // console.log("url", file);
+//     //     file = fileURLToPath(file);
+//     //     // console.log("path", file);
+//     //     vm.runInThisContext(fs.readFileSync(file, "utf8"), file);
+//     // } else {
+//     //     // console.log("script", script.textContent);
+
+//     //     vm.runInThisContext(script.textContent, `script${i++}`);
+//     // }
+// }

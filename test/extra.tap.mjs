@@ -139,14 +139,34 @@ tap.test("SVGDocument", function (t) {
 
 tap.test("isDefaultNamespace", function (t) {
 	const doc2 = parser.parseFromString(
-		`<root xmlns="fooNamespace" ></root>`,
+		`<root xmlns="fooNamespace" attr="value" xmlns:prefix="PrefixedNamespace"></root>`,
 		"text/xml"
 	);
+
 	t.notOk(doc2.isDefaultNamespace("ooNamespace"));
 	t.ok(doc2.isDefaultNamespace("fooNamespace"));
-	doc2.documentElement.remove();
+	const top = doc2.documentElement;
+	const attr = top.getAttributeNode("attr");
+	t.notOk(attr.isDefaultNamespace("ooNamespace"));
+	t.ok(attr.isDefaultNamespace("fooNamespace"));
+
+	t.strictSame(attr.ownerElement, top);
+	t.strictSame(attr.lookupNamespaceURI("prefix"), "PrefixedNamespace");
+	t.notOk(attr.lookupNamespaceURI("refixedNamespace"));
+	t.strictSame(attr.lookupPrefix("PrefixedNamespace"), "prefix");
+	t.notOk(attr.lookupPrefix("prefi"));
+	t.ok(attr.isEqualNode(attr));
+	t.notOk(attr.isEqualNode(top));
+	t.notOk(attr.isEqualNode(null));
+	t.notOk(attr.isEqualNode(top.getAttributeNode("attr2")));
+	top.removeAttributeNode(attr);
+	t.notOk(attr.isDefaultNamespace("fooNamespace"));
+	t.notOk(attr.ownerElement);
+
+	top.remove();
 	t.notOk(doc2.isDefaultNamespace("fooNamespace"));
 	t.notOk(doc2.cloneNode(true).documentElement);
+
 	t.end();
 });
 

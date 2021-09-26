@@ -1,7 +1,7 @@
 "uses strict";
 import test from "tap";
 import { Document } from "../dist/document.js";
-import { parseDOM, DOMParser } from "../dist/dom-parse.js";
+import { DOMParser } from "../dist/dom-parse.js";
 
 const CI = false;
 const parser = new DOMParser();

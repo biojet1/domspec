@@ -1,10 +1,11 @@
-function domParse(doc: Document, top: ParentNode, opt = {}) {
+function domParse(doc: Document, top: ParentNode, opt:any = {}) {
 	const parser = new SaxesParser({
 		// lowercase: true,
 		xmlns: true,
 		strictEntities: true,
 		...opt,
 	});
+	// const runScripts:ParentNode[]|undefined = opt.runScripts ? [] : undefined;
 
 	parser.on("error", (err) => {
 		throw new Error(`SaxesParser ${err.message}`);
@@ -43,10 +44,7 @@ function domParse(doc: Document, top: ParentNode, opt = {}) {
 	});
 
 	parser.on("opentag", (node) => {
-		// console.log("opentag", node.name, top.nodeName);
-		// console.dir(top, { depth: 1 });
-
-		const { local, attributes, uri, prefix, name } = node;
+		const { local, attributes, uri, prefix, name } = node as SaxesTagNS;
 		let ns = uri || null;
 		if (!ns && prefix) {
 			ns = top.lookupNamespaceURI(prefix);
@@ -60,18 +58,6 @@ function domParse(doc: Document, top: ParentNode, opt = {}) {
 
 		const attrs = Object.entries(attributes);
 
-		// attrs.sort(function (a, b) {
-		// 	var nameA = a[0];
-		// 	var nameB = b[0];
-		// 	if (nameA < nameB) {
-		// 		return 1;
-		// 	}
-		// 	if (nameA > nameB) {
-		// 		return -1;
-		// 	}
-		// 	// names must be equal
-		// 	return 0;
-		// });
 		for (const [key, { uri, value }] of attrs) {
 			tag.setAttributeNS(uri, key, value);
 		}
@@ -85,6 +71,10 @@ function domParse(doc: Document, top: ParentNode, opt = {}) {
 		if (node.isSelfClosing) {
 			(top as Element)._parsed_closed = true;
 		}
+		// if (runScripts && (top as Element).localName == "script") {
+		// 	runScripts.push(top);
+		// 	// top._do("eval");
+		// }
 		if (parentNode) {
 			top = parentNode;
 		} else {
@@ -92,7 +82,14 @@ function domParse(doc: Document, top: ParentNode, opt = {}) {
 			throw new Error(`unexpected null parentNode of ${top}`);
 		}
 	});
-
+	parser.on("end", function () {
+		// parser stream is done, and ready to have more stuff written to it.
+		// if (runScripts) {
+		// 	while (runScripts.length > 0) {
+		// 		const script = runScripts.shift();
+		// 	}
+		// }
+	});
 	return parser;
 	// .write(str);
 }
@@ -139,6 +136,22 @@ export const parseDOM = function (
 	}
 };
 
+export const pushDOMParser = function (
+	parent: ParentNode, // Element | Document | DocumentFragment
+	opt = {}
+) {
+	if (parent instanceof Document) {
+		return domParse(parent, parent);
+	} else {
+		const doc = parent.ownerDocument;
+		if (doc) {
+			return domParse(doc, parent, { fragment: true });
+		} else {
+			throw new Error(`No ownerDocument`);
+		}
+	}
+};
+
 export class DOMParser {
 	parseFromString(markup: string, type?: string) {
 		let doc: Document;
@@ -170,7 +183,7 @@ const PUBLIC_DOCTYPE = /<!doctype\s+([^\s]+)\s+public\s+"([^"]+)"\s+"([^"]+)"/i;
 const SYSTEM_DOCTYPE = /<!doctype\s+([^\s]+)\s+system\s+"([^"]+)"/i;
 const CUSTOM_NAME_DOCTYPE = /<!doctype\s+([^\s>]+)/i;
 
-import { SaxesParser } from "saxes";
+import { SaxesParser, SaxesTagNS } from "saxes";
 import { ParentNode } from "./parent-node.js";
 import { Element } from "./element.js";
 import {

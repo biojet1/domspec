@@ -2,7 +2,20 @@ export class XMLSerializer {
 	serializeToString(node: Node): string {
 		// return Array.from(enumDOMStr(node)).join("");
 		const { endNode, startNode } = node;
-		return Array.from(enumXMLDump(startNode, endNode)).join("");
+		switch (node.nodeType) {
+			default: {
+				return Array.from(enumXMLDump(startNode, endNode)).join("");
+			}
+			case 9: {
+				// DOCUMENT_NODE
+				return Array.from(
+					enumXMLDump(
+						startNode[NEXT] || startNode,
+						endNode[PREV] || endNode
+					)
+				).join("");
+			}
+		}
 	}
 }
 
@@ -23,7 +36,10 @@ export function* enumXMLDump(start: Node, end: Node) {
 					if (v !== null) {
 						const { name } = cur as Attr;
 						if (name)
-							yield ` ${name}="${(v as string).replace(/[<>&"\xA0]/g, rep)}"`;
+							yield ` ${name}="${(v as string).replace(
+								/[<>&"\xA0\t\n\r]/g,
+								rep
+							)}"`;
 					}
 				}
 				break;
@@ -137,8 +153,18 @@ const rep = function (m: string) {
 			return "&gt;";
 		case '"':
 			return "&quot;";
+
+
+		// case "\t":
+		// 	return "&#x9;";
+		// case "\n":
+		// 	return "&#x9;";
+		// case '\r':
+		// 	return "&#x9;";
 	}
-	return m;
+	return `&#${m.charCodeAt(0)};`;
+
+		// return m;
 };
 
 import { NEXT, PREV, END, Node } from "./node.js";

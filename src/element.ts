@@ -572,6 +572,8 @@ export class Element extends ParentNode {
 		}
 		return id;
 	}
+	_do(...args:any[]){
+	}
 }
 
 function checkQName(name: string) {
@@ -670,7 +672,6 @@ function nextUniqueId() {
 import { XMLNS } from "./namespace.js";
 import { StringAttr, Attr } from "./attr.js";
 import { ChildNode } from "./child-node.js";
-import { parseDOM } from "./dom-parse.js";
 import { StyleAttr } from "./attr-style.js";
 import { ClassAttr } from "./attr-class.js";
 import { NamedNodeMap } from "./named-node-map.js";

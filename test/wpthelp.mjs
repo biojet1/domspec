@@ -1,9 +1,3 @@
-// import { parseDOM, DOMParser } from "../../dist/dom-parse.js";
-// import { Node } from "../../dist/node.js";
-// import { Document } from "../../dist/document.js";
-// import { Element } from "../../dist/element.js";
-// import { HTMLCollection } from "../../dist/parent-node.js";
-// import { Window } from "../../dist/window.js";
 import tap from "tap";
 import * as all from "../dist/all.js";
 // console.log("ALL", all);

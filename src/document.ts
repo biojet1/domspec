@@ -3,37 +3,36 @@ import { NonElementParentNode } from "./non-element-parent-node.js";
 export abstract class Document extends NonElementParentNode {
 	//// Dom
 	contentType: string;
-	documentURI?: string;
 	defaultView?: Window;
+	currentScript?: Element;
 	_domImpl?: DOMImplementationA;
+	_location?: URL | string;
+	// documentURI?: string;
 
 	protected constructor(contentType?: string) {
 		super();
-		// this.ownerDocument = this;
-		this.documentURI = "about:blank";
+		// this.documentURI = "about:blank";
 		this.contentType = contentType || "application/xml";
 	}
-
+	get documentURI() {
+		const { _location } = this;
+		return _location ? _location.toString() : "about:blank";
+	}
 	get URL() {
 		return this.documentURI;
 	}
 	get compatMode() {
 		return "CSS1Compat";
 	}
-	get location() {
-		return null;
-	}
 	get characterSet() {
 		return "UTF-8";
 	}
-
 	get charset() {
 		return this.characterSet;
 	}
 	get inputEncoding() {
 		return this.characterSet;
 	}
-
 	get nodeType() {
 		return 9;
 	}
@@ -78,13 +77,10 @@ export abstract class Document extends NonElementParentNode {
 		}
 		return "";
 	}
-
-
 	get implementation() {
 		const { _domImpl } = this;
 		return _domImpl || (this._domImpl = new DOMImplementationA(this));
 	}
-
 	lookupNamespaceURI(prefix: string): string | null {
 		if (!prefix) {
 			return HTML_NS;
@@ -189,18 +185,6 @@ export abstract class Document extends NonElementParentNode {
 	createEvent(name: string) {
 		return createEvent(name);
 	}
-	// static fromNS(ns?: string) {
-	// 	switch (ns) {
-	// 		case "text/html":
-	// 		case "http://www.w3.org/1999/xhtml":
-	// 			return new HTMLDocument();
-	// 		case "image/svg+xml":
-	// 		case "http://www.w3.org/2000/svg":
-	// 			return new SVGDocument();
-	// 		default:
-	// 			return new XMLDocument();
-	// 	}
-	// }
 
 	get isHTML() {
 		return this.contentType == "text/html";
@@ -210,12 +194,12 @@ export abstract class Document extends NonElementParentNode {
 	}
 
 	cloneNode(deep?: boolean) {
-		const { contentType, defaultView, documentURI } = this;
+		const { contentType, defaultView, _location } = this;
 		const node = new (this.constructor as any)();
 
 		if (contentType) node.contentType = contentType;
 		if (defaultView) node.defaultView = defaultView;
-		if (documentURI) node.documentURI = documentURI;
+		if (_location) node._location = _location;
 		// if (characterSet) node.characterSet = characterSet;
 		if (deep) {
 			const end = node[END];
@@ -340,7 +324,54 @@ export abstract class Document extends NonElementParentNode {
 				}
 		}
 	}
+
+	get location() {
+		const { _location } = this;
+		if (_location) {
+			if (typeof _location === "string") {
+				return (this._location = new URL(_location));
+			}
+			return _location;
+		}
+		return null;
+	}
+
+	set location(url: URL | string | null) {
+		throw new Error(`Not implemented`);
+	}
+
+	static _fetcher?: (
+		url: RequestInfo,
+		init?: RequestInit
+	) => Promise<Response>;
+
+	static async fetch(url: RequestInfo, init?: RequestInit) {
+		console.info("Document.fetch");
+		return import("node-fetch").then((mod) => {
+			console.info("node-fetch imported");
+			Document.fetch = mod.default;
+			return mod.default(url, init);
+		});
+	}
+
+	static new(mimeType: string) {
+		switch (mimeType) {
+			case "image/svg+xml":
+				return new SVGDocument(mimeType);
+			case "text/html":
+			case "application/xhtml+xml":
+				return new HTMLDocument(mimeType);
+		}
+		return new XMLDocument(mimeType);
+	}
+
+	//  html: "text/html",
+	// xhtml: "application/xhtml+xml",
+	// xml: "application/xml",
+	// svg: "image/svg+xml",
 }
+
+import { RequestInfo, RequestInit } from "node-fetch";
 
 export class XMLDocument extends Document {
 	constructor(mimeType = "application/xml") {
@@ -373,8 +404,8 @@ export class HTMLDocument extends Document {
 }
 
 export class SVGDocument extends Document {
-	constructor() {
-		super("image/svg+xml");
+	constructor(contentType = "image/svg+xml") {
+		super(contentType);
 	}
 	get isSVG() {
 		return true;

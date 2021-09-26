@@ -1,5 +1,4 @@
 import { Document } from "../dist/document.js";
-import { parseDOM, DOMParser } from "../dist/dom-parse.js";
 import tap from "tap";
 
 // console.info(document.outerHTML);

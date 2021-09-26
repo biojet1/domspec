@@ -93,7 +93,8 @@ export abstract class Attr extends Node {
 			value: valA,
 		} = this;
 		return (
-			(localA ? localA === localB : !localB) &&
+			localA === localB &&
+			// (localA ? localA === localB : !localB) &&
 			(nsA ? nsA === nsB : !nsB) &&
 			// (prefixA ? prefixA === prefixB : !!prefixB) &&
 			valA === valB

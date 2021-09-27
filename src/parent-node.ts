@@ -24,8 +24,8 @@ export abstract class ParentNode extends ChildNode {
 				/* c8 ignore start */
 			} else if (next instanceof EndNode) {
 				throw new Error("Unexpected following EndNode node");
-				/* c8 ignore stop */
 			}
+			/* c8 ignore stop */
 		}
 		return null;
 	}
@@ -46,8 +46,8 @@ export abstract class ParentNode extends ChildNode {
 			// return prev.startNode as ChildNode;
 			if (prev instanceof EndNode) {
 				return prev.parentNode;
-			} else if (prev instanceof ParentNode) {
 				/* c8 ignore start */
+			} else if (prev instanceof ParentNode) {
 				throw new Error("Unexpected preceding ParentNode node");
 				/* c8 ignore stop */
 			} else if (prev instanceof ChildNode) {

@@ -1,7 +1,7 @@
 /*
 s = """*/
 import { Document, HTMLDocument } from "./document.js";
-import { EventTarget } from "./event-target.js";
+import { EventTarget, MessageEvent } from "./event-target.js";
 import * as html_elements from "./html/element.js";
 import * as all from "./all.js";
 
@@ -29,6 +29,7 @@ export class Window extends EventTarget {
 	_parent?: Window;
 	_first?: Window;
 	_next?: Window;
+	_name?: string;
 	static _top?: Window;
 
 	constructor(doc?: Document) {
@@ -64,6 +65,9 @@ export class Window extends EventTarget {
 	}
 	get parent(): Window {
 		return this._parent || this;
+	}
+	get name() {
+		return this._name || "";
 	}
 
 	get top() {
@@ -144,6 +148,47 @@ export class Window extends EventTarget {
 		globalThis.clearTimeout(id);
 	}
 
+	postMessage(message:any, targetOrigin:string) {
+		// console.log("[postMessage]", arguments);
+		if (arguments.length < 2) {
+			// "'postMessage' requires 2 arguments: 'message' and 'targetOrigin'"
+			throw new TypeError();
+		}
+
+		// targetOrigin = String(targetOrigin);
+
+		// if (!isValidTargetOrigin(targetOrigin)) {
+		// 	// TODO: Fix me
+		// 	throw DOMException.create(globalObject, [
+		// 		"Failed to execute 'postMessage' on 'Window': " +
+		// 			"Invalid target origin '" +
+		// 			targetOrigin +
+		// 			"' in a call to 'postMessage'.",
+		// 		"SyntaxError",
+		// 	]);
+		// }
+
+		// // TODO: targetOrigin === '/' - requires reference to source window
+		// // See https://github.com/jsdom/jsdom/pull/1140#issuecomment-111587499
+		// if (
+		// 	targetOrigin !== "*" &&
+		// 	targetOrigin !==
+		// 		idlUtils.implForWrapper(globalObject._document)._origin
+		// ) {
+		// 	return;
+		// }
+
+		// TODO: event.source - requires reference to source window
+		// TODO: event.origin - requires reference to source window
+		// TODO: event.ports
+		// TODO: event.data - structured clone message - requires cloning DOM nodes
+		setTimeout(() => {
+			const event = new MessageEvent("message", { data: message });
+
+			this.dispatchEvent(event);
+		}, 0);
+	}
+
 	async loadURL(url: string) {
 		let doc;
 		function mimeTypeFor(s: string) {
@@ -203,7 +248,77 @@ export class Location extends URL {
 	}
 }
 
+Object.defineProperties(Window.prototype, {
+	console: {
+		value: console,
+	},
+	clearTimeout: {
+		value: clearTimeout,
+	},
+	setTimeout: {
+		value: setTimeout,
+	},
+	setInterval: {
+		value: setInterval,
+	},
+});
+
 import { DOMImplementation } from "./dom-implementation.js";
 import { pushDOMParser } from "./dom-parse.js";
 import { fileURLToPath, pathToFileURL } from "url";
 import fs from "fs";
+
+/*
+interface Window : EventTarget {
+  // the current browsing context
+  //+/ [LegacyUnforgeable] readonly attribute WindowProxy window;
+  //+/ [Replaceable] readonly attribute WindowProxy self;
+  //+/ [LegacyUnforgeable] readonly attribute Document document;
+  //+/ attribute DOMString name;
+  //+/ [PutForwards=href, LegacyUnforgeable] readonly attribute Location location;
+  readonly attribute History history;
+  readonly attribute CustomElementRegistry customElements;
+  [Replaceable] readonly attribute BarProp locationbar;
+  [Replaceable] readonly attribute BarProp menubar;
+  [Replaceable] readonly attribute BarProp personalbar;
+  [Replaceable] readonly attribute BarProp scrollbars;
+  [Replaceable] readonly attribute BarProp statusbar;
+  [Replaceable] readonly attribute BarProp toolbar;
+  attribute DOMString status;
+  undefined close();
+  readonly attribute boolean closed;
+  undefined stop();
+  undefined focus();
+  undefined blur();
+
+  // other browsing contexts
+  [Replaceable] readonly attribute WindowProxy frames;
+  [Replaceable] readonly attribute unsigned long length;
+  //+/ [LegacyUnforgeable] readonly attribute WindowProxy? top;
+  attribute any opener;
+  [Replaceable] readonly attribute WindowProxy? parent;
+  readonly attribute Element? frameElement;
+  WindowProxy? open(optional USVString url = "", optional DOMString target = "_blank", optional [LegacyNullToEmptyString] DOMString features = "");
+  getter object (DOMString name);
+  // Since this is the global object, the IDL named getter adds a NamedPropertiesObject exotic
+  // object on the prototype chain. Indeed, this does not make the global object an exotic object.
+  // Indexed access is taken care of by the WindowProxy exotic object.
+
+  // the user agent
+  readonly attribute Navigator navigator;
+  readonly attribute Navigator clientInformation; // legacy alias of .navigator
+  readonly attribute boolean originAgentCluster;
+
+  // user prompts
+  undefined alert();
+  undefined alert(DOMString message);
+  boolean confirm(optional DOMString message = "");
+  DOMString? prompt(optional DOMString message = "", optional DOMString default = "");
+  undefined print();
+
+  undefined postMessage(any message, USVString targetOrigin, optional sequence<object> transfer = []);
+  undefined postMessage(any message, optional WindowPostMessageOptions options = {});
+
+  // also has obsolete members
+};
+*/

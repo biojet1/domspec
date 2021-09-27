@@ -8,6 +8,14 @@ export interface CustomEventInit extends EventInit {
 	detail?: any;
 }
 
+export interface MessageEventInit extends EventInit {
+	data?: any;
+	origin?: string;
+	lastEventId?: string;
+	source?: EventTarget;
+	ports?: EventTarget[];
+}
+
 export interface EventListener {
 	handleEvent(event: Event): undefined;
 }
@@ -32,6 +40,7 @@ export class EventTarget {
 		callback: EventListener | CallBack,
 		options: EventEntry | boolean
 	) {
+		// console.log("[addEventListener]", type);
 		let { _listeners } = this;
 		let entry: EventEntry;
 		if (typeof options === "boolean") {
@@ -72,6 +81,7 @@ export class EventTarget {
 	*_enumAncestorTargets(): Generator<EventTarget, void, unknown> {}
 
 	dispatchEvent(event: Event, trusted?: boolean) {
+		// console.log("[dispatchEvent]", event);
 		if (typeof trusted !== "boolean") trusted = false;
 		function invoke(target: EventTarget, event: Event) {
 			const { _listeners } = target;
@@ -279,10 +289,10 @@ export class Event {
 	isTrusted: boolean;
 	defaultPrevented: boolean;
 	timeStamp: number;
-	_propagationStopped: boolean;
-	_immediatePropagationStopped: boolean;
+	_propagationStopped?: boolean;
+	_immediatePropagationStopped?: boolean;
+	_dispatching?: boolean;
 	_initialized: boolean;
-	_dispatching: boolean;
 	constructor(type?: string, dictionary?: EventInit) {
 		// Initialize basic event properties
 		this.type = type || "";
@@ -298,8 +308,8 @@ export class Event {
 
 		// Initialize internal flags
 		// XXX: Would it be better to inherit these defaults from the prototype?
-		this._propagationStopped = false;
-		this._immediatePropagationStopped = false;
+		// this._propagationStopped = false;
+		// this._immediatePropagationStopped = false;
 		this._initialized = true;
 		this._dispatching = false;
 	}
@@ -311,8 +321,8 @@ export class Event {
 		this._initialized = true;
 		if (this._dispatching) return;
 
-		this._propagationStopped = false;
-		this._immediatePropagationStopped = false;
+		delete this._propagationStopped;
+		delete this._immediatePropagationStopped;
 		this.defaultPrevented = false;
 		this.isTrusted = false;
 
@@ -366,5 +376,24 @@ export class Event {
 	}
 	get NONE() {
 		return 0;
+	}
+}
+
+export class MessageEvent extends Event {
+	readonly data?: any;
+	readonly origin?: string;
+	readonly lastEventId?: string;
+	readonly source?: EventTarget;
+	readonly ports?: EventTarget[];
+	constructor(type?: string, init?: MessageEventInit) {
+		super(type, init);
+		if (init) {
+			const { data, origin, lastEventId, source, ports } = init;
+			if (data) this.data = data;
+			if (origin) this.origin = origin;
+			if (lastEventId) this.lastEventId = lastEventId;
+			if (source) this.source = source;
+			if (ports) this.ports = ports;
+		}
 	}
 }

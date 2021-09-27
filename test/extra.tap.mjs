@@ -62,6 +62,24 @@ tap.test("createTextNode", function (t) {
 	t.end();
 });
 
+tap.test("endNode", function (t) {
+	const top = doc.documentElement;
+	const end = top.endNode;
+	t.notOk(end.isEqualNode(top));
+	t.ok(end.isEqualNode(end));
+	t.end();
+});
+
+tap.test("contains/querySelector no args", function (t) {
+	const top = doc.documentElement;
+	t.throws(() => top.contains(), TypeError);
+	t.throws(() => top.contains(1), TypeError);
+	t.throws(() => top.querySelector(), TypeError);
+	t.throws(() => top.querySelectorAll(), TypeError);
+	t.end();
+});
+
+
 tap.test("createDocumentType", function (t) {
 	const e1 = doc.implementation.createDocumentType(
 		"html",

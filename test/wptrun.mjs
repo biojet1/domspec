@@ -96,12 +96,41 @@ const self = new Proxy(window, {
         return Reflect.set(target, key, value, receiver);
     },
 });
-Object.defineProperty(Window, "self", {
-    // only returns odd die sides
-    get: function () {
-        return self;
+
+Object.defineProperties(Window.prototype, {
+    console: {
+        value: console,
+    },
+    clearTimeout: {
+        value: clearTimeout,
+    },
+    setTimeout: {
+        value: setTimeout,
+    },
+    setInterval: {
+        value: setTimeout,
+    },
+    // addEventListener: ,
+
+    //     EventTarget.prototype.addEventListener.apply(window, arguments);
+});
+
+Object.defineProperty(Window.prototype, "addEventListener", {
+    value: function () {
+        EventTarget.prototype.addEventListener.apply(window, arguments);
     },
 });
+
+Object.defineProperty(Window.prototype, "self", {
+    value: self,
+});
+// window.setTimeout = setTimeout;
+// window.setInterval = setInterval;
+// window.clearTimeout = clearTimeout;
+// window.clearInterval = clearInterval;
+// window.setImmediate = setImmediate;
+// window.clearImmediate = clearImmediate;
+
 window
     .loadURL(url)
     .catch(function (err) {
@@ -112,15 +141,33 @@ window
         console.log("path", document.innerHTML);
         console.log("baseURI", document.baseURI);
         console.log("win", document.location);
-
-        window.setTimeout = setTimeout;
-        window.setInterval = setInterval;
-        window.clearTimeout = clearTimeout;
-        window.clearInterval = clearInterval;
-        window.setImmediate = setImmediate;
-        window.clearImmediate = clearImmediate;
-
         vm.createContext(window);
+        vm.runInContext(
+            `
+        console.log("top", top.location.toString());
+        console.log("self", self.location.toString());
+        console.log("window", window.location.toString());
+        console.log("parent", parent.location.toString());
+        console.log("document", document.location.href);
+window.addEventListener("test", (e)=> console.log("test event"));
+
+                    `,
+            window,
+            `scriptX`
+        );
+        window.dispatchEvent(new Event("test"));
+        // window.setTimeout = setTimeout;
+        // window.setInterval = setInterval;
+        // // window.clearTimeout = clearTimeout;
+        // window.clearInterval = clearInterval;
+        // window.setImmediate = setImmediate;
+        // window.clearImmediate = clearImmediate;
+        // window.addEventListener = function () {
+        //     EventTarget.prototype.addEventListener.apply(window, arguments);
+        // };
+        // const my = { self: self, window: window, document: document };
+        // vm.createContext(my);
+        let i = 0;
         for (const script of document.getElementsByTagName("script")) {
             const src = script.getAttribute("src");
 
@@ -135,15 +182,16 @@ window
             } else {
                 // console.log("script", script.textContent);
 
-                vm.runInContext(script.textContent, window, `script${i++}`);
+                vm.runInContext(script.textContent, window, `script${++i}`);
             }
-            if (!test_harness_found) {
-            }
+            // if (!test_harness_found) {
+            // }
 
             // console.log(scr.tagName, file);
         }
+        console.log("add_completion_callback");
         if (window.add_completion_callback) {
-            test_harness_found = true;
+            // test_harness_found = true;
             window.add_completion_callback(function (tests, status) {
                 console.log("DONE", status, tests);
                 for (const test of tests) {
@@ -161,6 +209,7 @@ window
                 // });
             });
         }
+        console.log("dispatchEvent", "load");
         window.dispatchEvent(new Event("load"));
     });
 

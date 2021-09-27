@@ -35,6 +35,7 @@
     "saxes": "^5.0.1"
   },
   "peerDependencies": {
+    "node-fetch": "*",
     "svggeom": "git://github.com/biojet1/svggeom#main"
   },
   "files": [

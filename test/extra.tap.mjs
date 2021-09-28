@@ -67,6 +67,10 @@ tap.test("endNode", function (t) {
 	const end = top.endNode;
 	t.notOk(end.isEqualNode(top));
 	t.ok(end.isEqualNode(end));
+	for (const text of doc.getElementsByTagName("text")) {
+		t.notOk(end.isEqualNode(text));
+		t.notOk(end.isEqualNode(text.endNode));
+	}
 	t.end();
 });
 
@@ -78,7 +82,6 @@ tap.test("contains/querySelector no args", function (t) {
 	t.throws(() => top.querySelectorAll(), TypeError);
 	t.end();
 });
-
 
 tap.test("createDocumentType", function (t) {
 	const e1 = doc.implementation.createDocumentType(

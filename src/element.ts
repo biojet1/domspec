@@ -274,7 +274,6 @@ export class Element extends ParentNode {
 
 	//// DOM: </Content>
 
-
 	get innerText() {
 		return this.textContent;
 	}
@@ -572,8 +571,7 @@ export class Element extends ParentNode {
 		}
 		return id;
 	}
-	_do(...args:any[]){
-	}
+	_do(...args: any[]) {}
 }
 
 function checkQName(name: string) {

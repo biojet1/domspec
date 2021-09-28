@@ -1,11 +1,13 @@
-function domParse(doc: Document, top: ParentNode, opt:any = {}) {
+function domParse(doc: Document, top: ParentNode, options?: any) {
+	const opt = options || {};
 	const parser = new SaxesParser({
 		// lowercase: true,
 		xmlns: true,
 		strictEntities: true,
 		...opt,
 	});
-	// const runScripts:ParentNode[]|undefined = opt.runScripts ? [] : undefined;
+	const scripts: Element[] | undefined =
+		opt.runScripts !== false ? [] : undefined;
 
 	parser.on("error", (err) => {
 		throw new Error(`SaxesParser ${err.message}`);
@@ -67,14 +69,13 @@ function domParse(doc: Document, top: ParentNode, opt:any = {}) {
 
 	parser.on("closetag", (node) => {
 		const { parentNode } = top;
-		// console.dir(top, { depth: 1 });
 		if (node.isSelfClosing) {
 			(top as Element)._parsed_closed = true;
 		}
-		// if (runScripts && (top as Element).localName == "script") {
-		// 	runScripts.push(top);
-		// 	// top._do("eval");
-		// }
+		if (scripts && (top as Element).localName == "script") {
+			scripts.push(top as Element);
+			// top._do("eval");
+		}
 		if (parentNode) {
 			top = parentNode;
 		} else {
@@ -84,11 +85,23 @@ function domParse(doc: Document, top: ParentNode, opt:any = {}) {
 	});
 	parser.on("end", function () {
 		// parser stream is done, and ready to have more stuff written to it.
-		// if (runScripts) {
-		// 	while (runScripts.length > 0) {
-		// 		const script = runScripts.shift();
-		// 	}
-		// }
+		if (scripts) {
+			runScripts(scripts, opt.resourceLoader)
+				.catch((err) => {
+					err.message;
+					console.error("Error running scripts", err);
+				})
+				.then(() => {
+					if (scripts.length !== 0) {
+						throw new Error();
+					}
+					const { defaultView: window } = doc;
+					if (window) {
+						console.info("WINDOW LOAD");
+						window.dispatchEvent(new Event("load"));
+					}
+				});
+		}
 	});
 	return parser;
 	// .write(str);
@@ -120,36 +133,31 @@ function domParse(doc: Document, top: ParentNode, opt:any = {}) {
 // 	// onerror(error /*: Error */)
 // }
 
-export const parseDOM = function (
-	str: string,
-	parent: ParentNode // Element | Document | DocumentFragment
+export const pushDOMParser = function (
+	parent: ParentNode, // Element | Document | DocumentFragment
+	opt?: any
 ) {
 	if (parent instanceof Document) {
-		domParse(parent, parent).write(str);
-	} else {
-		const doc = parent.ownerDocument;
-		if (doc) {
-			domParse(doc, parent, { fragment: true }).write(str);
-		} else {
-			throw new Error(`No ownerDocument`);
-		}
+		return domParse(parent, parent, opt);
 	}
+	const { ownerDocument: doc } = parent;
+	if (doc) {
+		if (opt) {
+			opt.fragment = true;
+		} else {
+			opt = { fragment: true };
+		}
+		return domParse(doc, parent, opt);
+	}
+	throw new Error(`No ownerDocument`);
 };
 
-export const pushDOMParser = function (
+export const parseDOM = function (
+	str: string,
 	parent: ParentNode, // Element | Document | DocumentFragment
 	opt = {}
 ) {
-	if (parent instanceof Document) {
-		return domParse(parent, parent);
-	} else {
-		const doc = parent.ownerDocument;
-		if (doc) {
-			return domParse(doc, parent, { fragment: true });
-		} else {
-			throw new Error(`No ownerDocument`);
-		}
-	}
+	pushDOMParser(parent, opt).write(str);
 };
 
 export class DOMParser {
@@ -186,6 +194,7 @@ const CUSTOM_NAME_DOCTYPE = /<!doctype\s+([^\s>]+)/i;
 import { SaxesParser, SaxesTagNS } from "saxes";
 import { ParentNode } from "./parent-node.js";
 import { Element } from "./element.js";
+import { runScripts } from "./resource.js";
 import {
 	Document,
 	HTMLDocument,
@@ -193,3 +202,4 @@ import {
 	XMLDocument,
 } from "./document.js";
 import { DocumentType } from "./document-type.js";
+import { Event } from "./event-target.js";

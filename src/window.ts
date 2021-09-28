@@ -148,7 +148,7 @@ export class Window extends EventTarget {
 		globalThis.clearTimeout(id);
 	}
 
-	postMessage(message:any, targetOrigin:string) {
+	postMessage(message: any, targetOrigin: string) {
 		// console.log("[postMessage]", arguments);
 		if (arguments.length < 2) {
 			// "'postMessage' requires 2 arguments: 'message' and 'targetOrigin'"
@@ -182,15 +182,20 @@ export class Window extends EventTarget {
 		// TODO: event.origin - requires reference to source window
 		// TODO: event.ports
 		// TODO: event.data - structured clone message - requires cloning DOM nodes
+		const { window: source } = globalThis;
 		setTimeout(() => {
-			const event = new MessageEvent("message", { data: message });
+			const event = new MessageEvent("message", {
+				data: message,
+				source: source as any as EventTarget,
+			});
 
 			this.dispatchEvent(event);
 		}, 0);
 	}
 
-	async loadURL(url: string) {
+	async loadURL(url: string, params?: any) {
 		let doc;
+		// console.log("loadURL: ", params);
 		function mimeTypeFor(s: string) {
 			if (/\.svg$/.test(s)) {
 				return "image/svg+xml";
@@ -202,24 +207,32 @@ export class Window extends EventTarget {
 				return "application/xml";
 			}
 		}
+		const rl =
+			(params.resourceLoader as ResourceLoader) ||
+			Document.resourceLoader;
 		if (url.indexOf("file:") === 0) {
-			const file = fileURLToPath(url);
-			doc = Document.new(mimeTypeFor(url));
-			doc._location = url;
-			const sax = pushDOMParser(this.setDocument(doc));
+			// const file = fileURLToPath(url);
+			const strm = await rl.readStream(url);
+			if (strm) {
+				doc = Document.new(mimeTypeFor(url));
+				doc._location = url;
+				const sax = pushDOMParser(this.setDocument(doc), params);
 
-			sax.write(fs.readFileSync(file, "utf8"));
-			sax.close();
+				for await (const chunk of strm) {
+					sax.write(chunk);
+				}
+				sax.close();
+			}
 		} else {
-			const response = await Document.fetch(url);
+			const response = await rl.fetch(url);
 			if (response) {
-				doc = Document.new(
-					response.headers.get("content-type") || mimeTypeFor(url)
-				);
 				const { body } = response;
 				if (body) {
+					doc = Document.new(
+						response.headers.get("content-type") || mimeTypeFor(url)
+					);
 					doc._location = url;
-					const sax = pushDOMParser(this.setDocument(doc));
+					const sax = pushDOMParser(this.setDocument(doc), params);
 					for await (const chunk of body) {
 						sax.write(chunk.toString());
 					}
@@ -263,10 +276,11 @@ Object.defineProperties(Window.prototype, {
 	},
 });
 
+import { ResourceLoader } from "./resource.js";
 import { DOMImplementation } from "./dom-implementation.js";
 import { pushDOMParser } from "./dom-parse.js";
-import { fileURLToPath, pathToFileURL } from "url";
-import fs from "fs";
+// import { fileURLToPath, pathToFileURL } from "url";
+// import fs from "fs";
 
 /*
 interface Window : EventTarget {

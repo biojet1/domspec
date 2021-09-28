@@ -101,18 +101,15 @@ export abstract class Document extends NonElementParentNode {
 	}
 
 	createElement(localName: string) {
-		// const node = newElement(this.contentType, localName);
 		const node = createElement(this, localName);
 		node.ownerDocument = this;
 		return node;
-		// return
 	}
 
 	createElementNS(
 		ns: string | null | undefined,
 		qualifiedName: string
 	): Element {
-		// const node = newElement(this.contentType, qualifiedName, ns);
 		const node = createElement(this, qualifiedName, ns || "");
 		node.ownerDocument = this;
 		return node;
@@ -367,12 +364,16 @@ export abstract class Document extends NonElementParentNode {
 		}
 		return new XMLDocument(mimeType);
 	}
-
+	static get resourceLoader() {
+		return _resourceLoader || (_resourceLoader = new ResourceLoader());
+	}
 	//  html: "text/html",
 	// xhtml: "application/xhtml+xml",
 	// xml: "application/xml",
 	// svg: "image/svg+xml",
 }
+
+let	_resourceLoader:ResourceLoader;
 
 import { RequestInfo, RequestInit } from "node-fetch";
 
@@ -399,12 +400,12 @@ export class SVGDocument extends Document {
 		return true;
 	}
 }
-
+import { ResourceLoader } from "./resource.js";
 import { HTML_NS, SVG_NS, validateAndExtract, checkName } from "./namespace.js";
 import { ChildNode } from "./child-node.js";
 import { EndNode, ParentNode } from "./parent-node.js";
 import { Element } from "./element.js";
-import { newElement, createElement } from "./elements.js";
+import { createElement } from "./elements.js";
 import { Attr, StringAttr } from "./attr.js";
 import {
 	Comment,

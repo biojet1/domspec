@@ -11,6 +11,8 @@ import {
     HTMLDocument,
     XMLDocument,
     Window,
+    ResourceLoader,
+    runScripts,
 } from "../dist/all.js";
 
 for (const [k, v] of Object.entries(all)) {
@@ -34,7 +36,28 @@ if (1) {
         console.log("::dispatchEvent", arguments[0]);
         dispatchEvent.apply(this, arguments);
     };
+    // const clearTimeout = Window.prototype.clearTimeout;
+    // Window.prototype.clearTimeout = function () {
+    //     console.log("::clearTimeout", arguments);
+    //     clearTimeout.apply(this, arguments);
+    // };
 }
+
+class TestResourceLoader extends ResourceLoader {
+    resolveURL(href, baseURI) {
+        if (href == "/resources/testharnessreport.js") {
+            href =
+                "file:///mnt/META/wrx/ts/svgdom-ts/test/testharnessreport.js";
+        } else if (href.startsWith("/")) {
+            baseURI = WPT_ROOT_URL;
+            href = href.substring(1);
+        }
+        const url = super.resolveURL(href, baseURI);
+        console.log("resolveURL: ", href, baseURI, url);
+        return url;
+    }
+}
+
 const window = new Window();
 // await SVGDocument.fetch(
 //     "http://0.0.0.0:8048/mod/vfskit.web/local/OS/pub/004/wpt/svg/idlharness.window.js"
@@ -42,7 +65,11 @@ const window = new Window();
 const url =
     // "file:///media/biojet1/OS/pub/004/wpt/svg/types/scripted/SVGGeometryElement.getTotalLength-01.svg";
     "http://0.0.0.0:8048/mod/vfskit.web/local/OS/pub/004/wpt/svg/types/scripted/SVGGeometryElement.getTotalLength-01.svg";
+const rl = new TestResourceLoader();
 
+for await (const chunk of await rl.readStream(url)) {
+    console.log("chunk", chunk.toString());
+}
 // TestWindow.loadURL(url)
 //     .then(function (win) {
 //         console.log("path", win.document.innerHTML);
@@ -102,9 +129,9 @@ Object.defineProperty(Window.prototype, "self", {
 // window.clearInterval = clearInterval;
 // window.setImmediate = setImmediate;
 // window.clearImmediate = clearImmediate;
-
+window.tap = tap;
 window
-    .loadURL(url)
+    .loadURL(url, { resourceLoader: new TestResourceLoader() })
     .catch(function (err) {
         console.log("err", err);
         throw err;
@@ -127,7 +154,7 @@ window.addEventListener("test", (e)=> console.log("test event"));
             window,
             `scriptX`
         );
-        window.dispatchEvent(new Event("test"));
+        // window.dispatchEvent(new Event("test"));
         // window.setTimeout = setTimeout;
         // window.setInterval = setInterval;
         // // window.clearTimeout = clearTimeout;
@@ -139,48 +166,48 @@ window.addEventListener("test", (e)=> console.log("test event"));
         // };
         // const my = { self: self, window: window, document: document };
         // vm.createContext(my);
-        let i = 0;
-        for (const script of document.getElementsByTagName("script")) {
-            const src = script.getAttribute("src");
+        // let i = 0;
+        // for (const script of document.getElementsByTagName("script")) {
+        //     const src = script.getAttribute("src");
 
-            if (src) {
-                let file = src.substring(1);
-                // console.log("file", file.substring(1));
-                file = new URL(file, WPT_ROOT_URL);
-                // console.log("url", file);
-                file = fileURLToPath(file);
-                // console.log("path", file);
-                vm.runInContext(fs.readFileSync(file, "utf8"), window, file);
-            } else {
-                // console.log("script", script.textContent);
+        //     if (src) {
+        //         let file = src.substring(1);
+        //         // console.log("file", file.substring(1));
+        //         file = new URL(file, WPT_ROOT_URL);
+        //         // console.log("url", file);
+        //         file = fileURLToPath(file);
+        //         // console.log("path", file);
+        //         vm.runInContext(fs.readFileSync(file, "utf8"), window, file);
+        //     } else {
+        //         // console.log("script", script.textContent);
 
-                vm.runInContext(script.textContent, window, `script${++i}`);
-            }
-            // if (!test_harness_found) {
-            // }
+        //         vm.runInContext(script.textContent, window, `script${++i}`);
+        //     }
+        //     // if (!test_harness_found) {
+        //     // }
 
-            // console.log(scr.tagName, file);
-        }
-        console.log("add_completion_callback");
-        if (window.add_completion_callback) {
-            // test_harness_found = true;
-            window.add_completion_callback(function (tests, status) {
-                console.log("DONE", status, tests);
-                for (const test of tests) {
-                    tap.equal(test.status, 0, test.name, {
-                        message: test.message,
-                    });
-                }
+        //     // console.log(scr.tagName, file);
+        // }
+        // console.log("add_completion_callback");
+        // if (window.add_completion_callback) {
+        //     // test_harness_found = true;
+        //     window.add_completion_callback(function (tests, status) {
+        //         console.log("DONE", status, tests);
+        //         for (const test of tests) {
+        //             tap.equal(test.status, 0, test.name, {
+        //                 message: test.message,
+        //             });
+        //         }
 
-                // tap.test(`test`, function (t) {
-                //     for (const test of tests) {
-                //         t.equal(test.status, 0, test.name, test);
-                //     }
+        //         // tap.test(`test`, function (t) {
+        //         //     for (const test of tests) {
+        //         //         t.equal(test.status, 0, test.name, test);
+        //         //     }
 
-                //     t.end();
-                // });
-            });
-        }
-        console.log("dispatchEvent", "load");
-        window.dispatchEvent(new Event("load"));
+        //         //     t.end();
+        //         // });
+        //     });
+        // }
+        // console.log("dispatchEvent", "load");
+        // window.dispatchEvent(new Event("load"));
     });

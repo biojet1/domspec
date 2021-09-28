@@ -622,9 +622,10 @@ export class EndNode extends Node {
 		}
 		let { parentNode: parentB } = node as EndNode;
 		let { parentNode: parentA } = this;
-		return parentA && parentB
-			? parentA.isEqualNode(parentB)
-			: !parentA === !parentB;
+		return (parentA && parentB && parentA.isEqualNode(parentB)) || false;
+		// return parentA && parentB
+		// 	? parentA.isEqualNode(parentB)
+		// 	: !parentA === !parentB;
 	}
 }
 

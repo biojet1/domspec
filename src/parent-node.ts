@@ -503,7 +503,11 @@ export abstract class ParentNode extends ChildNode {
 		let cur: Node | null | undefined = this[NEXT];
 		const end = this[END];
 		for (; cur && cur !== end; cur = cur[NEXT]) {
-			if (cur.nodeType === 3) text.push(cur.textContent);
+			switch (cur.nodeType) {
+				case 3:
+				case 4:
+					text.push(cur.textContent);
+			}
 		}
 		return text.join("");
 	}

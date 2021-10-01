@@ -202,6 +202,9 @@ export class SVGGeometryElement extends SVGGraphicsElement {
 	getTotalLength() {
 		return this.path.length;
 	}
+	getPointAtLength(L: number) {
+		return this.path.pointAtLength(L);
+	}
 }
 
 /// SVGGeometryElement //////////
@@ -235,7 +238,7 @@ export class SVGRectElement extends SVGGeometryElement {
 		const height = parseFloat(this.getAttribute("height") || "0");
 		const x = parseFloat(this.getAttribute("x") || "0");
 		const y = parseFloat(this.getAttribute("y") || "0");
-		return `M ${x} ${y} h ${width} v ${height} H ${x} V ${y}`;
+		return `M ${x} ${y} h ${width} v ${height} h ${-width} Z`;
 	}
 }
 

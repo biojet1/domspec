@@ -47,6 +47,7 @@
     "src": "dist"
   },
   "tap": {
+    "timeout": 90,
     "coverage": false
   },
   "devDependencies": {

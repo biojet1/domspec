@@ -67,7 +67,8 @@ export function validateAndExtract(
 			}
 			return [null, null, qualifiedName];
 		} else {
-			throw new Error("NamespaceError");
+			// throw new Error("NamespaceError");
+			throw new Error(`NamespaceError '${ns}' '${qualifiedName}'`);
 		}
 	}
 }

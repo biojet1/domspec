@@ -118,28 +118,29 @@ async function _eval(script: Element, res: ResourceLoader): Promise<Element> {
 	if (document) {
 		const { defaultView: window } = document;
 		if (window) {
+			vm.createContext(window);
 			if (src) {
 				const { documentURI } = document;
 				const url = res.resolveURL(src, documentURI);
 				return res.readURL(url).then((code: string) => {
 					try {
 						document.currentScript = script;
-						console.log(`eval: ${url} [${src}]`);
+						// console.log(`eval: ${url} [${src}]`);
 						vm.runInContext(code, window, src);
 					} finally {
 						delete document.currentScript;
-						return script;
 					}
+					return script;
 				});
-			} else if(text){
+			} else if (text) {
 				try {
 					document.currentScript = script;
-					console.log("eval: text");
+					// console.log(`eval: ${text.trim().substring(0, 32)}`);
 					vm.runInContext(text, window, "script");
 				} finally {
 					delete document.currentScript;
-					return script;
 				}
+				return script;
 			}
 		}
 	}
@@ -153,7 +154,7 @@ export async function runScripts(
 ): Promise<Element | undefined> {
 	const script = scripts && scripts.shift();
 	const rl = res || new ResourceLoader();
-	console.log("script: ", script && script.getAttributeNS(null, "src"), rl);
+	// console.log("script: ", script && script.getAttributeNS(null, "src"), rl);
 
 	return (
 		script &&

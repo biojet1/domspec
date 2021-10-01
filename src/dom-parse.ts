@@ -8,29 +8,17 @@ function domParse(doc: Document, top: ParentNode, options?: any) {
 	});
 	const scripts: Element[] | undefined =
 		opt.runScripts !== false ? [] : undefined;
+	const { isHTML } = doc;
 
 	parser.on("error", (err) => {
 		throw new Error(`SaxesParser ${err.message}`);
 	});
 
 	parser.on("doctype", (dt) => {
-		let [name, pub, sys] = ["html", "", ""];
-
 		if (top !== doc) {
 			throw new Error("Doctype can only be appended to document");
-		} else if (!HTML5_DOCTYPE.test(dt)) {
-			let m;
-			if ((m = PUBLIC_DOCTYPE.exec(dt))) {
-				[name, pub, sys] = [m[1], m[2], m[3]];
-			} else if ((m = SYSTEM_DOCTYPE.exec(dt))) {
-				[name, sys] = [m[1], m[2]];
-			} else if ((m = CUSTOM_NAME_DOCTYPE.exec(dt))) {
-				name = m[1];
-			}
 		}
-		let node = doc.implementation.createDocumentType(name, pub, sys);
-		// node.ownerDocument = doc;
-		top.appendChild(node);
+		top.appendChild(createDocumentType(doc, dt));
 	});
 
 	parser.on("text", (str: string) => {
@@ -42,7 +30,9 @@ function domParse(doc: Document, top: ParentNode, options?: any) {
 	});
 
 	parser.on("cdata", (data) => {
-		top.appendChild(doc.createCDATASection(data));
+		if (isHTML) {
+			top.appendChild(doc.createTextNode(data));
+		} else top.appendChild(doc.createCDATASection(data));
 	});
 
 	parser.on("opentag", (node) => {
@@ -87,17 +77,17 @@ function domParse(doc: Document, top: ParentNode, options?: any) {
 		// parser stream is done, and ready to have more stuff written to it.
 		if (scripts) {
 			runScripts(scripts, opt.resourceLoader)
-				.catch((err) => {
-					err.message;
-					console.error("Error running scripts", err);
-				})
+				// .catch((err) => {
+				// 	err.message;
+				// 	console.error("Error running scripts", err);
+				// })
 				.then(() => {
 					if (scripts.length !== 0) {
 						throw new Error();
 					}
 					const { defaultView: window } = doc;
 					if (window) {
-						console.info("WINDOW LOAD");
+						// console.info("WINDOW LOAD");
 						window.dispatchEvent(new Event("load"));
 					}
 				});
@@ -107,31 +97,110 @@ function domParse(doc: Document, top: ParentNode, options?: any) {
 	// .write(str);
 }
 
-// function domParse(str: string, doc: Document, top: ParentNode) {
-// 	const handler = {
-// 		onopentagname: function (name /*: string */) {
-// 			const pos = name.indexOf(":");
-// 			if (pos < 0) {
-// 				const tag = doc.createElement(name);
-// 				top.appendChild(tag);
-// 				top = tag;
-// 			}else{
+function htmlParser2(doc: Document, top: ParentNode, options?: any) {
+	let cdata: CDATASection | null;
+	const opt = options || {};
+	const handler = {
+		onopentagname(name: string) {
+			let tag;
+			const i = name.indexOf(":");
+			if (i < 0) {
+				// tag = doc.createElement(name);
+				tag = doc.createElementNS(null, name);
+			} else {
+				const prefix = name.substring(0, i);
+				const local = name.substring(i + 1);
+				const ns = top.lookupNamespaceURI(prefix);
+				tag = doc.createElementNS(ns, local);
+			}
+			top.appendChild(tag);
+			top = tag;
+		},
+		onclosetag(name: string) {
+			const { parentNode } = top;
 
-// 			}
-// 			// prefix =
-// 		},
-// 		onattribute(name /*: string */, value /*: string */) {},
-// 		onclosetag: function (name /*: string */) {},
-// 	};
+			// delete (top as any)._nsmap;
 
-// 	// ontext(text /*: string */)
-// 	// onprocessinginstruction(name /*: string */, data /*: string */)
-// 	// oncomment(data /*: string */)
-// 	// oncommentend()
-// 	// oncdatastart()
-// 	// oncdataend()
-// 	// onerror(error /*: Error */)
-// }
+			if (parentNode) {
+				top = parentNode;
+			} else {
+				/* c8 ignore next */
+				throw new Error(`unexpected null parentNode of ${top}`);
+			}
+		},
+		onattribute(name: string, value: string) {
+			const i = name.indexOf(":");
+			if (i < 0) {
+				// switch (name) {
+				// 	case "xmlns": {
+				// 		get_prefix_map(top)[true] = value;
+				// 		break;
+				// 	}
+				// }
+				(top as Element).setAttributeNS(null, name, value);
+			} else {
+				const prefix = name.substring(0, i);
+				// const local = name.substring(i + 1);
+				let ns;
+				switch (prefix) {
+					case "xmlns":
+						ns = XMLNS;
+						break;
+					default:
+						ns = top.lookupNamespaceURI(prefix);
+				}
+				(top as Element).setAttributeNS(ns, name, value);
+			}
+		},
+		ontext(text: string) {
+			if (cdata) {
+				// console.log(`ontext cdata (${text})`);
+				cdata.data += text;
+			} else if (top.nodeType !== 9) {
+				// console.log(`ontext (${text})`);
+				top.appendChild(doc.createTextNode(text));
+			}
+		},
+		oncomment(data: string) {
+			top.appendChild(doc.createComment(data));
+		},
+		onprocessinginstruction(name: string, data: string) {
+			switch (name) {
+				case "!doctype": {
+					if (top !== doc) {
+						throw new Error(
+							"Doctype can only be appended to document"
+						);
+					}
+					top.appendChild(createDocumentType(doc, data));
+					break;
+				}
+				default:
+					const m = data.match(/^\?\s*(\w+)\s+(.*)\s*\?$/);
+					// console.log(`onpi`, JSON.stringify(data), JSON.stringify(m));
+					m &&
+						top.appendChild(
+							doc.createProcessingInstruction(m[1], m[2])
+						);
+			}
+		},
+		oncdatastart() {
+			cdata = doc.createCDATASection("");
+		},
+		oncdataend() {
+			if (cdata) {
+				top.appendChild(cdata);
+				cdata = null;
+			}
+		},
+	};
+	opt.recognizeSelfClosing = true;
+	// opt.recognizeCDATA = true;
+	return import("htmlparser2").then((mod) => {
+		const { Parser } = mod;
+		return new Parser(handler, opt);
+	});
+}
 
 export const pushDOMParser = function (
 	parent: ParentNode, // Element | Document | DocumentFragment
@@ -181,15 +250,61 @@ export class DOMParser {
 					doc.insertBefore(new DocumentType("html"), doc.firstChild);
 				}
 		}
-
 		return doc;
+	}
+
+	async parseString(markup: string, type?: string) {
+		let doc: Document;
+		let opt: any = {};
+		switch (type) {
+			case "application/xhtml+xml":
+				opt.xmlMode = true;
+				doc = new HTMLDocument(type);
+				break;
+			case "text/html":
+				// opt.xmlMode = true;
+				doc = new HTMLDocument(type);
+				break;
+			case "image/svg+xml":
+				opt.xmlMode = true;
+				doc = new SVGDocument();
+				break;
+			default:
+				opt.xmlMode = true;
+				doc = new XMLDocument(type);
+		}
+		return htmlParser2(doc, doc, opt).then((parser) => {
+			parser.write(markup);
+			parser.end();
+			const { _promises } = parser as any;
+			if (_promises) {
+				return Promise.all(_promises).then((v) => doc);
+			}
+			return doc;
+		});
 	}
 }
 
-const HTML5_DOCTYPE = /<!doctype html>/i;
-const PUBLIC_DOCTYPE = /<!doctype\s+([^\s]+)\s+public\s+"([^"]+)"\s+"([^"]+)"/i;
-const SYSTEM_DOCTYPE = /<!doctype\s+([^\s]+)\s+system\s+"([^"]+)"/i;
-const CUSTOM_NAME_DOCTYPE = /<!doctype\s+([^\s>]+)/i;
+const HTML5_DOCTYPE = /<?!doctype\s+html\s+>?/i;
+const PUBLIC_DOCTYPE =
+	/<?!doctype\s+([^\s]+)\s+public\s+"([^"]+)"\s+"([^"]+)"/i;
+const SYSTEM_DOCTYPE = /<?!doctype\s+([^\s]+)\s+system\s+"([^"]+)"/i;
+const CUSTOM_NAME_DOCTYPE = /<?!doctype\s+([^\s>]+)/i;
+
+function createDocumentType(doc: Document, dt: string) {
+	let [name, pub, sys] = ["html", "", ""];
+	if (!HTML5_DOCTYPE.test(dt)) {
+		let m;
+		if ((m = PUBLIC_DOCTYPE.exec(dt))) {
+			[name, pub, sys] = [m[1], m[2], m[3]];
+		} else if ((m = SYSTEM_DOCTYPE.exec(dt))) {
+			[name, sys] = [m[1], m[2]];
+		} else if ((m = CUSTOM_NAME_DOCTYPE.exec(dt))) {
+			name = m[1];
+		}
+	}
+	return doc.implementation.createDocumentType(name, pub, sys);
+}
 
 import { SaxesParser, SaxesTagNS } from "saxes";
 import { ParentNode } from "./parent-node.js";
@@ -203,3 +318,5 @@ import {
 } from "./document.js";
 import { DocumentType } from "./document-type.js";
 import { Event } from "./event-target.js";
+import { CDATASection } from "./character-data.js";
+import { XMLNS } from "./namespace.js";

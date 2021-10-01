@@ -120,10 +120,6 @@ export class Element extends ParentNode {
 		}
 		checkName(name);
 		for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
-			// if (name === attr.localName) {
-			// 	attr.value = value;
-			// 	return;
-			// }
 			if (name === attr.name) {
 				attr.value = value;
 				return;

@@ -1,7 +1,6 @@
-import { Event } from "./event-target.js";
+import { Event, DOMException } from "./event-target.js";
 
 export class CustomEvent extends Event {}
-
 
 export function createEvent(name: string) {
 	// TODO
@@ -35,7 +34,7 @@ export function createEvent(name: string) {
 		case "mutationevent":
 			break;
 	}
-	throw new Error("NotSupportedError");
+	throw DOMException.new("NotSupportedError");
 }
 // "event" 	Event
 // "events"

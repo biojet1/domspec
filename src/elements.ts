@@ -1,4 +1,5 @@
 import { XMLNS, XML_NS, HTML_NS, SVG_NS } from "./namespace.js";
+import { DOMException } from "./event-target.js";
 import { Element } from "./element.js";
 import {
 	SVGElement,
@@ -125,7 +126,7 @@ export function newElement(
 		((prefix === "xmlns" || qualifiedName === "xmlns") && ns !== XMLNS) ||
 		(ns === XMLNS && !(prefix === "xmlns" || qualifiedName === "xmlns"))
 	) {
-		throw new Error("NamespaceError");
+		throw DOMException.new("NamespaceError");
 	}
 
 	switch (ns || contentType) {
@@ -460,7 +461,7 @@ export function createElement(
 			((prefix === "xmlns" || name === "xmlns") && ns !== XMLNS) ||
 			(ns === XMLNS && !(prefix === "xmlns" || name === "xmlns"))
 		) {
-			throw new Error("NamespaceError");
+			throw DOMException.new("NamespaceError");
 		}
 	}
 

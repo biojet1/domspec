@@ -174,7 +174,8 @@ export class EventTarget {
 		}
 
 		if (!event._initialized || event._dispatching)
-			throw new Error("InvalidStateError");
+			throw DOMException.new("InvalidStateError");
+
 		event.isTrusted = trusted;
 
 		// Begin dispatching the event now
@@ -395,5 +396,87 @@ export class MessageEvent extends Event {
 			if (source) this.source = source;
 			if (ports) this.ports = ports;
 		}
+	}
+}
+
+export class DOMException {
+	readonly name?: any;
+	readonly message?: string;
+	constructor(message: string, name: string = "") {
+		this.message = message;
+		this.name = name;
+	}
+	get code() {
+		switch (this.name) {
+			case "IndexSizeError":
+				return 1;
+			case "HierarchyRequestError":
+				return 3;
+			case "WrongDocumentError":
+				return 4;
+			case "InvalidCharacterError":
+				return 5;
+			case "NoModificationAllowedError":
+				return 7;
+			case "NotFoundError":
+				return 8;
+			case "NotSupportedError":
+				return 9;
+			case "InUseAttributeError":
+				return 10;
+			case "InvalidStateError":
+				return 11;
+			case "SyntaxError":
+				return 12;
+			case "InvalidModificationError":
+				return 13;
+			case "NamespaceError":
+				return 14;
+			case "InvalidAccessError":
+				return 15;
+			case "TypeMismatchError":
+				return 17;
+			case "SecurityError":
+				return 18;
+			case "NetworkError":
+				return 19;
+			case "AbortError":
+				return 20;
+			case "URLMismatchError":
+				return 21;
+			case "QuotaExceededError":
+				return 22;
+			case "TimeoutError":
+				return 23;
+			case "InvalidNodeTypeError":
+				return 24;
+			case "DataCloneError":
+				return 25;
+			default:
+				return 0;
+			// case "EncodingError":
+			// 	return 0;
+			// case "NotReadableError":
+			// 	return 0;
+			// case "UnknownError":
+			// 	return 0;
+			// case "ConstraintError":
+			// 	return 0;
+			// case "DataError":
+			// 	return 0;
+			// case "TransactionInactiveError":
+			// 	return 0;
+			// case "ReadOnlyError":
+			// 	return 0;
+			// case "VersionError":
+			// 	return 0;
+			// case "OperationError":
+			// 	return 0;
+			// case "NotAllowedError":
+			// 	return 0;
+		}
+	}
+	static new(name: string, message: string = "") {
+		return new DOMException(message, name);
 	}
 }

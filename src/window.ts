@@ -193,7 +193,7 @@ export class Window extends EventTarget {
 		}, 0);
 	}
 
-	async loadURL(url: string, params?: any) {
+	async loadURL1(url: string, params?: any) {
 		let doc;
 		// console.log("loadURL: ", params);
 		function mimeTypeFor(s: string) {
@@ -246,6 +246,66 @@ export class Window extends EventTarget {
 		}
 		return doc;
 	}
+	async loadURL(url: string, params?: any) {
+		function mimeTypeFor(s: string) {
+			if (/\.svg$/.test(s)) {
+				return "image/svg+xml";
+			} else if (/\.xhtml?$/.test(s)) {
+				return "application/xhtml+xml";
+			} else if (/\.html?$/.test(s)) {
+				return "application/xhtml+xml";
+			} else if (/\.xml$/.test(s)) {
+				return "application/xml";
+			}
+		}
+		const rl =
+			(params.resourceLoader as ResourceLoader) ||
+			Document.resourceLoader;
+		// let p: Promise<[string, AsyncIterableIterator<string | Buffer>]>;
+		let mt: string;
+		let it: AsyncIterableIterator<string | Buffer>;
+
+		[mt, it] = await (url.indexOf("file:") === 0
+			? rl.readStream(url).then((strm) => {
+					if (strm) {
+						return ["", strm[Symbol.asyncIterator]()];
+					} else {
+						throw new Error();
+					}
+			  })
+			: rl.fetch(url).then((response) => {
+					const { body } = response;
+					if (body) {
+						return [
+							response.headers.get("content-type") || "",
+							body[Symbol.asyncIterator](),
+						];
+					} else {
+						throw new Error(`No response body ${url}`);
+					}
+			  }));
+		// return p.then(function ([mt, it]) {
+		const doc = this.setDocument(Document.new(mt || mimeTypeFor(url)));
+		doc._location = url;
+		// const sax = pushDOMParser(doc, params);
+		// for await (const chunk of it) {
+		// 	sax.write(chunk.toString());
+		// }
+		// sax.close();
+		const parser = await htmlParser2(doc, doc, params);
+		for await (const chunk of it) {
+			parser.write(chunk.toString());
+		}
+		// const { _promises } = parser as any;
+		// if (_promises) {
+		// 	console.log("await", "_promises", _promises.length);
+
+		// 	await Promise.all(_promises);
+		// }
+		parser.end();
+		return doc;
+		// });
+	}
 }
 
 let lastTime = 0;
@@ -278,7 +338,7 @@ Object.defineProperties(Window.prototype, {
 
 import { ResourceLoader } from "./resource.js";
 import { DOMImplementation } from "./dom-implementation.js";
-import { pushDOMParser } from "./dom-parse.js";
+import { pushDOMParser, htmlParser2 } from "./dom-parse.js";
 // import { fileURLToPath, pathToFileURL } from "url";
 // import fs from "fs";
 

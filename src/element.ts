@@ -168,7 +168,7 @@ export class Element extends ParentNode {
 		if (node === prev) {
 			return node;
 		} else if (parentNode) {
-			throw new Error(`InuseAttributeError`);
+			throw DOMException.new(`InuseAttributeError`);
 		} else if (prev) {
 			// prev.insertLeft(node).remove();
 			const ref = prev[PREV] || this;
@@ -351,7 +351,10 @@ export class Element extends ParentNode {
 				this.insertBefore(element, null);
 				break;
 			default:
-				throw new Error(`SyntaxError: Invalid position ${position}`);
+				throw DOMException.new(
+					"SyntaxError",
+					`Invalid position ${position}`
+				);
 		}
 		return element;
 	}
@@ -380,9 +383,11 @@ export class Element extends ParentNode {
 				case null:
 				case undefined:
 					break;
+
 				default:
-					throw new Error(
-						`SyntaxError: Invalid position ${position}`
+					throw DOMException.new(
+						"SyntaxError;",
+						`Invalid position ${position}`
 					);
 			}
 	}
@@ -572,11 +577,11 @@ export class Element extends ParentNode {
 
 function checkQName(name: string) {
 	if (!name) {
-		throw new Error(`InvalidCharacterErr: !'${name}'`);
+		throw DOMException.new("InvalidCharacterErr", `!'${name}'`);
 	} else if (name.indexOf(":") < 0) {
 		return checkName(name);
 	} else if (!/^[_A-Za-z]\w*:[_A-Za-z][\w_-]*$/.test(name)) {
-		throw new Error(`InvalidCharacterErr: '${name}'`);
+		throw DOMException.new("InvalidCharacterErr", `'${name}'`);
 	}
 	return true;
 }
@@ -672,3 +677,4 @@ import { NamedNodeMap } from "./named-node-map.js";
 import { enumXMLDump } from "./dom-serialize.js";
 import { validateAndExtract, checkName, HTML_NS } from "./namespace.js";
 import { prepareMatch } from "./css/match.js";
+import { DOMException } from "./event-target.js";

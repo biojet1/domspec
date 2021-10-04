@@ -97,108 +97,230 @@ function domParse(doc: Document, top: ParentNode, options?: any) {
 	// .write(str);
 }
 
-function htmlParser2(doc: Document, top: ParentNode, options?: any) {
-	let cdata: CDATASection | null;
+export function getNamespace(
+	prefix: string,
+	cur: Element,
+	attribs?: { [key: string]: string }
+) {
+	if (attribs) {
+		for (const [key, value] of Object.entries(attribs)) {
+			const i = key.indexOf(":");
+			if (i < 0) {
+				if (!prefix && key === "xmlns") {
+					return value;
+				}
+			} else if (
+				key.substring(0, i) === "xmlns" &&
+				key.substring(i + 1) === prefix
+			) {
+				return value;
+			}
+		}
+	}
+	return cur.lookupNamespaceURI(prefix) || "";
+}
+
+export function htmlParser2(doc: Document, top: ParentNode, options?: any) {
 	const opt = options || {};
-	const handler = {
-		onopentagname(name: string) {
-			let tag;
-			const i = name.indexOf(":");
-			if (i < 0) {
-				// tag = doc.createElement(name);
-				tag = doc.createElementNS(null, name);
-			} else {
-				const prefix = name.substring(0, i);
-				const local = name.substring(i + 1);
-				const ns = top.lookupNamespaceURI(prefix);
-				tag = doc.createElementNS(ns, local);
-			}
-			top.appendChild(tag);
-			top = tag;
-		},
-		onclosetag(name: string) {
-			const { parentNode } = top;
-
-			// delete (top as any)._nsmap;
-
-			if (parentNode) {
-				top = parentNode;
-			} else {
-				/* c8 ignore next */
-				throw new Error(`unexpected null parentNode of ${top}`);
-			}
-		},
-		onattribute(name: string, value: string) {
-			const i = name.indexOf(":");
-			if (i < 0) {
-				// switch (name) {
-				// 	case "xmlns": {
-				// 		get_prefix_map(top)[true] = value;
-				// 		break;
-				// 	}
-				// }
-				(top as Element).setAttributeNS(null, name, value);
-			} else {
-				const prefix = name.substring(0, i);
-				// const local = name.substring(i + 1);
-				let ns;
-				switch (prefix) {
-					case "xmlns":
-						ns = XMLNS;
-						break;
-					default:
-						ns = top.lookupNamespaceURI(prefix);
-				}
-				(top as Element).setAttributeNS(ns, name, value);
-			}
-		},
-		ontext(text: string) {
-			if (cdata) {
-				// console.log(`ontext cdata (${text})`);
-				cdata.data += text;
-			} else if (top.nodeType !== 9) {
-				// console.log(`ontext (${text})`);
-				top.appendChild(doc.createTextNode(text));
-			}
-		},
-		oncomment(data: string) {
-			top.appendChild(doc.createComment(data));
-		},
-		onprocessinginstruction(name: string, data: string) {
-			switch (name) {
-				case "!doctype": {
-					if (top !== doc) {
-						throw new Error(
-							"Doctype can only be appended to document"
-						);
-					}
-					top.appendChild(createDocumentType(doc, data));
-					break;
-				}
-				default:
-					const m = data.match(/^\?\s*(\w+)\s+(.*)\s*\?$/);
-					// console.log(`onpi`, JSON.stringify(data), JSON.stringify(m));
-					m &&
-						top.appendChild(
-							doc.createProcessingInstruction(m[1], m[2])
-						);
-			}
-		},
-		oncdatastart() {
-			cdata = doc.createCDATASection("");
-		},
-		oncdataend() {
-			if (cdata) {
-				top.appendChild(cdata);
-				cdata = null;
-			}
-		},
-	};
 	opt.recognizeSelfClosing = true;
+	if (opt.xmlMode === undefined) {
+		opt.xmlMode = doc.contentType.indexOf("xml") >= 0;
+	}
 	// opt.recognizeCDATA = true;
 	return import("htmlparser2").then((mod) => {
+		let cdata: CDATASection | null;
+		const handler = {
+			// onopentagname(name: string) {
+			// 	let tag;
+			// 	const i = name.indexOf(":");
+			// 	if (i < 0) {
+			// 		// const ns = top.lookupNamespaceURI("");
+			// 		// tag = doc.createElement(name);
+			// 		// tag = doc.createElementNS(ns, name);
+			// 		tag = doc.createElement(name);
+			// 	} else {
+			// 		const prefix = name.substring(0, i);
+			// 		const local = name.substring(i + 1);
+			// 		const ns = top.lookupNamespaceURI(prefix);
+			// 		tag = doc.createElementNS(ns, local);
+			// 	}
+			// 	top.appendChild(tag);
+			// 	top = tag;
+			// },
+			onopentag(name: string, attribs: { [key: string]: string }): void {
+				// const type = this.options.xmlMode ? ElementType.Tag : undefined;
+				// const element = new Element(name, attribs, undefined, type);
+				// this.addNode(element);
+				// this.tagStack.push(element);
+				let tag;
+				const i = name.indexOf(":");
+				if (i < 0) {
+					const ns = getNamespace("", top as Element, attribs);
+					// tag = doc.createElement(name);
+					if (ns) tag = doc.createElementNS(ns, name);
+					else tag = doc.createElement(name);
+				} else {
+					const prefix = name.substring(0, i);
+					const local = name.substring(i + 1);
+					// const ns = top.lookupNamespaceURI(prefix);
+					const ns = getNamespace(prefix, top as Element, attribs);
+					if (ns) {
+						tag = doc.createElementNS(ns, local);
+					} else {
+						throw new Error(`no namespace for ${name}`);
+					}
+				}
+				for (const [key, value] of Object.entries(attribs)) {
+					const i = key.indexOf(":");
+					if (i < 0) {
+						tag.setAttributeNS(null, key, value);
+					} else {
+						const prefix = key.substring(0, i);
+						let ns;
+						switch (prefix) {
+							case "xmlns":
+								ns = XMLNS;
+								break;
+							default:
+								ns = getNamespace(prefix, top as Element, attribs);
+						}
+						tag.setAttributeNS(ns, key, value);
+					}
+				}
+				top.appendChild(tag);
+				top = tag;
+			},
+			onclosetag(name: string) {
+				const { parentNode } = top;
+				// delete (top as any)._nsmap;
+				const tag = top as Element;
+				if (parentNode) {
+					top = parentNode;
+				} else {
+					/* c8 ignore next */
+					throw new Error(`unexpected null parentNode of ${top}`);
+				}
+
+				if (tag.localName == "script") {
+					// console.log("script", "pause");
+					// parser.pause();
+					// const P = runScript(tag, opt.resourceLoader).then(() => {
+					// 	console.log("script", "resume");
+					// 	parser.resume();
+					// });
+					// let PS = (parser as any)._promises;
+					// if (PS) {
+					// 	PS.push(P);
+					// } else {
+					// 	(parser as any)._promises = [P];
+					// }
+
+					let ss = (parser as any).scripts;
+					if (ss) {
+						ss.push(tag);
+					} else {
+						(parser as any).scripts = [tag];
+					}
+				}
+			},
+			// onattribute(name: string, value: string) {
+			// 	const i = name.indexOf(":");
+			// 	if (i < 0) {
+			// 		// switch (name) {
+			// 		// 	case "xmlns": {
+			// 		// 		get_prefix_map(top)[true] = value;
+			// 		// 		break;
+			// 		// 	}
+			// 		// }
+			// 		(top as Element).setAttributeNS(null, name, value);
+			// 	} else {
+			// 		const prefix = name.substring(0, i);
+			// 		// const local = name.substring(i + 1);
+			// 		let ns;
+			// 		switch (prefix) {
+			// 			case "xmlns":
+			// 				ns = XMLNS;
+			// 				break;
+			// 			default:
+			// 				ns = top.lookupNamespaceURI(prefix);
+			// 		}
+			// 		(top as Element).setAttributeNS(ns, name, value);
+			// 	}
+			// },
+			ontext(text: string) {
+				if (cdata) {
+					// console.log(`ontext cdata (${text})`);
+					cdata.data += text;
+				} else if (top.nodeType !== 9) {
+					// console.log(`ontext (${text})`);
+					top.appendChild(doc.createTextNode(text));
+				}
+			},
+			oncomment(data: string) {
+				top.appendChild(doc.createComment(data));
+			},
+			onprocessinginstruction(name: string, data: string) {
+				switch (name) {
+					case "!doctype": {
+						if (top !== doc) {
+							throw new Error(
+								"Doctype can only be appended to document"
+							);
+						}
+						top.appendChild(createDocumentType(doc, data));
+						break;
+					}
+					default:
+						const m = data.match(/^\?\s*(\w+)\s+(.*)\s*\?$/);
+						// console.log(`onpi`, JSON.stringify(data), JSON.stringify(m));
+						m &&
+							top.appendChild(
+								doc.createProcessingInstruction(m[1], m[2])
+							);
+				}
+			},
+			oncdatastart() {
+				cdata = doc.createCDATASection("");
+			},
+			oncdataend() {
+				if (cdata) {
+					top.appendChild(cdata);
+					cdata = null;
+				}
+			},
+
+			onend() {
+				let scripts = (parser as any).scripts;
+
+				if (scripts) {
+					runScripts(scripts, opt.resourceLoader)
+						// .catch((err) => {
+						// 	err.message;
+						// 	console.error("Error running scripts", err);
+						// })
+						.then(() => {
+							if (scripts.length !== 0) {
+								throw new Error();
+							}
+							const { defaultView: window } = doc;
+							if (window) {
+								// console.info("WINDOW LOAD");
+								window.dispatchEvent(new Event("load"));
+							}
+						});
+				}
+			},
+		};
+
 		const { Parser } = mod;
-		return new Parser(handler, opt);
+		const parser = new Parser(handler, opt);
+
+		// const { _promises } = parser as any;
+		// if (_promises) {
+		// 	return Promise.all(_promises).then((v) => doc);
+		// }
+
+		return parser;
 	});
 }
 
@@ -309,7 +431,7 @@ function createDocumentType(doc: Document, dt: string) {
 import { SaxesParser, SaxesTagNS } from "saxes";
 import { ParentNode } from "./parent-node.js";
 import { Element } from "./element.js";
-import { runScripts } from "./resource.js";
+import { runScripts, runScript } from "./resource.js";
 import {
 	Document,
 	HTMLDocument,

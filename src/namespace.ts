@@ -10,7 +10,7 @@ export const NameRE = /^[:A-Z_a-z][:A-Z_a-z0-9.-]*$/;
 
 export function checkName(name: string) {
 	if (!NameRE.test(name)) {
-		throw new Error(`InvalidCharacterErr: Name '${name}'`);
+		throw DOMException.new("InvalidCharacterErr", `Name '${name}'`);
 	}
 }
 
@@ -27,23 +27,29 @@ export function validateAndExtract(
 			prefix = qualifiedName.substring(0, pos);
 			localName = qualifiedName.substring(pos + 1);
 			if (!/^[_A-Za-z]\w*:[_A-Za-z][\w_-]*$/.test(qualifiedName)) {
-				throw new Error(
-					`InvalidCharacterErr: qualifiedName '${qualifiedName}'`
+				throw DOMException.new(
+					"InvalidCharacterErr",
+					`qualifiedName '${qualifiedName}'`
 				);
 			}
 			// if (prefix && !NCNameRE.test(prefix)) {
-			// 	throw new Error(`InvalidCharacterErr: prefix '${prefix}'`);
+			// 	throw DOMException.new(
+			// 		"InvalidCharacterErr",
+			// 		`prefix '${prefix}'`
+			// 	);
 			// } else if (!NCNameRE.test(localName)) {
-			// 	throw new Error(
-			// 		`InvalidCharacterErr: localName '${localName}'`
+			// 	throw DOMException.new(
+			// 		"InvalidCharacterErr",
+			// 		`localName '${localName}'`
 			// 	);
 			// }
 		} else {
 			prefix = "";
 			localName = qualifiedName;
 			if (!NCNameRE.test(qualifiedName)) {
-				throw new Error(
-					`InvalidCharacterErr: qualifiedName '${qualifiedName}'`
+				throw DOMException.new(
+					"InvalidCharacterErr",
+					`qualifiedName '${qualifiedName}'`
 				);
 			}
 		}
@@ -54,8 +60,9 @@ export function validateAndExtract(
 				ns !== XMLNS) ||
 			(ns === XMLNS && !(prefix === "xmlns" || qualifiedName === "xmlns"))
 		) {
-			throw new Error(
-				`NamespaceError: NS[${ns}] QN[${qualifiedName}] LN[${localName}] P[${prefix}]`
+			throw DOMException.new(
+				"NamespaceError",
+				`NS[${ns}] QN[${qualifiedName}] LN[${localName}] P[${prefix}]`
 			);
 		}
 
@@ -63,12 +70,19 @@ export function validateAndExtract(
 	} else {
 		if (qualifiedName.indexOf(":") < 0) {
 			if (!NameRE.test(qualifiedName)) {
-				throw new Error(`InvalidCharacterErr: name '${qualifiedName}'`);
+				throw DOMException.new(
+					"InvalidCharacterErr",
+					`name '${qualifiedName}'`
+				);
 			}
 			return [null, null, qualifiedName];
 		} else {
-			// throw new Error("NamespaceError");
-			throw new Error(`NamespaceError '${ns}' '${qualifiedName}'`);
+			throw DOMException.new(
+				"NamespaceError",
+				`'${ns}' '${qualifiedName}'`
+			);
 		}
 	}
 }
+
+import { DOMException } from "./event-target.js";

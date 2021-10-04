@@ -1,31 +1,3 @@
-// export class Eval {
-// 	constructor(doc: Document) {
-// 		this.document = doc;
-
-// 		return false;
-// 	}
-
-// 	resolveURL(href: string, baseURI: string) {
-// 		return new URL(href, baseURI);
-// 	}
-
-// 	async fetchExternalScript(src: string) {
-// 		const { document } = this;
-// 		const { defaultView: window, documentURI } = document;
-// 		if (window && documentURI) {
-// 			const url = this.resolveURL(src, baseURI);
-// 			return this.readURL(url).then((code) => {
-// 				vm.runInContext(code, window, src);
-// 			});
-// 		}
-
-// 		// const { ownerDocument: document, defaultView: window } =
-// 		// 	this.ownerDocument;
-// 		// const resourceLoader = document._fetcher;
-// 		// const { URL, defaultView } = document;
-// 	}
-// }
-
 export class ResourceLoader {
 	resolveURL(href: string, baseURI: string) {
 		return new URL(href, baseURI).href;
@@ -162,6 +134,10 @@ export async function runScripts(
 			scripts.length > 0 ? runScripts(scripts, rl) : script
 		)
 	);
+}
+export async function runScript(script: Element, res?: ResourceLoader) {
+	const rl = res || new ResourceLoader();
+	return _eval(script, rl);
 }
 
 import { createReadStream } from "fs";

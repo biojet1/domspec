@@ -131,7 +131,7 @@ export abstract class Document extends NonElementParentNode {
 	}
 	createCDATASection(text: string) {
 		if (this.isHTML) {
-			throw new Error(`NotSupportedError`);
+			throw DOMException.new("NotSupportedError");
 		}
 		const node = new CDATASection(text);
 		node.ownerDocument = this;
@@ -148,7 +148,7 @@ export abstract class Document extends NonElementParentNode {
 		if (!name) {
 			name += "";
 			if (!name) {
-				throw new Error(`InvalidCharacterErr: name='${name}'`);
+				throw DOMException.new("InvalidCharacterErr", `name='${name}'`);
 			}
 		}
 		checkName(name);
@@ -239,7 +239,7 @@ export abstract class Document extends NonElementParentNode {
 			// 	break;
 			case 9: // DOCUMENT_NODE
 			case -1:
-				throw new Error(`NotSupportedError`);
+				throw DOMException.new("NotSupportedError");
 		}
 		let { startNode: cur, endNode: end, parentNode, ownerDocument } = node;
 		parentNode /* c8 ignore next */ && node.remove();
@@ -278,14 +278,18 @@ export abstract class Document extends NonElementParentNode {
 						{
 							if (this.firstElementChild) {
 								if ((node as ParentNode).firstElementChild) {
-									throw new Error(`HierarchyRequestError`);
+									throw DOMException.new(
+										"HierarchyRequestError"
+									);
 								}
 							} else {
 								if (
 									(node as ParentNode).firstElementChild
 										?.nextElementSibling
 								) {
-									throw new Error(`HierarchyRequestError`);
+									throw DOMException.new(
+										"HierarchyRequestError"
+									);
 								}
 							}
 							for (const cur of (node as ParentNode).childNodes) {
@@ -297,7 +301,7 @@ export abstract class Document extends NonElementParentNode {
 					case 10: {
 						// DOCUMENT_TYPE_NODE
 						if (this.doctype) {
-							throw new Error(`HierarchyRequestError`);
+							throw DOMException.new("HierarchyRequestError");
 						}
 						yield node;
 						break;
@@ -311,7 +315,7 @@ export abstract class Document extends NonElementParentNode {
 								typeof n !== "string" &&
 								n.nodeType === 1
 							) {
-								throw new Error(`HierarchyRequestError`);
+								throw DOMException.new("HierarchyRequestError");
 							}
 						}
 					}
@@ -358,8 +362,9 @@ export abstract class Document extends NonElementParentNode {
 		switch (mimeType) {
 			case "image/svg+xml":
 				return new SVGDocument(mimeType);
-			case "text/html":
 			case "application/xhtml+xml":
+				break;
+			case "text/html":
 				return new HTMLDocument(mimeType);
 		}
 		return new XMLDocument(mimeType);
@@ -373,7 +378,7 @@ export abstract class Document extends NonElementParentNode {
 	// svg: "image/svg+xml",
 }
 
-let	_resourceLoader:ResourceLoader;
+let _resourceLoader: ResourceLoader;
 
 import { RequestInfo, RequestInit } from "node-fetch";
 
@@ -419,4 +424,5 @@ import { Window } from "./window.js";
 import { DocumentType } from "./document-type.js";
 import { NEXT, PREV, END, Node } from "./node.js";
 import { createEvent } from "./event.js";
+import { DOMException } from "./event-target.js";
 export { DOMImplementation };

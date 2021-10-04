@@ -113,7 +113,7 @@ if (_FILE) {
     // const test_file = "svg/types/scripted/SVGGeometryElement.getTotalLength-01.svg";
     process.env._FILE = 'AUX';
     const PKG_DIR_URL = pathToFileURL(".");
-    const tests = `
+    let tests = `
 svg/types/scripted/SVGGeometryElement.getTotalLength-01.svg
 // svg/types/scripted/SVGGraphicsElement.getBBox-01.html
 svg/types/scripted/SVGGeometryElement.getPointAtLength-01.svg
@@ -142,7 +142,7 @@ dom/nodes/Node-isEqualNode-xhtml.xhtml
 dom/nodes/Node-lookupPrefix.xhtml
 // dom/nodes/Node-nodeName-xhtml.xhtml
 // dom/nodes/ProcessingInstruction-escapes-1.xhtml
-dom/nodes/ProcessingInstruction-literal-1.xhtml
+// dom/nodes/ProcessingInstruction-literal-1.xhtml
 // dom/nodes/ProcessingInstruction-literal-2.xhtml
 
 
@@ -164,8 +164,10 @@ dom/nodes/Element-siblingElement-null-svg.svg
         .split(/[\r\n]+/)
         .map((v) => v.trim())
         .filter((v) => v && !v.startsWith("#") && !v.startsWith("//"));
+    tests=['dom/nodes/Document-createCDATASection-xhtml.xhtml']
     console.info(tests);
     tap.jobs = 5;
+    console.info(`test: ${tests.length}`);
     for (const sub of tests) {
         // const href = new URL(sub, WPT_ROOT_URL).href;
         process.env._FILE = sub;

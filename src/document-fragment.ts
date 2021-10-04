@@ -34,7 +34,7 @@ export class DocumentFragment extends NonElementParentNode {
 			if (parent) {
 				let cur: ChildNode | null = first;
 				do {
-					this._on_child_detached(cur);
+					// this._on_child_detached(cur);
 				} while (cur !== last && (cur = cur.nextSibling || last));
 			}
 			last.endNode._linkr(next);

@@ -25,7 +25,7 @@ export abstract class Node extends EventTarget {
 		this.parentNode = parent;
 		prev && prev._linkr(startNode);
 		next && endNode._linkr(next);
-		parent && parent._on_child_attached(this);
+		// parent && parent._on_child_attached(this);
 		// return startNode;
 	}
 
@@ -72,7 +72,7 @@ export abstract class Node extends EventTarget {
 
 		if (parentNode) {
 			this.parentNode = null;
-			parentNode._on_child_detached(this);
+			// parentNode._on_child_detached(this);
 			// moCallback(this, parentNode);
 			// if (nodeType === ELEMENT_NODE) disconnectedCallback(this);
 		}
@@ -121,10 +121,10 @@ export abstract class Node extends EventTarget {
 			? (root as Document).documentElement || root
 			: root;
 	}
-	contains(node?: ChildNode) {
-		return false;
-		// return this === node;
-	}
+	// contains(node?: ChildNode) {
+	// 	return false;
+	// 	// return this === node;
+	// }
 	appendChild(node: Node) {
 		throw new Error(`Not implemented`);
 	}
@@ -232,6 +232,53 @@ export abstract class Node extends EventTarget {
 				return 2 + 8; // PRECEDING + CONTAINS
 			}
 		}
+	}
+	contains(node?: Node | null) {
+		for (;;) {
+			if (node === this) {
+				return true;
+			} else if (node) {
+				if (!(node = node.parentNode)) {
+					if (!(arguments[0] instanceof Node)) {
+						throw new TypeError();
+					}
+					break;
+				}
+			} else {
+				if (arguments.length < 1) {
+					throw new TypeError();
+				}
+				break;
+			}
+		}
+		return false;
+	}
+
+	insertBefore(node: ChildNode, before?: ChildNode | EndNode | null) {
+		const { _before } = this as any;
+		if (_before) {
+			return _before.call(
+				this,
+				before || (this as any as ParentNode)[END],
+				[node]
+			);
+		} else {
+			if (!node || !(node instanceof Node)) {
+				throw new TypeError();
+			}
+			throw DOMException.new("HierarchyRequestError", "Not ParentNode");
+		}
+		// return node;
+	}
+	_replace(node: ChildNode, child: ChildNode) {
+		throw DOMException.new("HierarchyRequestError", this.nodeType + "");
+	}
+
+	replaceChild(node: ChildNode, child: ChildNode) {
+		return this._replace(node, child);
+	}
+	removeChild(node: ChildNode) {
+		throw DOMException.new("NotFoundError");
 	}
 	/// DOM constants
 	static get ELEMENT_NODE() {
@@ -500,7 +547,7 @@ export class Children extends NodeList {
 // Node <- EndNode
 // Node <- AttrNode
 
-import { EventTarget } from "./event-target.js";
+import { EventTarget, DOMException } from "./event-target.js";
 import { ChildNode } from "./child-node.js";
 import { Text } from "./character-data.js";
 import { EndNode, ParentNode } from "./parent-node.js";

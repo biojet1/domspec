@@ -573,10 +573,10 @@ export abstract class ParentNode extends ChildNode {
 		const pos = name.indexOf(":");
 		if (this.ownerDocument?.isHTML) {
 			let p: string;
-			let n: string;
+			let n: string = name;
 			let l: string;
 			if (pos < 0) {
-				n = name;
+				// n = name;
 			} else {
 				name = name.replace(/([A-Z]+)/g, (m, a) => a.toLowerCase());
 				p = name.substring(0, pos);
@@ -601,13 +601,17 @@ export abstract class ParentNode extends ChildNode {
 										(m, a) => a.toLowerCase()
 									);
 								}
-							}
-							if (p === undefined) {
-								if (localName === n) {
-									yield el;
+								if (p === undefined) {
+									if (localName === n) {
+										yield el;
+									}
+								} else {
+									if (localName === n && prefix === p) {
+										yield el;
+									}
 								}
 							} else {
-								if (localName === n && prefix === p) {
+								if (el.tagName === n) {
 									yield el;
 								}
 							}

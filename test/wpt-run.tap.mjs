@@ -111,7 +111,7 @@ if (_FILE) {
         });
 } else {
     // const test_file = "svg/types/scripted/SVGGeometryElement.getTotalLength-01.svg";
-    process.env._FILE = 'AUX';
+    process.env._FILE = "AUX";
     const PKG_DIR_URL = pathToFileURL(".");
     let tests = `
 svg/types/scripted/SVGGeometryElement.getTotalLength-01.svg
@@ -122,8 +122,8 @@ svg/types/scripted/SVGGeometryElement.getPointAtLength-02.svg
 // svg/types/scripted/SVGGeometryElement.getPointAtLength-04.svg
 // svg/types/scripted/SVGGeometryElement.getPointAtLength-05.svg
 
-// dom/nodes/Document-createCDATASection-xhtml.xhtml
-// dom/nodes/Document-createProcessingInstruction-xhtml.xhtml
+dom/nodes/Document-createCDATASection-xhtml.xhtml
+dom/nodes/Document-createProcessingInstruction-xhtml.xhtml
 // dom/nodes/Document-getElementsByTagName-xhtml.xhtml
 // dom/nodes/DocumentType-literal-xhtml.xhtml
 dom/nodes/Element-childElementCount-dynamic-add-xhtml.xhtml
@@ -160,11 +160,19 @@ dom/nodes/Element-lastElementChild-svg.svg
 dom/nodes/Element-nextElementSibling-svg.svg
 dom/nodes/Element-previousElementSibling-svg.svg
 dom/nodes/Element-siblingElement-null-svg.svg
-    `
+    `;
+    // tests = `
+    // dom/nodes/Document-getElementsByTagName-xhtml.xhtml
+    // `;
+
+    tests = tests
         .split(/[\r\n]+/)
         .map((v) => v.trim())
         .filter((v) => v && !v.startsWith("#") && !v.startsWith("//"));
-    tests=['dom/nodes/Document-createCDATASection-xhtml.xhtml']
+    // tests=['dom/nodes/Document-createCDATASection-xhtml.xhtml']
+
+    //
+
     console.info(tests);
     tap.jobs = 5;
     console.info(`test: ${tests.length}`);
@@ -174,7 +182,7 @@ dom/nodes/Element-siblingElement-null-svg.svg
         tap.spawn(
             // "tap",
             "node",
-            ["test/wpt-run.mjs"],
+            ["test/wpt-run.tap.mjs"],
             // {buffered:true},
             sub
         );

@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      WPT_ROOT: .wpt
+      WPT_ROOT: _wpt
       WPT_URL: https://github.com/web-platform-tests/wpt/archive/refs/tags/merge_pr_30022.tar.gz
 
     steps:
@@ -57,6 +57,10 @@ jobs:
           if [ ! -f README.md ]; then
             curl -L "$WPT_URL" | tar xvzf - --strip-components 1
             patch dom/nodes/Document-createProcessingInstruction.js - << 'EOD'
+          18c18
+          <   for (var i = 0, il = invalid.length; i < il; i++) {
+          ---
+          >   for (let i = 0, il = invalid.length; i < il; i++) {
           27c27
           <   for (var i = 0, il = valid.length; i < il; ++i) {
           ---

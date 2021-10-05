@@ -253,7 +253,7 @@ export class Window extends EventTarget {
 			} else if (/\.xhtml?$/.test(s)) {
 				return "application/xhtml+xml";
 			} else if (/\.html?$/.test(s)) {
-				return "application/xhtml+xml";
+				return "text/html";
 			} else if (/\.xml$/.test(s)) {
 				return "application/xml";
 			}
@@ -287,6 +287,7 @@ export class Window extends EventTarget {
 		// return p.then(function ([mt, it]) {
 		const doc = this.setDocument(Document.new(mt || mimeTypeFor(url)));
 		doc._location = url;
+		// console.log("loadURL", doc.isHTML, url);
 		// const sax = pushDOMParser(doc, params);
 		// for await (const chunk of it) {
 		// 	sax.write(chunk.toString());

@@ -53,6 +53,17 @@ export class DocumentFragment extends NonElementParentNode {
 			return new DocumentFragment();
 		}
 	}
+	constructor(owner?: Document | null) {
+		super();
+		if (owner === undefined) {
+			const { window } = globalThis;
+			if (window) {
+				this.ownerDocument = window.document as any as Document;
+			}
+		} else {
+			this.ownerDocument = owner;
+		}
+	}
 
 	static fromTemplate(self: ParentNode) {
 		return new TemplateFragment(self);
@@ -62,7 +73,7 @@ export class DocumentFragment extends NonElementParentNode {
 export class TemplateFragment extends DocumentFragment {
 	self: ParentNode;
 	constructor(self: ParentNode) {
-		super();
+		super(self.ownerDocument);
 		this[END] = self[END];
 		this[NEXT] = self[NEXT];
 		this.self = self;
@@ -94,3 +105,4 @@ export class TemplateFragment extends DocumentFragment {
 import { ChildNode } from "./child-node.js";
 import { EndNode, ParentNode } from "./parent-node.js";
 import { Node, PREV, NEXT, END } from "./node.js";
+import { Document } from "./document.js";

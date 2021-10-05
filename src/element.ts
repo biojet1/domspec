@@ -575,16 +575,16 @@ export class Element extends ParentNode {
 	_do(...args: any[]) {}
 }
 
-function checkQName(name: string) {
-	if (!name) {
-		throw DOMException.new("InvalidCharacterErr", `!'${name}'`);
-	} else if (name.indexOf(":") < 0) {
-		return checkName(name);
-	} else if (!/^[_A-Za-z]\w*:[_A-Za-z][\w_-]*$/.test(name)) {
-		throw DOMException.new("InvalidCharacterErr", `'${name}'`);
-	}
-	return true;
-}
+// function checkQName(name: string) {
+// 	if (!name) {
+// 		throw DOMException.new("InvalidCharacterError", `!'${name}'`);
+// 	} else if (name.indexOf(":") < 0) {
+// 		return checkName(name);
+// 	} else if (!/^[_A-Za-z]\w*:[_A-Za-z][\w_-]*$/.test(name)) {
+// 		throw DOMException.new("InvalidCharacterError", `'${name}'`);
+// 	}
+// 	return true;
+// }
 
 function toCamelCase(name: string) {
 	return name.slice(5).replace(/-([a-z])/g, (_, $1) => $1.toUpperCase());

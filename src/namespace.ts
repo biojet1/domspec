@@ -6,11 +6,17 @@ export const SVG_NS = "http://www.w3.org/2000/svg";
 export const XLINK_NS = "http://www.w3.org/1999/xlink";
 
 export const NCNameRE = /^[_A-Za-z][\w_-]*$/;
-export const NameRE = /^[:A-Z_a-z][:A-Z_a-z0-9.-]*$/;
+export const NameRE = /^[A-Za-z:_]+[\w:\.\xB7-]*$/;
 
 export function checkName(name: string) {
 	if (!NameRE.test(name)) {
-		throw DOMException.new("InvalidCharacterErr", `Name '${name}'`);
+		throw DOMException.new("InvalidCharacterError", `Name '${name}'`);
+	}
+}
+export function checkQName(name: string) {
+	const colon = name.indexOf(":");
+	if (!/^[A-Za-z_][\w\.\xB7-]*(?::[A-Za-z_][\w\.\xB7-]*|)$/.test(name)) {
+		throw DOMException.new("InvalidCharacterError", `Name '${name}'`);
 	}
 }
 
@@ -28,18 +34,18 @@ export function validateAndExtract(
 			localName = qualifiedName.substring(pos + 1);
 			if (!/^[_A-Za-z]\w*:[_A-Za-z][\w_-]*$/.test(qualifiedName)) {
 				throw DOMException.new(
-					"InvalidCharacterErr",
+					"InvalidCharacterError",
 					`qualifiedName '${qualifiedName}'`
 				);
 			}
 			// if (prefix && !NCNameRE.test(prefix)) {
 			// 	throw DOMException.new(
-			// 		"InvalidCharacterErr",
+			// 		"InvalidCharacterError",
 			// 		`prefix '${prefix}'`
 			// 	);
 			// } else if (!NCNameRE.test(localName)) {
 			// 	throw DOMException.new(
-			// 		"InvalidCharacterErr",
+			// 		"InvalidCharacterError",
 			// 		`localName '${localName}'`
 			// 	);
 			// }
@@ -48,7 +54,7 @@ export function validateAndExtract(
 			localName = qualifiedName;
 			if (!NCNameRE.test(qualifiedName)) {
 				throw DOMException.new(
-					"InvalidCharacterErr",
+					"InvalidCharacterError",
 					`qualifiedName '${qualifiedName}'`
 				);
 			}
@@ -71,7 +77,7 @@ export function validateAndExtract(
 		if (qualifiedName.indexOf(":") < 0) {
 			if (!NameRE.test(qualifiedName)) {
 				throw DOMException.new(
-					"InvalidCharacterErr",
+					"InvalidCharacterError",
 					`name '${qualifiedName}'`
 				);
 			}

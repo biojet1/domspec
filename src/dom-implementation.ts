@@ -4,19 +4,6 @@ export class DOMImplementation {
 		return true;
 	}
 	ownerDocument: Document;
-	// createDocumentType(
-	// 	qualifiedName: string,
-	// 	publicId: string,
-	// 	systemId: string
-	// ) {
-	// 	return new DocumentType(qualifiedName, publicId, systemId);
-	// }
-	// abstract createDocument(
-	// 	namespace?: string,
-	// 	qualifiedName?: string,
-	// 	doctype?: DocumentType
-	// ): Document;
-	// abstract createHTMLDocument(titleText: string): Document;	ownerDocument: Document;
 	constructor(ownerDocument: Document) {
 		// super();
 		this.ownerDocument = ownerDocument;
@@ -61,12 +48,6 @@ export class DOMImplementation {
 		systemId: string
 	) {
 		const node = new DocumentType(qualifiedName, publicId, systemId);
-
-		// const node = super.createDocumentType(
-		// 	qualifiedName,
-		// 	publicId,
-		// 	systemId
-		// );
 		node.ownerDocument = this.ownerDocument;
 		return node;
 	}

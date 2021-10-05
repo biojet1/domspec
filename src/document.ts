@@ -101,7 +101,7 @@ export abstract class Document extends NonElementParentNode {
 	}
 
 	createElement(localName: string) {
-		const node = createElement(this, localName);
+		const node = createElement(this, localName + "");
 		node.ownerDocument = this;
 		return node;
 	}
@@ -110,7 +110,7 @@ export abstract class Document extends NonElementParentNode {
 		ns: string | null | undefined,
 		qualifiedName: string
 	): Element {
-		const node = createElement(this, qualifiedName, ns || "");
+		const node = createElement(this, qualifiedName + "", ns || "");
 		node.ownerDocument = this;
 		return node;
 	}
@@ -138,8 +138,8 @@ export abstract class Document extends NonElementParentNode {
 		return node;
 	}
 	createDocumentFragment() {
-		const node = new DocumentFragment();
-		node.ownerDocument = this;
+		const node = new DocumentFragment(this);
+		// node.ownerDocument = this;
 		return node;
 	}
 	createAttribute(name: string) {
@@ -148,9 +148,15 @@ export abstract class Document extends NonElementParentNode {
 		if (!name) {
 			name += "";
 			if (!name) {
-				throw DOMException.new("InvalidCharacterErr", `name='${name}'`);
+				throw DOMException.new(
+					"InvalidCharacterError",
+					`name='${name}'`
+				);
 			}
 		}
+		// if (!/^[A-Za-z:_]+[\w:\.\xB7-]*$/.test(name)) {
+		// 	throw DOMException.new("InvalidCharacterError", `name='${name}'`);
+		// }
 		checkName(name);
 		if (this.isHTML) {
 			name = name.toLowerCase();

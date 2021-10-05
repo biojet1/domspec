@@ -4,6 +4,7 @@ export class DocumentType extends ChildNode {
 	name: string;
 	constructor(name: string, publicId: string = "", systemId: string = "") {
 		super();
+		checkQName(name);
 		this.name = name;
 		this.publicId = publicId;
 		this.systemId = systemId;
@@ -45,3 +46,4 @@ export class DocumentType extends ChildNode {
 }
 import { Node } from "./node.js";
 import { ChildNode } from "./child-node.js";
+import { checkQName } from "./namespace.js";

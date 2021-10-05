@@ -120,8 +120,14 @@ export function getNamespace(
 	return cur.lookupNamespaceURI(prefix) || "";
 }
 
+function _appendChild(parent: ParentNode, node: Node) {
+	const ref = parent.endNode;
+	node._attach(ref[PREV] || parent, ref, parent);
+}
+
 export function htmlParser2(doc: Document, top: ParentNode, options?: any) {
 	const opt = options || {};
+	const TOP = top;
 	opt.recognizeSelfClosing = true;
 	if (opt.xmlMode === undefined) {
 		opt.xmlMode = doc.contentType.indexOf("xml") >= 0;
@@ -182,12 +188,18 @@ export function htmlParser2(doc: Document, top: ParentNode, options?: any) {
 								ns = XMLNS;
 								break;
 							default:
-								ns = getNamespace(prefix, top as Element, attribs);
+								ns = getNamespace(
+									prefix,
+									top as Element,
+									attribs
+								);
 						}
 						tag.setAttributeNS(ns, key, value);
 					}
 				}
-				top.appendChild(tag);
+				// top.appendChild(tag);
+				_appendChild(top, tag);
+
 				top = tag;
 			},
 			onclosetag(name: string) {
@@ -253,30 +265,47 @@ export function htmlParser2(doc: Document, top: ParentNode, options?: any) {
 					cdata.data += text;
 				} else if (top.nodeType !== 9) {
 					// console.log(`ontext (${text})`);
-					top.appendChild(doc.createTextNode(text));
+					// top.appendChild(doc.createTextNode(text));
+					_appendChild(top, doc.createTextNode(text));
 				}
 			},
 			oncomment(data: string) {
-				top.appendChild(doc.createComment(data));
+				// top.appendChild(doc.createComment(data));
+				_appendChild(top, doc.createComment(data));
 			},
 			onprocessinginstruction(name: string, data: string) {
+				// console.log(`onprocessinginstruction (${name}) (${data})`);
 				switch (name) {
-					case "!doctype": {
+					case "!DOCTYPE":
+					case "!doctype":
 						if (top !== doc) {
 							throw new Error(
 								"Doctype can only be appended to document"
 							);
 						}
-						top.appendChild(createDocumentType(doc, data));
+						// top.appendChild(createDocumentType(doc, data));
+						_appendChild(top, createDocumentType(doc, data));
 						break;
-					}
+					case "?xml":
+						// case "?xml-stylesheet":
+						if (!top.firstChild) {
+							break;
+						}
 					default:
-						const m = data.match(/^\?\s*(\w+)\s+(.*)\s*\?$/);
-						// console.log(`onpi`, JSON.stringify(data), JSON.stringify(m));
+						const m = data.match(/^\?\s*([^\s]+)\s+(.*)\s*\?$/);
+						// console.log(
+						// 	`onpi`,
+						// 	JSON.stringify(data),
+						// 	JSON.stringify(m)
+						// );
 						m &&
-							top.appendChild(
+							_appendChild(
+								top,
 								doc.createProcessingInstruction(m[1], m[2])
 							);
+					// top.appendChild(
+					// 	doc.createProcessingInstruction(m[1], m[2])
+					// )
 				}
 			},
 			oncdatastart() {
@@ -284,14 +313,109 @@ export function htmlParser2(doc: Document, top: ParentNode, options?: any) {
 			},
 			oncdataend() {
 				if (cdata) {
-					top.appendChild(cdata);
+					// top.appendChild(cdata);
+					_appendChild(top, cdata);
 					cdata = null;
 				}
 			},
 
 			onend() {
+				if (TOP === doc && doc.isHTML) {
+					let first;
+					for (const e of doc.children) {
+						if (e.localName !== "html") {
+							const ref = e.startNode[PREV] || doc;
+							const kids = Array.from(doc.childNodes).filter(
+								(e) => {
+									switch (e.nodeType) {
+										case 8:
+										case 1:
+											return true;
+									}
+								}
+							);
+							const html = doc.createElement("html");
+							html._attach(
+								ref,
+								ref.endNode[NEXT] || doc[END],
+								doc
+							);
+							for (const c of kids) {
+								c._detach();
+								_appendChild(html, c);
+							}
+							break;
+						}
+					}
+					for (const html of doc.children) {
+						if (html.localName === "html") {
+							let head, body;
+							for (const child of Array.from(html.children)) {
+								// console.log("child", child.localName)
+								switch (child.localName) {
+									case "head":
+										if (head) {
+											for (const c of Array.from(
+												child.childNodes
+											)) {
+												c._detach();
+												_appendChild(head, c);
+											}
+										} else {
+											head = child;
+										}
+										break;
+									case "body":
+										if (body) {
+											for (const c of Array.from(
+												child.childNodes
+											)) {
+												c._detach();
+												_appendChild(body, c);
+											}
+										} else {
+											body = child;
+										}
+										break;
+									case "meta":
+									case "style":
+									case "script":
+									case "noscript":
+									case "base":
+									case "link":
+									case "title":
+										if (!body) {
+											if (!head) {
+												head =
+													doc.createElement("head");
+												head._attach(
+													child[PREV] || html,
+													child,
+													html
+												);
+											}
+											child._detach();
+											_appendChild(head, child);
+											break;
+										} // fall
+									default:
+										if (!body) {
+											body = doc.createElement("body");
+											body._attach(
+												child[PREV] || html,
+												child,
+												html
+											);
+										}
+										child._detach();
+										_appendChild(body, child);
+								}
+							}
+							break;
+						}
+					}
+				}
 				let scripts = (parser as any).scripts;
-
 				if (scripts) {
 					runScripts(scripts, opt.resourceLoader)
 						// .catch((err) => {
@@ -407,14 +531,15 @@ export class DOMParser {
 	}
 }
 
-const HTML5_DOCTYPE = /<?!doctype\s+html\s+>?/i;
+const HTML5_DOCTYPE = /^<?!doctype\s+html\s+>?$/i;
 const PUBLIC_DOCTYPE =
-	/<?!doctype\s+([^\s]+)\s+public\s+"([^"]+)"\s+"([^"]+)"/i;
-const SYSTEM_DOCTYPE = /<?!doctype\s+([^\s]+)\s+system\s+"([^"]+)"/i;
-const CUSTOM_NAME_DOCTYPE = /<?!doctype\s+([^\s>]+)/i;
+	/^<?!doctype\s+([^\s]+)\s+public\s+"([^"]+)"\s+"([^"]+)"/i;
+const SYSTEM_DOCTYPE = /^<?!doctype\s+([^\s]+)\s+system\s+"([^"]+)"/i;
+const CUSTOM_NAME_DOCTYPE = /^<?!doctype\s+([^\s>]+)/i;
 
 function createDocumentType(doc: Document, dt: string) {
 	let [name, pub, sys] = ["html", "", ""];
+	// console.info(`createDocumentType`, dt);
 	if (!HTML5_DOCTYPE.test(dt)) {
 		let m;
 		if ((m = PUBLIC_DOCTYPE.exec(dt))) {
@@ -424,7 +549,9 @@ function createDocumentType(doc: Document, dt: string) {
 		} else if ((m = CUSTOM_NAME_DOCTYPE.exec(dt))) {
 			name = m[1];
 		}
+		// console.info(`createDocumentType !HTML5_DOCTYPE`, [name, pub, sys], m);
 	}
+
 	return doc.implementation.createDocumentType(name, pub, sys);
 }
 
@@ -442,3 +569,4 @@ import { DocumentType } from "./document-type.js";
 import { Event } from "./event-target.js";
 import { CDATASection } from "./character-data.js";
 import { XMLNS } from "./namespace.js";
+import { PREV, NEXT, END, Node } from "./node.js";

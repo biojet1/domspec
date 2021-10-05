@@ -252,21 +252,26 @@ export class ProcessingInstruction extends CharacterData {
 	readonly target: string;
 	constructor(target: string, data: string) {
 		super(data);
-		if (
-			this._data.indexOf("?>") >= 0 ||
-			!(
-				/^[A-Za-z:_]+[\w:\.-\xB7]*$/.test(target) || 0
-				// /^[A-Za-z:_\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD][-\w:\.\u00B7\u0300-\u036F\u203F-\u2040\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD]+[\.0-9\u00B7\u0300-\u036F\u203F-\u2040-][A-Za-z:_\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD]*$/.test(
-				// 	target
-				// )
-			)
-		) {
-			throw DOMException.new(
-				"InvalidCharacterError",
-				`${target} ${data}`
-			);
-		}
 
+		if (this._data.indexOf("?>") >= 0) {
+			throw DOMException.new("InvalidCharacterError", `data: ${data}`);
+		} else {
+			checkName(target);
+		}
+		// if (
+		// 	this._data.indexOf("?>") >= 0 ||
+		// 	!(
+		// 		/^[A-Za-z:_]+[\w:\.-\xB7]*$/.test(target) || 0
+		// 		// /^[A-Za-z:_\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD][-\w:\.\u00B7\u0300-\u036F\u203F-\u2040\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD]+[\.0-9\u00B7\u0300-\u036F\u203F-\u2040-][A-Za-z:_\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD]*$/.test(
+		// 		// 	target
+		// 		// )
+		// 	)
+		// ) {
+		// 	throw DOMException.new(
+		// 		"InvalidCharacterError",
+		// 		`${target} ${data}`
+		// 	);
+		// }
 		this.target = target;
 	}
 	//// Dom
@@ -304,6 +309,7 @@ import { NEXT, PREV, Node } from "./node.js";
 import { ChildNode } from "./child-node.js";
 import { Document } from "./document.js";
 import { DOMException } from "./event-target.js";
+import { checkName } from "./namespace.js";
 
 // escape
 

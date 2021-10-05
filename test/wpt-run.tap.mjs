@@ -95,19 +95,21 @@ if (_FILE) {
     Object.defineProperty(Window.prototype, "self", {
         value: self,
     });
+    globalThis.window = window;
     window.tap = tap;
+    window.TypeError = TypeError;
     window
         .loadURL(_FILE, { resourceLoader: new TestResourceLoader() })
         .then(function (document) {
             // console.log("path", document.innerHTML);
-            console.log("baseURI", document.baseURI);
+            console.log("baseURI", document.isHTML, document.baseURI);
             // console.log("win", document.location);
         })
         .catch(function (err) {
             tap.fail(`Load failed ${test_name}`, err);
             tap.threw(err);
             // console.log("err", err);
-            // throw err;
+            throw err;
         });
 } else {
     // const test_file = "svg/types/scripted/SVGGeometryElement.getTotalLength-01.svg";
@@ -124,8 +126,7 @@ svg/types/scripted/SVGGeometryElement.getPointAtLength-02.svg
 
 dom/nodes/Document-createCDATASection-xhtml.xhtml
 dom/nodes/Document-createProcessingInstruction-xhtml.xhtml
-// dom/nodes/Document-getElementsByTagName-xhtml.xhtml
-// dom/nodes/DocumentType-literal-xhtml.xhtml
+dom/nodes/DocumentType-literal-xhtml.xhtml
 dom/nodes/Element-childElementCount-dynamic-add-xhtml.xhtml
 dom/nodes/Element-childElementCount-dynamic-remove-xhtml.xhtml
 dom/nodes/Element-childElementCount-nochild-xhtml.xhtml
@@ -140,12 +141,16 @@ dom/nodes/Element-previousElementSibling-xhtml.xhtml
 dom/nodes/Element-siblingElement-null-xhtml.xhtml
 dom/nodes/Node-isEqualNode-xhtml.xhtml
 dom/nodes/Node-lookupPrefix.xhtml
-// dom/nodes/Node-nodeName-xhtml.xhtml
-// dom/nodes/ProcessingInstruction-escapes-1.xhtml
-// dom/nodes/ProcessingInstruction-literal-1.xhtml
-// dom/nodes/ProcessingInstruction-literal-2.xhtml
+dom/nodes/ProcessingInstruction-literal-1.xhtml
+dom/nodes/ProcessingInstruction-literal-2.xhtml
 
+dom/nodes/ProcessingInstruction-escapes-1.xhtml
+dom/nodes/ProcessingInstruction-literal-1.xhtml
+dom/nodes/ProcessingInstruction-literal-2.xhtml
+dom/nodes/DocumentType-literal-xhtml.xhtml
 
+dom/nodes/Document-getElementsByTagName-xhtml.xhtml
+dom/nodes/Node-nodeName-xhtml.xhtml
 
 dom/nodes/Document-constructor-svg.svg
 dom/nodes/Element-childElementCount-dynamic-add-svg.svg
@@ -160,22 +165,198 @@ dom/nodes/Element-lastElementChild-svg.svg
 dom/nodes/Element-nextElementSibling-svg.svg
 dom/nodes/Element-previousElementSibling-svg.svg
 dom/nodes/Element-siblingElement-null-svg.svg
-    `;
-    // tests = `
-    // dom/nodes/Document-getElementsByTagName-xhtml.xhtml
-    // `;
 
+dom/nodes/CharacterData-appendChild.html
+dom/nodes/CharacterData-appendData.html
+dom/nodes/CharacterData-data.html
+dom/nodes/CharacterData-deleteData.html
+dom/nodes/CharacterData-insertData.html
+dom/nodes/CharacterData-remove.html
+dom/nodes/CharacterData-replaceData.html
+dom/nodes/CharacterData-substringData.html
+dom/nodes/CharacterData-surrogates.html
+
+dom/nodes/Document-characterSet-normalization-1.html
+dom/nodes/Document-characterSet-normalization-2.html
+dom/nodes/Document-constructor.html
+dom/nodes/Document-createAttribute.html
+dom/nodes/Document-createCDATASection.html
+dom/nodes/Document-createComment.html
+dom/nodes/Document-createProcessingInstruction.html
+dom/nodes/Document-createTextNode.html
+dom/nodes/Document-doctype.html
+dom/nodes/DocumentFragment-getElementById.html
+dom/nodes/DocumentFragment-querySelectorAll-after-modification.html
+dom/nodes/Document-getElementById.html
+
+dom/nodes/DocumentFragment-constructor.html
+dom/nodes/Document-implementation.html
+dom/nodes/Document-importNode.html
+dom/nodes/DocumentType-literal.html
+dom/nodes/DocumentType-remove.html
+
+dom/nodes/append-on-Document.html
+dom/nodes/Element-childElementCount.html
+dom/nodes/Element-childElementCount-dynamic-add.html
+dom/nodes/Element-childElementCount-dynamic-remove.html
+dom/nodes/Element-childElementCount-nochild.html
+dom/nodes/Element-childElement-null.html
+
+dom/nodes/Element-firstElementChild.html
+dom/nodes/Element-firstElementChild-namespace.html
+dom/nodes/Element-getElementsByClassName.html
+
+dom/nodes/Element-hasAttribute.html
+dom/nodes/Element-hasAttributes.html
+dom/nodes/Element-insertAdjacentElement.html
+dom/nodes/Element-lastElementChild.html
+dom/nodes/Element-nextElementSibling.html
+dom/nodes/Element-previousElementSibling.html
+dom/nodes/Element-remove.html
+dom/nodes/Element-removeAttribute.html
+dom/nodes/Element-removeAttributeNS.html
+dom/nodes/Element-setAttribute.html
+dom/nodes/Element-setAttribute-crbug-1138487.html
+dom/nodes/Element-siblingElement-null.html
+dom/nodes/Element-tagName.html
+dom/nodes/Element-webkitMatchesSelector.html
+
+dom/nodes/Node-appendChild.html
+dom/nodes/node-appendchild-crash.html
+dom/nodes/Node-baseURI.html
+dom/nodes/Node-cloneNode.html
+dom/nodes/Node-cloneNode-document-with-doctype.html
+dom/nodes/Node-cloneNode-external-stylesheet-no-bc.sub.html
+dom/nodes/Node-cloneNode-on-inactive-document-crash.html
+
+dom/nodes/Node-nodeName.html
+dom/nodes/Node-nodeValue.html
+dom/nodes/Node-normalize.html
+dom/nodes/Node-parentElement.html
+dom/nodes/Node-parentNode.html
+dom/nodes/Node-parentNode-iframe.html
+dom/nodes/Node-properties.html
+dom/nodes/Node-removeChild.html
+dom/nodes/Node-replaceChild.html
+dom/nodes/Node-textContent.html
+dom/nodes/Node-constants.html
+dom/nodes/Node-contains.html
+dom/nodes/Node-insertBefore.html
+dom/nodes/Node-isEqualNode.html
+dom/nodes/Node-isSameNode.html
+dom/nodes/Text-splitText.html
+dom/nodes/Text-wholeText.html
+
+dom/nodes/ParentNode-append.html
+dom/nodes/ParentNode-children.html
+dom/nodes/ParentNode-prepend.html
+dom/nodes/ParentNode-querySelector-case-insensitive.html
+dom/nodes/ParentNode-querySelectors-exclusive.html
+dom/nodes/ParentNode-querySelectors-space-and-dash-attribute-value.html
+dom/nodes/prepend-on-Document.html
+dom/nodes/ChildNode-after.html
+dom/nodes/ChildNode-before.html
+dom/nodes/ChildNode-replaceWith.html
+dom/nodes/getElementsByClassName-32.html
+dom/nodes/getElementsByClassName-empty-set.html
+
+//     `;
+//     tests = `
+
+// // dom/nodes/aria-attribute-reflection.tentative.html
+// // dom/nodes/aria-element-reflection.tentative.html
+// // dom/nodes/attributes.html
+// // dom/nodes/attributes-namednodemap.html
+// // dom/nodes/case.html
+// // dom/nodes/Comment-constructor.html
+
+
+// // dom/nodes/Document-createElementNS.html
+// // dom/nodes/Document-createEvent.https.html
+// // dom/nodes/Document-createTreeWalker.html
+// // dom/nodes/Document-getElementsByClassName.html
+// // dom/nodes/Document-getElementsByTagName.html
+// // dom/nodes/Document-getElementsByTagNameNS.html
+// // dom/nodes/Document-URL.html
+
+
+// // dom/nodes/MutationObserver-attributes.html
+// // dom/nodes/MutationObserver-callback-arguments.html
+// // dom/nodes/MutationObserver-characterData.html
+// // dom/nodes/MutationObserver-childList.html
+// // dom/nodes/MutationObserver-disconnect.html
+// // dom/nodes/MutationObserver-document.html
+// // dom/nodes/MutationObserver-inner-outer.html
+// // dom/nodes/MutationObserver-sanity.html
+// // dom/nodes/MutationObserver-takeRecords.html
+// // dom/nodes/ParentNode-querySelector-All.html
+// // dom/nodes/ParentNode-querySelector-All-content.html
+// // dom/nodes/ParentNode-querySelectorAll-removed-elements.html
+// // dom/nodes/ParentNode-querySelector-escapes.html
+// // dom/nodes/ParentNode-querySelector-scope.html
+// // dom/nodes/ParentNode-querySelectors-namespaces.html
+// dom/nodes/query-target-in-load-event.html
+// dom/nodes/query-target-in-load-event.part.html
+// dom/nodes/remove-and-adopt-thcrash.html
+// dom/nodes/remove-from-shadow-host-and-adopt-into-iframe.html
+// dom/nodes/remove-from-shadow-host-and-adopt-into-iframe-ref.html
+// dom/nodes/remove-unscopable.html
+// dom/nodes/rootNode.html
+// dom/nodes/svg-template-querySelector.html
+// dom/nodes/Text-constructor.html
+
+//      `;
+
+// //     tests = `// Iframed
+// // dom/nodes/Document-createElement.html
+// // dom/nodes/Document-createElement-namespace.html
+// // `;
+
+//     tests = `
+// dom/nodes/DOMImplementation-hasFeature.html
+// dom/nodes/DOMImplementation-createDocumentType.html
+// // dom/nodes/DOMImplementation-createDocument.html
+// dom/nodes/DOMImplementation-createDocument-with-null-browsing-context-crash.html
+
+// `;
+//     tests = `// Iframed
+// // dom/nodes/DOMImplementation-createHTMLDocument.html
+// // dom/nodes/DOMImplementation-createHTMLDocument-with-null-browsing-context-crash.html
+// // dom/nodes/DOMImplementation-createHTMLDocument-with-saved-implementation.html
+
+// // dom/nodes/Element-children.html
+// // dom/nodes/Element-classlist.html
+// // dom/nodes/Element-closest.html
+
+// // dom/nodes/Element-getElementsByTagName.html
+// // dom/nodes/Element-getElementsByTagName-change-document-HTMLNess.html
+// // dom/nodes/Element-getElementsByTagNameNS.html
+// // dom/nodes/Element-insertAdjacentText.html
+// // dom/nodes/Element-matches.html
+// // dom/nodes/Element-matches-namespaced-elements.html
+
+// // dom/nodes/Node-childNodes.html
+// // dom/nodes/Node-cloneNode-svg.html
+// // dom/nodes/Node-cloneNode-XMLDocument.html
+// // dom/nodes/Node-compareDocumentPosition.html
+// // dom/nodes/Node-isConnected.html
+// // dom/nodes/Node-isConnected-shadow-dom.html
+// // dom/nodes/NodeList-Iterable.html
+// // dom/nodes/Node-lookupNamespaceURI.html
+// // dom/nodes/Node-mutation-adoptNode.html
+// // dom/nodes/ParentNode-replaceChildren.html
+// // dom/nodes/insert-adjacent.html
+// // dom/nodes/getElementsByClassName-whitespace-class-names.html
+// `;
     tests = tests
         .split(/[\r\n]+/)
         .map((v) => v.trim())
         .filter((v) => v && !v.startsWith("#") && !v.startsWith("//"));
-    // tests=['dom/nodes/Document-createCDATASection-xhtml.xhtml']
-
-    //
 
     console.info(tests);
     tap.jobs = 5;
     console.info(`test: ${tests.length}`);
+    let i = 0;
     for (const sub of tests) {
         // const href = new URL(sub, WPT_ROOT_URL).href;
         process.env._FILE = sub;
@@ -184,7 +365,7 @@ dom/nodes/Element-siblingElement-null-svg.svg
             "node",
             ["test/wpt-run.tap.mjs"],
             // {buffered:true},
-            sub
+            `[${++i} ${sub}]`
         );
     }
 }

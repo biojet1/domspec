@@ -570,15 +570,20 @@ export abstract class ParentNode extends ChildNode {
 				}
 			})();
 		}
+		const q = name;
 		const pos = name.indexOf(":");
-		if (this.ownerDocument?.isHTML) {
+		let { ownerDocument, nodeType } = this;
+		const isHTML = ownerDocument
+			? ownerDocument.isHTML
+			: nodeType === 9 && (this as any as Document).isHTML;
+		if (isHTML) {
 			let p: string;
-			let n: string = name;
+			let n: string;
 			let l: string;
 			if (pos < 0) {
-				// n = name;
+				n = name;
 			} else {
-				name = name.replace(/([A-Z]+)/g, (m, a) => a.toLowerCase());
+				// name = name.replace(/([A-Z]+)/g, (m, a) => a.toLowerCase());
 				p = name.substring(0, pos);
 				n = name.substring(pos + 1);
 				// l = n.replace(/([A-Z]+)/, (m, a) => a.toLowerCase());
@@ -591,27 +596,31 @@ export abstract class ParentNode extends ChildNode {
 							const el = next as any as Element;
 							let { localName, namespaceURI, prefix } = el;
 							if (namespaceURI === HTML_NS) {
-								localName = localName.replace(
-									/([A-Z]+)/g,
-									(m, a) => a.toLowerCase()
-								);
-								if (prefix) {
-									prefix = prefix.replace(
-										/([A-Z]+)/g,
-										(m, a) => a.toLowerCase()
-									);
-								}
-								if (p === undefined) {
-									if (localName === n) {
-										yield el;
-									}
-								} else {
-									if (localName === n && prefix === p) {
-										yield el;
-									}
+								// localName = localName.replace(
+								// 	/([A-Z]+)/g,
+								// 	(m, a) => a.toLowerCase()
+								// );
+								// if (prefix) {
+								// 	prefix = prefix.replace(
+								// 		/([A-Z]+)/g,
+								// 		(m, a) => a.toLowerCase()
+								// 	);
+								// }
+								// if (p === undefined) {
+								// 	if (localName === n) {
+								// 		yield el;
+								// 	}
+								// } else {
+								// 	if (localName === n && prefix === p) {
+								// 		yield el;
+								// 	}
+								// }
+								// el.qualifiedName
+								if (el.qualifiedName === q) {
+									yield el;
 								}
 							} else {
-								if (el.tagName === n) {
+								if (el.qualifiedName === q) {
 									yield el;
 								}
 							}
@@ -636,10 +645,13 @@ export abstract class ParentNode extends ChildNode {
 					if (next.nodeType === 1) {
 						const el = next as any as Element;
 						const { localName, prefix } = el;
-						if (
-							localName === n &&
-							(p === undefined || (p ? prefix === p : !prefix))
-						) {
+						// if (
+						// 	localName === n &&
+						// 	(p === undefined || (p ? prefix === p : !prefix))
+						// ) {
+						// 	yield el;
+						// }
+						if (el.qualifiedName === q) {
 							yield el;
 						}
 					}

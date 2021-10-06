@@ -208,7 +208,7 @@ export abstract class Node extends EventTarget {
 		let bN = those.length;
 		if (these[--aN] !== those[--bN]) {
 			// No common ancestor
-			return 1 + 32; // DISCONNECTED + IMPLEMENTATION_SPECIFIC
+			return 1 + 32 + (2); // DISCONNECTED + IMPLEMENTATION_SPECIFIC
 		}
 		for (;;) {
 			let a: Node | null = these[--aN];

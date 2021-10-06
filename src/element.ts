@@ -257,14 +257,29 @@ export class Element extends ParentNode {
 		return test(this);
 	}
 	closest(selectors: string) {
-		let parentElement: Element | null = this;
-		const test = prepareMatch(parentElement, selectors + "");
-		do {
-			if (test(parentElement)) {
-				return parentElement;
+		let cur: Element | null = this;
+
+		if (0) {
+			while (cur && !cur.matches(selectors)) {
+				cur = cur.parentElement;
 			}
-		} while ((parentElement = parentElement.parentElement));
-		return null;
+			return cur;
+		} else {
+			let test;
+
+			try {
+				test = prepareMatch(cur, selectors + "");
+			} catch {
+				return null;
+			}
+			do {
+				if (test(cur)) {
+					return cur;
+				}
+				cur = cur.parentElement;
+			} while (cur);
+			return null;
+		}
 	}
 	// </selectors>
 
@@ -572,7 +587,6 @@ export class Element extends ParentNode {
 		}
 		return id;
 	}
-	_do(...args: any[]) {}
 }
 
 // function checkQName(name: string) {

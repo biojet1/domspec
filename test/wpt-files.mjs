@@ -12,12 +12,16 @@ tests = tests
     .map((v) => v.trim())
     .filter((v) => v && !v.startsWith("#") && !v.startsWith("//"));
 
-
 glob("test/wpt-o?/*.tap.?js", {}, function (er, files) {
     const names = files.map((v) => {
         v = path.basename(v);
+
         v = v.replace(/\-/, "/");
         v = v.replace(/\-/, "/");
+        if (v.startsWith("svg/types/scripted-")) {
+            v = v.replace(/\-/, "/");
+        }
+
         v = v.replace(".tap.mjs", "");
         return v;
     });

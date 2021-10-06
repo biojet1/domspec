@@ -64,7 +64,6 @@ function domParse(doc: Document, top: ParentNode, options?: any) {
 		}
 		if (scripts && (top as Element).localName == "script") {
 			scripts.push(top as Element);
-			// top._do("eval");
 		}
 		if (parentNode) {
 			top = parentNode;
@@ -117,6 +116,9 @@ export function getNamespace(
 			}
 		}
 	}
+	if (!prefix) {
+		return cur.namespaceURI;
+	}
 	return cur.lookupNamespaceURI(prefix) || "";
 }
 
@@ -163,8 +165,19 @@ export function htmlParser2(doc: Document, top: ParentNode, options?: any) {
 				if (i < 0) {
 					const ns = getNamespace("", top as Element, attribs);
 					// tag = doc.createElement(name);
-					if (ns) tag = doc.createElementNS(ns, name);
-					else tag = doc.createElement(name);
+					L1: {
+						if (name === "svg") {
+							if (HTML_NS == ns) {
+								tag = doc.createElementNS(SVG_NS, name);
+								break L1;
+							}
+						}
+						if (ns) {
+							tag = doc.createElementNS(ns, name);
+						} else {
+							tag = doc.createElement(name);
+						}
+					}
 				} else {
 					const prefix = name.substring(0, i);
 					const local = name.substring(i + 1);
@@ -570,3 +583,4 @@ import { Event } from "./event-target.js";
 import { CDATASection } from "./character-data.js";
 import { XMLNS } from "./namespace.js";
 import { PREV, NEXT, END, Node } from "./node.js";
+import { HTML_NS, SVG_NS } from "./namespace.js";

@@ -11,8 +11,9 @@ add_completion_callback(function (tests, status) {
     tap.test(test_name, function (t) {
         let i = 0;
         for (const test of tests) {
+            test._structured_clone = null;
             t.equal(test.status, 0, `${test.name} #${++i} @${test_name}`, {
-                message: test.message,
+                message: test,
             });
         }
 

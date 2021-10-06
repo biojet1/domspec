@@ -117,7 +117,6 @@ if (_FILE) {
     const PKG_DIR_URL = pathToFileURL(".");
     let tests = `
 svg/types/scripted/SVGGeometryElement.getTotalLength-01.svg
-// svg/types/scripted/SVGGraphicsElement.getBBox-01.html
 svg/types/scripted/SVGGeometryElement.getPointAtLength-01.svg
 svg/types/scripted/SVGGeometryElement.getPointAtLength-02.svg
 // svg/types/scripted/SVGGeometryElement.getPointAtLength-03.svg
@@ -295,6 +294,11 @@ dom/nodes/getElementsByClassName-30.htm
 dom/nodes/ProcessingInstruction-escapes-1.xhtml
 dom/nodes/getElementsByClassName-10.xml
 dom/nodes/getElementsByClassName-11.xml
+dom/nodes/Element-insertAdjacentText.html
+dom/nodes/Node-compareDocumentPosition.html
+ svg/types/scripted/SVGGraphicsElement.getBBox-01.html
+dom/nodes/Element-closest.html
+ dom/nodes/Document-getElementsByClassName.html
 
 //     `;
 //     tests = `
@@ -311,7 +315,6 @@ dom/nodes/getElementsByClassName-11.xml
 
 // // dom/nodes/Document-createEvent.https.html
 // // dom/nodes/Document-createTreeWalker.html
-// // dom/nodes/Document-getElementsByClassName.html
 // // dom/nodes/Document-getElementsByTagName.html
 // // dom/nodes/Document-getElementsByTagNameNS.html
 // // dom/nodes/Document-URL.html
@@ -355,20 +358,27 @@ dom/nodes/getElementsByClassName-11.xml
 // // dom/nodes/DOMImplementation-createDocument.html
 // dom/nodes/DOMImplementation-createDocument-with-null-browsing-context-crash.html
 
+
 // `;
-    let tests_try = `// Iframed
+    let tests_try = `
+// # MutationObserver
+// dom/nodes/ParentNode-replaceChildren.html
+
+
+    // Iframed
+// dom/nodes/Document-createElementNS.html
 // dom/nodes/DOMImplementation-createHTMLDocument.html
 // dom/nodes/DOMImplementation-createHTMLDocument-with-null-browsing-context-crash.html
 // dom/nodes/DOMImplementation-createHTMLDocument-with-saved-implementation.html
 
+/////////
+
 // dom/nodes/Element-children.html
 // dom/nodes/Element-classlist.html
-// dom/nodes/Element-closest.html
 
 // dom/nodes/Element-getElementsByTagName.html
 // dom/nodes/Element-getElementsByTagName-change-document-HTMLNess.html
 // dom/nodes/Element-getElementsByTagNameNS.html
-// dom/nodes/Element-insertAdjacentText.html
 // dom/nodes/Element-matches.html
 // dom/nodes/Element-matches-namespaced-elements.html
 
@@ -377,11 +387,8 @@ dom/nodes/getElementsByClassName-11.xml
 // dom/nodes/Node-isConnected.html
 // dom/nodes/Node-isConnected-shadow-dom.html
 
-// dom/nodes/Node-compareDocumentPosition.html
-// dom/nodes/ParentNode-replaceChildren.html
-// dom/nodes/Document-createElementNS.html
 // dom/nodes/getElementsByClassName-whitespace-class-names.html
-// dom/nodes/attributes.html
+dom/nodes/attributes.html
 
 // dom/events/Event-initEvent.html
 // dom/events/EventTarget-dispatchEvent-returnvalue.html

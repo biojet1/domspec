@@ -12,7 +12,7 @@ jobs:
     env:
       WPT_ROOT: .wpt
       WPT_URL: https://github.com/web-platform-tests/wpt/archive/refs/tags/merge_pr_30022.tar.gz
-      WPT_HASH: 1
+      # WPT_HASH: 1
 
     steps:
       - uses: actions/checkout@v2
@@ -48,8 +48,7 @@ jobs:
           cache-name: wpt
         with:
           path: ${{ env.WPT_ROOT }}
-          key: ${{ runner.os }}-${{ env.cache-name }}-${{ env.WPT_URL }}-${{ env.WPT_HASH }}
-
+          key: ${{ runner.os }}-${{ env.cache-name }}-${{ env.WPT_URL }}-${{ hashFiles('test/wpt-patch.sh') }}
       - run: |
           echo [$HOME]
           ls

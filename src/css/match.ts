@@ -121,11 +121,16 @@ export function prepareMatch(
 	elem: ParentNode,
 	selectors: string
 ): (node: ParentNode) => boolean {
-	return compile(selectors, {
+	const opt = {
 		// xmlMode: !ignoreCase(elem),
 		xmlMode: true,
+		// context: elem,
 		adapter,
-	});
+	};
+	if(selectors.indexOf(':scope') >= 0){
+		(opt as any).context = elem;
+	}
+	return compile(selectors, opt);
 }
 
 // export const matches = (elem: ParentNode, selectors: string) => {

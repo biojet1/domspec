@@ -22,7 +22,7 @@ if (_FILE) {
 
     _FILE = new URL(_FILE, WPT_ROOT_URL).href;
 
-    console.info("_FILE", _FILE);
+    // console.info("_FILE", _FILE);
 
     const REPORT_URL = pathToFileURL("./test/testharnessreport.js").href;
 
@@ -102,7 +102,7 @@ if (_FILE) {
         .loadURL(_FILE, { resourceLoader: new TestResourceLoader() })
         .then(function (document) {
             // console.log("path", document.innerHTML);
-            console.log("baseURI", document.isHTML, document.baseURI);
+            // console.log("baseURI", document.isHTML, document.baseURI);
             // console.log("win", document.location);
         })
         .catch(function (err) {
@@ -141,10 +141,7 @@ dom/nodes/Element-previousElementSibling-xhtml.xhtml
 dom/nodes/Element-siblingElement-null-xhtml.xhtml
 dom/nodes/Node-isEqualNode-xhtml.xhtml
 dom/nodes/Node-lookupPrefix.xhtml
-dom/nodes/ProcessingInstruction-literal-1.xhtml
-dom/nodes/ProcessingInstruction-literal-2.xhtml
 
-dom/nodes/ProcessingInstruction-escapes-1.xhtml
 dom/nodes/ProcessingInstruction-literal-1.xhtml
 dom/nodes/ProcessingInstruction-literal-2.xhtml
 dom/nodes/DocumentType-literal-xhtml.xhtml
@@ -222,12 +219,9 @@ dom/nodes/Element-tagName.html
 dom/nodes/Element-webkitMatchesSelector.html
 
 dom/nodes/Node-appendChild.html
-dom/nodes/node-appendchild-crash.html
 dom/nodes/Node-baseURI.html
 dom/nodes/Node-cloneNode.html
 dom/nodes/Node-cloneNode-document-with-doctype.html
-dom/nodes/Node-cloneNode-external-stylesheet-no-bc.sub.html
-dom/nodes/Node-cloneNode-on-inactive-document-crash.html
 
 dom/nodes/Node-nodeName.html
 dom/nodes/Node-nodeValue.html
@@ -259,19 +253,62 @@ dom/nodes/ChildNode-before.html
 dom/nodes/ChildNode-replaceWith.html
 dom/nodes/getElementsByClassName-32.html
 dom/nodes/getElementsByClassName-empty-set.html
+dom/nodes/Node-cloneNode-XMLDocument.html
+dom/nodes/NodeList-Iterable.html
+dom/nodes/Node-lookupNamespaceURI.html
+dom/nodes/Node-mutation-adoptNode.html
+dom/nodes/insert-adjacent.html
+dom/events/Event-constants.html
+dom/events/Event-defaultPrevented.html
+dom/events/Event-dispatch-bubble-canceled.html
+dom/events/Event-propagation.html
+dom/events/Event-returnValue.html
+dom/events/Event-type.html
+
+css/cssom/cssom-cssText-serialize.html
+css/cssom/cssom-cssstyledeclaration-set.html
+css/cssom/cssom-setProperty-shorthand.html
+css/cssom/cssstyledeclaration-setter-declarations.html
+css/cssom/setproperty-null-undefined.html
+
+dom/nodes/getElementsByClassName-01.htm
+dom/nodes/getElementsByClassName-02.htm
+dom/nodes/getElementsByClassName-03.htm
+dom/nodes/getElementsByClassName-04.htm
+dom/nodes/getElementsByClassName-05.htm
+dom/nodes/getElementsByClassName-06.htm
+dom/nodes/getElementsByClassName-07.htm
+dom/nodes/getElementsByClassName-08.htm
+dom/nodes/getElementsByClassName-12.htm
+dom/nodes/getElementsByClassName-13.htm
+dom/nodes/getElementsByClassName-14.htm
+dom/nodes/getElementsByClassName-15.htm
+dom/nodes/getElementsByClassName-16.htm
+dom/nodes/getElementsByClassName-17.htm
+dom/nodes/getElementsByClassName-18.htm
+dom/nodes/getElementsByClassName-19.htm
+dom/nodes/getElementsByClassName-23.htm
+dom/nodes/getElementsByClassName-24.htm
+dom/nodes/getElementsByClassName-29.htm
+dom/nodes/getElementsByClassName-30.htm
+
+dom/nodes/ProcessingInstruction-escapes-1.xhtml
+dom/nodes/getElementsByClassName-10.xml
+dom/nodes/getElementsByClassName-11.xml
 
 //     `;
 //     tests = `
+// dom/nodes/node-appendchild-crash.html
+// dom/nodes/Node-cloneNode-on-inactive-document-crash.html
+// dom/nodes/Node-cloneNode-external-stylesheet-no-bc.sub.html
 
 // // dom/nodes/aria-attribute-reflection.tentative.html
 // // dom/nodes/aria-element-reflection.tentative.html
-// // dom/nodes/attributes.html
 // // dom/nodes/attributes-namednodemap.html
 // // dom/nodes/case.html
 // // dom/nodes/Comment-constructor.html
 
 
-// // dom/nodes/Document-createElementNS.html
 // // dom/nodes/Document-createEvent.https.html
 // // dom/nodes/Document-createTreeWalker.html
 // // dom/nodes/Document-getElementsByClassName.html
@@ -319,36 +356,47 @@ dom/nodes/getElementsByClassName-empty-set.html
 // dom/nodes/DOMImplementation-createDocument-with-null-browsing-context-crash.html
 
 // `;
-//     tests = `// Iframed
-// // dom/nodes/DOMImplementation-createHTMLDocument.html
-// // dom/nodes/DOMImplementation-createHTMLDocument-with-null-browsing-context-crash.html
-// // dom/nodes/DOMImplementation-createHTMLDocument-with-saved-implementation.html
+    let tests_try = `// Iframed
+// dom/nodes/DOMImplementation-createHTMLDocument.html
+// dom/nodes/DOMImplementation-createHTMLDocument-with-null-browsing-context-crash.html
+// dom/nodes/DOMImplementation-createHTMLDocument-with-saved-implementation.html
 
-// // dom/nodes/Element-children.html
-// // dom/nodes/Element-classlist.html
-// // dom/nodes/Element-closest.html
+// dom/nodes/Element-children.html
+// dom/nodes/Element-classlist.html
+// dom/nodes/Element-closest.html
 
-// // dom/nodes/Element-getElementsByTagName.html
-// // dom/nodes/Element-getElementsByTagName-change-document-HTMLNess.html
-// // dom/nodes/Element-getElementsByTagNameNS.html
-// // dom/nodes/Element-insertAdjacentText.html
-// // dom/nodes/Element-matches.html
-// // dom/nodes/Element-matches-namespaced-elements.html
+// dom/nodes/Element-getElementsByTagName.html
+// dom/nodes/Element-getElementsByTagName-change-document-HTMLNess.html
+// dom/nodes/Element-getElementsByTagNameNS.html
+// dom/nodes/Element-insertAdjacentText.html
+// dom/nodes/Element-matches.html
+// dom/nodes/Element-matches-namespaced-elements.html
 
-// // dom/nodes/Node-childNodes.html
-// // dom/nodes/Node-cloneNode-svg.html
-// // dom/nodes/Node-cloneNode-XMLDocument.html
-// // dom/nodes/Node-compareDocumentPosition.html
-// // dom/nodes/Node-isConnected.html
-// // dom/nodes/Node-isConnected-shadow-dom.html
-// // dom/nodes/NodeList-Iterable.html
-// // dom/nodes/Node-lookupNamespaceURI.html
-// // dom/nodes/Node-mutation-adoptNode.html
-// // dom/nodes/ParentNode-replaceChildren.html
-// // dom/nodes/insert-adjacent.html
-// // dom/nodes/getElementsByClassName-whitespace-class-names.html
-// `;
-    tests = tests
+// dom/nodes/Node-childNodes.html
+// dom/nodes/Node-cloneNode-svg.html
+// dom/nodes/Node-isConnected.html
+// dom/nodes/Node-isConnected-shadow-dom.html
+
+// dom/nodes/Node-compareDocumentPosition.html
+// dom/nodes/ParentNode-replaceChildren.html
+// dom/nodes/Document-createElementNS.html
+// dom/nodes/getElementsByClassName-whitespace-class-names.html
+// dom/nodes/attributes.html
+
+// dom/events/Event-initEvent.html
+// dom/events/EventTarget-dispatchEvent-returnvalue.html
+
+// dom/nodes/getElementsByClassName-20.htm
+// dom/nodes/getElementsByClassName-21.htm
+// dom/nodes/getElementsByClassName-22.htm
+// dom/nodes/getElementsByClassName-25.htm
+// dom/nodes/getElementsByClassName-26.htm
+// dom/nodes/getElementsByClassName-27.htm
+// dom/nodes/getElementsByClassName-28.htm
+// dom/nodes/getElementsByClassName-31.htm
+
+`;
+    tests = (process.env.TRY ? tests_try : tests)
         .split(/[\r\n]+/)
         .map((v) => v.trim())
         .filter((v) => v && !v.startsWith("#") && !v.startsWith("//"));

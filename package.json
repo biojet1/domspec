@@ -10,6 +10,7 @@
     "rm-map": "find dist -name '*.js.map' -type f -delete",
     "c8test": "c8 npx tap --no-coverage --reporter=terse 'test/*.tap.?js' 'test/wpt-o?/*.tap.?js'",
     "wpt": "c8 npx tap --no-coverage --reporter=terse 'test/wpt-o?/*.tap.?js'",
+    "wpt-run-try": "env TRY=1 tap --node-arg=--trace-warnings --node-arg=--unhandled-rejections=strict --bail test/wpt-run.tap.mjs",
     "c8report": "c8 report -r text-lcov > coverage/lcov.info",
     "c8rephtml": "c8 report -r html",
     "html:switch": "env SWITCH=html node test/elements.js",

@@ -386,7 +386,7 @@ export class Element extends ParentNode {
 
 				default:
 					throw DOMException.new(
-						"SyntaxError;",
+						"SyntaxError",
 						`Invalid position ${position}`
 					);
 			}

@@ -153,7 +153,9 @@ export class EventTarget {
 				const { [type]: stack } = _listeners;
 				if (stack) {
 					for (const { listener, capture } of stack) {
-						if (event._immediatePropagationStopped) return;
+						if (event._immediatePropagationStopped) {
+							return !event.defaultPrevented;
+						}
 						switch (phase) {
 							case Event.CAPTURING_PHASE:
 								if (!capture) continue;
@@ -405,6 +407,10 @@ export class DOMException {
 	constructor(message: string, name: string = "") {
 		this.message = message;
 		this.name = name;
+	}
+	toString() {
+		const { name, message, code } = this;
+		return `DOMException: ${code} ${name} ${message}`;
 	}
 	get code() {
 		switch (this.name) {

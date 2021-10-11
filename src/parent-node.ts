@@ -530,18 +530,31 @@ export abstract class ParentNode extends ChildNode {
 		}
 	}
 
-	// *elementsByTagName(name: string) {
-	// 	let { [NEXT]: next, [END]: end } = this;
-	// 	for (; next && next !== end; next = next[NEXT]) {
-	// 		if (next.nodeType === 1) {
-	// 			const el = next as any as Element;
-	// 			const { localName } = el;
-	// 			if (localName === name) {
-	// 				yield el;
-	// 			}
-	// 		}
-	// 	}
-	// }
+// 	elementsByTagName(name: string) {
+// 		let { [NEXT]: next, [END]: end } = this;
+// 		for (; next && next !== end; next = next[NEXT]) {
+// 			if (next.nodeType === 1) {
+// 				const el = next as any as Element;
+// 				const { localName } = el;
+// 				if (localName === name) {
+// 					yield el;
+// 				}
+// 			}
+// 		}
+
+// const myIterator = {
+
+// 	*[Symbol.iterator](): Iterator<Attr> {
+// 		let attr = this.#owner[NEXT];
+// 		for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
+// 			yield attr;
+// 		}
+// 	}
+// };
+
+// 		return new Proxy(this, );
+
+// 	}
 
 	// *elementsByClassName(name: string) {
 	// 	let { [NEXT]: next, [END]: end } = this;

@@ -30,18 +30,18 @@ if (_FILE) {
     if (1) {
         const postMessage = Window.prototype.postMessage;
         Window.prototype.postMessage = function () {
-            console.log("::postMessage", arguments);
+            console.error("::postMessage", arguments);
             postMessage.apply(this, arguments);
         };
         const addEventListener = EventTarget.prototype.addEventListener;
         EventTarget.prototype.addEventListener = function () {
-            // console.log("::addEventListener", arguments[0]);
+            // console.error("::addEventListener", arguments[0]);
             addEventListener.apply(this, arguments);
         };
         const dispatchEvent = EventTarget.prototype.dispatchEvent;
         EventTarget.prototype.dispatchEvent = function () {
-            // console.log("::dispatchEvent", arguments[0].type);
-            dispatchEvent.apply(this, arguments);
+            // console.error("::dispatchEvent", arguments[0].type);
+            return dispatchEvent.apply(this, arguments);
         };
     }
 
@@ -54,11 +54,11 @@ if (_FILE) {
                 href = href.substring(1);
             }
             const url = super.resolveURL(href, baseURI);
-            // console.log("resolveURL: ", href, baseURI, url);
+            // console.error("resolveURL: ", href, baseURI, url);
             return url;
         }
     }
-    // console.log(process.argv)
+    // console.error(process.argv)
     const window = new Window();
 
     window.test_name = test_name;
@@ -69,19 +69,28 @@ if (_FILE) {
     const rl = new TestResourceLoader();
 
     // for await (const chunk of await rl.readStream(url)) {
-    //     console.log("chunk", chunk.toString());
+    //     console.error("chunk", chunk.toString());
     // }
+
+    const seen = {};
 
     const self = new Proxy(window, {
         get: function (target, key, receiver) {
             const v = Reflect.get(target, key, receiver);
-            // console.log(`GET ${v ? (typeof v).substring(0, 7) : "NONE"}\t${key}`);
+            if (!seen[key]) {
+                seen[key] = 1;
+                // console.error(
+                //     `GET ${v ? (typeof v).substring(0, 7) : "NONE"}\t${key}`
+                // );
+            }
             return v;
         },
 
         set: function (target, key, value, receiver) {
             const v = Reflect.get(target, key, receiver);
-            // console.log(`SET ${v ? (typeof v).substring(0, 7) : "NONE"}\t${key}`);
+            // console.error(
+            //     `SET ${v ? (typeof v).substring(0, 7) : "NONE"}\t${key}`
+            // );
             global[key] = value;
             return Reflect.set(target, key, value, receiver);
         },
@@ -96,21 +105,49 @@ if (_FILE) {
         value: self,
     });
     globalThis.window = window;
+    process.on("beforeExit", (code) => {
+        code && console.error(`beforeExit: ${code}`);
+        // console.error(window.tests);
+    });
+
+    //catches uncaught exceptions
+    process.on("uncaughtException", () => {
+        console.error(`uncaughtException`);
+    });
+
     window.tap = tap;
     window.TypeError = TypeError;
+
+    window.addEventListener(
+        "error",
+        function (e) {
+            console.error("event error", e);
+        },
+        false
+    );
+    window.addEventListener(
+        "unhandledrejection",
+        function (e) {
+            console.error("event unhandledrejection", e);
+        },
+        false
+    );
+
     window
         .loadURL(_FILE, { resourceLoader: new TestResourceLoader() })
         .then(function (document) {
-            // console.log("path", document.innerHTML);
-            // console.log("baseURI", document.isHTML, document.baseURI);
-            // console.log("win", document.location);
+            // console.error("baseURI", document.isHTML, document.baseURI);
+            // console.error("path", document.innerHTML);
+            // console.error("win", document.location);
         })
         .catch(function (err) {
             tap.fail(`Load failed ${test_name}`, err);
             tap.threw(err);
-            // console.log("err", err);
+            // console.error("err", err);
             throw err;
         });
+
+    // console.error("This message is displayed first.");
 } else {
     // const test_file = "svg/types/scripted/SVGGeometryElement.getTotalLength-01.svg";
     process.env._FILE = "AUX";
@@ -119,7 +156,6 @@ if (_FILE) {
 svg/types/scripted/SVGGeometryElement.getTotalLength-01.svg
 svg/types/scripted/SVGGeometryElement.getPointAtLength-01.svg
 svg/types/scripted/SVGGeometryElement.getPointAtLength-02.svg
-// svg/types/scripted/SVGGeometryElement.getPointAtLength-03.svg
 // svg/types/scripted/SVGGeometryElement.getPointAtLength-04.svg
 // svg/types/scripted/SVGGeometryElement.getPointAtLength-05.svg
 
@@ -138,7 +174,6 @@ dom/nodes/Element-lastElementChild-xhtml.xhtml
 dom/nodes/Element-nextElementSibling-xhtml.xhtml
 dom/nodes/Element-previousElementSibling-xhtml.xhtml
 dom/nodes/Element-siblingElement-null-xhtml.xhtml
-dom/nodes/Node-isEqualNode-xhtml.xhtml
 dom/nodes/Node-lookupPrefix.xhtml
 
 dom/nodes/ProcessingInstruction-literal-1.xhtml
@@ -172,8 +207,6 @@ dom/nodes/CharacterData-replaceData.html
 dom/nodes/CharacterData-substringData.html
 dom/nodes/CharacterData-surrogates.html
 
-dom/nodes/Document-characterSet-normalization-1.html
-dom/nodes/Document-characterSet-normalization-2.html
 dom/nodes/Document-constructor.html
 dom/nodes/Document-createAttribute.html
 dom/nodes/Document-createCDATASection.html
@@ -215,7 +248,6 @@ dom/nodes/Element-setAttribute.html
 dom/nodes/Element-setAttribute-crbug-1138487.html
 dom/nodes/Element-siblingElement-null.html
 dom/nodes/Element-tagName.html
-dom/nodes/Element-webkitMatchesSelector.html
 
 dom/nodes/Node-appendChild.html
 dom/nodes/Node-baseURI.html
@@ -226,8 +258,6 @@ dom/nodes/Node-nodeName.html
 dom/nodes/Node-nodeValue.html
 dom/nodes/Node-normalize.html
 dom/nodes/Node-parentElement.html
-dom/nodes/Node-parentNode.html
-dom/nodes/Node-parentNode-iframe.html
 dom/nodes/Node-properties.html
 dom/nodes/Node-removeChild.html
 dom/nodes/Node-replaceChild.html
@@ -293,73 +323,71 @@ dom/nodes/getElementsByClassName-30.htm
 
 dom/nodes/ProcessingInstruction-escapes-1.xhtml
 dom/nodes/getElementsByClassName-10.xml
-dom/nodes/getElementsByClassName-11.xml
 dom/nodes/Element-insertAdjacentText.html
 dom/nodes/Node-compareDocumentPosition.html
- svg/types/scripted/SVGGraphicsElement.getBBox-01.html
+svg/types/scripted/SVGGraphicsElement.getBBox-01.html
 dom/nodes/Element-closest.html
- dom/nodes/Document-getElementsByClassName.html
+dom/nodes/Document-getElementsByClassName.html
+dom/nodes/attributes.html
+dom/events/Event-initEvent.html
+dom/events/EventTarget-dispatchEvent-returnvalue.html
+    dom/nodes/svg-template-querySelector.html
+    dom/nodes/DOMImplementation-hasFeature.html
+    dom/nodes/attributes-namednodemap.html
+dom/nodes/Node-childNodes.html
+dom/nodes/getElementsByClassName-whitespace-class-names.html
+svg/types/scripted/SVGLength.html
 
 //     `;
-//     tests = `
-// dom/nodes/node-appendchild-crash.html
-// dom/nodes/Node-cloneNode-on-inactive-document-crash.html
-// dom/nodes/Node-cloneNode-external-stylesheet-no-bc.sub.html
+    //     tests = `
+    // dom/nodes/node-appendchild-crash.html
+    // dom/nodes/Node-cloneNode-on-inactive-document-crash.html
+    // dom/nodes/Node-cloneNode-external-stylesheet-no-bc.sub.html
 
-// // dom/nodes/aria-attribute-reflection.tentative.html
-// // dom/nodes/aria-element-reflection.tentative.html
-// // dom/nodes/attributes-namednodemap.html
-// // dom/nodes/case.html
-// // dom/nodes/Comment-constructor.html
+    // // dom/nodes/aria-attribute-reflection.tentative.html
+    // // dom/nodes/aria-element-reflection.tentative.html
+    // // dom/nodes/case.html
+    // // dom/nodes/Comment-constructor.html
 
+    // // dom/nodes/Document-createTreeWalker.html
+    // // dom/nodes/Document-getElementsByTagNameNS.html
+    // // dom/nodes/Document-URL.html
 
-// // dom/nodes/Document-createEvent.https.html
-// // dom/nodes/Document-createTreeWalker.html
-// // dom/nodes/Document-getElementsByTagName.html
-// // dom/nodes/Document-getElementsByTagNameNS.html
-// // dom/nodes/Document-URL.html
+    // // dom/nodes/MutationObserver-attributes.html
+    // // dom/nodes/MutationObserver-callback-arguments.html
+    // // dom/nodes/MutationObserver-characterData.html
+    // // dom/nodes/MutationObserver-childList.html
+    // // dom/nodes/MutationObserver-disconnect.html
+    // // dom/nodes/MutationObserver-document.html
+    // // dom/nodes/MutationObserver-inner-outer.html
+    // // dom/nodes/MutationObserver-sanity.html
+    // // dom/nodes/MutationObserver-takeRecords.html
+    // // dom/nodes/ParentNode-querySelector-All-content.html
+    // // dom/nodes/ParentNode-querySelectorAll-removed-elements.html
+    // // dom/nodes/ParentNode-querySelector-escapes.html
+    // // dom/nodes/ParentNode-querySelector-scope.html
+    // // dom/nodes/ParentNode-querySelectors-namespaces.html
+    // dom/nodes/query-target-in-load-event.html
+    // dom/nodes/query-target-in-load-event.part.html
+    // dom/nodes/remove-and-adopt-thcrash.html
+    // dom/nodes/remove-from-shadow-host-and-adopt-into-iframe.html
+    // dom/nodes/remove-from-shadow-host-and-adopt-into-iframe-ref.html
+    // dom/nodes/remove-unscopable.html
+    // dom/nodes/rootNode.html
+    // dom/nodes/Text-constructor.html
 
+    //      `;
 
-// // dom/nodes/MutationObserver-attributes.html
-// // dom/nodes/MutationObserver-callback-arguments.html
-// // dom/nodes/MutationObserver-characterData.html
-// // dom/nodes/MutationObserver-childList.html
-// // dom/nodes/MutationObserver-disconnect.html
-// // dom/nodes/MutationObserver-document.html
-// // dom/nodes/MutationObserver-inner-outer.html
-// // dom/nodes/MutationObserver-sanity.html
-// // dom/nodes/MutationObserver-takeRecords.html
-// // dom/nodes/ParentNode-querySelector-All.html
-// // dom/nodes/ParentNode-querySelector-All-content.html
-// // dom/nodes/ParentNode-querySelectorAll-removed-elements.html
-// // dom/nodes/ParentNode-querySelector-escapes.html
-// // dom/nodes/ParentNode-querySelector-scope.html
-// // dom/nodes/ParentNode-querySelectors-namespaces.html
-// dom/nodes/query-target-in-load-event.html
-// dom/nodes/query-target-in-load-event.part.html
-// dom/nodes/remove-and-adopt-thcrash.html
-// dom/nodes/remove-from-shadow-host-and-adopt-into-iframe.html
-// dom/nodes/remove-from-shadow-host-and-adopt-into-iframe-ref.html
-// dom/nodes/remove-unscopable.html
-// dom/nodes/rootNode.html
-// dom/nodes/svg-template-querySelector.html
-// dom/nodes/Text-constructor.html
+    // //     tests = `// Iframed
+    // // dom/nodes/Document-createElement.html
+    // // `;
 
-//      `;
+    //     tests = `
+    // dom/nodes/DOMImplementation-createDocumentType.html
+    // // dom/nodes/DOMImplementation-createDocument.html
+    // dom/nodes/DOMImplementation-createDocument-with-null-browsing-context-crash.html
 
-// //     tests = `// Iframed
-// // dom/nodes/Document-createElement.html
-// // dom/nodes/Document-createElement-namespace.html
-// // `;
-
-//     tests = `
-// dom/nodes/DOMImplementation-hasFeature.html
-// dom/nodes/DOMImplementation-createDocumentType.html
-// // dom/nodes/DOMImplementation-createDocument.html
-// dom/nodes/DOMImplementation-createDocument-with-null-browsing-context-crash.html
-
-
-// `;
+    // `;
     let tests_try = `
 // # MutationObserver
 // dom/nodes/ParentNode-replaceChildren.html
@@ -370,8 +398,16 @@ dom/nodes/Element-closest.html
 // dom/nodes/DOMImplementation-createHTMLDocument.html
 // dom/nodes/DOMImplementation-createHTMLDocument-with-null-browsing-context-crash.html
 // dom/nodes/DOMImplementation-createHTMLDocument-with-saved-implementation.html
+// dom/nodes/Document-createElement-namespace.html
+// dom/nodes/Node-isEqualNode-xhtml.xhtml
+// dom/nodes/Node-parentNode.html
+// dom/nodes/Node-parentNode-iframe.html
+// dom/nodes/Element-webkitMatchesSelector.html
+// dom/nodes/Document-characterSet-normalization-1.html
+// dom/nodes/Document-characterSet-normalization-2.html
 
 /////////
+// dom/nodes/getElementsByClassName-11.xml
 
 // dom/nodes/Element-children.html
 // dom/nodes/Element-classlist.html
@@ -382,16 +418,11 @@ dom/nodes/Element-closest.html
 // dom/nodes/Element-matches.html
 // dom/nodes/Element-matches-namespaced-elements.html
 
-// dom/nodes/Node-childNodes.html
 // dom/nodes/Node-cloneNode-svg.html
 // dom/nodes/Node-isConnected.html
 // dom/nodes/Node-isConnected-shadow-dom.html
 
-// dom/nodes/getElementsByClassName-whitespace-class-names.html
-dom/nodes/attributes.html
-
-// dom/events/Event-initEvent.html
-// dom/events/EventTarget-dispatchEvent-returnvalue.html
+// dom/nodes/Document-getElementsByTagName.html
 
 // dom/nodes/getElementsByClassName-20.htm
 // dom/nodes/getElementsByClassName-21.htm
@@ -401,6 +432,9 @@ dom/nodes/attributes.html
 // dom/nodes/getElementsByClassName-27.htm
 // dom/nodes/getElementsByClassName-28.htm
 // dom/nodes/getElementsByClassName-31.htm
+// // dom/nodes/ParentNode-querySelector-All.html
+// // dom/nodes/Document-createEvent.https.html
+// svg/types/scripted/SVGGeometryElement.getPointAtLength-03.svg
 
 `;
     tests = (process.env.TRY ? tests_try : tests)

@@ -60,7 +60,7 @@ export class DOMTokenList extends Set<string> {
 
 	parse(tokens: string) {
 		this.clear();
-		for (const token of tokens.split(/\s+/))
+		for (const token of tokens.split(/[\t\n\f\r ]+/))
 			token.length > 0 && super.add(token);
 	}
 

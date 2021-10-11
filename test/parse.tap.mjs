@@ -46,4 +46,19 @@ test(function() {
 	)
 	.then((doc) => {
 		console.log(doc.innerHTML);
+		function getEnumerableOwnProps1(obj) {
+			var arr = [];
+			for (var prop in obj) {
+				if (obj.hasOwnProperty(prop)) {
+					arr.push(prop);
+				}
+			}
+			return arr;
+		}
+		var el = doc.createElement("div");
+		el.setAttribute("a", "");
+		el.setAttribute("b", "");
+		console.error(Object.getOwnPropertyNames(el.attributes));
+		console.error(getEnumerableOwnProps1(el.attributes), ["0", "1"]);
+		// console.error(getEnumerableOwnProps2(el.attributes), ["0", "1"]);
 	});

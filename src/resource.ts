@@ -126,7 +126,7 @@ export async function runScripts(
 ): Promise<Element | undefined> {
 	const script = scripts && scripts.shift();
 	const rl = res || new ResourceLoader();
-	// console.log("script: ", script && script.getAttributeNS(null, "src"), rl);
+	// console.error("script: ", script && script.getAttributeNS(null, "src"), rl);
 
 	return (
 		script &&

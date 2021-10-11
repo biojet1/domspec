@@ -192,7 +192,8 @@ export function htmlParser2(doc: Document, top: ParentNode, options?: any) {
 				for (const [key, value] of Object.entries(attribs)) {
 					const i = key.indexOf(":");
 					if (i < 0) {
-						tag.setAttributeNS(null, key, value);
+						// tag.setAttributeNS(null, key, value);
+						tag.letAttributeNode(key).value = value;
 					} else {
 						const prefix = key.substring(0, i);
 						let ns;
@@ -207,7 +208,8 @@ export function htmlParser2(doc: Document, top: ParentNode, options?: any) {
 									attribs
 								);
 						}
-						tag.setAttributeNS(ns, key, value);
+						// tag.setAttributeNS(ns, key, value);
+						tag.letAttributeNodeNS(ns, key).value = value;
 					}
 				}
 				// top.appendChild(tag);
@@ -430,21 +432,23 @@ export function htmlParser2(doc: Document, top: ParentNode, options?: any) {
 				}
 				let scripts = (parser as any).scripts;
 				if (scripts) {
-					runScripts(scripts, opt.resourceLoader)
-						// .catch((err) => {
-						// 	err.message;
-						// 	console.error("Error running scripts", err);
-						// })
-						.then(() => {
-							if (scripts.length !== 0) {
-								throw new Error();
-							}
-							const { defaultView: window } = doc;
-							if (window) {
-								// console.info("WINDOW LOAD");
-								window.dispatchEvent(new Event("load"));
-							}
-						});
+					process.nextTick(() => {
+						runScripts(scripts, opt.resourceLoader)
+							.catch((err) => {
+								err.message;
+								// console.error("Error running scripts", err);
+							})
+							.then(() => {
+								if (scripts.length !== 0) {
+									throw new Error();
+								}
+								const { defaultView: window } = doc;
+								// console.error("WINDOW LOAD");
+								if (window) {
+									window.dispatchEvent(new Event("load"));
+								}
+							});
+					});
 				}
 			},
 		};

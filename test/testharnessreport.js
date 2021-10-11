@@ -1,12 +1,12 @@
 // import tap from "tap";
-// console.log(
+// console.error(
 //     "testharnessreport",
 //     "/mnt/META/wrx/ts/svgdom-ts/test/testharnessreport.js"
 // );
-// console.log("DEBUG", add_completion_callback);
-setup(null, { explicit_timeout: true });
+// console.error("DEBUG", add_completion_callback);
+setup(null, { explicit_timeout: true, debug:false });
 add_completion_callback(function (tests, status) {
-    // console.log("DONE:TAP", status, tests);
+    // console.info("DONE:TAP", status, tests.length);
 
     tap.test(test_name, function (t) {
         let i = 0;

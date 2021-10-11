@@ -1,5 +1,5 @@
 import { Point, Box, Matrix, Path } from "svggeom";
-import { userUnit } from "./units.js";
+import { userUnit, SVGLength } from "./units.js";
 /// Base Elements //////////
 
 export class SVGElement extends Element {
@@ -25,6 +25,10 @@ export class SVGElement extends Element {
 			}
 		}
 		return null;
+	}
+
+	createSVGLength() {
+		return new SVGLength();
 	}
 }
 
@@ -152,6 +156,22 @@ export class SVGGraphicsElement extends SVGElement {
 		// return this.shapeBox(true);
 		return box.isValid() ? box : Box.empty();
 	}
+
+	newAttributeNode(name: string) {
+		switch (name) {
+			case "r":
+			case "rx":
+			case "ry":
+			case "cx":
+			case "cy":
+			case "x":
+			case "y":
+			case "width":
+			case "height":
+				return new SVGLengthAttr(name);
+		}
+		return super.newAttributeNode(name);
+	}
 }
 
 export class SVGTextContentElement extends SVGGraphicsElement {}
@@ -197,13 +217,40 @@ export class SVGGeometryElement extends SVGGraphicsElement {
 				p.setAttribute("transform", s);
 			return p;
 		}
-		throw new Error(`No ownerDocument`);
+		throw DOMException.new(`InvalidStateError`);
 	}
 	getTotalLength() {
 		return this.path.length;
 	}
 	getPointAtLength(L: number) {
 		return this.path.pointAtLength(L);
+	}
+	get r(): SVGLengthAttr {
+		return this.letAttributeNode("r") as SVGLengthAttr; // for now
+	}
+	get x(): SVGLengthAttr {
+		return this.letAttributeNode("x") as SVGLengthAttr; // for now
+	}
+	get y(): SVGLengthAttr {
+		return this.letAttributeNode("y") as SVGLengthAttr; // for now
+	}
+	get cx(): SVGLengthAttr {
+		return this.letAttributeNode("cx") as SVGLengthAttr; // for now
+	}
+	get cy(): SVGLengthAttr {
+		return this.letAttributeNode("cy") as SVGLengthAttr; // for now
+	}
+	get rx(): SVGLengthAttr {
+		return this.letAttributeNode("rx") as SVGLengthAttr; // for now
+	}
+	get ry(): SVGLengthAttr {
+		return this.letAttributeNode("ry") as SVGLengthAttr; // for now
+	}
+	get width(): SVGLengthAttr {
+		return this.letAttributeNode("width") as SVGLengthAttr; // for now
+	}
+	get height(): SVGLengthAttr {
+		return this.letAttributeNode("height") as SVGLengthAttr; // for now
 	}
 }
 
@@ -240,6 +287,13 @@ export class SVGRectElement extends SVGGeometryElement {
 		const y = parseFloat(this.getAttribute("y") || "0");
 		return `M ${x} ${y} h ${width} v ${height} h ${-width} Z`;
 	}
+	// get x(): SVGLengthAttr {
+	// 	const attr = this.letAttributeNode("x");
+	// 	if (attr instanceof SVGLengthAttr) {
+	// 		return attr;
+	// 	}
+	// 	return attr as SVGLengthAttr; // for now
+	// }
 }
 
 export class SVGLineElement extends SVGGeometryElement {
@@ -534,7 +588,9 @@ export class SVGScriptElement extends SVGElement {
 }
 
 import { Element } from "../element.js";
-
+import { SVGLengthAttr } from "./units.js";
+import { DOMException } from "../event-target.js";
+export { SVGLength };
 // const excl = /^SVGGraphicsElement|SVGGeometryElement|SVGFE[A-Z].+$/;
 // Object.getOwnPropertyNames(window)
 // 	.filter(

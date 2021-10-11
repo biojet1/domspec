@@ -49,9 +49,14 @@ global.assert_throws_dom = function () {
     what = what
       .toLowerCase()
       .replace(/(_[a-z])/g, (m, p1) => p1.slice(1).toUpperCase())
-      .replace(/^[a-z]/g, (m) => m.toUpperCase());
+      .replace(/^[a-z]/g, (m) => m.toUpperCase())
+      .replace(/Inuse/, "InUse");
   }
-  (current_t || tap).throws(fn, DOMException, {  name: `${what}`, message:/.*/ });
+  (current_t || tap).throws(fn, DOMException, {
+    name: `${what}`,
+
+    message: /.*/,
+  });
 };
 
 global.assert_equals = function (a, b, msg) {

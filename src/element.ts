@@ -2,6 +2,13 @@ import { NEXT, PREV, END, Node } from "./node.js";
 import { ParentNode, EndNode } from "./parent-node.js";
 export const DATASET = Symbol();
 
+function* attributes(node: Element) {
+	let attr = node[NEXT];
+	for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
+		yield attr;
+	}
+}
+
 export class Element extends ParentNode {
 	//// Parse
 	_parsed_closed?: boolean;
@@ -89,18 +96,31 @@ export class Element extends ParentNode {
 		}
 		let attr = this[NEXT];
 		for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
-			// if (attr.name === name) return attr;
-			// if (attr.localName === name) return attr;
 			if (attr.name === name) return attr;
 		}
 		return null;
 	}
-
-	getAttributeNodeNS(nsu: string | null, localName: string) {
-		// console.log("getAttributeNodeNS:", [localName, ns]);
-
-		// const [ns, prefix, lname] = validateAndExtract(nsu, localName);
-
+	newAttributeNode(name: string): Attr {
+		return new StringAttr(name);
+	}
+	letAttributeNode(name: string) {
+		const { ownerDocument, _ns } = this;
+		if (ownerDocument?.isHTML && _ns === HTML_NS) {
+			name = name.toLowerCase();
+		}
+		let attr = this[NEXT];
+		for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
+			if (attr.name === name) return attr;
+		}
+		const node = this.newAttributeNode(name);
+		node.ownerDocument = ownerDocument;
+		const ref =
+			(attr && (attr instanceof Attr ? attr : attr[PREV])) || this;
+		node._attach(ref, ref[NEXT] || this[END], this);
+		return node;
+	}
+	letAttributeNodeNS(nsu: string | null, localName: string) {
+		const { ownerDocument } = this;
 		let attr = this[NEXT];
 		for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
 			if (attr.localName === localName) {
@@ -109,28 +129,41 @@ export class Element extends ParentNode {
 				}
 			}
 		}
-
+		const [ns, prefix, lname] = validateAndExtract(nsu, localName);
+		const node = new StringAttr(lname);
+		node._ns = ns;
+		node._prefix = prefix;
+		node.ownerDocument = ownerDocument;
+		const ref =
+			(attr && (attr instanceof Attr ? attr : attr[PREV])) || this;
+		node._attach(ref, ref[NEXT] || this[END], this);
+		return node;
+	}
+	getAttributeNodeNS(nsu: string | null, localName: string) {
+		let attr = this[NEXT];
+		for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
+			if (attr.localName === localName) {
+				if (nsu ? attr.namespaceURI === nsu : !attr.namespaceURI) {
+					return attr;
+				}
+			}
+		}
 		return null;
 	}
 	setAttribute(name: string, value: string) {
 		let lname;
-		let attr = this[NEXT];
+		// let attr = this[NEXT];
 		if (this.ownerDocument?.isHTML && this._ns === HTML_NS) {
 			name = name.toLowerCase();
 		}
 		checkName(name);
-		for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
-			if (name === attr.name) {
-				attr.value = value;
-				return;
-			}
-		}
-		const node = new StringAttr(name);
-		node.value = value;
-		node.ownerDocument = this.ownerDocument;
-		const ref =
-			(attr && (attr instanceof Attr ? attr : attr[PREV])) || this;
-		node._attach(ref, ref[NEXT] || this[END], this);
+		const attr = this.letAttributeNode(name);
+		// const node = new StringAttr(name);
+		attr.value = value;
+		// node.ownerDocument = this.ownerDocument;
+		// const ref =
+		// 	(attr && (attr instanceof Attr ? attr : attr[PREV])) || this;
+		// node._attach(ref, ref[NEXT] || this[END], this);
 	}
 	setAttributeNS(nms: string | null, qname: string, value: string) {
 		let attr = this[NEXT];
@@ -168,7 +201,7 @@ export class Element extends ParentNode {
 		if (node === prev) {
 			return node;
 		} else if (parentNode) {
-			throw DOMException.new(`InuseAttributeError`);
+			throw DOMException.new(`InUseAttributeError`);
 		} else if (prev) {
 			// prev.insertLeft(node).remove();
 			const ref = prev[PREV] || this;
@@ -244,10 +277,12 @@ export class Element extends ParentNode {
 	}
 
 	get attributes() {
-		return new NamedNodeMap(this);
+		return new Proxy<Element>(this, AttributesHandler);
+		// return new NamedNodeMap(this);
 	}
+
 	getAttributeNames() {
-		return Array.from(this.attributes).map((a) => a.name);
+		return new Array(...attributes(this)).map((attr) => attr.name);
 	}
 
 	//// DOM: </Attributes>
@@ -533,14 +568,16 @@ export class Element extends ParentNode {
 			namespaceURI: nsB,
 			prefix: prefixB,
 			localName: localB,
-			attributes: attrsB,
+			// attributes: attrsB,
 		} = node as Element;
 		let {
 			namespaceURI: nsA,
 			prefix: prefixA,
 			localName: localA,
-			attributes: attrsA,
+			// attributes: attrsA,
 		} = this;
+		const attrsA = new Array(...attributes(this));
+		const attrsB = new Array(...attributes(node as Element));
 		if (
 			!localA !== !localB ||
 			localA !== localB ||
@@ -687,8 +724,10 @@ import { StringAttr, Attr } from "./attr.js";
 import { ChildNode } from "./child-node.js";
 import { StyleAttr } from "./attr-style.js";
 import { ClassAttr } from "./attr-class.js";
-import { NamedNodeMap } from "./named-node-map.js";
+import { NamedNodeMap, AttributesHandler } from "./named-node-map.js";
 import { enumXMLDump } from "./dom-serialize.js";
 import { validateAndExtract, checkName, HTML_NS } from "./namespace.js";
 import { prepareMatch } from "./css/match.js";
 import { DOMException } from "./event-target.js";
+
+export { NamedNodeMap };

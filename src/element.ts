@@ -103,6 +103,13 @@ export class Element extends ParentNode {
 	newAttributeNode(name: string): Attr {
 		return new StringAttr(name);
 	}
+	newAttributeNodeNS(
+		nsu: string | null,
+		name: string,
+		localName: string
+	): Attr {
+		return new StringAttr(name, localName);
+	}
 	letAttributeNode(name: string) {
 		const { ownerDocument, _ns } = this;
 		if (ownerDocument?.isHTML && _ns === HTML_NS) {
@@ -113,26 +120,6 @@ export class Element extends ParentNode {
 			if (attr.name === name) return attr;
 		}
 		const node = this.newAttributeNode(name);
-		node.ownerDocument = ownerDocument;
-		const ref =
-			(attr && (attr instanceof Attr ? attr : attr[PREV])) || this;
-		node._attach(ref, ref[NEXT] || this[END], this);
-		return node;
-	}
-	letAttributeNodeNS(nsu: string | null, localName: string) {
-		const { ownerDocument } = this;
-		let attr = this[NEXT];
-		for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
-			if (attr.localName === localName) {
-				if (nsu ? attr.namespaceURI === nsu : !attr.namespaceURI) {
-					return attr;
-				}
-			}
-		}
-		const [ns, prefix, lname] = validateAndExtract(nsu, localName);
-		const node = new StringAttr(lname);
-		node._ns = ns;
-		node._prefix = prefix;
 		node.ownerDocument = ownerDocument;
 		const ref =
 			(attr && (attr instanceof Attr ? attr : attr[PREV])) || this;
@@ -151,43 +138,34 @@ export class Element extends ParentNode {
 		return null;
 	}
 	setAttribute(name: string, value: string) {
-		let lname;
-		// let attr = this[NEXT];
 		if (this.ownerDocument?.isHTML && this._ns === HTML_NS) {
 			name = name.toLowerCase();
 		}
 		checkName(name);
 		const attr = this.letAttributeNode(name);
-		// const node = new StringAttr(name);
 		attr.value = value;
-		// node.ownerDocument = this.ownerDocument;
-		// const ref =
-		// 	(attr && (attr instanceof Attr ? attr : attr[PREV])) || this;
-		// node._attach(ref, ref[NEXT] || this[END], this);
 	}
-	setAttributeNS(nms: string | null, qname: string, value: string) {
+	letAttributeNodeNS(nms: string | null, qname: string) {
 		let attr = this[NEXT];
 		const [ns, prefix, lname] = validateAndExtract(nms, qname);
 		for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
 			const { namespaceURI, localName } = attr;
 			if (namespaceURI === ns && localName === lname) {
-				attr.value = value;
-				return;
+				return attr;
 			}
-			// if (namespaceURI === ns && localName === qname) {
-			// 	attr.value = value;
-			// 	return;
-			// }
 		}
-
-		const node = new StringAttr(qname, lname);
+		const { ownerDocument } = this;
+		const node = this.newAttributeNodeNS(nms, qname, lname);
 		node._ns = ns;
 		node._prefix = prefix;
-		node.value = value;
-		node.ownerDocument = this.ownerDocument;
+		node.ownerDocument = ownerDocument;
 		const ref =
 			(attr && (attr instanceof Attr ? attr : attr[PREV])) || this;
 		node._attach(ref, ref[NEXT] || this[END], this);
+		return node;
+	}
+	setAttributeNS(nms: string | null, qname: string, value: string) {
+		this.letAttributeNodeNS(nms, qname).value = value;
 	}
 	setAttributeNode(node: Attr) {
 		return this.setAttributeNodeNS(node);

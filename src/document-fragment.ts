@@ -24,8 +24,18 @@ export class DocumentFragment extends NonElementParentNode {
 			// }
 			if (parent) {
 				let cur: ChildNode | null = first;
+				// let _next = first.nextSibling;
+				// let _prev = null;
 				do {
 					cur.parentNode = parent;
+					// cur._removed(this)
+					if (cur === last) {
+						break;
+					}
+					// _prev = cur;
+					// cur = next;
+					// _next = cur.nextSibling;
+					//
 				} while (cur !== last && (cur = cur.nextSibling || last));
 			}
 

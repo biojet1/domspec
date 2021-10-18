@@ -18,8 +18,8 @@ export abstract class Node extends EventTarget {
 		return this;
 	}
 	_attach(prev: Node | null, next: Node, parent: ParentNode) {
-		const { startNode, endNode } = this;
-		if (this.parentNode || startNode[PREV] || endNode[NEXT]) {
+		const { startNode, endNode, parentNode } = this;
+		if (parentNode || startNode[PREV] || endNode[NEXT]) {
 			throw new Error(`Detach first`);
 		}
 		this.parentNode = parent;

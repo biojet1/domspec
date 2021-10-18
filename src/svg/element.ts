@@ -1,5 +1,4 @@
 import { Point, Box, Matrix, Path } from "svggeom";
-import { userUnit, SVGLength } from "./units.js";
 /// Base Elements //////////
 
 export class SVGElement extends Element {
@@ -158,6 +157,7 @@ export class SVGGraphicsElement extends SVGElement {
 	}
 
 	newAttributeNode(name: string) {
+		// console.log("newAttributeNode", name);
 		switch (name) {
 			case "r":
 			case "rx":
@@ -169,8 +169,41 @@ export class SVGGraphicsElement extends SVGElement {
 			case "width":
 			case "height":
 				return new SVGLengthAttr(name);
+			case "viewBox":
+				return new SVGRectAttr(name);
 		}
+
 		return super.newAttributeNode(name);
+	}
+	get r(): SVGLengthAttr {
+		return this.letAttributeNode("r") as SVGLengthAttr; // for now
+	}
+	get x(): SVGLengthAttr {
+		return this.letAttributeNode("x") as SVGLengthAttr; // for now
+	}
+	get y(): SVGLengthAttr {
+		return this.letAttributeNode("y") as SVGLengthAttr; // for now
+	}
+	get cx(): SVGLengthAttr {
+		return this.letAttributeNode("cx") as SVGLengthAttr; // for now
+	}
+	get cy(): SVGLengthAttr {
+		return this.letAttributeNode("cy") as SVGLengthAttr; // for now
+	}
+	get rx(): SVGLengthAttr {
+		return this.letAttributeNode("rx") as SVGLengthAttr; // for now
+	}
+	get ry(): SVGLengthAttr {
+		return this.letAttributeNode("ry") as SVGLengthAttr; // for now
+	}
+	get width(): SVGLengthAttr {
+		return this.letAttributeNode("width") as SVGLengthAttr; // for now
+	}
+	get height(): SVGLengthAttr {
+		return this.letAttributeNode("height") as SVGLengthAttr; // for now
+	}
+	get viewBox(): SVGRectAttr {
+		return this.letAttributeNode("viewBox") as SVGRectAttr; // for now
 	}
 }
 
@@ -224,33 +257,6 @@ export class SVGGeometryElement extends SVGGraphicsElement {
 	}
 	getPointAtLength(L: number) {
 		return this.path.pointAtLength(L);
-	}
-	get r(): SVGLengthAttr {
-		return this.letAttributeNode("r") as SVGLengthAttr; // for now
-	}
-	get x(): SVGLengthAttr {
-		return this.letAttributeNode("x") as SVGLengthAttr; // for now
-	}
-	get y(): SVGLengthAttr {
-		return this.letAttributeNode("y") as SVGLengthAttr; // for now
-	}
-	get cx(): SVGLengthAttr {
-		return this.letAttributeNode("cx") as SVGLengthAttr; // for now
-	}
-	get cy(): SVGLengthAttr {
-		return this.letAttributeNode("cy") as SVGLengthAttr; // for now
-	}
-	get rx(): SVGLengthAttr {
-		return this.letAttributeNode("rx") as SVGLengthAttr; // for now
-	}
-	get ry(): SVGLengthAttr {
-		return this.letAttributeNode("ry") as SVGLengthAttr; // for now
-	}
-	get width(): SVGLengthAttr {
-		return this.letAttributeNode("width") as SVGLengthAttr; // for now
-	}
-	get height(): SVGLengthAttr {
-		return this.letAttributeNode("height") as SVGLengthAttr; // for now
 	}
 }
 
@@ -381,6 +387,7 @@ export class SVGImageElement extends SVGGraphicsElement {
 
 export class SVGSVGElement extends SVGGraphicsElement {
 	static TAGS = ["svg"];
+
 	get _isViewportElement() {
 		return 1;
 	}
@@ -588,7 +595,7 @@ export class SVGScriptElement extends SVGElement {
 }
 
 import { Element } from "../element.js";
-import { SVGLengthAttr } from "./units.js";
+import { userUnit, SVGLength, SVGRectAttr, SVGLengthAttr } from "./units.js";
 import { DOMException } from "../event-target.js";
 export { SVGLength };
 // const excl = /^SVGGraphicsElement|SVGGeometryElement|SVGFE[A-Z].+$/;

@@ -51,7 +51,11 @@ function domParse(doc: Document, top: ParentNode, options?: any) {
 		const attrs = Object.entries(attributes);
 
 		for (const [key, { uri, value }] of attrs) {
-			tag.setAttributeNS(uri, key, value);
+			if (uri) {
+				tag.setAttributeNS(uri, key, value);
+			} else {
+				tag.setAttribute(key, value);
+			}
 		}
 		top.appendChild(tag);
 		top = tag;

@@ -42,39 +42,6 @@ export function userUnit(src: string, default_value?: number): number {
 const UNITS = ["", "", "%", "em", "ex", "px", "cm", "mm", "in", "pt", "pc"];
 const CONVS = [0, 1, 1];
 
-// class SVGLength1 {
-// 	attr: SVGLengthAttr;
-// 	constructor(attr: SVGLengthAttr) {
-// 		this.attr = attr;
-// 	}
-// 	get unitType() {
-// 		return this.attr._unit;
-// 	}
-// 	get valueInSpecifiedUnits() {
-// 		return this.attr._num;
-// 	}
-// 	get valueAsString() {
-// 		return this.attr.value;
-// 	}
-// 	get value() {
-// 		let { _num, _unit } = this.attr;
-// 		if (_unit) {
-// 			switch (_unit) {
-// 				// case "":
-// 				// case "px":
-// 				case 0:
-// 				case 1:
-// 				case 5:
-// 					return _num;
-// 			}
-// 			return CONVERSIONS[_unit] * (_num || 0);
-// 		}
-// 		return NaN;
-// 	}
-// 	// newValueSpecifiedUnits(unitType: number, valueInSpecifiedUnits: number);
-// 	// convertToSpecifiedUnits(unitType: number);
-// }
-
 export class SVGLength {
 	_unit: number;
 	_num: number;
@@ -98,29 +65,6 @@ export class SVGLength {
 		}
 	}
 
-	// parse(value: string) {
-	// 	if (value) {
-	// 		const m = value.match(BOTH_MATCH);
-	// 		if (m) {
-	// 			const num = parseFloat(m[1]);
-	// 			const unit = m.pop();
-	// 			this._num = num;
-	// 			if (unit) {
-	// 				this._unit = UNITS.indexOf(unit);
-	// 			} else {
-	// 				this._unit = 1;
-	// 			}
-	// 			// if (num >= 0) {
-	// 			// 	this._num = num;
-	// 			// }
-	// 		} else {
-	// 			throw new Error(`Invalid unit ${value}`);
-	// 		}
-	// 	} else {
-	// 		this._num = 0;
-	// 		this._unit = 1;
-	// 	}
-	// }
 	get valueAsString() {
 		let { _num, _unit } = this;
 		return `${_num}${UNITS[_unit] || ""}`;
@@ -217,61 +161,19 @@ export class SVGLength {
 }
 
 export class SVGLengthAttr extends Attr {
-	// _baseVal?: SVGLength;
-	// _unit?: number;
-	// _num?: number;
 	_var?: SVGLength | string;
 
 	set value(value: string) {
-		// const m = value.match(BOTH_MATCH);
-		// if (m) {
-		// 	const num = parseFloat(m[1]);
-		// 	const unit = m.pop();
-		// 	this._num = num;
-		// 	if (unit) {
-		// 		this._unit = UNITS.indexOf(unit);
-		// 	} else {
-		// 		delete this._unit;
-		// 	}
-		// 	throw new Error(`Can not convert to user unit ${value}, [${m}]`);
-		// } else {
-		// 	throw new Error(`Invalid unit ${value}`);
-		// }
 		const { _var } = this;
 		if (_var instanceof SVGLength) {
 			_var.valueAsString = value;
 		} else {
 			this._var = value;
 		}
-		// if (typeof _var === "string") {
-		// 	this._var = value;
-		// } else if (_var) {
-		// 	_var.parse(value);
-		// } else {
-		// 	this._var = value;
-		// }
 	}
 
 	get value() {
-		// let { _num, _unit } = this;
-		// if (_num === undefined) {
-		// 	return _unit ? _unit + "" : "";
-		// } else {
-		// 	switch (_unit) {
-		// 		case undefined:
-		// 		case 0:
-		// 		case 1:
-		// 		case 5:
-		// 			return _num + "";
-		// 	}
-		// 	return `${_num + 0}${_unit}`;
-		// }
 		const { _var } = this;
-		// if (typeof _var === "string") {
-		// 	return _var;
-		// } else if (_var) {
-		// 	return _var.valueAsString;
-		// }
 		if (_var instanceof SVGLength) {
 			return _var.valueAsString;
 		}
@@ -285,26 +187,63 @@ export class SVGLengthAttr extends Attr {
 		} else {
 			return (this._var = new SVGLength(_var));
 		}
-		// if (typeof _var === "string") {
-		// 	return (this._var = new SVGLength(_var));
-		// } else if (_var) {
-		// 	return _var;
-		// } else {
-		// 	return (this._var = new SVGLength());
-		// }
-		// return this._baseVal || (this._baseVal = new SVGLength(this));
 	}
 
-	// get baseValQ() {
-
-	// 	return this._baseVal || null;
-	// }
-
-	// valueOf() {
-	// 	let { tokensQ: tokens } = this;
-	// 	return tokens && tokens.size > 0 ? tokens.format() : null;
-	// }
+	valueOf() {
+		const { _var } = this;
+		if (_var instanceof SVGLength) {
+			return _var.valueAsString;
+		} else {
+			return _var?.toString();
+		}
+	}
 }
 
+export class SVGRectAttr extends Attr {
+	_var?: Box | string;
+
+	set value(value: string) {
+		const { _var } = this;
+		if (_var instanceof Box) {
+			const v = value.split(/[\s,]+/).map(parseFloat);
+			_var.x = v[0];
+			_var.y = v[1];
+			_var.width = v[2];
+			_var.height = v[3];
+		} else {
+			this._var = value;
+		}
+	}
+
+	get value() {
+		const { _var } = this;
+		if (_var instanceof Box) {
+			const { x, y, width, height } = _var;
+			return `${x} ${y} ${width} ${height}`;
+		}
+		return _var || "";
+	}
+
+	get baseVal() {
+		const { _var } = this;
+		if (_var instanceof Box) {
+			return _var;
+		} else {
+			return (this._var = Box.new(_var));
+		}
+	}
+
+	valueOf() {
+		const { _var } = this;
+		if (_var instanceof Box) {
+			const { x, y, width, height } = _var;
+			return `${x} ${y} ${width} ${height}`;
+		} else {
+			return _var?.toString();
+		}
+	}
+}
+
+import { Box } from "svggeom";
 import { Attr } from "../attr.js";
 import { DOMException } from "../event-target.js";

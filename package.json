@@ -21,6 +21,7 @@
     "svg:import": "env IMPORT=svg node test/elements.js",
     "compile": "tsc -d --sourcemap",
     "prepare": "tsc -d --removeComments",
+    "up:devel": "python -B -m ghdevapi.up -A biojet1/svgdom-ts . -m . -r devel -a",
     "up": "python -B -m ghdevapi up -A biojet1/svgdom-ts . -m . -r main -a"
   },
   "author": "",

@@ -437,8 +437,8 @@ export class Element extends ParentNode {
 			return node.proxy;
 		}
 	}
-	set style(value: string) {
-		this.setAttribute("style", value);
+	set style(value: CSSStyleDeclaration) {
+		this.setAttribute("style", value.toString());
 	}
 	get classList() {
 		const attr = this.getAttributeNode("class");

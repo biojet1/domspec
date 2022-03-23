@@ -33,6 +33,7 @@ def ofHTML(path, opt):
     js = []
     inc_scripts = []
     seen_testharness = None
+    script = None
     for script in root.iter("{*}script"):
         src = script.get("src")
         if src:
@@ -45,7 +46,8 @@ def ofHTML(path, opt):
             script.text  and js.append(script.text)
             # print(script)
             script.text = None
-    if not seen_testharness:
+
+    if not seen_testharness and script is None:
         return
     elif opt.dry_run is False:
         fh = open(dest, "w")

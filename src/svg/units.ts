@@ -99,6 +99,7 @@ export class SVGLength {
 		let { _num, _unit } = this;
 		if (isFinite(value)) {
 			switch (_unit) {
+				case 0:
 				case 1:
 				case 5:
 					this._num = value;
@@ -243,6 +244,8 @@ export class SVGRectAttr extends Attr {
 		}
 	}
 }
+
+
 
 import { Box } from "svggeom";
 import { Attr } from "../attr.js";

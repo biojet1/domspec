@@ -29,6 +29,14 @@ export class SVGElement extends Element {
 	createSVGLength() {
 		return new SVGLength();
 	}
+	createSVGMatrix() {
+		return new Matrix();
+	}
+	createSVGTransformFromMatrix(M: Matrix) {
+		const m = new SVGTransform();
+		m.setMatrix(M);
+		return m;
+	}
 }
 
 interface IBBoxParam {
@@ -60,7 +68,8 @@ export class SVGGraphicsElement extends SVGElement {
 	}
 
 	get transformM() {
-		return Matrix.parse(this.getAttribute("transform") || "");
+		// return Matrix.parse(this.getAttribute("transform") || "");
+		return this.transform.baseVal.consolidate();
 	}
 
 	set transformM(T: Matrix) {
@@ -171,6 +180,8 @@ export class SVGGraphicsElement extends SVGElement {
 				return new SVGLengthAttr(name);
 			case "viewBox":
 				return new SVGRectAttr(name);
+			case "transform":
+				return new SVGTransformListAttr(name);
 		}
 
 		return super.newAttributeNode(name);
@@ -204,6 +215,9 @@ export class SVGGraphicsElement extends SVGElement {
 	}
 	get viewBox(): SVGRectAttr {
 		return this.letAttributeNode("viewBox") as SVGRectAttr; // for now
+	}
+	get transform(): SVGTransformListAttr {
+		return this.letAttributeNode("transform") as SVGTransformListAttr; // for now
 	}
 }
 
@@ -239,9 +253,9 @@ export class SVGGeometryElement extends SVGGraphicsElement {
 	}
 
 	toPathElement() {
-		let { ownerDocument } = this;
+		const { ownerDocument } = this;
 		if (ownerDocument) {
-			const p = ownerDocument.createElement("path");
+			const p = ownerDocument.createElement("path") as SVGGeometryElement;
 			let s;
 			(s = this.describe()) && p.setAttribute("d", s);
 			(s = this.getAttribute("style")) && p.setAttribute("style", s);
@@ -596,8 +610,9 @@ export class SVGScriptElement extends SVGElement {
 
 import { Element } from "../element.js";
 import { userUnit, SVGLength, SVGRectAttr, SVGLengthAttr } from "./units.js";
+import { SVGTransformListAttr, SVGTransform } from "./attr-transform.js";
 import { DOMException } from "../event-target.js";
-export { SVGLength };
+export { SVGLength, SVGTransform };
 // const excl = /^SVGGraphicsElement|SVGGeometryElement|SVGFE[A-Z].+$/;
 // Object.getOwnPropertyNames(window)
 // 	.filter(

@@ -1,5 +1,4 @@
 import { Point, Box, Matrix, Path } from "svggeom";
-import { userUnit } from "./units.js";
 /// Base Elements //////////
 
 export class SVGElement extends Element {
@@ -27,6 +26,17 @@ export class SVGElement extends Element {
 		return null;
 	}
 
+	createSVGLength() {
+		return new SVGLength();
+	}
+	createSVGMatrix() {
+		return new Matrix();
+	}
+	createSVGTransformFromMatrix(M: Matrix) {
+		const m = new SVGTransform();
+		m.setMatrix(M);
+		return m;
+	}
 }
 
 interface IBBoxParam {
@@ -58,10 +68,11 @@ export class SVGGraphicsElement extends SVGElement {
 	}
 
 	get transformM() {
-		return Matrix.parse(this.getAttribute("transform") || "");
+		// return Matrix.parse(this.getAttribute("transform") || "");
+		return this.transform.baseVal.consolidate();
 	}
 
-	set transformM(T: Matrix ) {
+	set transformM(T: Matrix) {
 		this.setAttribute("transform", T.toString());
 	}
 
@@ -153,6 +164,61 @@ export class SVGGraphicsElement extends SVGElement {
 		// return this.shapeBox(true);
 		return box.isValid() ? box : Box.empty();
 	}
+
+	newAttributeNode(name: string) {
+		// console.log("newAttributeNode", name);
+		switch (name) {
+			case "r":
+			case "rx":
+			case "ry":
+			case "cx":
+			case "cy":
+			case "x":
+			case "y":
+			case "width":
+			case "height":
+				return new SVGLengthAttr(name);
+			case "viewBox":
+				return new SVGRectAttr(name);
+			case "transform":
+				return new SVGTransformListAttr(name);
+		}
+
+		return super.newAttributeNode(name);
+	}
+	get r(): SVGLengthAttr {
+		return this.letAttributeNode("r") as SVGLengthAttr; // for now
+	}
+	get x(): SVGLengthAttr {
+		return this.letAttributeNode("x") as SVGLengthAttr; // for now
+	}
+	get y(): SVGLengthAttr {
+		return this.letAttributeNode("y") as SVGLengthAttr; // for now
+	}
+	get cx(): SVGLengthAttr {
+		return this.letAttributeNode("cx") as SVGLengthAttr; // for now
+	}
+	get cy(): SVGLengthAttr {
+		return this.letAttributeNode("cy") as SVGLengthAttr; // for now
+	}
+	get rx(): SVGLengthAttr {
+		return this.letAttributeNode("rx") as SVGLengthAttr; // for now
+	}
+	get ry(): SVGLengthAttr {
+		return this.letAttributeNode("ry") as SVGLengthAttr; // for now
+	}
+	get width(): SVGLengthAttr {
+		return this.letAttributeNode("width") as SVGLengthAttr; // for now
+	}
+	get height(): SVGLengthAttr {
+		return this.letAttributeNode("height") as SVGLengthAttr; // for now
+	}
+	get viewBox(): SVGRectAttr {
+		return this.letAttributeNode("viewBox") as SVGRectAttr; // for now
+	}
+	get transform(): SVGTransformListAttr {
+		return this.letAttributeNode("transform") as SVGTransformListAttr; // for now
+	}
 }
 
 export class SVGTextContentElement extends SVGGraphicsElement {}
@@ -187,9 +253,9 @@ export class SVGGeometryElement extends SVGGraphicsElement {
 	}
 
 	toPathElement() {
-		let { ownerDocument } = this;
+		const { ownerDocument } = this;
 		if (ownerDocument) {
-			const p = ownerDocument.createElement("path");
+			const p = ownerDocument.createElement("path") as SVGGeometryElement;
 			let s;
 			(s = this.describe()) && p.setAttribute("d", s);
 			(s = this.getAttribute("style")) && p.setAttribute("style", s);
@@ -198,7 +264,13 @@ export class SVGGeometryElement extends SVGGraphicsElement {
 				p.setAttribute("transform", s);
 			return p;
 		}
-		throw new Error(`No ownerDocument`);
+		throw DOMException.new(`InvalidStateError`);
+	}
+	getTotalLength() {
+		return this.path.length;
+	}
+	getPointAtLength(L: number) {
+		return this.path.pointAtLength(L);
 	}
 }
 
@@ -233,8 +305,15 @@ export class SVGRectElement extends SVGGeometryElement {
 		const height = parseFloat(this.getAttribute("height") || "0");
 		const x = parseFloat(this.getAttribute("x") || "0");
 		const y = parseFloat(this.getAttribute("y") || "0");
-		return `M ${x} ${y} h ${width} v ${height} H ${x} V ${y}`;
+		return `M ${x} ${y} h ${width} v ${height} h ${-width} Z`;
 	}
+	// get x(): SVGLengthAttr {
+	// 	const attr = this.letAttributeNode("x");
+	// 	if (attr instanceof SVGLengthAttr) {
+	// 		return attr;
+	// 	}
+	// 	return attr as SVGLengthAttr; // for now
+	// }
 }
 
 export class SVGLineElement extends SVGGeometryElement {
@@ -322,6 +401,7 @@ export class SVGImageElement extends SVGGraphicsElement {
 
 export class SVGSVGElement extends SVGGraphicsElement {
 	static TAGS = ["svg"];
+
 	get _isViewportElement() {
 		return 1;
 	}
@@ -465,8 +545,74 @@ export class SVGPatternElement extends SVGElement {
 	static TAGS = ["pattern"];
 }
 
-import { Element } from "../element.js";
+interface ScriptElement {
+	_alreadyStarted?: boolean;
+}
 
+export class SVGScriptElement extends SVGElement {
+	static TAGS = ["script"];
+	_alreadyStarted?: boolean;
+
+	// _eval() {
+	// 	if (this._alreadyStarted) {
+	// 		return;
+	// 	}
+
+	// 	// TODO: this text check doesn't seem completely the same as the spec, which e.g. will try to execute scripts with
+	// 	// child element nodes. Spec bug? https://github.com/whatwg/html/issues/3419
+	// 	const src = this.getAttributeNS(null, "src");
+	// 	let text = !src && this.textContent;
+
+	// 	if (!text || !src) {
+	// 		return;
+	// 	}
+
+	// 	// if (!this._attached) {
+	// 	// 	return;
+	// 	// }
+
+	// 	// const scriptBlocksTypeString = this._getTypeString();
+	// 	// const type = getType(scriptBlocksTypeString);
+
+	// 	// if (type !== "classic") {
+	// 	// 	// TODO: implement modules, and then change the check to `type === null`.
+	// 	// 	return;
+	// 	// }
+
+	// 	this._alreadyStarted = true;
+
+	// 	// TODO: implement nomodule here, **but only after we support modules**.
+
+	// 	// At this point we completely depart from the spec.
+
+	// 	if (src) {
+	// 		// this._fetchExternalScript();
+	// 	} else {
+	// 		// this._fetchInternalScript();
+	// 	}
+	// }
+
+	// _fetchExternalScript(src: string) {
+	// 	const document = this.ownerDocument;
+	// 	if (document) {
+	// 		const { defaultView: window } = document;
+	// 		if(window){
+
+	// 		}
+	// 		document.resolveURL(src)
+	// 	}
+	// 	// const { ownerDocument: document, defaultView: window } =
+	// 	// 	this.ownerDocument;
+	// 	// const resourceLoader = document._fetcher;
+	// 	// const { URL, defaultView } = document;
+	// }
+}
+
+import { Element } from "../element.js";
+import { userUnit, SVGLength, SVGRectAttr, SVGLengthAttr } from "./units.js";
+import { SVGTransformListAttr, SVGTransform } from "./attr-transform.js";
+import { DOMException } from "../event-target.js";
+export { SVGLength, SVGTransform };
 // const excl = /^SVGGraphicsElement|SVGGeometryElement|SVGFE[A-Z].+$/;
 // Object.getOwnPropertyNames(window)
 // 	.filter(

@@ -3,7 +3,7 @@ import test from "tap";
 import fs from "fs";
 import { JSDOM } from "jsdom";
 import { Document } from "../dist/document.js";
-import { parseDOM, DOMParser } from "../dist/dom-parse.js";
+import { DOMParser } from "../dist/dom-parse.js";
 import { checkNode } from "./domCheck.mjs";
 
 const xml = fs.readFileSync("test/test.xml", "utf8");

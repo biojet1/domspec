@@ -12,6 +12,7 @@ jobs:
     env:
       WPT_ROOT: .wpt
       WPT_URL: https://github.com/web-platform-tests/wpt/archive/refs/tags/merge_pr_30022.tar.gz
+      # WPT_HASH: 1
 
     steps:
       - uses: actions/checkout@v2
@@ -47,21 +48,14 @@ jobs:
           cache-name: wpt
         with:
           path: ${{ env.WPT_ROOT }}
-          key: ${{ runner.os }}-${{ env.cache-name }}-${{ env.WPT_URL }}
-
+          key: ${{ runner.os }}-${{ env.cache-name }}-${{ env.WPT_URL }}-${{ hashFiles('test/wpt-patch.sh') }}
       - run: |
           echo [$HOME]
           ls
           [ -d "$WPT_ROOT" ] || mkdir -vp "$WPT_ROOT"
-          cd "$WPT_ROOT"
-          if [ ! -f README.md ]; then
-            curl -L "$WPT_URL" | tar xvzf - --strip-components 1
-            patch dom/nodes/Document-createProcessingInstruction.js - << 'EOD'
-          27c27
-          <   for (var i = 0, il = valid.length; i < il; ++i) {
-          ---
-          >   for (let i = 0, il = valid.length; i < il; ++i) {
-          EOD
+          if [ ! -f "$WPT_ROOT/README.md" ]; then
+            curl -L "$WPT_URL" | tar xvzf - -C "$WPT_ROOT" --strip-components 1
+            . test/wpt-patch.sh
           fi
       # - name: Archive production artifacts
       #   uses: actions/upload-artifact@v2

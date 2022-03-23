@@ -3,37 +3,36 @@ import { NonElementParentNode } from "./non-element-parent-node.js";
 export abstract class Document extends NonElementParentNode {
 	//// Dom
 	contentType: string;
-	documentURI?: string;
 	defaultView?: Window;
-	_domImpl?: DOMImplementationA;
+	currentScript?: Element;
+	_domImpl?: DOMImplementation;
+	_location?: URL | string;
+	// documentURI?: string;
 
 	protected constructor(contentType?: string) {
 		super();
-		// this.ownerDocument = this;
-		this.documentURI = "about:blank";
+		// this.documentURI = "about:blank";
 		this.contentType = contentType || "application/xml";
 	}
-
+	get documentURI() {
+		const { _location } = this;
+		return _location ? _location.toString() : "about:blank";
+	}
 	get URL() {
 		return this.documentURI;
 	}
 	get compatMode() {
 		return "CSS1Compat";
 	}
-	get location() {
-		return null;
-	}
 	get characterSet() {
 		return "UTF-8";
 	}
-
 	get charset() {
 		return this.characterSet;
 	}
 	get inputEncoding() {
 		return this.characterSet;
 	}
-
 	get nodeType() {
 		return 9;
 	}
@@ -72,12 +71,16 @@ export abstract class Document extends NonElementParentNode {
 		}
 		return "";
 	}
-
+	get head() {
+		for (const cur of this.getElementsByTagName("head")) {
+			return cur;
+		}
+		return "";
+	}
 	get implementation() {
 		const { _domImpl } = this;
-		return _domImpl || (this._domImpl = new DOMImplementationA(this));
+		return _domImpl || (this._domImpl = new DOMImplementation(this));
 	}
-
 	lookupNamespaceURI(prefix: string): string | null {
 		if (!prefix) {
 			return HTML_NS;
@@ -98,19 +101,16 @@ export abstract class Document extends NonElementParentNode {
 	}
 
 	createElement(localName: string) {
-		// const node = newElement(this.contentType, localName);
-		const node = createElement(this, localName);
+		const node = createElement(this, localName + "");
 		node.ownerDocument = this;
 		return node;
-		// return
 	}
 
 	createElementNS(
 		ns: string | null | undefined,
 		qualifiedName: string
 	): Element {
-		// const node = newElement(this.contentType, qualifiedName, ns);
-		const node = createElement(this, qualifiedName, ns || "");
+		const node = createElement(this, qualifiedName + "", ns || "");
 		node.ownerDocument = this;
 		return node;
 	}
@@ -131,15 +131,15 @@ export abstract class Document extends NonElementParentNode {
 	}
 	createCDATASection(text: string) {
 		if (this.isHTML) {
-			throw new Error(`NotSupportedError`);
+			throw DOMException.new("NotSupportedError");
 		}
 		const node = new CDATASection(text);
 		node.ownerDocument = this;
 		return node;
 	}
 	createDocumentFragment() {
-		const node = new DocumentFragment();
-		node.ownerDocument = this;
+		const node = new DocumentFragment(this);
+		// node.ownerDocument = this;
 		return node;
 	}
 	createAttribute(name: string) {
@@ -148,9 +148,15 @@ export abstract class Document extends NonElementParentNode {
 		if (!name) {
 			name += "";
 			if (!name) {
-				throw new Error(`InvalidCharacterErr: name='${name}'`);
+				throw DOMException.new(
+					"InvalidCharacterError",
+					`name='${name}'`
+				);
 			}
 		}
+		// if (!/^[A-Za-z:_]+[\w:\.\xB7-]*$/.test(name)) {
+		// 	throw DOMException.new("InvalidCharacterError", `name='${name}'`);
+		// }
 		checkName(name);
 		if (this.isHTML) {
 			name = name.toLowerCase();
@@ -179,19 +185,9 @@ export abstract class Document extends NonElementParentNode {
 		/* c8 ignore next */
 		return {};
 	}
-
-	// static fromNS(ns?: string) {
-	// 	switch (ns) {
-	// 		case "text/html":
-	// 		case "http://www.w3.org/1999/xhtml":
-	// 			return new HTMLDocument();
-	// 		case "image/svg+xml":
-	// 		case "http://www.w3.org/2000/svg":
-	// 			return new SVGDocument();
-	// 		default:
-	// 			return new XMLDocument();
-	// 	}
-	// }
+	createEvent(name: string) {
+		return createEvent(name);
+	}
 
 	get isHTML() {
 		return this.contentType == "text/html";
@@ -201,12 +197,12 @@ export abstract class Document extends NonElementParentNode {
 	}
 
 	cloneNode(deep?: boolean) {
-		const { contentType, defaultView, documentURI } = this;
+		const { contentType, defaultView, _location } = this;
 		const node = new (this.constructor as any)();
 
 		if (contentType) node.contentType = contentType;
 		if (defaultView) node.defaultView = defaultView;
-		if (documentURI) node.documentURI = documentURI;
+		if (_location) node._location = _location;
 		// if (characterSet) node.characterSet = characterSet;
 		if (deep) {
 			const end = node[END];
@@ -249,7 +245,7 @@ export abstract class Document extends NonElementParentNode {
 			// 	break;
 			case 9: // DOCUMENT_NODE
 			case -1:
-				throw new Error(`NotSupportedError`);
+				throw DOMException.new("NotSupportedError");
 		}
 		let { startNode: cur, endNode: end, parentNode, ownerDocument } = node;
 		parentNode /* c8 ignore next */ && node.remove();
@@ -288,14 +284,18 @@ export abstract class Document extends NonElementParentNode {
 						{
 							if (this.firstElementChild) {
 								if ((node as ParentNode).firstElementChild) {
-									throw new Error(`HierarchyRequestError`);
+									throw DOMException.new(
+										"HierarchyRequestError"
+									);
 								}
 							} else {
 								if (
 									(node as ParentNode).firstElementChild
 										?.nextElementSibling
 								) {
-									throw new Error(`HierarchyRequestError`);
+									throw DOMException.new(
+										"HierarchyRequestError"
+									);
 								}
 							}
 							for (const cur of (node as ParentNode).childNodes) {
@@ -307,7 +307,7 @@ export abstract class Document extends NonElementParentNode {
 					case 10: {
 						// DOCUMENT_TYPE_NODE
 						if (this.doctype) {
-							throw new Error(`HierarchyRequestError`);
+							throw DOMException.new("HierarchyRequestError");
 						}
 						yield node;
 						break;
@@ -321,7 +321,7 @@ export abstract class Document extends NonElementParentNode {
 								typeof n !== "string" &&
 								n.nodeType === 1
 							) {
-								throw new Error(`HierarchyRequestError`);
+								throw DOMException.new("HierarchyRequestError");
 							}
 						}
 					}
@@ -331,7 +331,62 @@ export abstract class Document extends NonElementParentNode {
 				}
 		}
 	}
+
+	get location() {
+		const { _location } = this;
+		if (_location) {
+			if (typeof _location === "string") {
+				return (this._location = new URL(_location));
+			}
+			return _location;
+		}
+		return null;
+	}
+
+	set location(url: URL | string | null) {
+		throw new Error(`Not implemented`);
+	}
+
+	get baseURI() {
+		return documentBaseURL(this);
+	}
+	static _fetcher?: (
+		url: RequestInfo,
+		init?: RequestInit
+	) => Promise<Response>;
+
+	static async fetch(url: RequestInfo, init?: RequestInit) {
+		console.info("Document.fetch");
+		return import("node-fetch").then((mod) => {
+			console.info("node-fetch imported");
+			Document.fetch = mod.default;
+			return mod.default(url, init);
+		});
+	}
+
+	static new(mimeType?: string) {
+		switch (mimeType) {
+			case "image/svg+xml":
+				return new SVGDocument(mimeType);
+			case "application/xhtml+xml":
+				break;
+			case "text/html":
+				return new HTMLDocument(mimeType);
+		}
+		return new XMLDocument(mimeType);
+	}
+	static get resourceLoader() {
+		return _resourceLoader || (_resourceLoader = new ResourceLoader());
+	}
+	//  html: "text/html",
+	// xhtml: "application/xhtml+xml",
+	// xml: "application/xml",
+	// svg: "image/svg+xml",
 }
+
+let _resourceLoader: ResourceLoader;
+
+import { RequestInfo, RequestInit } from "node-fetch";
 
 export class XMLDocument extends Document {
 	constructor(mimeType = "application/xml") {
@@ -346,92 +401,22 @@ export class HTMLDocument extends Document {
 	get isHTML() {
 		return true;
 	}
-	static setup(titleText?: string) {
-		const d = new HTMLDocument();
-		const root = d.createElement("html");
-		const head = d.createElement("head");
-		const title = d.createElement("title");
-		d.appendChild(new DocumentType("html"));
-		if (titleText) {
-			title.appendChild(d.createTextNode(titleText));
-			head.appendChild(title);
-		}
-		root.appendChild(head);
-		root.appendChild(d.createElement("body"));
-		d.appendChild(root);
-		return d;
-	}
 }
 
 export class SVGDocument extends Document {
-	constructor() {
-		super("image/svg+xml");
+	constructor(contentType = "image/svg+xml") {
+		super(contentType);
 	}
 	get isSVG() {
 		return true;
 	}
 }
-
-export class DOMImplementationA extends DOMImplementation {
-	ownerDocument: Document;
-	constructor(ownerDocument: Document) {
-		super();
-		this.ownerDocument = ownerDocument;
-	}
-	createDocumentType(
-		qualifiedName: string,
-		publicId: string,
-		systemId: string
-	) {
-		const node = super.createDocumentType(
-			qualifiedName,
-			publicId,
-			systemId
-		);
-		node.ownerDocument = this.ownerDocument;
-		return node;
-	}
-	createDocument(
-		namespace?: string,
-		qualifiedName?: string,
-		doctype?: DocumentType
-	) {
-		// const doc = Document.fromNS(namespace);
-		const doc = new XMLDocument();
-		if (doctype) {
-			// if (doctype.ownerDocument) {
-			// 	throw new Error(
-			// 		"the object is in the wrong Document, a call to importNode is required"
-			// 	);
-			// }
-			doctype.ownerDocument = doc;
-			doc.appendChild(doctype);
-		}
-		if (qualifiedName) {
-			doc.appendChild(
-				doc.createElementNS(namespace || null, qualifiedName)
-			);
-		}
-		switch (namespace) {
-			case "http://www.w3.org/1999/xhtml":
-				doc.contentType = "application/xhtml+xml";
-				break;
-			case "http://www.w3.org/2000/svg":
-				doc.contentType = "image/svg+xml";
-				break;
-		}
-		return doc;
-	}
-	createHTMLDocument(titleText = "") {
-		return HTMLDocument.setup(titleText);
-	}
-}
-
+import { ResourceLoader } from "./resource.js";
 import { HTML_NS, SVG_NS, validateAndExtract, checkName } from "./namespace.js";
 import { ChildNode } from "./child-node.js";
 import { EndNode, ParentNode } from "./parent-node.js";
 import { Element } from "./element.js";
-import { newElement, createElement } from "./elements.js";
+import { createElement } from "./elements.js";
 import { Attr, StringAttr } from "./attr.js";
 import {
 	Comment,
@@ -440,7 +425,10 @@ import {
 	ProcessingInstruction,
 } from "./character-data.js";
 import { DocumentFragment } from "./document-fragment.js";
-import { DOMImplementation } from "./dom-implementation.js";
+import { DOMImplementation, documentBaseURL } from "./dom-implementation.js";
 import { Window } from "./window.js";
 import { DocumentType } from "./document-type.js";
 import { NEXT, PREV, END, Node } from "./node.js";
+import { createEvent } from "./event.js";
+import { DOMException } from "./event-target.js";
+export { DOMImplementation };

@@ -1,9 +1,3 @@
-// import { parseDOM, DOMParser } from "../../dist/dom-parse.js";
-// import { Node } from "../../dist/node.js";
-// import { Document } from "../../dist/document.js";
-// import { Element } from "../../dist/element.js";
-// import { HTMLCollection } from "../../dist/parent-node.js";
-// import { Window } from "../../dist/window.js";
 import tap from "tap";
 import * as all from "../dist/all.js";
 // console.log("ALL", all);
@@ -55,9 +49,14 @@ global.assert_throws_dom = function () {
     what = what
       .toLowerCase()
       .replace(/(_[a-z])/g, (m, p1) => p1.slice(1).toUpperCase())
-      .replace(/^[a-z]/g, (m) => m.toUpperCase());
+      .replace(/^[a-z]/g, (m) => m.toUpperCase())
+      .replace(/Inuse/, "InUse");
   }
-  (current_t || tap).throws(fn, Error, { message: `${what}` }, what);
+  (current_t || tap).throws(fn, DOMException, {
+    name: `${what}`,
+
+    message: /.*/,
+  });
 };
 
 global.assert_equals = function (a, b, msg) {

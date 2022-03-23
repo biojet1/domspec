@@ -24,8 +24,18 @@ export class DocumentFragment extends NonElementParentNode {
 			// }
 			if (parent) {
 				let cur: ChildNode | null = first;
+				// let _next = first.nextSibling;
+				// let _prev = null;
 				do {
 					cur.parentNode = parent;
+					// cur._removed(this)
+					if (cur === last) {
+						break;
+					}
+					// _prev = cur;
+					// cur = next;
+					// _next = cur.nextSibling;
+					//
 				} while (cur !== last && (cur = cur.nextSibling || last));
 			}
 
@@ -34,7 +44,7 @@ export class DocumentFragment extends NonElementParentNode {
 			if (parent) {
 				let cur: ChildNode | null = first;
 				do {
-					this._on_child_detached(cur);
+					// this._on_child_detached(cur);
 				} while (cur !== last && (cur = cur.nextSibling || last));
 			}
 			last.endNode._linkr(next);
@@ -53,6 +63,17 @@ export class DocumentFragment extends NonElementParentNode {
 			return new DocumentFragment();
 		}
 	}
+	constructor(owner?: Document | null) {
+		super();
+		if (owner === undefined) {
+			const { window } = globalThis;
+			if (window) {
+				this.ownerDocument = window.document as any as Document;
+			}
+		} else {
+			this.ownerDocument = owner;
+		}
+	}
 
 	static fromTemplate(self: ParentNode) {
 		return new TemplateFragment(self);
@@ -62,7 +83,7 @@ export class DocumentFragment extends NonElementParentNode {
 export class TemplateFragment extends DocumentFragment {
 	self: ParentNode;
 	constructor(self: ParentNode) {
-		super();
+		super(self.ownerDocument);
 		this[END] = self[END];
 		this[NEXT] = self[NEXT];
 		this.self = self;
@@ -94,3 +115,4 @@ export class TemplateFragment extends DocumentFragment {
 import { ChildNode } from "./child-node.js";
 import { EndNode, ParentNode } from "./parent-node.js";
 import { Node, PREV, NEXT, END } from "./node.js";
+import { Document } from "./document.js";

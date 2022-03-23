@@ -11,7 +11,7 @@ const doc = parser.parseFromString(
 <!DOCTYPE root [
 <!-- I'm a test. -->
 ]>
-<svg><?PI EXTRA?>
+<svg viewBox="-10 20 200 300"><?PI EXTRA?>
 <text><![CDATA[<![CDATA\xA0<&>]]></text>;
 </svg>
 	`,
@@ -58,6 +58,54 @@ tap.test("createTextNode", function (t) {
 
 	t.ok(e1.isEqualNode(e1));
 	t.notOk(e2.isEqualNode(null));
+
+	t.end();
+});
+
+tap.test("endNode", function (t) {
+	const top = doc.documentElement;
+	const end = top.endNode;
+	t.notOk(end.isEqualNode(top));
+	t.ok(end.isEqualNode(end));
+	for (const text of doc.getElementsByTagName("text")) {
+		t.notOk(end.isEqualNode(text));
+		t.notOk(end.isEqualNode(text.endNode));
+	}
+	t.end();
+});
+
+tap.test("contains/querySelector no args", function (t) {
+	const top = doc.documentElement;
+	t.throws(() => top.contains(), TypeError);
+	t.throws(() => top.contains(1), TypeError);
+	t.throws(() => top.querySelector(), TypeError);
+	t.throws(() => top.querySelectorAll(), TypeError);
+	t.end();
+});
+
+tap.test("viewBox", function (t) {
+	const doc = parser.parseFromString(`<?xml version="1.0" standalone="no"?>
+<svg width="300px" height="100px" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="-10 20 200 300"></svg>`);
+	const top = doc.documentElement;
+	console.log(top.constructor.name);
+	console.log(top.width.constructor.name);
+	console.log(top.viewBox.constructor.name);
+
+	t.strictSame(top.viewBox.baseVal.x, -10);
+	t.strictSame(top.viewBox.baseVal.width, 200);
+	t.strictSame(top.height.baseVal.value, 100);
+	top.viewBox.baseVal.x = 42;
+	top.height.baseVal.value = 444;
+	top.viewBox.baseVal.width = 456;
+	t.strictSame(top.viewBox.baseVal.x, 42);
+	t.strictSame(top.height.baseVal.value, 444);
+
+	const text = top.outerHTML;
+
+	t.match(text, /viewBox="42 20 456 300"/);
+	t.match(text, /height="444(?:px)?"/);
+
+	// console.log(top.outerHTML);
 
 	t.end();
 });
@@ -139,14 +187,34 @@ tap.test("SVGDocument", function (t) {
 
 tap.test("isDefaultNamespace", function (t) {
 	const doc2 = parser.parseFromString(
-		`<root xmlns="fooNamespace" ></root>`,
+		`<root xmlns="fooNamespace" attr="value" xmlns:prefix="PrefixedNamespace"></root>`,
 		"text/xml"
 	);
+
 	t.notOk(doc2.isDefaultNamespace("ooNamespace"));
 	t.ok(doc2.isDefaultNamespace("fooNamespace"));
-	doc2.documentElement.remove();
+	const top = doc2.documentElement;
+	const attr = top.getAttributeNode("attr");
+	t.notOk(attr.isDefaultNamespace("ooNamespace"));
+	t.ok(attr.isDefaultNamespace("fooNamespace"));
+
+	t.strictSame(attr.ownerElement, top);
+	t.strictSame(attr.lookupNamespaceURI("prefix"), "PrefixedNamespace");
+	t.notOk(attr.lookupNamespaceURI("refixedNamespace"));
+	t.strictSame(attr.lookupPrefix("PrefixedNamespace"), "prefix");
+	t.notOk(attr.lookupPrefix("prefi"));
+	t.ok(attr.isEqualNode(attr));
+	t.notOk(attr.isEqualNode(top));
+	t.notOk(attr.isEqualNode(null));
+	t.notOk(attr.isEqualNode(top.getAttributeNode("attr2")));
+	top.removeAttributeNode(attr);
+	t.notOk(attr.isDefaultNamespace("fooNamespace"));
+	t.notOk(attr.ownerElement);
+
+	top.remove();
 	t.notOk(doc2.isDefaultNamespace("fooNamespace"));
 	t.notOk(doc2.cloneNode(true).documentElement);
+
 	t.end();
 });
 

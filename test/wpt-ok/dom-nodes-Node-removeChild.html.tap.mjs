@@ -44,10 +44,11 @@ documents.forEach(function(d) {
       var doc = get();
       var s = doc[creator]("test")
       doc.body.appendChild(s)
-      assert_equals(s.ownerDocument, doc)
+      assert_equals(s.ownerDocument, doc);
+      // s.removeChild(doc);
       assert_throws_dom(
         "NOT_FOUND_ERR",
-        (doc.defaultView || self).DOMException,
+        // (doc.defaultView || self).DOMException,
         function() { s.removeChild(doc) }
       );
     }, "Calling removeChild on a " + p + " from " + description +

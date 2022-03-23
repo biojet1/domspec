@@ -44,6 +44,12 @@ assert(
 
 node.style.color = null;
 assert(node.toString(), "<div></div>", "setter as null");
+
+node.style.display = 'none';
+assert(node.toString(), `<div style="display: none;"></div>`, "display=none");
+node.style.display = '';
+assert(node.toString(), "<div></div>", "setter as ''");
+
 // node.id = "";
 // node.className = "";
 // assert(node.toString(), "<div></div>", "setter as null");

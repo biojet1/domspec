@@ -74,7 +74,7 @@ export abstract class CharacterData extends ChildNode {
 			offset = new Uint32Array([offset])[0];
 		}
 		if (offset > length) {
-			throw new Error("IndexSizeError: offset > length");
+			throw DOMException.new("IndexSizeError", "offset > length");
 		}
 		if (count < 0) {
 			count = new Uint32Array([count])[0];
@@ -105,7 +105,7 @@ export abstract class CharacterData extends ChildNode {
 		offset = new Uint32Array([offset])[0];
 
 		if (offset > length) {
-			throw new Error("IndexSizeError: offset > length");
+			throw DOMException.new("IndexSizeError", "offset > length");
 		}
 
 		count = new Uint32Array([count])[0];
@@ -163,7 +163,7 @@ export class TextNode extends CharacterData {
 		const { length, ownerDocument, parentNode } = this;
 
 		if (offset > length) {
-			throw new Error("IndexSizeError: offset > length");
+			throw DOMException.new("IndexSizeError", "offset > length");
 		}
 
 		const count = length - offset;
@@ -206,7 +206,7 @@ export class CDATASection extends Text {
 	constructor(data: string) {
 		super(data);
 		if (this._data.indexOf("]]>") >= 0) {
-			throw new Error(`InvalidCharacterError`);
+			throw DOMException.new(`InvalidCharacterError`);
 		}
 	}
 	toString() {
@@ -224,7 +224,7 @@ export class Comment extends CharacterData {
 	constructor(data: string) {
 		super(data);
 		// if (this._data.indexOf("--") >= 0) {
-		// 	throw new Error(`InvalidCharacterError`);
+		// 	throw DOMException.new("InvalidCharacterError");
 		// }
 	}
 	//// Dom
@@ -240,14 +240,38 @@ export class Comment extends CharacterData {
 	}
 }
 
+// const NameStartChar =
+// 	/^[A-Za-z:_\uC0-\uD6\uD8-\uF6\uF8-\u2FF\u370-\u37D\u37F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD\u10000-\uEFFFF]+[-\.0-9\uB7\u0300-\u036F\u203F-\u2040]*$/;
+// // const NameExtra = /^[-\.0-9\uB7\u0300-\u036F\u203F-\u2040]$/;
+
+// function isXMLName(s){
+// 	NameStartChar.test(target)
+// }
+
 export class ProcessingInstruction extends CharacterData {
 	readonly target: string;
 	constructor(target: string, data: string) {
 		super(data);
-		if (this._data.indexOf("?>") >= 0 || !/^[a-zA-Z][^\s]*$/.test(target)) {
-			throw new Error(`InvalidCharacterError: ${target} ${data}`);
-		}
 
+		if (this._data.indexOf("?>") >= 0) {
+			throw DOMException.new("InvalidCharacterError", `data: ${data}`);
+		} else {
+			checkName(target);
+		}
+		// if (
+		// 	this._data.indexOf("?>") >= 0 ||
+		// 	!(
+		// 		/^[A-Za-z:_]+[\w:\.-\xB7]*$/.test(target) || 0
+		// 		// /^[A-Za-z:_\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD][-\w:\.\u00B7\u0300-\u036F\u203F-\u2040\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD]+[\.0-9\u00B7\u0300-\u036F\u203F-\u2040-][A-Za-z:_\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD]*$/.test(
+		// 		// 	target
+		// 		// )
+		// 	)
+		// ) {
+		// 	throw DOMException.new(
+		// 		"InvalidCharacterError",
+		// 		`${target} ${data}`
+		// 	);
+		// }
 		this.target = target;
 	}
 	//// Dom
@@ -284,6 +308,8 @@ export class ProcessingInstruction extends CharacterData {
 import { NEXT, PREV, Node } from "./node.js";
 import { ChildNode } from "./child-node.js";
 import { Document } from "./document.js";
+import { DOMException } from "./event-target.js";
+import { checkName } from "./namespace.js";
 
 // escape
 

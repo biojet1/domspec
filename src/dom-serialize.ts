@@ -1,8 +1,17 @@
 export class XMLSerializer {
 	serializeToString(node: Node): string {
-		// return Array.from(enumDOMStr(node)).join("");
 		const { endNode, startNode } = node;
-		return Array.from(enumXMLDump(startNode, endNode)).join("");
+		switch (node.nodeType) {
+			default:
+				return Array.from(enumXMLDump(startNode, endNode)).join("");
+			case 9: // DOCUMENT_NODE
+				return Array.from(
+					enumXMLDump(
+						startNode[NEXT] || startNode,
+						endNode[PREV] || endNode
+					)
+				).join("");
+		}
 	}
 }
 
@@ -23,7 +32,10 @@ export function* enumXMLDump(start: Node, end: Node) {
 					if (v !== null) {
 						const { name } = cur as Attr;
 						if (name)
-							yield ` ${name}="${(v as string).replace(/[<>&"\xA0]/g, rep)}"`;
+							yield ` ${name}="${(v as string).replace(
+								/[<>&"\xA0\t\n\r]/g,
+								rep
+							)}"`;
 					}
 				}
 				break;
@@ -31,13 +43,13 @@ export function* enumXMLDump(start: Node, end: Node) {
 			case 4: // CDATA_SECTION_NODE
 			case 7: // PROCESSING_INSTRUCTION_NODE
 			case 8: // COMMENT_NODE
+			case 10: // DOCUMENT_TYPE_NODE
 				if (isOpened) {
 					yield ">";
 					isOpened = false;
 				}
 				yield cur.toString();
 				break;
-
 			case -1: // End Tag
 				const { [PREV]: prev, parentNode: start } = cur as EndNode;
 				switch (start.nodeType) {
@@ -83,13 +95,6 @@ export function* enumXMLDump(start: Node, end: Node) {
 				isOpened = true;
 				break;
 
-			case 10: // DOCUMENT_TYPE_NODE
-				if (isOpened) {
-					yield ">";
-					isOpened = false;
-				}
-				yield cur.toString();
-				break;
 			// ENTITY_REFERENCE_NODE 	5
 			// ENTITY_NODE 	6
 			// NOTATION_NODE 	12
@@ -126,7 +131,6 @@ export function* enumFlatDOM(node: Node) {
 
 const rep = function (m: string) {
 	switch (m) {
-		// '   &apos;
 		// case "\xA0":
 		// 	return "&nbsp;";
 		case "&":
@@ -137,14 +141,21 @@ const rep = function (m: string) {
 			return "&gt;";
 		case '"':
 			return "&quot;";
+		// case "\t":
+		// 	return "&#x9;";
+		// case "\n":
+		// 	return "&#x9;";
+		// case '\r':
+		// 	return "&#x9;";
 	}
-	return m;
+	return `&#${m.charCodeAt(0)};`;
+
+	// return m;
 };
 
 import { NEXT, PREV, END, Node } from "./node.js";
 import { ChildNode } from "./child-node.js";
 import { ParentNode, EndNode } from "./parent-node.js";
-// import { NonElementParentNode } from "./non-element-parent-node.js";
 import { Element } from "./element.js";
 import { Attr } from "./attr.js";
 // import { Document } from "./document.js";

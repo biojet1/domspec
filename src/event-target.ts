@@ -8,44 +8,12 @@ export interface CustomEventInit extends EventInit {
 	detail?: any;
 }
 
-export class Event {
-	static CAPTURING_PHASE = 1;
-	static AT_TARGET = 2;
-	static BUBBLING_PHASE = 3;
-	readonly type: string;
-	target: EventTarget | null;
-	currentTarget: EventTarget | null;
-	eventPhase: number;
-	bubbles: boolean;
-	cancelable: boolean;
-	composed: boolean;
-	isTrusted: boolean;
-	defaultPrevented: boolean;
-	timeStamp: number;
-	_propagationStopped: boolean;
-	_immediatePropagationStopped: boolean;
-	_initialized: boolean;
-	_dispatching: boolean;
-	constructor(type: string, dictionary: EventInit) {
-		// Initialize basic event properties
-		this.type = type || "";
-		this.target = null;
-		this.currentTarget = null;
-		this.eventPhase = 2; // AT_TARGET
-		this.bubbles = dictionary?.bubbles || false;
-		this.cancelable = dictionary?.cancelable || false;
-		this.composed = dictionary?.composed || false;
-		this.isTrusted = false;
-		this.defaultPrevented = false;
-		this.timeStamp = Date.now();
-
-		// Initialize internal flags
-		// XXX: Would it be better to inherit these defaults from the prototype?
-		this._propagationStopped = false;
-		this._immediatePropagationStopped = false;
-		this._initialized = true;
-		this._dispatching = false;
-	}
+export interface MessageEventInit extends EventInit {
+	data?: any;
+	origin?: string;
+	lastEventId?: string;
+	source?: EventTarget;
+	ports?: EventTarget[];
 }
 
 export interface EventListener {
@@ -72,6 +40,7 @@ export class EventTarget {
 		callback: EventListener | CallBack,
 		options: EventEntry | boolean
 	) {
+		// console.log("[addEventListener]", type);
 		let { _listeners } = this;
 		let entry: EventEntry;
 		if (typeof options === "boolean") {
@@ -112,6 +81,7 @@ export class EventTarget {
 	*_enumAncestorTargets(): Generator<EventTarget, void, unknown> {}
 
 	dispatchEvent(event: Event, trusted?: boolean) {
+		// console.log("[dispatchEvent]", event);
 		if (typeof trusted !== "boolean") trusted = false;
 		function invoke(target: EventTarget, event: Event) {
 			const { _listeners } = target;
@@ -183,7 +153,9 @@ export class EventTarget {
 				const { [type]: stack } = _listeners;
 				if (stack) {
 					for (const { listener, capture } of stack) {
-						if (event._immediatePropagationStopped) return;
+						if (event._immediatePropagationStopped) {
+							return !event.defaultPrevented;
+						}
 						switch (phase) {
 							case Event.CAPTURING_PHASE:
 								if (!capture) continue;
@@ -204,7 +176,8 @@ export class EventTarget {
 		}
 
 		if (!event._initialized || event._dispatching)
-			throw new Error("InvalidStateError");
+			throw DOMException.new("InvalidStateError");
+
 		event.isTrusted = trusted;
 
 		// Begin dispatching the event now
@@ -238,6 +211,8 @@ export class EventTarget {
 		event._dispatching = false;
 		event.eventPhase = Event.AT_TARGET;
 		event.currentTarget = null;
+		event._propagationStopped = false;
+		event._immediatePropagationStopped = false;
 
 		// Deal with mouse events and figure out when
 		// a click has happened
@@ -299,5 +274,215 @@ export class EventTarget {
 	}
 	get DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC() {
 		return 32;
+	}
+}
+
+export class Event {
+	static NONE = 0;
+	static CAPTURING_PHASE = 1;
+	static AT_TARGET = 2;
+	static BUBBLING_PHASE = 3;
+	type: string;
+	target: EventTarget | null;
+	currentTarget: EventTarget | null;
+	eventPhase: number;
+	bubbles: boolean;
+	cancelable: boolean;
+	composed: boolean;
+	isTrusted: boolean;
+	defaultPrevented: boolean;
+	timeStamp: number;
+	_propagationStopped?: boolean;
+	_immediatePropagationStopped?: boolean;
+	_dispatching?: boolean;
+	_initialized: boolean;
+	constructor(type?: string, dictionary?: EventInit) {
+		// Initialize basic event properties
+		this.type = type || "";
+		this.target = null;
+		this.currentTarget = null;
+		this.eventPhase = 2; // AT_TARGET
+		this.bubbles = dictionary?.bubbles || false;
+		this.cancelable = dictionary?.cancelable || false;
+		this.composed = dictionary?.composed || false;
+		this.isTrusted = false;
+		this.defaultPrevented = false;
+		this.timeStamp = Date.now();
+
+		// Initialize internal flags
+		// XXX: Would it be better to inherit these defaults from the prototype?
+		// this._propagationStopped = false;
+		// this._immediatePropagationStopped = false;
+		this._initialized = true;
+		this._dispatching = false;
+	}
+	initEvent(
+		type: string,
+		bubbles: boolean = false,
+		cancelable: boolean = false
+	) {
+		this._initialized = true;
+		if (this._dispatching) return;
+
+		delete this._propagationStopped;
+		delete this._immediatePropagationStopped;
+		this.defaultPrevented = false;
+		this.isTrusted = false;
+
+		this.target = null;
+		this.type = type;
+		this.bubbles = bubbles;
+		this.cancelable = cancelable;
+		if (type === undefined) {
+			throw new TypeError();
+		}
+	}
+	stopImmediatePropagation() {
+		this._propagationStopped = true;
+		this._immediatePropagationStopped = true;
+	}
+
+	stopPropagation() {
+		this._propagationStopped = true;
+	}
+	preventDefault() {
+		if (this.cancelable) {
+			this.defaultPrevented = true;
+			// this._retval = b;
+		}
+	}
+	get cancelBubble() {
+		return this._propagationStopped || false;
+	}
+	set cancelBubble(cancel: boolean) {
+		this._propagationStopped = cancel;
+	}
+	get srcElement() {
+		return this.target || null;
+	}
+	get returnValue() {
+		return this.cancelable ? !this.defaultPrevented : true;
+	}
+	set returnValue(b: boolean) {
+		if (this.cancelable && !this.defaultPrevented) {
+			this.defaultPrevented = !this.defaultPrevented;
+		}
+	}
+	get CAPTURING_PHASE() {
+		return 1;
+	}
+	get AT_TARGET() {
+		return 2;
+	}
+	get BUBBLING_PHASE() {
+		return 3;
+	}
+	get NONE() {
+		return 0;
+	}
+}
+
+export class MessageEvent extends Event {
+	readonly data?: any;
+	readonly origin?: string;
+	readonly lastEventId?: string;
+	readonly source?: EventTarget;
+	readonly ports?: EventTarget[];
+	constructor(type?: string, init?: MessageEventInit) {
+		super(type, init);
+		if (init) {
+			const { data, origin, lastEventId, source, ports } = init;
+			if (data) this.data = data;
+			if (origin) this.origin = origin;
+			if (lastEventId) this.lastEventId = lastEventId;
+			if (source) this.source = source;
+			if (ports) this.ports = ports;
+		}
+	}
+}
+
+export class DOMException {
+	readonly name?: any;
+	readonly message?: string;
+	constructor(message: string, name: string = "") {
+		this.message = message;
+		this.name = name;
+	}
+	toString() {
+		const { name, message, code } = this;
+		return `DOMException: ${code} ${name} ${message}`;
+	}
+	get code() {
+		switch (this.name) {
+			case "IndexSizeError":
+				return 1;
+			case "HierarchyRequestError":
+				return 3;
+			case "WrongDocumentError":
+				return 4;
+			case "InvalidCharacterError":
+				return 5;
+			case "NoModificationAllowedError":
+				return 7;
+			case "NotFoundError":
+				return 8;
+			case "NotSupportedError":
+				return 9;
+			case "InUseAttributeError":
+				return 10;
+			case "InvalidStateError":
+				return 11;
+			case "SyntaxError":
+				return 12;
+			case "InvalidModificationError":
+				return 13;
+			case "NamespaceError":
+				return 14;
+			case "InvalidAccessError":
+				return 15;
+			case "TypeMismatchError":
+				return 17;
+			case "SecurityError":
+				return 18;
+			case "NetworkError":
+				return 19;
+			case "AbortError":
+				return 20;
+			case "URLMismatchError":
+				return 21;
+			case "QuotaExceededError":
+				return 22;
+			case "TimeoutError":
+				return 23;
+			case "InvalidNodeTypeError":
+				return 24;
+			case "DataCloneError":
+				return 25;
+			default:
+				return 0;
+			// case "EncodingError":
+			// 	return 0;
+			// case "NotReadableError":
+			// 	return 0;
+			// case "UnknownError":
+			// 	return 0;
+			// case "ConstraintError":
+			// 	return 0;
+			// case "DataError":
+			// 	return 0;
+			// case "TransactionInactiveError":
+			// 	return 0;
+			// case "ReadOnlyError":
+			// 	return 0;
+			// case "VersionError":
+			// 	return 0;
+			// case "OperationError":
+			// 	return 0;
+			// case "NotAllowedError":
+			// 	return 0;
+		}
+	}
+	static new(name: string, message: string = "") {
+		return new DOMException(message, name);
 	}
 }

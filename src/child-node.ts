@@ -42,7 +42,6 @@ export abstract class ChildNode extends Node {
 		return null;
 	}
 
-
 	get nextElementSibling(): Element | null {
 		let { nextSibling: node } = this;
 		for (; node; node = node.nextSibling) {
@@ -120,13 +119,13 @@ export abstract class ChildNode extends Node {
 		}
 	}
 
-	contains(node?: ChildNode) {
-		return this === node;
-	}
+	// contains(node?: ChildNode) {
+	// 	return this === node;
+	// }
 
 	appendChild(node: Node) {
 		if (node) {
-			throw new Error(`HierarchyRequestError: Not implemented`);
+			throw DOMException.new("HierarchyRequestError");
 		} else {
 			throw new TypeError();
 		}
@@ -161,8 +160,7 @@ export abstract class ChildNode extends Node {
 	}
 }
 
+import { DOMException } from "./event-target.js";
 import { ParentNode, EndNode } from "./parent-node.js";
 import { Element } from "./element.js";
-// import { Element } from "./element.js";
-// import { Text } from "./character-data.js";
 import { Document } from "./document.js";

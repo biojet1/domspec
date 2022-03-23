@@ -1,11 +1,11 @@
 function checkToken(token: string) {
 	if (token.length > 0) {
 		if (/\s/.test(token)) {
-			throw new Error("InvalidCharacterError: white space");
+			throw DOMException.new("SyntaxError", `white space`);
 		}
 		return token;
 	} else {
-		throw new Error("SyntaxError: empty token");
+		throw DOMException.new("SyntaxError", `empty token`);
 	}
 }
 
@@ -60,7 +60,7 @@ export class DOMTokenList extends Set<string> {
 
 	parse(tokens: string) {
 		this.clear();
-		for (const token of tokens.split(/\s+/))
+		for (const token of tokens.split(/[\t\n\f\r ]+/))
 			token.length > 0 && super.add(token);
 	}
 
@@ -88,3 +88,5 @@ export class DOMTokenList extends Set<string> {
 		return this.format();
 	}
 }
+
+import { DOMException } from "./event-target.js";

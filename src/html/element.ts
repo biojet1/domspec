@@ -2,8 +2,11 @@ export class HTMLElement extends Element {
 	hasAttribute(qName: string) {
 		return super.hasAttribute(qName.toLowerCase());
 	}
-
 }
+export class HTMLScriptElement extends HTMLElement {
+	_alreadyStarted?: boolean;
+}
+
 export class HTMLDivElement extends HTMLElement {}
 export class HTMLTemplateElement extends HTMLElement {
 	get content() {
@@ -72,7 +75,6 @@ export class HTMLPictureElement extends HTMLElement {}
 export class HTMLPreElement extends HTMLElement {}
 export class HTMLProgressElement extends HTMLElement {}
 export class HTMLQuoteElement extends HTMLElement {}
-export class HTMLScriptElement extends HTMLElement {}
 export class HTMLSelectElement extends HTMLElement {}
 export class HTMLSlotElement extends HTMLElement {}
 export class HTMLSourceElement extends HTMLElement {}

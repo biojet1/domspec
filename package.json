@@ -10,6 +10,8 @@
     "rm-map": "find dist -name '*.js.map' -type f -delete",
     "c8test": "c8 npx tap --no-coverage --reporter=terse 'test/*.tap.?js' 'test/wpt-o?/*.tap.?js'",
     "wpt": "c8 npx tap --no-coverage --reporter=terse 'test/wpt-o?/*.tap.?js'",
+    "wpt-run-try": "env TRY=1 tap --node-arg=--trace-warnings --node-arg=--unhandled-rejections=strict --bail test/wpt-run.tap.mjs",
+    "wpt-run-ok": "env tap -t600 --node-arg=--trace-warnings --node-arg=--unhandled-rejections=strict --bail test/wpt-run.tap.mjs",
     "c8report": "c8 report -r text-lcov > coverage/lcov.info",
     "c8rephtml": "c8 report -r html",
     "html:switch": "env SWITCH=html node test/elements.js",
@@ -18,7 +20,8 @@
     "svg:switch": "env SWITCH=svg node test/elements.js",
     "svg:import": "env IMPORT=svg node test/elements.js",
     "compile": "tsc -d --sourcemap",
-    "prepare": "tsc -d",
+    "prepare": "tsc -d --removeComments",
+    "up:devel": "python -B -m ghdevapi.up -A biojet1/svgdom-ts . -m . -r devel -a",
     "up": "python -B -m ghdevapi up -A biojet1/svgdom-ts . -m . -r main -a"
   },
   "author": "",
@@ -35,6 +38,7 @@
     "saxes": "^5.0.1"
   },
   "peerDependencies": {
+    "node-fetch": "*",
     "svggeom": "git://github.com/biojet1/svggeom#main"
   },
   "files": [
@@ -44,6 +48,10 @@
     "reports-dir": "/tmp/.c8/rep",
     "temp-directory": "/tmp/.c8/tmp",
     "src": "dist"
+  },
+  "tap": {
+    "timeout": 90,
+    "coverage": false
   },
   "devDependencies": {
     "chai": "^4.3.4",

@@ -24,8 +24,8 @@ export abstract class ParentNode extends ChildNode {
 				/* c8 ignore start */
 			} else if (next instanceof EndNode) {
 				throw new Error("Unexpected following EndNode node");
-				/* c8 ignore stop */
 			}
+			/* c8 ignore stop */
 		}
 		return null;
 	}
@@ -46,8 +46,8 @@ export abstract class ParentNode extends ChildNode {
 			// return prev.startNode as ChildNode;
 			if (prev instanceof EndNode) {
 				return prev.parentNode;
-			} else if (prev instanceof ParentNode) {
 				/* c8 ignore start */
+			} else if (prev instanceof ParentNode) {
 				throw new Error("Unexpected preceding ParentNode node");
 				/* c8 ignore stop */
 			} else if (prev instanceof ChildNode) {
@@ -75,22 +75,37 @@ export abstract class ParentNode extends ChildNode {
 		this._before(this[END], this._toNodes(nodes));
 	}
 
-	_before(ref: ChildNode | EndNode, nodes: Iterable<ChildNode>) {
+	_before(child: ChildNode | EndNode, nodes: Iterable<ChildNode>) {
 		let { ownerDocument, nodeType } = this;
-		if (ref.parentNode != this) {
-			throw new Error("NotFoundError: unexpected reference child parent");
+		if (child.parentNode != this) {
+			for (const node of nodes) {
+				// console.log((node as ParentNode).outerHTML, this.outerHTML, node.contains(this));
+				if (!node || !(node instanceof Node)) {
+					throw new TypeError("wIAXm1");
+				} else if (node.contains(this)) {
+					throw DOMException.new(
+						"HierarchyRequestError",
+						`node is ancestor of parent`
+					);
+				}
+			}
+			throw DOMException.new(
+				"NotFoundError",
+				`unexpected reference child parent`
+			);
 		} else if (nodeType === 9) {
 			ownerDocument = this as unknown as Document;
 		}
 		for (const node of nodes) {
 			if (node instanceof ParentNode) {
 				if (node.contains(this)) {
-					throw new Error(
-						"HierarchyRequestError: node is ancestor of parent."
+					throw DOMException.new(
+						"HierarchyRequestError",
+						`node is ancestor of parent`
 					);
 				}
 			}
-			switch (node.nodeType) {
+			S1: switch (node.nodeType) {
 				case 11: {
 					// DOCUMENT_FRAGMENT_NODE
 					if (nodeType === 9) {
@@ -111,15 +126,20 @@ export abstract class ParentNode extends ChildNode {
 									cur = cur.nextSibling;
 									continue;
 							}
-							throw new Error(`HierarchyRequestError`);
+
+							throw DOMException.new(
+								"HierarchyRequestError",
+								"A"
+							);
 						}
-						if (ref instanceof ChildNode) {
-							let cur: ChildNode | null = ref;
+						if (child instanceof ChildNode) {
+							let cur: ChildNode | null = child;
 							for (; cur; cur = cur.nextSibling) {
 								switch (cur.nodeType) {
 									case 10: // DOCUMENT_TYPE_NODE
-										throw new Error(
-											`HierarchyRequestError`
+										throw DOMException.new(
+											"HierarchyRequestError",
+											"B"
 										);
 								}
 							}
@@ -130,66 +150,84 @@ export abstract class ParentNode extends ChildNode {
 				case 1: // ELEMENT_NODE
 					if (nodeType === 9) {
 						if ((this as unknown as Document).firstElementChild) {
-							throw new Error(`HierarchyRequestError`);
+							throw DOMException.new(
+								"HierarchyRequestError",
+								"C"
+							);
 						}
-						if (ref instanceof ChildNode) {
-							let cur: ChildNode | null = ref;
+						if (child instanceof ChildNode) {
+							let cur: ChildNode | null = child;
 							for (; cur; cur = cur.nextSibling) {
 								switch (cur.nodeType) {
 									case 10: // DOCUMENT_TYPE_NODE
-										throw new Error(
-											`HierarchyRequestError`
+										throw DOMException.new(
+											"HierarchyRequestError",
+											"D"
 										);
 								}
 							}
 						}
 					}
 					break;
-
 				case 3: // TEXT_NODE
 					if (nodeType === 9) {
-						throw new Error(`HierarchyRequestError`);
+						throw DOMException.new("HierarchyRequestError", "E");
 					}
 					break;
-
-				case 4: {
-					// CDATA_SECTION_NODE
-					// switch (this.nodeType) {
-					// 	case 9: // DOCUMENT_NODE
-					// 		throw new Error(`HierarchyRequestError`);
-					// }
-				}
+				case 4: // CDATA_SECTION_NODE
 				case 7: // PROCESSING_INSTRUCTION_NODE
 				case 8: // COMMENT_NODE
 					break;
 				case 10: // DOCUMENT_TYPE_NODE
-					if (nodeType === 9) {
+					if (9 === nodeType) {
+						// DOCUMENT_NODE
 						const doc = this as unknown as Document;
 						if (doc.doctype) {
-							throw new Error(`HierarchyRequestError`);
+							throw DOMException.new(
+								"HierarchyRequestError",
+								"F"
+							);
 						}
 						const first = doc.firstElementChild as unknown as Node;
-						if (first && !first.isSameNode(ref)) {
-							throw new Error(`HierarchyRequestError`);
+						if (first && !first.isSameNode(child)) {
+							throw DOMException.new(
+								"HierarchyRequestError",
+								"G"
+							);
 						}
-						break;
+						break S1;
 					}
 				// fall
 				default:
+					// if(!node)
 					if (node instanceof ChildNode) {
-						throw new Error(`HierarchyRequestError`);
+						throw DOMException.new(
+							"HierarchyRequestError",
+							`${nodeType} ${node.nodeType}`
+						);
 					} else {
 						throw new TypeError();
 					}
 			}
-			if (node !== ref) {
+
+			// if (0) {
+			// 	let referenceChild = child;
+			// 	if (referenceChild === node) {
+			// 		referenceChild = node.nextSibling;
+			// 	}
+			// 	// let previousSibling = child.previousSibling;
+			// 	// let removedNodes = child.parentNode ? [child] : [];
+			// 	// child._detach(ownerDocument);
+			// 	// const ref = referenceChild || this[END];
+			// 	// node._detach(ownerDocument);
+			// 	// node._attach(ref[PREV] || this, ref, this);
+			// }
+
+			if (node !== child) {
 				node._detach(ownerDocument);
-				node._attach(ref[PREV] || this, ref, this);
+				node._attach(child[PREV] || this, child, this);
 			}
 		}
-		// let { _children } = this;
-		// _children && this.childNodes;
-		// _children_map.get(this)?.putChildren(this);
 	}
 
 	insertBefore(node: ChildNode, before?: ChildNode | EndNode | null) {
@@ -202,64 +240,186 @@ export abstract class ParentNode extends ChildNode {
 		return node;
 	}
 
-	contains(node?: ChildNode | null) {
-		for (;;) {
-			if (node === this) {
-				return true;
-			} else if (node) {
-				if (!(node = node.parentNode)) {
-					if (!(arguments[0] instanceof Node)) {
-						throw new TypeError();
-					}
-					break;
-				}
-			} else {
-				if (arguments.length < 1) {
-					throw new TypeError();
-				}
-				break;
-			}
-		}
-		return false;
-	}
-
 	removeChild(node: ChildNode) {
-		if (!node || !(node instanceof ChildNode)) throw new TypeError();
-		if (node.parentNode !== this) throw new Error("NotFoundError");
+		if (!(node instanceof ChildNode)) throw new TypeError();
+		if (node.parentNode !== this) throw DOMException.new("NotFoundError");
+
 		node.remove();
 		// const { _children } = this;
 		// _children && _children.putChildren(this);
 		return node;
 	}
 
-	replaceChild(node: ChildNode, child: ChildNode) {
-		// console.error(
-		// 	"replaceChild child.parentNode",
-		// 	child.nodeName,
-		// 	child.parentNode && child.parentNode.nodeName
-		// );
-		// if (!node) throw new Error("NotFoundError");
-		if (!node || !child) {
+	_replace(node: ChildNode, child: ChildNode) {
+		if (!node) {
+			throw new TypeError();
+		} else if (node.contains(this)) {
+			throw DOMException.new("HierarchyRequestError", "Not ParentNode");
+		} else if (!child) {
 			throw new TypeError();
 		} else if (child.parentNode !== this) {
-			throw new Error("NotFoundError");
+			throw DOMException.new("NotFoundError", "X");
 		}
-		const ref = child.nextSibling || this[END];
-		child.remove();
-		this._before(ref, [node]);
+		let { ownerDocument, nodeType: parentType } = this;
+		let { nodeType } = node;
+
+		switch (nodeType) {
+			case 1: // ELEMENT_NODE
+				if (9 === parentType) {
+					// DOCUMENT_NODE
+					if (
+						child !==
+							(this as unknown as Document).firstElementChild ||
+						child.nextSibling?.nodeType === 10
+					) {
+						throw DOMException.new("HierarchyRequestError");
+					}
+				}
+				break;
+			case 3: // TEXT_NODE
+				if (9 === parentType) {
+					throw DOMException.new(
+						"HierarchyRequestError",
+						`${nodeType} not allowed in ${parentType}`
+					);
+				}
+				break;
+			case 4: // CDATA_SECTION_NODE
+			case 7: //PROCESSING_INSTRUCTION_NODE
+			case 8: //COMMENT_NODE
+				// case 9: //DOCUMENT_NODE
+				break;
+			case 10: //DOCUMENT_TYPE_NODE
+				if (9 === parentType) {
+					let seen_elem = 0;
+					let cur: ChildNode | null = this.firstChild;
+					for (; cur; cur = cur.nextSibling) {
+						switch (cur.nodeType) {
+							case 10: // DOCUMENT_TYPE_NODE
+								if (child !== cur) {
+									throw DOMException.new(
+										"HierarchyRequestError",
+										"already has doctype child"
+									);
+								}
+								if (seen_elem > 0) {
+									throw DOMException.new(
+										"HierarchyRequestError",
+										"element is preceding doctype child"
+									);
+								}
+								break;
+							case 1:
+								++seen_elem;
+							// break;
+							default:
+								if (child === cur && seen_elem > 0) {
+									throw DOMException.new(
+										"HierarchyRequestError",
+										"element is preceding child"
+									);
+								}
+						}
+					}
+				} else {
+					throw DOMException.new(
+						"HierarchyRequestError",
+						`${nodeType} not allowed in ${parentType}`
+					);
+				}
+				break;
+			case 11: //DOCUMENT_FRAGMENT_NODE
+				if (9 === parentType) {
+					// DOCUMENT_NODE
+					let seen_elem = 0;
+					let cur: ChildNode | null = node.firstChild;
+					for (; cur; cur = cur.nextSibling) {
+						switch (cur.nodeType) {
+							case 10: // DOCUMENT_TYPE_NODE
+								if (seen_elem > 0) {
+									throw DOMException.new(
+										"HierarchyRequestError",
+										"doctype is following child"
+									);
+								}
+								break;
+							case 1:
+								if (++seen_elem > 1) {
+									throw DOMException.new(
+										"HierarchyRequestError",
+										"more than one element child"
+									);
+								}
+								break;
+							case 3:
+								throw DOMException.new(
+									"HierarchyRequestError",
+									"has a Text node child"
+								);
+								break;
+						}
+					}
+					cur = this.firstChild;
+					let seen_child = 0;
+					for (; cur; cur = cur.nextSibling) {
+						switch (cur.nodeType) {
+							case 10: // DOCUMENT_TYPE_NODE
+								if (seen_child > 0 && seen_elem > 0) {
+									throw DOMException.new(
+										"HierarchyRequestError",
+										"element before the doctype"
+									);
+								}
+								break;
+							case 1: {
+								if (seen_elem > 0) {
+									if (child !== cur) {
+										throw DOMException.new(
+											"HierarchyRequestError",
+											"DocumentFragment with an element element child already"
+										);
+									}
+								}
+								break;
+							}
+						}
+						if (child === cur) {
+							seen_child++;
+						}
+					}
+				}
+				break;
+			default:
+				throw DOMException.new("HierarchyRequestError");
+		}
+		if (child === node) {
+			return child;
+		} else if (parentType === 9) {
+			ownerDocument = this as unknown as Document;
+		}
+		if (1) {
+			let referenceChild = child.nextSibling;
+			if (referenceChild === node) {
+				referenceChild = node.nextSibling;
+			}
+			let previousSibling = child.previousSibling;
+			let removedNodes = child.parentNode ? [child] : [];
+			child._detach(ownerDocument);
+			const ref = referenceChild || this[END];
+			node._detach(ownerDocument);
+			node._attach(ref[PREV] || this, ref, this);
+		}
 		return child;
-		// this.insertBefore(node, child.endNode[NEXT] as ChildNode);
-		// return child;
 	}
 
-	_on_child_detached(node: Node) {
-		// _children_map?.get(this)?.putChildren(this);
-		// _children_map?.get(this)?.length;
-	}
-	_on_child_attached(node: Node) {
-		// _children_map?.get(this)?.putChildren(this);
-		// _children_map?.get(this)?.length;
-	}
+	// _on_child_detached(node: Node) {
+	// 	// _children_map?.get(this)?.putChildren(this);
+	// 	// _children_map?.get(this)?.length;
+	// }
+	// _on_child_attached(node: Node) {
+	// 	// _children_map?.get(this)?.putChildren(this);
+	// 	// _children_map?.get(this)?.length;
+	// }
 
 	hasChildNodes() {
 		return !!this.lastChild;
@@ -339,18 +499,31 @@ export abstract class ParentNode extends ChildNode {
 		}
 	}
 
-	// *elementsByTagName(name: string) {
-	// 	let { [NEXT]: next, [END]: end } = this;
-	// 	for (; next && next !== end; next = next[NEXT]) {
-	// 		if (next.nodeType === 1) {
-	// 			const el = next as any as Element;
-	// 			const { localName } = el;
-	// 			if (localName === name) {
-	// 				yield el;
+	// 	elementsByTagName(name: string) {
+	// 		let { [NEXT]: next, [END]: end } = this;
+	// 		for (; next && next !== end; next = next[NEXT]) {
+	// 			if (next.nodeType === 1) {
+	// 				const el = next as any as Element;
+	// 				const { localName } = el;
+	// 				if (localName === name) {
+	// 					yield el;
+	// 				}
 	// 			}
 	// 		}
+
+	// const myIterator = {
+
+	// 	*[Symbol.iterator](): Iterator<Attr> {
+	// 		let attr = this.#owner[NEXT];
+	// 		for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
+	// 			yield attr;
+	// 		}
 	// 	}
-	// }
+	// };
+
+	// 		return new Proxy(this, );
+
+	// 	}
 
 	// *elementsByClassName(name: string) {
 	// 	let { [NEXT]: next, [END]: end } = this;
@@ -379,15 +552,20 @@ export abstract class ParentNode extends ChildNode {
 				}
 			})();
 		}
+		const q = name;
 		const pos = name.indexOf(":");
-		if (this.ownerDocument?.isHTML) {
+		let { ownerDocument, nodeType } = this;
+		const isHTML = ownerDocument
+			? ownerDocument.isHTML
+			: nodeType === 9 && (this as any as Document).isHTML;
+		if (isHTML) {
 			let p: string;
 			let n: string;
 			let l: string;
 			if (pos < 0) {
 				n = name;
 			} else {
-				name = name.replace(/([A-Z]+)/g, (m, a) => a.toLowerCase());
+				// name = name.replace(/([A-Z]+)/g, (m, a) => a.toLowerCase());
 				p = name.substring(0, pos);
 				n = name.substring(pos + 1);
 				// l = n.replace(/([A-Z]+)/, (m, a) => a.toLowerCase());
@@ -400,23 +578,31 @@ export abstract class ParentNode extends ChildNode {
 							const el = next as any as Element;
 							let { localName, namespaceURI, prefix } = el;
 							if (namespaceURI === HTML_NS) {
-								localName = localName.replace(
-									/([A-Z]+)/g,
-									(m, a) => a.toLowerCase()
-								);
-								if (prefix) {
-									prefix = prefix.replace(
-										/([A-Z]+)/g,
-										(m, a) => a.toLowerCase()
-									);
-								}
-							}
-							if (p === undefined) {
-								if (localName === n) {
+								// localName = localName.replace(
+								// 	/([A-Z]+)/g,
+								// 	(m, a) => a.toLowerCase()
+								// );
+								// if (prefix) {
+								// 	prefix = prefix.replace(
+								// 		/([A-Z]+)/g,
+								// 		(m, a) => a.toLowerCase()
+								// 	);
+								// }
+								// if (p === undefined) {
+								// 	if (localName === n) {
+								// 		yield el;
+								// 	}
+								// } else {
+								// 	if (localName === n && prefix === p) {
+								// 		yield el;
+								// 	}
+								// }
+								// el.qualifiedName
+								if (el.qualifiedName === q) {
 									yield el;
 								}
 							} else {
-								if (localName === n && prefix === p) {
+								if (el.qualifiedName === q) {
 									yield el;
 								}
 							}
@@ -441,10 +627,13 @@ export abstract class ParentNode extends ChildNode {
 					if (next.nodeType === 1) {
 						const el = next as any as Element;
 						const { localName, prefix } = el;
-						if (
-							localName === n &&
-							(p === undefined || (p ? prefix === p : !prefix))
-						) {
+						// if (
+						// 	localName === n &&
+						// 	(p === undefined || (p ? prefix === p : !prefix))
+						// ) {
+						// 	yield el;
+						// }
+						if (el.qualifiedName === q) {
 							yield el;
 						}
 					}
@@ -503,7 +692,11 @@ export abstract class ParentNode extends ChildNode {
 		let cur: Node | null | undefined = this[NEXT];
 		const end = this[END];
 		for (; cur && cur !== end; cur = cur[NEXT]) {
-			if (cur.nodeType === 3) text.push(cur.textContent);
+			switch (cur.nodeType) {
+				case 3:
+				case 4:
+					text.push(cur.textContent);
+			}
 		}
 		return text.join("");
 	}
@@ -599,6 +792,8 @@ function* iterQuery(test: (node: Element) => boolean, elem: ParentNode) {
 	}
 }
 
+function _removeChild(parent: ParentNode, child: ChildNode) {}
+
 export class EndNode extends Node {
 	parentNode: ParentNode;
 	constructor(parent: ParentNode) {
@@ -622,9 +817,10 @@ export class EndNode extends Node {
 		}
 		let { parentNode: parentB } = node as EndNode;
 		let { parentNode: parentA } = this;
-		return parentA && parentB
-			? parentA.isEqualNode(parentB)
-			: !parentA === !parentB;
+		return (parentA && parentB && parentA.isEqualNode(parentB)) || false;
+		// return parentA && parentB
+		// 	? parentA.isEqualNode(parentB)
+		// 	: !parentA === !parentB;
 	}
 }
 
@@ -682,6 +878,12 @@ export abstract class HTMLCollection {
 	abstract [Symbol.iterator](): Iterator<Element>;
 }
 
+function _insert(parent: ParentNode, node: ChildNode, child: ChildNode) {
+	if (child) {
+	} else {
+	}
+}
+
 import {
 	Node,
 	PREV,
@@ -700,3 +902,4 @@ import { enumXMLDump } from "./dom-serialize.js";
 import { parseDOM } from "./dom-parse.js";
 import { Document } from "./document.js";
 import { HTML_NS } from "./namespace.js";
+import { DOMException } from "./event-target.js";

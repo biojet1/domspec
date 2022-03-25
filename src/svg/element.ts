@@ -178,8 +178,9 @@ export class SVGGraphicsElement extends SVGElement {
 			case "width":
 			case "height":
 				return new SVGLengthAttr(name);
-			case "viewBox":
-				return new SVGRectAttr(name);
+			case "viewbox":
+				// return new SVGRectAttr(name);
+				return new SVGLengthListAttr(name);
 			case "transform":
 				return new SVGTransformListAttr(name);
 		}
@@ -213,8 +214,8 @@ export class SVGGraphicsElement extends SVGElement {
 	get height(): SVGLengthAttr {
 		return this.letAttributeNode("height") as SVGLengthAttr; // for now
 	}
-	get viewBox(): SVGRectAttr {
-		return this.letAttributeNode("viewBox") as SVGRectAttr; // for now
+	get viewBox(): SVGLengthListAttr {
+		return this.letAttributeNode("viewbox") as SVGLengthListAttr; // for now
 	}
 	get transform(): SVGTransformListAttr {
 		return this.letAttributeNode("transform") as SVGTransformListAttr; // for now
@@ -609,7 +610,14 @@ export class SVGScriptElement extends SVGElement {
 }
 
 import { Element } from "../element.js";
-import { userUnit, SVGLength, SVGRectAttr, SVGLengthAttr } from "./units.js";
+import {
+	userUnit,
+	SVGLength,
+	SVGRectAttr,
+	SVGLengthAttr,
+	SVGLengthListAttr,
+	SVGLengthList,
+} from "./units.js";
 import { SVGTransformListAttr, SVGTransform } from "./attr-transform.js";
 import { DOMException } from "../event-target.js";
 export { SVGLength, SVGTransform };

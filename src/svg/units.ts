@@ -64,6 +64,9 @@ export class SVGLength {
 			throw new TypeError();
 		}
 	}
+	toString() {
+		return this.valueAsString;
+	}
 
 	get valueAsString() {
 		let { _num, _unit } = this;
@@ -84,16 +87,14 @@ export class SVGLength {
 	}
 	get value() {
 		let { _num, _unit } = this;
-		if (_unit) {
-			switch (_unit) {
-				case 0:
-				case 1:
-				case 5:
-					return _num;
-			}
-			return CONVERSIONS[_unit] * _num;
+
+		switch (_unit) {
+			case 0:
+			case 1:
+			case 5:
+				return _num;
 		}
-		return NaN;
+		return CONVERSIONS[_unit] * _num;
 	}
 	set value(value: number) {
 		let { _num, _unit } = this;
@@ -161,6 +162,82 @@ export class SVGLength {
 	static SVG_LENGTHTYPE_PC = 10;
 }
 
+export class SVGLengthList extends Array<SVGLength> {
+	clear() {
+		this.splice(0);
+	}
+	initialize(newItem: SVGLength) {
+		if (newItem instanceof SVGLength) {
+			this.clear();
+			this.push(newItem);
+			return newItem;
+		}
+		throw TypeError();
+	}
+
+	getItem(i: number) {
+		return this[i];
+	}
+
+	removeItem(i: number) {
+		const m = this[i];
+		this.splice(i, 1);
+		return m;
+	}
+	appendItem(newItem: SVGLength) {
+		this.push(newItem);
+		return newItem;
+	}
+	insertItemBefore(newItem: SVGLength, i: number) {
+		let j;
+		while ((j = this.indexOf(newItem)) >= 0) {
+			this.splice(j, 1);
+		}
+		if (newItem instanceof SVGLength) {
+			this.splice(i, 0, newItem);
+			return newItem;
+		} else {
+			const n = new SVGLength(newItem);
+			this.splice(i, 0, n);
+			return n;
+		}
+	}
+	replaceItem(newItem: SVGLength, i: number) {
+		let j;
+		while ((j = this.indexOf(newItem)) >= 0) {
+			this.splice(j, 1);
+			--i;
+		}
+		this.splice(i, 0, newItem);
+	}
+
+	toString() {
+		return this.join(" ");
+	}
+	get numberOfItems() {
+		return this.length;
+	}
+
+	public static parse(d: string): SVGLengthList {
+		const tl = new SVGLengthList();
+		// console.log("parse:static", d);
+		for (const str of d.split(/[\s,]+/)) {
+			// console.log("str", str);
+			tl.appendItem(new SVGLength(str.trim()));
+		}
+		return tl;
+	}
+	parse(d: string): SVGLengthList {
+		this.clear();
+		// console.log("parse", d);
+		for (const str of d.split(/[\s,]+/)) {
+			// console.log("str", str);
+			this.appendItem(new SVGLength(str.trim()));
+		}
+		return this;
+	}
+}
+
 export class SVGLengthAttr extends Attr {
 	_var?: SVGLength | string;
 
@@ -197,6 +274,42 @@ export class SVGLengthAttr extends Attr {
 		} else {
 			return _var?.toString();
 		}
+	}
+}
+
+export class SVGLengthListAttr extends Attr {
+	_var?: SVGLengthList | string;
+
+	set value(value: string) {
+		const { _var } = this;
+		if (_var instanceof SVGLengthList) {
+			_var.parse(value);
+		} else {
+			this._var = value;
+		}
+	}
+
+	get value() {
+		const { _var } = this;
+		if (_var instanceof SVGLengthList) {
+			return _var.toString() || "";
+		}
+		return _var ?? "";
+	}
+
+	get baseVal() {
+		const { _var } = this;
+		if (_var instanceof SVGLengthList) {
+			return _var;
+		} else if (_var) {
+			return (this._var = SVGLengthList.parse(_var));
+		} else {
+			return (this._var = new SVGLengthList());
+		}
+	}
+
+	valueOf() {
+		return this._var?.toString();
 	}
 }
 
@@ -244,8 +357,6 @@ export class SVGRectAttr extends Attr {
 		}
 	}
 }
-
-
 
 import { Box } from "svggeom";
 import { Attr } from "../attr.js";

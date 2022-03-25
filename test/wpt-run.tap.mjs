@@ -435,7 +435,7 @@ svg/types/scripted/SVGLength.html
 // // dom/nodes/ParentNode-querySelector-All.html
 // // dom/nodes/Document-createEvent.https.html
 // svg/types/scripted/SVGGeometryElement.getPointAtLength-03.svg
-
+svg/types/scripted/SVGLengthList-basics.html
 `;
     tests = (process.env.TRY ? tests_try : tests)
         .split(/[\r\n]+/)

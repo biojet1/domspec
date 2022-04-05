@@ -51,7 +51,7 @@ interface IBBoxParam {
 export class SVGGraphicsElement extends SVGElement {
 	get nearestViewportElement(): SVGElement | null {
 		let parent: SVGElement = this;
-		while ((parent = this.parentElement as SVGElement)) {
+		while ((parent = parent.parentElement as SVGElement)) {
 			if (parent._isViewportElement) {
 				return parent;
 			}
@@ -61,7 +61,7 @@ export class SVGGraphicsElement extends SVGElement {
 	get farthestViewportElement(): SVGElement | null {
 		let parent: SVGElement = this;
 		let farthest: SVGElement | null = null;
-		while ((parent = this.parentElement as SVGElement)) {
+		while ((parent = parent.parentElement as SVGElement)) {
 			if (parent._isViewportElement) {
 				farthest = parent as SVGElement;
 			}
@@ -355,10 +355,13 @@ export class SVGCircleElement extends SVGGeometryElement {
 export class SVGRectElement extends SVGGeometryElement {
 	static TAGS = ["rect"];
 	describe() {
-		const width = parseFloat(this.getAttribute("width") || "0");
-		const height = parseFloat(this.getAttribute("height") || "0");
-		const x = parseFloat(this.getAttribute("x") || "0");
-		const y = parseFloat(this.getAttribute("y") || "0");
+		const width = this.width.baseVal.value;
+		const height = this.height.baseVal.value;
+		const x = this.x.baseVal.value;
+		const y = this.y.baseVal.value;
+		const rx = this.rx.baseVal.value;
+		const ry = this.ry.baseVal.value;
+
 		return `M ${x} ${y} h ${width} v ${height} h ${-width} Z`;
 	}
 	fuseTransform(parentT?: Matrix) {

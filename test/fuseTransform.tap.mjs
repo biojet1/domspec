@@ -111,15 +111,35 @@ tap.test("rect", function (t) {
 	t.end();
 });
 
-// rect = Rectangle(attrib={
-//     "x": "10px", "y": "20px",
-//     "width": "100px", "height": "200px",
-//     "rx": "15px", "ry": "30px" })
-// self.assertEqual(rect.left, 10)
-// self.assertEqual(rect.top, 20)
-// self.assertEqual(rect.right, 10+100)
-// self.assertEqual(rect.bottom, 20+200)
-// self.assertEqual(rect.width, 100)
-// self.assertEqual(rect.height, 200)
-// self.assertEqual(rect.rx, 15)
-// self.assertEqual(rect.ry, 30)
+tap.test("viewportElement", function (t) {
+	const doc = parser.parseFromString(`
+<svg xmlns="http://www.w3.org/2000/svg" id="VPA" viewBox="0 0 200 100">
+  <svg id="VPB" viewBox="0 0 200 100">
+    <svg id="VPC" viewBox="0 0 200 100">
+      <svg id="VPD" viewBox="0 0 200 100">
+        <svg id="VPE" viewBox="0 0 200 100">
+          <rect id="R1" x="10px" y="20px" width="100px" height="200px" rx="15px" ry="30px"/>
+        </svg>
+      </svg>
+    </svg>
+  </svg>
+</svg>
+		`);
+	const top = doc.documentElement;
+	const R1 = doc.getElementById("R1");
+	const VPA = doc.getElementById("VPA");
+	const VPB = doc.getElementById("VPB");
+	const VPC = doc.getElementById("VPC");
+	const VPD = doc.getElementById("VPD");
+	const VPE = doc.getElementById("VPE");
+
+	t.same(R1.viewportElement.id, "VPE");
+	t.same(R1.ownerSVGElement.id, "VPE");
+	t.same(R1.nearestViewportElement.id, "VPE");
+	t.same(R1.farthestViewportElement.id, "VPA");
+	t.same(VPE.viewportElement.id, "VPD");
+	t.same(VPE.ownerSVGElement.id, "VPD");
+	t.same(VPE.nearestViewportElement.id, "VPD");
+	t.same(VPE.farthestViewportElement.id, "VPA");
+	t.end();
+});

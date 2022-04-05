@@ -2,6 +2,7 @@ import tap from "tap";
 import { Document, SVGDocument } from "../dist/document.js";
 import { ParentNode } from "../dist/parent-node.js";
 import { DOMParser } from "../dist/dom-parse.js";
+import { SVGLength } from "../dist/svg/element.js";
 import { Path } from "svggeom";
 
 const parser = new DOMParser();
@@ -141,5 +142,98 @@ tap.test("viewportElement", function (t) {
 	t.same(VPE.ownerSVGElement.id, "VPD");
 	t.same(VPE.nearestViewportElement.id, "VPD");
 	t.same(VPE.farthestViewportElement.id, "VPA");
+	t.same(VPA.farthestViewportElement, null);
+	t.same(VPA.nearestViewportElement, null);
+	t.same(VPA.ownerSVGElement, null);
+	t.same(VPA.viewportElement, null);
+	t.same(R1._isViewportElement, 0);
+	t.end();
+});
+
+tap.test("createSVGLength", function (t) {
+	const doc = parser.parseFromString(`
+<svg xmlns="http://www.w3.org/2000/svg" id="VPA" viewBox="0 0 200 100">
+    <rect id="R1" x="10px" y="20px" width="100px" height="200px" rx="15px" ry="30px"/>
+</svg>
+		`);
+	const top = doc.documentElement;
+	const R1 = doc.getElementById("R1");
+	var cssPixelsPerInch = 96;
+	(() => {
+		var length = R1.createSVGLength();
+		length.valueAsString = "48px";
+		length.convertToSpecifiedUnits(SVGLength.SVG_LENGTHTYPE_IN);
+		var referenceValue = 48 / cssPixelsPerInch;
+		t.same(length.valueAsString, referenceValue + "in");
+		t.same(length.valueInSpecifiedUnits, referenceValue);
+		t.same(length.value, 48);
+		t.same(length.unitType, SVGLength.SVG_LENGTHTYPE_IN);
+	})();
+
+	(() => {
+		var length = R1.createSVGLength();
+		length.valueAsString = "48px";
+		length.convertToSpecifiedUnits(SVGLength.SVG_LENGTHTYPE_CM);
+		var referenceValue = (48 * 2.54) / cssPixelsPerInch;
+		t.same(length.valueAsString, referenceValue.toFixed(2) + "cm");
+		t.same(length.valueInSpecifiedUnits, referenceValue);
+		t.same(length.value, 48);
+		t.same(length.unitType, SVGLength.SVG_LENGTHTYPE_CM);
+	})();
+
+	(() => {
+		var length = R1.createSVGLength();
+		length.valueAsString = "48px";
+		length.convertToSpecifiedUnits(SVGLength.SVG_LENGTHTYPE_MM);
+		var referenceValue = (48 * 25.4) / cssPixelsPerInch;
+		t.same(length.valueAsString, referenceValue.toFixed(1) + "mm");
+		t.same(length.valueInSpecifiedUnits, referenceValue.toFixed(1));
+		t.same(length.value, 48);
+		t.same(length.unitType, SVGLength.SVG_LENGTHTYPE_MM);
+	})();
+
+	(() => {
+		var length = R1.createSVGLength();
+		length.valueAsString = "4px";
+		length.convertToSpecifiedUnits(SVGLength.SVG_LENGTHTYPE_PT);
+		var referenceValue = (4 / cssPixelsPerInch) * 72;
+		t.same(length.valueAsString, referenceValue + "pt");
+		t.same(length.valueInSpecifiedUnits, referenceValue);
+		t.same(length.value, 4);
+		t.same(length.unitType, SVGLength.SVG_LENGTHTYPE_PT);
+	})();
+
+	(() => {
+		var length = R1.createSVGLength();
+		length.valueAsString = "16px";
+		length.convertToSpecifiedUnits(SVGLength.SVG_LENGTHTYPE_PC);
+		var referenceValue = (16 / cssPixelsPerInch) * 6;
+		t.same(length.valueAsString, referenceValue + "pc");
+		t.same(length.valueInSpecifiedUnits, referenceValue);
+		t.same(length.value, 16);
+		t.same(length.unitType, SVGLength.SVG_LENGTHTYPE_PC);
+	})();
+
+	(() => {
+		var length = R1.createSVGLength();
+		length.valueAsString = "2px";
+		length.convertToSpecifiedUnits(SVGLength.SVG_LENGTHTYPE_NUMBER);
+		t.same(length.valueAsString, "2");
+		t.same(length.valueInSpecifiedUnits, 2);
+		t.same(length.value, 2);
+		t.same(length.unitType, SVGLength.SVG_LENGTHTYPE_NUMBER);
+	})();
+
+
+
+	//  var length = svgElement.createSVGLength();
+	// length.valueAsString = "16px";
+	// length.convertToSpecifiedUnits(SVGLength.SVG_LENGTHTYPE_PC);
+	// var referenceValue = 16 / cssPixelsPerInch * 6;
+	// // Don't check valueAsString here, it's unreliable across browsers.
+	// assert_equals(length.valueInSpecifiedUnits, referenceValue);
+	// assert_equals(length.value, 16);
+	// assert_equals(length.unitType, SVGLength.SVG_LENGTHTYPE_PC);
+
 	t.end();
 });

@@ -93,8 +93,23 @@ export class SVGLength {
 			case 1:
 			case 5:
 				return _num;
+			case 2: // "%"
+			case 3: //  "em"
+			case 4: //  "ex"
+				throw DOMException.new("NotSupportedError");
+			case 6:
+				return (_num * 4800) / 127;
+			case 7:
+				return (_num * 480) / 127;
+			case 8:
+				return _num * 96;
+			case 9:
+				return (_num * 4) / 3;
+			case 10:
+				return _num * 16;
+			default:
+				throw new TypeError(`invalid ${_unit}`);
 		}
-		return CONVERSIONS[_unit] * _num;
 	}
 	set value(value: number) {
 		let { _num, _unit } = this;
@@ -110,19 +125,19 @@ export class SVGLength {
 				case 4: //  "ex"
 					throw DOMException.new("NotSupportedError");
 				case 6:
-					this._num = (4800 * value) / 127;
+					this._num = (127 * value) / 4800;
 					return;
 				case 7:
-					this._num = (480 * value) / 127;
+					this._num = (127 * value) / 480;
 					return;
 				case 8:
-					this._num = 96 * value;
+					this._num = value / 96;
 					return;
 				case 9:
-					this._num = (value * 4) / 3;
+					this._num = (value * 3) / 4;
 					return;
-				case 9:
-					this._num = 16 * value;
+				case 10:
+					this._num = 16 / value;
 					return;
 				default:
 					throw new TypeError(`invalid ${_unit}`);
@@ -141,7 +156,39 @@ export class SVGLength {
 	}
 	convertToSpecifiedUnits(unitType: number) {
 		if (unitType > 0 && unitType < 11) {
+			// this._unit = unitType;
+			// this._num = unitType;
+			const { value } = this;
 			this._unit = unitType;
+			this.value = value;
+			// switch (this._unit = unitType) {
+			// 	case 0:
+			// 	case 1:
+			// 	case 5:
+			// 		this._num = value;
+			// 		return;
+			// 	case 2: // "%"
+			// 	case 3: //  "em"
+			// 	case 4: //  "ex"
+			// 		throw DOMException.new("NotSupportedError");
+			// 	case 6:
+			// 		this._num = (4800 * value) / 127;
+			// 		return;
+			// 	case 7:
+			// 		this._num = (480 * value) / 127;
+			// 		return;
+			// 	case 8:
+			// 		this._num = 96 * value;
+			// 		return;
+			// 	case 9:
+			// 		this._num = (value * 4) / 3;
+			// 		return;
+			// 	case 10:
+			// 		this._num = 16 * value;
+			// 		return;
+			// 	default:
+			// 		throw new TypeError(`invalid ${_unit}`);
+			// }
 		} else if (unitType === undefined) {
 			throw new TypeError();
 		} else {

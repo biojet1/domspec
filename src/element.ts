@@ -85,6 +85,11 @@ export class Element extends ParentNode {
 		return node ? node.value : null;
 	}
 
+	popAttribute(name: string) {
+		const node = this.popAttributeNode(name);
+		return node?.value;
+	}
+
 	getAttributeNS(ns: string | null, localName: string) {
 		const node = this.getAttributeNodeNS(ns, localName);
 		return node ? node.value : null;
@@ -100,6 +105,21 @@ export class Element extends ParentNode {
 		}
 		return null;
 	}
+
+	popAttributeNode(name: string) {
+		if (this.ownerDocument?.isHTML && this._ns === HTML_NS) {
+			name = name.toLowerCase();
+		}
+		let attr = this[NEXT];
+		for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
+			if (attr.name === name) {
+				attr.remove();
+				return attr;
+			}
+		}
+		return null;
+	}
+
 	newAttributeNode(name: string): Attr {
 		return new StringAttr(name);
 	}

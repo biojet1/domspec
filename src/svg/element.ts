@@ -340,9 +340,9 @@ export class SVGPathElement extends SVGGeometryElement {
 export class SVGCircleElement extends SVGGeometryElement {
 	static TAGS = ["circle"];
 	describe() {
-		const r = parseFloat(this.getAttribute("r") || "0");
-		const x = parseFloat(this.getAttribute("cx") || "0");
-		const y = parseFloat(this.getAttribute("cy") || "0");
+		const r = this.r.baseVal.value;
+		const x = this.cx.baseVal.value;
+		const y = this.cy.baseVal.value;
 
 		if (r === 0) return "M0 0";
 
@@ -363,10 +363,12 @@ export class SVGRectElement extends SVGGeometryElement {
 	}
 	fuseTransform(parentT?: Matrix) {
 		const a = this.getAttributeNode("transform");
-		if (a) {
-			let m = Matrix.parse(a.value);
-			parentT && (m = parentT.multiply(m));
-
+		if (parentT) {
+			a && (parentT = parentT.multiply(Matrix.parse(a.value)));
+		} else if (a) {
+			parentT = Matrix.parse(a.value);
+		}
+		if (parentT) {
 			const {
 				a: scale_x,
 				b: skew_x,
@@ -374,7 +376,7 @@ export class SVGRectElement extends SVGGeometryElement {
 				d: scale_y,
 				e: translate_x,
 				f: translate_y,
-			} = m;
+			} = parentT;
 			if (skew_x == 0 && skew_y == 0) {
 				const { abs } = Math;
 				let w = this.width.baseVal.value;
@@ -389,7 +391,7 @@ export class SVGRectElement extends SVGGeometryElement {
 				this.y.baseVal.value = y;
 				this.width.baseVal.value = abs(w * scale_x);
 				this.height.baseVal.value = abs(h * scale_y);
-				this.removeAttributeNode(a);
+				a && this.removeAttributeNode(a);
 			} else {
 				throw new Error(
 					`fuseTransform of ${this.constructor.name} with skew_x == ${skew_x}, skew_y == ${skew_y}`
@@ -450,22 +452,22 @@ export class SVGPolygonElement extends SVGGeometryElement {
 	}
 	fuseTransform(parentT?: Matrix) {
 		const a = this.getAttributeNode("transform");
-		if (a) {
-			let m = Matrix.parse(a.value);
-			parentT && (m = parentT.multiply(m));
-			const p = this.getAttribute("points");
-			const l = p
+		if (parentT) {
+			a && (parentT = parentT.multiply(Matrix.parse(a.value)));
+		} else if (a) {
+			parentT = Matrix.parse(a.value);
+		}
+		const l =
+			parentT &&
+			this.getAttribute("points")
 				?.split(/(\s+)/)
 				.filter((e) => e.trim().length > 0)
-				.map((e) => p.split(",").map((v) => parseFloat(v)))
+				.map((e) => e.split(",").map((v) => parseFloat(v)))
 				.map((e) => Vec.pos(e[0], e[1]))
-				.map((e) => [...e.transform(m)])
+				.map((e) => [...e.transform(parentT)])
 				.map((e) => `${e[0]},${e[1]}`);
-			if (l) {
-				this.setAttribute("points", l.join(" "));
-				this.removeAttributeNode(a);
-			}
-		}
+		l && this.setAttribute("points", l.join(" "));
+		a && this.removeAttributeNode(a);
 	}
 }
 
@@ -478,23 +480,20 @@ export class SVGPolylineElement extends SVGGeometryElement {
 	fuseTransform(parentT?: Matrix) {
 		const a = this.getAttributeNode("transform");
 		if (parentT) {
-			if (a) {
-				parentT = parentT.multiply(Matrix.parse(a.value));
-			}
+			a && (parentT = parentT.multiply(Matrix.parse(a.value)));
 		} else if (a) {
 			parentT = Matrix.parse(a.value);
 		}
-		const l = parentT && this.getAttribute("points")
-			?.split(/(\s+)/)
-			.filter((e) => e.trim().length > 0)
-			.map((e) => e.split(",").map((v) => parseFloat(v)))
-			.map((e) => Vec.pos(e[0], e[1]))
-			.map((e) => [...e.transform(parentT)])
-			.map((e) => `${e[0]},${e[1]}`);
-		if (l) {
-			this.setAttribute("points", l.join(" "));
-		}
-
+		const l =
+			parentT &&
+			this.getAttribute("points")
+				?.split(/(\s+)/)
+				.filter((e) => e.trim().length > 0)
+				.map((e) => e.split(",").map((v) => parseFloat(v)))
+				.map((e) => Vec.pos(e[0], e[1]))
+				.map((e) => [...e.transform(parentT)])
+				.map((e) => `${e[0]},${e[1]}`);
+		l && this.setAttribute("points", l.join(" "));
 		a && this.removeAttributeNode(a);
 	}
 }

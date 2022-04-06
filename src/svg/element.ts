@@ -614,8 +614,14 @@ export class SVGTextElement extends SVGTextContentElement {
 				? T.multiply(this.transformM)
 				: this.transformM;
 		let s;
-		const x = (s = this.getAttribute("x")) ? userUnit(s, 0) : 0;
-		const y = (s = this.getAttribute("y")) ? userUnit(s, 0) : 0;
+		const {
+			x: {
+				baseVal: { value: x },
+			},
+			y: {
+				baseVal: { value: y },
+			},
+		} = this;
 		let box = Box.new();
 		box = box.merge(
 			Box.new(Vec.at(x, y).transform(E).toArray().concat([0, 0]))
@@ -755,14 +761,12 @@ export class SVGScriptElement extends SVGElement {
 }
 
 import { Element } from "../element.js";
+import { userUnit, SVGLength, SVGLengthAttr } from "./length.js";
 import {
-	userUnit,
-	SVGLength,
 	SVGRectAttr,
-	SVGLengthAttr,
 	SVGLengthListAttr,
 	SVGLengthList,
-} from "./units.js";
+} from "./length-list.js";
 import { SVGTransformListAttr, SVGTransform } from "./attr-transform.js";
 import { DOMException } from "../event-target.js";
 export { SVGLength, SVGTransform };

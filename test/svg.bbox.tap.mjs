@@ -42,7 +42,7 @@ test.test(`ParentNode`, { bail: !CI }, function (t) {
     let id =
         use.getAttributeNS("http://www.w3.org/1999/xlink", "href") ||
         use.getAttribute("href");
-    console.log("id", use.refElement().id);
+    // console.log("id", use.refElement().id);
     // if (id) {
     //     id =
     //     console.log("id2", );

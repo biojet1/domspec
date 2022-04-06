@@ -442,9 +442,9 @@ svg/types/scripted/SVGLengthList-basics.html
         .map((v) => v.trim())
         .filter((v) => v && !v.startsWith("#") && !v.startsWith("//"));
 
-    console.info(tests);
+    // console.info(tests);
     tap.jobs = 5;
-    console.info(`test: ${tests.length}`);
+    // console.info(`test: ${tests.length}`);
     let i = 0;
     for (const sub of tests) {
         // const href = new URL(sub, WPT_ROOT_URL).href;

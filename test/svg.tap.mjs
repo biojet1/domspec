@@ -9,9 +9,9 @@ tap.test("viewBox", function (t) {
 	const doc = parser.parseFromString(`<?xml version="1.0" standalone="no"?>
 <svg width="300px" height="100px" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="-10 20 200 300"></svg>`);
 	const top = doc.documentElement;
-	console.log(top.constructor.name);
-	console.log(top.width.constructor.name);
-	console.log(top.viewBox.constructor.name);
+	// console.log(top.constructor.name);
+	// console.log(top.width.constructor.name);
+	// console.log(top.viewBox.constructor.name);
 
 	// t.strictSame(top.viewBox.baseVal.x, -10);
 	// t.strictSame(top.viewBox.baseVal.width, 200);

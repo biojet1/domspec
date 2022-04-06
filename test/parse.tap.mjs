@@ -18,7 +18,7 @@ const doc = parser
 		"text/html"
 	)
 	.then((doc) => {
-		console.log(doc.innerHTML);
+		// console.log(doc.innerHTML);
 	});
 
 parser
@@ -45,7 +45,7 @@ test(function() {
 		"text/xml"
 	)
 	.then((doc) => {
-		console.log(doc.innerHTML);
+		// console.log(doc.innerHTML);
 		function getEnumerableOwnProps1(obj) {
 			var arr = [];
 			for (var prop in obj) {
@@ -58,7 +58,7 @@ test(function() {
 		var el = doc.createElement("div");
 		el.setAttribute("a", "");
 		el.setAttribute("b", "");
-		console.error(Object.getOwnPropertyNames(el.attributes));
-		console.error(getEnumerableOwnProps1(el.attributes), ["0", "1"]);
+		// console.error(Object.getOwnPropertyNames(el.attributes));
+		// console.error(getEnumerableOwnProps1(el.attributes), ["0", "1"]);
 		// console.error(getEnumerableOwnProps2(el.attributes), ["0", "1"]);
 	});

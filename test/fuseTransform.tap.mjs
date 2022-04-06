@@ -224,16 +224,35 @@ tap.test("createSVGLength", function (t) {
 		t.same(length.unitType, SVGLength.SVG_LENGTHTYPE_NUMBER);
 	})();
 
-
-
-	//  var length = svgElement.createSVGLength();
-	// length.valueAsString = "16px";
-	// length.convertToSpecifiedUnits(SVGLength.SVG_LENGTHTYPE_PC);
-	// var referenceValue = 16 / cssPixelsPerInch * 6;
-	// // Don't check valueAsString here, it's unreliable across browsers.
-	// assert_equals(length.valueInSpecifiedUnits, referenceValue);
-	// assert_equals(length.value, 16);
-	// assert_equals(length.unitType, SVGLength.SVG_LENGTHTYPE_PC);
+	const xAttr = R1.getAttributeNode("x");
+	const xVal = R1.x.baseVal;
+	t.same(xAttr.value, "10px");
+	t.same(xVal.value, 10);
+	xAttr.value = "2in";
+	t.same(xAttr.value, "2in");
+	t.same(xVal.value, 96 * 2);
+	xVal.value = 960;
+	t.same(xAttr.value, "10in");
+	t.same(xVal.value, 960);
+	xVal.newValueSpecifiedUnits(SVGLength.SVG_LENGTHTYPE_PT, 72);
+	t.same(xAttr.value, "72pt");
+	t.same(xVal.value, 96);
+	t.same(`${xVal.valueAsString}`, "72pt");
+	xAttr.value = "2pc";
+	t.same(xAttr.value, "2pc");
+	t.same(xVal.value, 32);
+	xAttr.value = "63.5cm";
+	t.same(xAttr.value, "63.5cm");
+	t.same(xVal.value, 2400);
+	xVal.valueInSpecifiedUnits = 31.75;
+	t.same(xAttr.value, "31.75cm");
+	t.same(xVal.value, 1200);
+	t.same(xVal.toString(), "31.75cm");
+	xAttr.value = "";
+	// t.same(xAttr.value, ""); // todo
+	t.same(R1.x.baseVal.value, 0);
+	t.same(R1.x.baseVal.valueInSpecifiedUnits, 0);
+	t.same(R1.x.baseVal.unitType, 1);
 
 	t.end();
 });

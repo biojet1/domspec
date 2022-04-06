@@ -533,11 +533,15 @@ export class SVGImageElement extends SVGGraphicsElement {
 		return 1;
 	}
 	shapeBox(T?: Matrix | boolean) {
-		let width = this.getAttribute("width");
-		let height = this.getAttribute("height");
-		let x = this.getAttribute("x");
-		let y = this.getAttribute("y");
-		if (x && y && width && height) {
+		const width = this.width.baseVal.value;
+		const height = this.height.baseVal.value;
+		const x = this.x.baseVal.value;
+		const y = this.y.baseVal.value;
+		// let width = this.getAttribute("width");
+		// let height = this.getAttribute("height");
+		// let x = this.getAttribute("x");
+		// let y = this.getAttribute("y");
+		if (width && height) {
 			return Box.new(`${x} ${y} ${width} ${height}`);
 		}
 		return Box.not();
@@ -575,13 +579,10 @@ export class SVGUseElement extends SVGGraphicsElement {
 
 	get transformM() {
 		const m = Matrix.parse(this.getAttribute("transform") || "");
-		const x = this.getAttribute("x");
-		const y = this.getAttribute("y");
+		const x = this.x.baseVal.value;
+		const y = this.y.baseVal.value;
 		if (x || y) {
-			return Matrix.translate(
-				parseFloat(x || "0"),
-				parseFloat(y || "0")
-			).multiply(m);
+			return Matrix.translate(x, y).multiply(m);
 		}
 		return m;
 	}

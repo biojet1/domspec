@@ -43,18 +43,22 @@ const UNITS = ["", "", "%", "em", "ex", "px", "cm", "mm", "in", "pt", "pc"];
 const CONVS = [0, 1, 1];
 
 export class SVGLength {
-	_unit: number;
-	_num: number;
+	_unit?: number;
+	_num?: number;
+
 	constructor(value?: string) {
-		this._num = 0;
-		this._unit = 1;
+		// this._num = 0;
+		// this._unit = 1;
 		if (value) this.valueAsString = value;
 	}
+
 	get unitType() {
-		return this._unit;
+		const { _unit = 1 } = this;
+		return _unit;
 	}
+
 	get valueInSpecifiedUnits() {
-		return this._num;
+		return this._num ?? 0;
 	}
 
 	set valueInSpecifiedUnits(value: number) {
@@ -64,14 +68,12 @@ export class SVGLength {
 			throw new TypeError();
 		}
 	}
-	toString() {
-		return this.valueAsString;
-	}
 
 	get valueAsString() {
-		let { _num, _unit } = this;
+		const { _num = 0, _unit = 1 } = this;
 		return `${_num}${UNITS[_unit] || ""}`;
 	}
+
 	set valueAsString(value: string) {
 		const m = BOTH_MATCH.exec(value);
 		if (m) {
@@ -83,10 +85,13 @@ export class SVGLength {
 				return;
 			}
 		}
+		delete this._num;
+		delete this._unit;
 		throw DOMException.new("SyntaxError");
 	}
+
 	get value() {
-		let { _num, _unit } = this;
+		const { _num = 0, _unit = 1 } = this;
 
 		switch (_unit) {
 			case 0:
@@ -111,8 +116,9 @@ export class SVGLength {
 				throw new TypeError(`invalid ${_unit}`);
 		}
 	}
+
 	set value(value: number) {
-		let { _num, _unit } = this;
+		let { _num = 0, _unit = 1 } = this;
 		if (isFinite(value)) {
 			switch (_unit) {
 				case 0:
@@ -145,55 +151,30 @@ export class SVGLength {
 		}
 		throw new TypeError(`value=[${value}] unit=[${_unit}]`);
 	}
+
 	newValueSpecifiedUnits(unitType: number, valueInSpecifiedUnits: number) {
 		if (isFinite(valueInSpecifiedUnits)) {
 			this.convertToSpecifiedUnits(unitType);
-			// this._unit = unitType;
 			this._num = valueInSpecifiedUnits;
 		} else {
 			throw new TypeError();
 		}
 	}
+
 	convertToSpecifiedUnits(unitType: number) {
 		if (unitType > 0 && unitType < 11) {
-			// this._unit = unitType;
-			// this._num = unitType;
 			const { value } = this;
 			this._unit = unitType;
 			this.value = value;
-			// switch (this._unit = unitType) {
-			// 	case 0:
-			// 	case 1:
-			// 	case 5:
-			// 		this._num = value;
-			// 		return;
-			// 	case 2: // "%"
-			// 	case 3: //  "em"
-			// 	case 4: //  "ex"
-			// 		throw DOMException.new("NotSupportedError");
-			// 	case 6:
-			// 		this._num = (4800 * value) / 127;
-			// 		return;
-			// 	case 7:
-			// 		this._num = (480 * value) / 127;
-			// 		return;
-			// 	case 8:
-			// 		this._num = 96 * value;
-			// 		return;
-			// 	case 9:
-			// 		this._num = (value * 4) / 3;
-			// 		return;
-			// 	case 10:
-			// 		this._num = 16 * value;
-			// 		return;
-			// 	default:
-			// 		throw new TypeError(`invalid ${_unit}`);
-			// }
 		} else if (unitType === undefined) {
 			throw new TypeError();
 		} else {
 			throw DOMException.new("NotSupportedError");
 		}
+	}
+
+	toString() {
+		return this.valueAsString;
 	}
 
 	static SVG_LENGTHTYPE_UNKNOWN = 0;
@@ -291,7 +272,12 @@ export class SVGLengthAttr extends Attr {
 	set value(value: string) {
 		const { _var } = this;
 		if (_var instanceof SVGLength) {
-			_var.valueAsString = value;
+			try {
+				_var.valueAsString = value;
+			} catch (err) {
+				console.error(err);
+				// this._var = value;
+			}
 		} else {
 			this._var = value;
 		}

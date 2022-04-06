@@ -692,7 +692,7 @@ export const dsHandler = {
 						(!namespaceURI || namespaceURI === "") &&
 						name.startsWith("data-")
 					) {
-						console.log("ownKeys", name, toCamelCase(name));
+						// console.log("ownKeys", name, toCamelCase(name));
 						yield toCamelCase(name);
 					}
 				}

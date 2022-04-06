@@ -166,9 +166,14 @@ export class SVGLength {
 
 	convertToSpecifiedUnits(unitType: number) {
 		if (unitType > 0 && unitType < 11) {
-			const { value } = this;
+			const { value, _unit } = this;
 			this._unit = unitType;
-			this.value = value;
+			try {
+				this.value = value;
+			} catch (err) {
+				this._unit = _unit;
+				throw err;
+			}
 		} else if (unitType === undefined) {
 			throw new TypeError();
 		} else {

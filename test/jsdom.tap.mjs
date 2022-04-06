@@ -437,7 +437,7 @@ test.test(`compareNode`, { bail: !CI }, function (t) {
 
     compareNode(t, doc2, doc1);
 
-    console.error("XML:", xml)
+    // console.error("XML:", xml)
 
     t.end();
 });

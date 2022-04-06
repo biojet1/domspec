@@ -14,10 +14,10 @@ tap.test("SVGLength", function (t) {
 </svg>
 		`);
 	const VPA = doc.getElementById("VPA");
-	VPA.innerHTML = "<g/>";
+	VPA.innerHTML = "<g><use/></g>";
 	t.match(VPA.constructor.name, "SVGSVGElement");
-	console.info(doc.constructor.name)
 	t.match(VPA.firstChild.constructor.name, "SVGGElement");
+	t.match(VPA.firstChild.firstChild.constructor.name, "SVGUseElement");
 
 	t.end();
 });

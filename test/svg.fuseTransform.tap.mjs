@@ -11,21 +11,29 @@ tap.test("fuseTranform", function (t) {
 	const doc = parser.parseFromString(`
 <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000">
   <g id="GA">
-    <g id="GB" transform="translate(0, 100)">
+   <path id="P3" d="M 10,10 H 40 V 30 H 10 Z" stroke="#bdcdd4" stroke-width="2" transform="matrix(3 1 -1 3 30 40)"/>
+   <g id="GB" transform="translate(0, 100)">
       <g id="GC" transform="translate(100, 0)">
         <path id="P1" d="M30 40h-30v-40z" stroke="#bdcdd4" stroke-width="2"/>
+        <path id="P2" d="M 10,10 H 40 V 30 H 10 Z" stroke="#bdcdd4" stroke-width="2" transform="matrix(3 1 -1 3 30 40)"/>
         <line id="L1" x1="0" y1="80" x2="100" y2="20" stroke="black"/>
       </g>
       <polyline id="PL1" points="0,100 50,25 50,75 100,0"/>
       <circle id="C1" cx="50" cy="50" r="50"/>
       <ellipse id="E1" cx="10.0" cy="10.0" rx="15.0" ry="10.0"/>
+      <rect id="R1" x="50" y="20" width="150" height="150" />
+      <rect id="R2" x="50" y="20" width="150" height="150" transform="translate(-100, 0)" />
     </g>
     <polyline id="PL2" transform="scale(2, -1)" points="100,100 150,25 150,75 200,0" fill="none" stroke="black"/>
   </g>
 </svg>
 		`);
 	const top = doc.documentElement;
+	const R1 = doc.getElementById("R1");
+	const R2 = doc.getElementById("R2");
 	const P1 = doc.getElementById("P1");
+	const P2 = doc.getElementById("P2");
+	const P3 = doc.getElementById("P3");
 	const C1 = doc.getElementById("C1");
 	const E1 = doc.getElementById("E1");
 	const L1 = doc.getElementById("L1");
@@ -50,19 +58,60 @@ tap.test("fuseTranform", function (t) {
 
 	top.fuseTransform();
 
-	t.notOk(P1.hasAttribute("P1"));
+	t.notOk(P1.hasAttribute("transform"));
+	t.notOk(P2.hasAttribute("transform"));
+	t.notOk(P3.hasAttribute("transform"));
 	t.notOk(GA.hasAttribute("transform"));
 	t.notOk(GB.hasAttribute("transform"));
 	t.notOk(GC.hasAttribute("transform"));
 	t.notOk(PL1.hasAttribute("transform"));
 	t.notOk(PL2.hasAttribute("transform"));
 
-	// console.error(top.outerHTML);
+	t.same(
+		[
+			R1.x.baseVal.value,
+			R1.y.baseVal.value,
+			R1.width.baseVal.value,
+			R1.height.baseVal.value,
+		],
+		[50, 120, 150, 150]
+	);
+	t.same([...R1.path.firstPoint], [50, 120, 0]);
+	t.same(
+		[
+			R2.x.baseVal.value,
+			R2.y.baseVal.value,
+			R2.width.baseVal.value,
+			R2.height.baseVal.value,
+		],
+		[50 - 100, 20 + 100, 150, 150]
+	);
+	t.same([...R2.path.firstPoint], [50 - 100, 20 + 100, 0]);
+
 	t.same(PL1.getAttribute("points"), "0,200 50,125 50,175 100,100");
 	t.same(PL2.getAttribute("points"), "200,-100 300,-25 300,-75 400,0");
-	const p = P1.path;
+	let p = P1.path;
 	let [x, y] = p.firstPoint;
 	t.same([x, y], [130, 140]);
+
+	t.same(
+		[...P2.path].map((s) => s.p1).map((p) => [p.x - 100, p.y - 100]),
+		[
+			[50, 80],
+			[140, 110],
+			[120, 170],
+			[30, 140],
+		]
+	);
+	t.same(
+		[...P3.path].map((s) => s.p1).map((p) => [p.x, p.y]),
+		[
+			[50, 80],
+			[140, 110],
+			[120, 170],
+			[30, 140],
+		]
+	);
 
 	t.end();
 });

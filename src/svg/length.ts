@@ -44,6 +44,7 @@ const CONVS = [0, 1, 1];
 
 export class SVGLength {
 	_unit?: number;
+	// _num?: number|string;
 	_num?: number;
 
 	constructor(value?: string) {
@@ -121,7 +122,7 @@ export class SVGLength {
 	}
 
 	set value(value: number) {
-		let { _num = 0, _unit = 1 } = this;
+		let { _unit = 1 } = this;
 		if (isFinite(value)) {
 			switch (_unit) {
 				case 0:

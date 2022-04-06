@@ -435,16 +435,18 @@ svg/types/scripted/SVGLength.html
 // // dom/nodes/ParentNode-querySelector-All.html
 // // dom/nodes/Document-createEvent.https.html
 // svg/types/scripted/SVGGeometryElement.getPointAtLength-03.svg
-
+svg/types/scripted/SVGLengthList-basics.html
+css/css-box/parsing/padding-shorthand.html
+css/css-box/parsing/margin-shorthand.html
 `;
     tests = (process.env.TRY ? tests_try : tests)
         .split(/[\r\n]+/)
         .map((v) => v.trim())
         .filter((v) => v && !v.startsWith("#") && !v.startsWith("//"));
 
-    console.info(tests);
+    // console.info(tests);
     tap.jobs = 5;
-    console.info(`test: ${tests.length}`);
+    // console.info(`test: ${tests.length}`);
     let i = 0;
     for (const sub of tests) {
         // const href = new URL(sub, WPT_ROOT_URL).href;

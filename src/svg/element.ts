@@ -1,4 +1,4 @@
-import { Point, Box, Matrix, Path } from "svggeom";
+import { Vec, Box, Matrix, Path } from "svggeom";
 /// Base Elements //////////
 
 export class SVGElement extends Element {
@@ -29,9 +29,11 @@ export class SVGElement extends Element {
 	createSVGLength() {
 		return new SVGLength();
 	}
+
 	createSVGMatrix() {
 		return new Matrix();
 	}
+
 	createSVGTransformFromMatrix(M: Matrix) {
 		const m = new SVGTransform();
 		m.setMatrix(M);
@@ -49,7 +51,7 @@ interface IBBoxParam {
 export class SVGGraphicsElement extends SVGElement {
 	get nearestViewportElement(): SVGElement | null {
 		let parent: SVGElement = this;
-		while ((parent = this.parentElement as SVGElement)) {
+		while ((parent = parent.parentElement as SVGElement)) {
 			if (parent._isViewportElement) {
 				return parent;
 			}
@@ -59,7 +61,7 @@ export class SVGGraphicsElement extends SVGElement {
 	get farthestViewportElement(): SVGElement | null {
 		let parent: SVGElement = this;
 		let farthest: SVGElement | null = null;
-		while ((parent = this.parentElement as SVGElement)) {
+		while ((parent = parent.parentElement as SVGElement)) {
 			if (parent._isViewportElement) {
 				farthest = parent as SVGElement;
 			}
@@ -177,9 +179,14 @@ export class SVGGraphicsElement extends SVGElement {
 			case "y":
 			case "width":
 			case "height":
+			case "x1":
+			case "x2":
+			case "y1":
+			case "y2":
 				return new SVGLengthAttr(name);
 			case "viewBox":
-				return new SVGRectAttr(name);
+				// return new SVGRectAttr(name);
+				return new SVGLengthListAttr(name);
 			case "transform":
 				return new SVGTransformListAttr(name);
 		}
@@ -192,6 +199,7 @@ export class SVGGraphicsElement extends SVGElement {
 	get x(): SVGLengthAttr {
 		return this.letAttributeNode("x") as SVGLengthAttr; // for now
 	}
+
 	get y(): SVGLengthAttr {
 		return this.letAttributeNode("y") as SVGLengthAttr; // for now
 	}
@@ -207,17 +215,47 @@ export class SVGGraphicsElement extends SVGElement {
 	get ry(): SVGLengthAttr {
 		return this.letAttributeNode("ry") as SVGLengthAttr; // for now
 	}
+	get x1(): SVGLengthAttr {
+		return this.letAttributeNode("x1") as SVGLengthAttr; // for now
+	}
+	get x2(): SVGLengthAttr {
+		return this.letAttributeNode("x2") as SVGLengthAttr; // for now
+	}
+	get y1(): SVGLengthAttr {
+		return this.letAttributeNode("y1") as SVGLengthAttr; // for now
+	}
+	get y2(): SVGLengthAttr {
+		return this.letAttributeNode("y2") as SVGLengthAttr; // for now
+	}
 	get width(): SVGLengthAttr {
 		return this.letAttributeNode("width") as SVGLengthAttr; // for now
 	}
 	get height(): SVGLengthAttr {
 		return this.letAttributeNode("height") as SVGLengthAttr; // for now
 	}
-	get viewBox(): SVGRectAttr {
-		return this.letAttributeNode("viewBox") as SVGRectAttr; // for now
+	get viewBox(): SVGLengthListAttr {
+		return this.letAttributeNode("viewBox") as SVGLengthListAttr; // for now
 	}
 	get transform(): SVGTransformListAttr {
 		return this.letAttributeNode("transform") as SVGTransformListAttr; // for now
+	}
+
+	fuseTransform(parentT?: Matrix) {
+		const a = this.getAttributeNode("transform");
+		if (parentT) {
+			if (a) {
+				parentT = parentT.multiply(Matrix.parse(a.value));
+			}
+		} else if (a) {
+			parentT = Matrix.parse(a.value);
+		}
+
+		for (const sub of this.children) {
+			if (sub instanceof SVGGraphicsElement) {
+				sub.fuseTransform(parentT);
+			}
+		}
+		a && this.removeAttributeNode(a);
 	}
 }
 
@@ -275,13 +313,36 @@ export class SVGGeometryElement extends SVGGraphicsElement {
 }
 
 /// SVGGeometryElement //////////
+export class SVGPathElement extends SVGGeometryElement {
+	static TAGS = ["path"];
+	describe() {
+		return this.getAttribute("d") || "";
+	}
+	fuseTransform(parentT?: Matrix) {
+		const a = this.getAttributeNode("transform");
+		const d = this.describe();
+
+		if (parentT) {
+			if (a) {
+				parentT = parentT.multiply(Matrix.parse(a.value));
+			}
+		} else if (a) {
+			parentT = Matrix.parse(a.value);
+		}
+
+		if (d && parentT) {
+			this.setAttribute("d", Path.parse(d).transform(parentT).describe());
+		}
+		a && this.removeAttributeNode(a);
+	}
+}
 
 export class SVGCircleElement extends SVGGeometryElement {
 	static TAGS = ["circle"];
 	describe() {
-		const r = parseFloat(this.getAttribute("r") || "0");
-		const x = parseFloat(this.getAttribute("cx") || "0");
-		const y = parseFloat(this.getAttribute("cy") || "0");
+		const r = this.r.baseVal.value;
+		const x = this.cx.baseVal.value;
+		const y = this.cy.baseVal.value;
 
 		if (r === 0) return "M0 0";
 
@@ -291,49 +352,95 @@ export class SVGCircleElement extends SVGGeometryElement {
 	}
 }
 
-export class SVGPathElement extends SVGGeometryElement {
-	static TAGS = ["path"];
-	describe() {
-		return this.getAttribute("d") || "";
-	}
-}
-
 export class SVGRectElement extends SVGGeometryElement {
 	static TAGS = ["rect"];
 	describe() {
-		const width = parseFloat(this.getAttribute("width") || "0");
-		const height = parseFloat(this.getAttribute("height") || "0");
-		const x = parseFloat(this.getAttribute("x") || "0");
-		const y = parseFloat(this.getAttribute("y") || "0");
+		const width = this.width.baseVal.value;
+		const height = this.height.baseVal.value;
+		const x = this.x.baseVal.value;
+		const y = this.y.baseVal.value;
+		const rx = this.rx.baseVal.value;
+		const ry = this.ry.baseVal.value;
+
 		return `M ${x} ${y} h ${width} v ${height} h ${-width} Z`;
 	}
-	// get x(): SVGLengthAttr {
-	// 	const attr = this.letAttributeNode("x");
-	// 	if (attr instanceof SVGLengthAttr) {
-	// 		return attr;
-	// 	}
-	// 	return attr as SVGLengthAttr; // for now
-	// }
+	fuseTransform(parentT?: Matrix) {
+		const a = this.getAttributeNode("transform");
+		if (parentT) {
+			a && (parentT = parentT.multiply(Matrix.parse(a.value)));
+		} else if (a) {
+			parentT = Matrix.parse(a.value);
+		}
+		if (parentT) {
+			const {
+				a: scale_x,
+				b: skew_x,
+				c: skew_y,
+				d: scale_y,
+				e: translate_x,
+				f: translate_y,
+			} = parentT;
+			if (skew_x == 0 && skew_y == 0) {
+				const { abs } = Math;
+				let w = this.width.baseVal.value;
+				let h = this.height.baseVal.value;
+				let x = this.x.baseVal.value;
+				let y = this.y.baseVal.value;
+				x *= scale_x;
+				x += translate_x;
+				y *= scale_y;
+				y += translate_y;
+				this.x.baseVal.value = x;
+				this.y.baseVal.value = y;
+				this.width.baseVal.value = abs(w * scale_x);
+				this.height.baseVal.value = abs(h * scale_y);
+				a && this.removeAttributeNode(a);
+			} else {
+				throw new Error(
+					`fuseTransform of ${this.constructor.name} with skew_x == ${skew_x}, skew_y == ${skew_y}`
+				);
+			}
+		}
+	}
 }
 
 export class SVGLineElement extends SVGGeometryElement {
 	static TAGS = ["line"];
 	describe() {
-		const x1 = parseFloat(this.getAttribute("x1") || "0");
-		const x2 = parseFloat(this.getAttribute("x2") || "0");
-		const y1 = parseFloat(this.getAttribute("y1") || "0");
-		const y2 = parseFloat(this.getAttribute("y2") || "0");
+		const x1 = this.x1.baseVal.value;
+		const x2 = this.x2.baseVal.value;
+		const y1 = this.y1.baseVal.value;
+		const y2 = this.y2.baseVal.value;
 		return `M ${x1} ${y1} L ${x2} ${y2}`;
+	}
+	fuseTransform(parentT: Matrix) {
+		const a = this.getAttributeNode("transform");
+		if (a) {
+			let m = Matrix.parse(a.value);
+			let x1 = this.x1.baseVal.value;
+			let x2 = this.x2.baseVal.value;
+			let y1 = this.y1.baseVal.value;
+			let y2 = this.y2.baseVal.value;
+			parentT && (m = parentT.multiply(m));
+
+			[x1, y1] = Vec.pos(x1, y1).transform(m);
+			[x2, y2] = Vec.pos(x2, y2).transform(m);
+			this.x1.baseVal.value = x1;
+			this.x2.baseVal.value = x2;
+			this.y1.baseVal.value = y1;
+			this.y2.baseVal.value = y2;
+			this.removeAttributeNode(a);
+		}
 	}
 }
 
 export class SVGEllipseElement extends SVGGeometryElement {
 	static TAGS = ["ellipse"];
 	describe() {
-		const rx = parseFloat(this.getAttribute("rx") || "0");
-		const ry = parseFloat(this.getAttribute("ry") || "0");
-		const x = parseFloat(this.getAttribute("cx") || "0");
-		const y = parseFloat(this.getAttribute("cy") || "0");
+		const rx = this.rx.baseVal.value;
+		const ry = this.ry.baseVal.value;
+		const x = this.cx.baseVal.value;
+		const y = this.cy.baseVal.value;
 		return `M ${x - rx} ${y} A ${rx} ${ry} 0 0 0 ${
 			x + rx
 		} ${y} A ${rx} ${ry} 0 0 0 ${x - rx} ${y}`;
@@ -346,6 +453,25 @@ export class SVGPolygonElement extends SVGGeometryElement {
 		const p = this.getAttribute("points");
 		return p ? `M ${p} Z` : "";
 	}
+	fuseTransform(parentT?: Matrix) {
+		const a = this.getAttributeNode("transform");
+		if (parentT) {
+			a && (parentT = parentT.multiply(Matrix.parse(a.value)));
+		} else if (a) {
+			parentT = Matrix.parse(a.value);
+		}
+		const l =
+			parentT &&
+			this.getAttribute("points")
+				?.split(/(\s+)/)
+				.filter((e) => e.trim().length > 0)
+				.map((e) => e.split(",").map((v) => parseFloat(v)))
+				.map((e) => Vec.pos(e[0], e[1]))
+				.map((e) => [...e.transform(parentT)])
+				.map((e) => `${e[0]},${e[1]}`);
+		l && this.setAttribute("points", l.join(" "));
+		a && this.removeAttributeNode(a);
+	}
 }
 
 export class SVGPolylineElement extends SVGGeometryElement {
@@ -353,6 +479,25 @@ export class SVGPolylineElement extends SVGGeometryElement {
 	describe() {
 		const p = this.getAttribute("points");
 		return p ? `M ${p}` : "";
+	}
+	fuseTransform(parentT?: Matrix) {
+		const a = this.getAttributeNode("transform");
+		if (parentT) {
+			a && (parentT = parentT.multiply(Matrix.parse(a.value)));
+		} else if (a) {
+			parentT = Matrix.parse(a.value);
+		}
+		const l =
+			parentT &&
+			this.getAttribute("points")
+				?.split(/(\s+)/)
+				.filter((e) => e.trim().length > 0)
+				.map((e) => e.split(",").map((v) => parseFloat(v)))
+				.map((e) => Vec.pos(e[0], e[1]))
+				.map((e) => [...e.transform(parentT)])
+				.map((e) => `${e[0]},${e[1]}`);
+		l && this.setAttribute("points", l.join(" "));
+		a && this.removeAttributeNode(a);
 	}
 }
 
@@ -388,11 +533,15 @@ export class SVGImageElement extends SVGGraphicsElement {
 		return 1;
 	}
 	shapeBox(T?: Matrix | boolean) {
-		let width = this.getAttribute("width");
-		let height = this.getAttribute("height");
-		let x = this.getAttribute("x");
-		let y = this.getAttribute("y");
-		if (x && y && width && height) {
+		const width = this.width.baseVal.value;
+		const height = this.height.baseVal.value;
+		const x = this.x.baseVal.value;
+		const y = this.y.baseVal.value;
+		// let width = this.getAttribute("width");
+		// let height = this.getAttribute("height");
+		// let x = this.getAttribute("x");
+		// let y = this.getAttribute("y");
+		if (width && height) {
 			return Box.new(`${x} ${y} ${width} ${height}`);
 		}
 		return Box.not();
@@ -430,13 +579,10 @@ export class SVGUseElement extends SVGGraphicsElement {
 
 	get transformM() {
 		const m = Matrix.parse(this.getAttribute("transform") || "");
-		const x = this.getAttribute("x");
-		const y = this.getAttribute("y");
+		const x = this.x.baseVal.value;
+		const y = this.y.baseVal.value;
 		if (x || y) {
-			return Matrix.translate(
-				parseFloat(x || "0"),
-				parseFloat(y || "0")
-			).multiply(m);
+			return Matrix.translate(x, y).multiply(m);
 		}
 		return m;
 	}
@@ -468,11 +614,17 @@ export class SVGTextElement extends SVGTextContentElement {
 				? T.multiply(this.transformM)
 				: this.transformM;
 		let s;
-		const x = (s = this.getAttribute("x")) ? userUnit(s, 0) : 0;
-		const y = (s = this.getAttribute("y")) ? userUnit(s, 0) : 0;
+		const {
+			x: {
+				baseVal: { value: x },
+			},
+			y: {
+				baseVal: { value: y },
+			},
+		} = this;
 		let box = Box.new();
 		box = box.merge(
-			Box.new(Point.at(x, y).transform(E).toArray().concat([0, 0]))
+			Box.new(Vec.at(x, y).transform(E).toArray().concat([0, 0]))
 		);
 		for (const sub of this.children) {
 			if (sub instanceof SVGGraphicsElement && sub.localName == "tspan") {
@@ -501,8 +653,8 @@ export class SVGTSpanElement extends SVGTextContentElement {
 		const fontsize = 16;
 		const x2 = x1 + 0; // This is impossible to calculate!
 		const y2 = y1 + fontsize;
-		const a = Point.at(x1, y1).transform(E);
-		const b = Point.at(x2, y2).transform(E).sub(a);
+		const a = Vec.at(x1, y1).transform(E);
+		const b = Vec.at(x2, y2).transform(E).sub(a);
 		box = box.merge(Box.new([a.x, a.y, Math.abs(b.x), Math.abs(b.y)]));
 		return box;
 	}
@@ -609,7 +761,12 @@ export class SVGScriptElement extends SVGElement {
 }
 
 import { Element } from "../element.js";
-import { userUnit, SVGLength, SVGRectAttr, SVGLengthAttr } from "./units.js";
+import { userUnit, SVGLength, SVGLengthAttr } from "./length.js";
+import {
+	SVGRectAttr,
+	SVGLengthListAttr,
+	SVGLengthList,
+} from "./length-list.js";
 import { SVGTransformListAttr, SVGTransform } from "./attr-transform.js";
 import { DOMException } from "../event-target.js";
 export { SVGLength, SVGTransform };

@@ -43,18 +43,25 @@ const UNITS = ["", "", "%", "em", "ex", "px", "cm", "mm", "in", "pt", "pc"];
 const CONVS = [0, 1, 1];
 
 export class SVGLength {
-	_unit: number;
-	_num: number;
+	_unit?: number;
+	// _num?: number|string;
+	_num?: number;
+
 	constructor(value?: string) {
-		this._num = 0;
-		this._unit = 1;
+		// this._num = 0;
+		// this._unit = 1;
 		if (value) this.valueAsString = value;
 	}
+
 	get unitType() {
-		return this._unit;
+		const { _unit = 1 } = this;
+		return _unit;
 	}
+
 	get valueInSpecifiedUnits() {
-		return this._num;
+		const { _unit = 1 } = this;
+		// return _unit < 0 ? 0 : this._num ?? 0:
+		return this._num ?? 0;
 	}
 
 	set valueInSpecifiedUnits(value: number) {
@@ -66,9 +73,11 @@ export class SVGLength {
 	}
 
 	get valueAsString() {
-		let { _num, _unit } = this;
+		const { _num = 0, _unit = 1 } = this;
+		// return _unit < 0 ? "0" : `${_num}${UNITS[_unit] || ""}`:
 		return `${_num}${UNITS[_unit] || ""}`;
 	}
+
 	set valueAsString(value: string) {
 		const m = BOTH_MATCH.exec(value);
 		if (m) {
@@ -80,23 +89,40 @@ export class SVGLength {
 				return;
 			}
 		}
+		// delete this._num;
+		// delete this._unit;
 		throw DOMException.new("SyntaxError");
 	}
+
 	get value() {
-		let { _num, _unit } = this;
-		if (_unit) {
-			switch (_unit) {
-				case 0:
-				case 1:
-				case 5:
-					return _num;
-			}
-			return CONVERSIONS[_unit] * _num;
+		const { _num = 0, _unit = 1 } = this;
+
+		switch (_unit) {
+			case 0:
+			case 1:
+			case 5:
+				return _num;
+			case 2: // "%"
+			case 3: //  "em"
+			case 4: //  "ex"
+				throw DOMException.new("NotSupportedError");
+			case 6:
+				return (_num * 4800) / 127;
+			case 7:
+				return (_num * 480) / 127;
+			case 8:
+				return _num * 96;
+			case 9:
+				return (_num * 4) / 3;
+			case 10:
+				return _num * 16;
+			default:
+				throw new TypeError(`invalid ${_unit}`);
 		}
-		return NaN;
 	}
+
 	set value(value: number) {
-		let { _num, _unit } = this;
+		let { _unit = 1 } = this;
 		if (isFinite(value)) {
 			switch (_unit) {
 				case 0:
@@ -109,19 +135,19 @@ export class SVGLength {
 				case 4: //  "ex"
 					throw DOMException.new("NotSupportedError");
 				case 6:
-					this._num = (4800 * value) / 127;
+					this._num = (127 * value) / 4800;
 					return;
 				case 7:
-					this._num = (480 * value) / 127;
+					this._num = (127 * value) / 480;
 					return;
 				case 8:
-					this._num = 96 * value;
+					this._num = value / 96;
 					return;
 				case 9:
-					this._num = (value * 4) / 3;
+					this._num = (value * 3) / 4;
 					return;
-				case 9:
-					this._num = 16 * value;
+				case 10:
+					this._num = 16 / value;
 					return;
 				default:
 					throw new TypeError(`invalid ${_unit}`);
@@ -129,23 +155,36 @@ export class SVGLength {
 		}
 		throw new TypeError(`value=[${value}] unit=[${_unit}]`);
 	}
+
 	newValueSpecifiedUnits(unitType: number, valueInSpecifiedUnits: number) {
 		if (isFinite(valueInSpecifiedUnits)) {
 			this.convertToSpecifiedUnits(unitType);
-			// this._unit = unitType;
 			this._num = valueInSpecifiedUnits;
 		} else {
 			throw new TypeError();
 		}
 	}
+
 	convertToSpecifiedUnits(unitType: number) {
 		if (unitType > 0 && unitType < 11) {
+			const { value, _unit } = this;
 			this._unit = unitType;
+			try {
+				this.value = value;
+			} catch (err) {
+				this._unit = _unit;
+				throw err;
+			}
 		} else if (unitType === undefined) {
 			throw new TypeError();
 		} else {
 			throw DOMException.new("NotSupportedError");
 		}
+	}
+
+	toString() {
+		// return _unit < 0 ? _num : `${_num}${UNITS[_unit] || ""}`:
+		return this.valueAsString;
 	}
 
 	static SVG_LENGTHTYPE_UNKNOWN = 0;
@@ -167,7 +206,12 @@ export class SVGLengthAttr extends Attr {
 	set value(value: string) {
 		const { _var } = this;
 		if (_var instanceof SVGLength) {
-			_var.valueAsString = value;
+			try {
+				_var.valueAsString = value;
+			} catch (err) {
+				console.error(err);
+				// this._var = value;
+			}
 		} else {
 			this._var = value;
 		}
@@ -200,53 +244,5 @@ export class SVGLengthAttr extends Attr {
 	}
 }
 
-export class SVGRectAttr extends Attr {
-	_var?: Box | string;
-
-	set value(value: string) {
-		const { _var } = this;
-		if (_var instanceof Box) {
-			const v = value.split(/[\s,]+/).map(parseFloat);
-			_var.x = v[0];
-			_var.y = v[1];
-			_var.width = v[2];
-			_var.height = v[3];
-		} else {
-			this._var = value;
-		}
-	}
-
-	get value() {
-		const { _var } = this;
-		if (_var instanceof Box) {
-			const { x, y, width, height } = _var;
-			return `${x} ${y} ${width} ${height}`;
-		}
-		return _var || "";
-	}
-
-	get baseVal() {
-		const { _var } = this;
-		if (_var instanceof Box) {
-			return _var;
-		} else {
-			return (this._var = Box.new(_var));
-		}
-	}
-
-	valueOf() {
-		const { _var } = this;
-		if (_var instanceof Box) {
-			const { x, y, width, height } = _var;
-			return `${x} ${y} ${width} ${height}`;
-		} else {
-			return _var?.toString();
-		}
-	}
-}
-
-
-
-import { Box } from "svggeom";
-import { Attr } from "../attr.js";
 import { DOMException } from "../event-target.js";
+import { Attr } from "../attr.js";

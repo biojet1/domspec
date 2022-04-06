@@ -2,13 +2,22 @@ export class SVGTransformList extends Array<SVGTransform> {
 	clear() {
 		this.splice(0);
 	}
+	getItem(i: number) {
+		return this[i];
+	}
+	removeItem(i: number) {
+		const m = this[i];
+		this.splice(i, 1);
+		return m;
+	}
+	appendItem(newItem: SVGTransform) {
+		this.push(newItem);
+		return newItem;
+	}
 	initialize(newItem: SVGTransform) {
 		this.clear();
 		this.push(newItem);
 		return newItem;
-	}
-	getItem(i: number) {
-		return this[i];
 	}
 	insertItemBefore(newItem: SVGTransform, i: number) {
 		let j;
@@ -24,15 +33,6 @@ export class SVGTransformList extends Array<SVGTransform> {
 			--i;
 		}
 		this.splice(i, 0, newItem);
-	}
-	removeItem(i: number) {
-		const m = this[i];
-		this.splice(i, 1);
-		return m;
-	}
-	appendItem(newItem: SVGTransform) {
-		this.push(newItem);
-		return newItem;
 	}
 	createSVGTransformFromMatrix(newItem: Matrix) {
 		this.clear();
@@ -65,6 +65,9 @@ export class SVGTransformList extends Array<SVGTransform> {
 			}
 		}
 		return m.toString();
+	}
+	get numberOfItems() {
+		return this.length;
 	}
 
 	public static parse(d: string): SVGTransformList {

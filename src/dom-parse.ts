@@ -1,5 +1,6 @@
-function domParse(doc: Document, top: ParentNode, options?: any) {
+function domParse(doc: Document, top: Document | Element | ParentNode, options?: any) {
 	const opt = options || {};
+	const parent = top;
 	const parser = new SaxesParser({
 		// lowercase: true,
 		xmlns: true,
@@ -40,6 +41,9 @@ function domParse(doc: Document, top: ParentNode, options?: any) {
 		let ns = uri || null;
 		if (!ns && prefix) {
 			ns = top.lookupNamespaceURI(prefix);
+		}
+		if (!ns) {
+			ns = (parent as Element)?.namespaceURI;
 		}
 		let tag;
 		if (ns) {

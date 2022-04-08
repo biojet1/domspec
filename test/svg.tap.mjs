@@ -12,20 +12,30 @@ tap.test("viewBox", function (t) {
 	// console.log(top.constructor.name);
 	// console.log(top.width.constructor.name);
 	// console.log(top.viewBox.constructor.name);
+	t.strictSame(top.viewBox.constructor.name, "SVGRectAttr");
 
-	// t.strictSame(top.viewBox.baseVal.x, -10);
-	// t.strictSame(top.viewBox.baseVal.width, 200);
-	// t.strictSame(top.height.baseVal.value, 100);
-	// top.viewBox.baseVal.x = 42;
-	// top.height.baseVal.value = 444;
-	// top.viewBox.baseVal.width = 456;
-	// t.strictSame(top.viewBox.baseVal.x, 42);
-	// t.strictSame(top.height.baseVal.value, 444);
+	t.strictSame(top.viewBox.baseVal.x, -10);
+	t.strictSame(top.viewBox.baseVal.width, 200);
+	t.strictSame(top.height.baseVal.value, 100);
+
+	top.viewBox.baseVal.x = 42;
+	top.viewBox.baseVal.width = 456;
+	top.height.baseVal.value = 444;
+	t.strictSame(top.viewBox.baseVal.x, 42);
+	t.strictSame(top.height.baseVal.value, 444);
+	t.strictSame(top.getAttribute("viewBox"), "42 20 456 300");
 
 	const text = top.outerHTML;
 
-	// t.match(text, /viewBox="42 20 456 300"/);
-	// t.match(text, /height="444(?:px)?"/);
+	t.match(text, /viewBox="42 20 456 300"/);
+	t.match(text, /height="444(?:px)?"/);
+
+	top.setAttribute("viewBox", "10 20 30 40");
+	const vb = top.viewBox.baseVal;
+	t.strictSame(vb.x, 10);
+	t.strictSame(vb.y, 20);
+	t.strictSame(vb.width, 30);
+	t.strictSame(vb.height, 40);
 
 	// console.log(top.outerHTML);
 

@@ -42,6 +42,22 @@ export function userUnit(src: string, default_value?: number): number {
 const UNITS = ["", "", "%", "em", "ex", "px", "cm", "mm", "in", "pt", "pc"];
 const CONVS = [0, 1, 1];
 
+export class SVGNumber {
+	_num?: number;
+
+	constructor(value?: string) {
+		value && (this._num = parseFloat(value));
+	}
+
+	get value() {
+		return this._num ?? 0;
+	}
+
+	set value(value: number) {
+		this._num = value;
+	}
+}
+
 export class SVGLength {
 	_unit?: number;
 	// _num?: number|string;

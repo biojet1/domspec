@@ -1,5 +1,23 @@
 import { Vec, Box, Matrix, Path } from "svggeom";
 /// Base Elements //////////
+function shapeBoxVP(node: SVGGraphicsElement, T?: Matrix | boolean): Box {
+	const width = node.width.baseVal.value;
+	const height = node.height.baseVal.value;
+	const x = node.x.baseVal.value;
+	const y = node.y.baseVal.value;
+	if (width && height) {
+		let b = Box.new(`${x} ${y} ${width} ${height}`);
+		if (T === true) {
+			b = b.transform(node.composedTransform());
+		} else if (T) {
+			b = b.transform(T);
+		} else {
+			b = b.transform(node.transformM);
+		}
+		return b;
+	}
+	return Box.not();
+}
 
 export class SVGElement extends Element {
 	get _isViewportElement() {
@@ -117,7 +135,7 @@ export class SVGGraphicsElement extends SVGElement {
 		return transformM;
 	}
 
-	shapeBox(T?: Matrix | boolean) {
+	shapeBox(T?: Matrix | boolean): Box {
 		// if (this.canRender()) {
 		const E =
 			T === true
@@ -186,7 +204,7 @@ export class SVGGraphicsElement extends SVGElement {
 				return new SVGLengthAttr(name);
 			case "viewBox":
 				return new SVGRectAttr(name);
-				// return new SVGLengthListAttr(name);
+			// return new SVGLengthListAttr(name);
 			case "transform":
 				return new SVGTransformListAttr(name);
 			// case "points":
@@ -523,6 +541,9 @@ export class SVGForeignObjectElement extends SVGGraphicsElement {
 	get _isViewportElement() {
 		return 2;
 	}
+	shapeBox(T?: Matrix | boolean): Box {
+		return shapeBoxVP(this, T);
+	}
 }
 
 export class SVGGElement extends SVGGraphicsElement {
@@ -530,23 +551,13 @@ export class SVGGElement extends SVGGraphicsElement {
 }
 
 export class SVGImageElement extends SVGGraphicsElement {
+	// https://svgwg.org/svg2-draft/coords.html#BoundingBoxes
 	static TAGS = ["image"];
 	get _isViewportElement() {
 		return 1;
 	}
-	shapeBox(T?: Matrix | boolean) {
-		const width = this.width.baseVal.value;
-		const height = this.height.baseVal.value;
-		const x = this.x.baseVal.value;
-		const y = this.y.baseVal.value;
-		// let width = this.getAttribute("width");
-		// let height = this.getAttribute("height");
-		// let x = this.getAttribute("x");
-		// let y = this.getAttribute("y");
-		if (width && height) {
-			return Box.new(`${x} ${y} ${width} ${height}`);
-		}
-		return Box.not();
+	shapeBox(T?: Matrix | boolean): Box {
+		return shapeBoxVP(this, T);
 	}
 }
 
@@ -555,6 +566,10 @@ export class SVGSVGElement extends SVGGraphicsElement {
 
 	get _isViewportElement() {
 		return 1;
+	}
+
+	shapeBox(T?: Matrix | boolean): Box {
+		return shapeBoxVP(this, T);
 	}
 
 	defs() {
@@ -598,9 +613,20 @@ export class SVGUseElement extends SVGGraphicsElement {
 				: this.transformM;
 		const ref = this.refElement();
 		if (ref) {
-			return (ref as SVGGraphicsElement).shapeBox(true).transform(E);
+			return (ref as SVGGraphicsElement).shapeBox().transform(E);
 		}
 		return Box.not();
+	}
+}
+// https://svgwg.org/svg2-draft/struct.html#SymbolElement
+
+export class SVGSymbolElement extends SVGGraphicsElement {
+	static TAGS = ["symbol"];
+	get _isViewportElement() {
+		return 1;
+	}
+	shapeBox(T?: Matrix | boolean): Box {
+		return shapeBoxVP(this, T);
 	}
 }
 
@@ -608,7 +634,7 @@ export class SVGUseElement extends SVGGraphicsElement {
 
 export class SVGTextElement extends SVGTextContentElement {
 	static TAGS = ["text"];
-	shapeBox(T?: Matrix | boolean) {
+	shapeBox(T?: Matrix | boolean): Box {
 		const E =
 			T === true
 				? this.composedTransform()
@@ -678,13 +704,6 @@ export class SVGClipPathElement extends SVGElement {
 
 export class SVGMaskElement extends SVGElement {
 	static TAGS = ["mask"];
-}
-
-export class SVGSymbolElement extends SVGElement {
-	static TAGS = ["symbol"];
-	get _isViewportElement() {
-		return 1;
-	}
 }
 
 export class SVGMissingGlyphElement extends SVGElement {

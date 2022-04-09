@@ -62,6 +62,7 @@ export class SVGLength {
 	_unit?: number;
 	// _num?: number|string;
 	_num?: number;
+	// _num?: number;
 
 	constructor(value?: string) {
 		// this._num = 0;
@@ -119,6 +120,7 @@ export class SVGLength {
 			case 5:
 				return _num;
 			case 2: // "%"
+
 			case 3: //  "em"
 			case 4: //  "ex"
 				throw DOMException.new("NotSupportedError");
@@ -147,6 +149,17 @@ export class SVGLength {
 					this._num = value;
 					return;
 				case 2: // "%"
+				{
+					/*
+					const e = _wm_parents[this];
+					if(e){
+						const v = e.nearestViewPort.width.baseVal.value || 100;
+						v*
+
+					}
+
+					*/
+				}
 				case 3: //  "em"
 				case 4: //  "ex"
 					throw DOMException.new("NotSupportedError");

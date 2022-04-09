@@ -36,13 +36,9 @@ export class SVGRectAttr extends Attr {
 			try {
 				return (this._var = BoxMut.parse(_var) as BoxMut);
 			} catch (err) {
-				//
+				return null;
 			}
-			// return (this._var = BoxMut.parse("0 0 0 0") as BoxMut);
-			// } else {
-			// return (this._var = BoxMut.parse("0 0 0 0") as BoxMut);
 		}
-		return _var ?? null;
 	}
 
 	valueOf() {

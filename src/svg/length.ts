@@ -62,6 +62,7 @@ export class SVGLength {
 	_unit?: number;
 	// _num?: number|string;
 	_num?: number;
+	// _num?: number;
 
 	constructor(value?: string) {
 		// this._num = 0;

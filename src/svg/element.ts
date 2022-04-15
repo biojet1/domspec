@@ -6,7 +6,7 @@ function shapeBoxVP(node: SVGGraphicsElement, T?: Matrix | boolean): Box {
 	const x = node.x.baseVal.value;
 	const y = node.y.baseVal.value;
 	if (width && height) {
-		let b = Box.new(`${x} ${y} ${width} ${height}`);
+		let b = Box.new(x, y, width, height);
 		if (T === true) {
 			b = b.transform(node.composedTransform());
 		} else if (T) {
@@ -126,6 +126,11 @@ export class SVGGraphicsElement extends SVGElement {
 	}
 
 	composedTransform(): Matrix {
+		// depreciated
+		return this.myCTM();
+	}
+
+	myCTM(): Matrix {
 		const { parentNode: parent, transformM } = this;
 		if (parent) {
 			if (parent instanceof SVGGraphicsElement) {
@@ -134,6 +139,17 @@ export class SVGGraphicsElement extends SVGElement {
 		}
 		return transformM;
 	}
+
+	parentCTM(): Matrix {
+		const { parentNode: parent } = this;
+		if (parent) {
+			if (parent instanceof SVGGraphicsElement) {
+				return parent.composedTransform();
+			}
+		}
+		return Matrix.identity();
+	}
+	// parentCTM(), myCTM(), myTM(), transformM
 
 	shapeBox(T?: Matrix | boolean): Box {
 		// if (this.canRender()) {
@@ -189,18 +205,18 @@ export class SVGGraphicsElement extends SVGElement {
 		// console.log("newAttributeNode", name);
 		switch (name) {
 			case "r":
+			case "x":
+			case "y":
 			case "rx":
 			case "ry":
 			case "cx":
 			case "cy":
-			case "x":
-			case "y":
-			case "width":
-			case "height":
 			case "x1":
 			case "x2":
 			case "y1":
 			case "y2":
+			case "width":
+			case "height":
 				return new SVGLengthAttr(name);
 			case "viewBox":
 				return new SVGRectAttr(name);
@@ -613,6 +629,9 @@ export class SVGUseElement extends SVGGraphicsElement {
 				: this.transformM;
 		const ref = this.refElement();
 		if (ref) {
+			if (ref instanceof SVGSymbolElement) {
+				return (ref as SVGGraphicsElement).shapeBox(E);
+			}
 			return (ref as SVGGraphicsElement).shapeBox().transform(E);
 		}
 		return Box.not();

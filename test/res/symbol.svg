@@ -16,9 +16,15 @@
   <!-- All instances of our symbol -->
   <use id="U1" href="#myDot" x="5"  y="5" style="opacity:1.0" />
   <use id="U2" href="#myDot" x="20" y="5" style="opacity:0.8" />
-  <use id="U3" href="#myDot" x="35" y="5" style="opacity:0.6" />
-  <use id="U4" href="#myDot" x="50" y="5" style="opacity:0.4" />
-  <use id="U5" href="#myDot" x="65" y="5" style="opacity:0.2" />
+
+  <g id="G1">
+    <use id="U3" href="#myDot" x="35" y="5" style="opacity:0.6" />
+  </g>
+
+  <g id="G2">
+    <use id="U4" href="#myDot" x="50" y="5" style="opacity:0.4" />
+    <use id="U5" href="#myDot" x="65" y="5" style="opacity:0.2" />
+  </g>
 
   <rect x="5"  y="5" fill="none" stroke="cyan"  width="10" height="10" />
   <rect x="20"  y="5" fill="none" stroke="cyan"  width="10" height="10" />

@@ -56,6 +56,8 @@ tap.test("Use+Symbol", function (t) {
 	const U3 = doc.getElementById("U3");
 	const U4 = doc.getElementById("U4");
 	const U5 = doc.getElementById("U5");
+	const G1 = doc.getElementById("G1");
+	const G2 = doc.getElementById("G2");
 	t.same(U1.refElement().id, "myDot");
 	t.same(U5.refElement().id, "myDot");
 	t.same(U1.shapeBox().toArray(), [5, 5, 10, 10]);
@@ -63,6 +65,10 @@ tap.test("Use+Symbol", function (t) {
 	t.same(U3.shapeBox().toArray(), [35, 5, 10, 10]);
 	t.same(U4.shapeBox().toArray(), [50, 5, 10, 10]);
 	t.same(U5.shapeBox().toArray(), [65, 5, 10, 10]);
+
+	t.same(G1.shapeBox().toArray(), [35, 5, 10, 10]);
+	t.same(G2.shapeBox().toArray(), [50, 5, 25, 10]);
+
 	t.end();
 });
 

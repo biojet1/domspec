@@ -85,7 +85,7 @@ export class SVGTransformList extends Array<SVGTransform> {
 	}
 }
 
-export class SVGTransform extends Matrix {
+export class SVGTransform extends MatrixMut {
 	θ?: number;
 	get matrix() {
 		return this;
@@ -304,7 +304,10 @@ export class SVGTransformListAttr extends Attr {
 	valueOf() {
 		const { _var } = this;
 		if (_var instanceof SVGTransformList) {
-			return _var.consolidate()?.toString();
+			const m = _var.consolidate();
+			if (m && !m.isIdentity()) {
+				return m.toString();
+			}
 		} else {
 			return _var?.toString();
 		}
@@ -314,5 +317,5 @@ const { tan, cos, sin, PI } = Math;
 const radians = function (d: number) {
 	return ((d % 360) * PI) / 180;
 };
-import { Matrix } from "svggeom";
+import { Matrix, MatrixMut } from "svggeom";
 import { Attr } from "../attr.js";

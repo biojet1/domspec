@@ -6,9 +6,9 @@ function shapeBoxVP(node: SVGGraphicsElement, T?: Matrix | boolean): Box {
 	const x = node.x.baseVal.value;
 	const y = node.y.baseVal.value;
 	if (width && height) {
-		let b = Box.new(`${x} ${y} ${width} ${height}`);
+		let b = Box.new(x, y, width, height);
 		if (T === true) {
-			b = b.transform(node.composedTransform());
+			b = b.transform(node.myCTM());
 		} else if (T) {
 			b = b.transform(T);
 		} else {
@@ -126,20 +126,34 @@ export class SVGGraphicsElement extends SVGElement {
 	}
 
 	composedTransform(): Matrix {
+		// depreciated
+		return this.myCTM();
+	}
+
+	myCTM(): Matrix {
 		const { parentNode: parent, transformM } = this;
 		if (parent) {
 			if (parent instanceof SVGGraphicsElement) {
-				return parent.composedTransform().multiply(transformM);
+				return parent.myCTM().multiply(transformM);
 			}
 		}
 		return transformM;
 	}
 
+	parentCTM(): Matrix {
+		const { parentNode: parent } = this;
+
+		return parent && parent instanceof SVGGraphicsElement
+			? parent.myCTM()
+			: Matrix.identity();
+	}
+	// parentCTM(), myCTM(), myTM(), transformM
+
 	shapeBox(T?: Matrix | boolean): Box {
 		// if (this.canRender()) {
 		const E =
 			T === true
-				? this.composedTransform()
+				? this.myCTM()
 				: T
 				? T.multiply(this.transformM)
 				: this.transformM;
@@ -169,7 +183,7 @@ export class SVGGraphicsElement extends SVGElement {
 		if (clip) {
 			if (M === true) {
 				return this.shapeBox(true).overlap(
-					clip.boundingBox(this.composedTransform())
+					clip.boundingBox(this.myCTM())
 				);
 			} else {
 				return this.shapeBox(M).overlap(clip.boundingBox(M));
@@ -189,18 +203,18 @@ export class SVGGraphicsElement extends SVGElement {
 		// console.log("newAttributeNode", name);
 		switch (name) {
 			case "r":
+			case "x":
+			case "y":
 			case "rx":
 			case "ry":
 			case "cx":
 			case "cy":
-			case "x":
-			case "y":
-			case "width":
-			case "height":
 			case "x1":
 			case "x2":
 			case "y1":
 			case "y2":
+			case "width":
+			case "height":
 				return new SVGLengthAttr(name);
 			case "viewBox":
 				return new SVGRectAttr(name);
@@ -298,7 +312,7 @@ export class SVGGeometryElement extends SVGGraphicsElement {
 		let { path } = this;
 		if (path.firstPoint) {
 			if (T === true) {
-				path = path.transform(this.composedTransform());
+				path = path.transform(this.myCTM());
 			} else {
 				path = path.transform(this.transformM);
 				if (T) {
@@ -607,12 +621,15 @@ export class SVGUseElement extends SVGGraphicsElement {
 	shapeBox(T?: Matrix | boolean) {
 		const E =
 			T === true
-				? this.composedTransform()
+				? this.myCTM()
 				: T
 				? T.multiply(this.transformM)
 				: this.transformM;
 		const ref = this.refElement();
 		if (ref) {
+			if (ref instanceof SVGSymbolElement) {
+				return (ref as SVGGraphicsElement).shapeBox(E);
+			}
 			return (ref as SVGGraphicsElement).shapeBox().transform(E);
 		}
 		return Box.not();
@@ -637,7 +654,7 @@ export class SVGTextElement extends SVGTextContentElement {
 	shapeBox(T?: Matrix | boolean): Box {
 		const E =
 			T === true
-				? this.composedTransform()
+				? this.myCTM()
 				: T
 				? T.multiply(this.transformM)
 				: this.transformM;
@@ -671,7 +688,7 @@ export class SVGTSpanElement extends SVGTextContentElement {
 		// of the text without width or height (which is impossible to calculate)
 		const E =
 			T === true
-				? this.composedTransform()
+				? this.myCTM()
 				: T
 				? T.multiply(this.transformM)
 				: this.transformM;

@@ -95,7 +95,7 @@ tap.test("fuseTranform", function (t) {
 	t.same([x, y], [130, 140]);
 
 	t.same(
-		[...P2.path].map((s) => s.p1).map((p) => [p.x - 100, p.y - 100]),
+		[...P2.path].map((s) => s.start).map((p) => [p.x - 100, p.y - 100]),
 		[
 			[50, 80],
 			[140, 110],
@@ -104,7 +104,7 @@ tap.test("fuseTranform", function (t) {
 		]
 	);
 	t.same(
-		[...P3.path].map((s) => s.p1).map((p) => [p.x, p.y]),
+		[...P3.path].map((s) => s.start).map((p) => [p.x, p.y]),
 		[
 			[50, 80],
 			[140, 110],

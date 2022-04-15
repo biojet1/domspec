@@ -29,7 +29,8 @@ export function* enumXMLDump(start: Node, end: Node) {
 			case 2: // ATTRIBUTE_NODE
 				{
 					const v = cur.valueOf();
-					if (v !== null) {
+					if (v != null) {
+						// same !(v === undefined || v === null)
 						const { name } = cur as Attr;
 						if (name)
 							yield ` ${name}="${(v as string).replace(

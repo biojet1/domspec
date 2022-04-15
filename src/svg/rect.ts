@@ -50,7 +50,57 @@ export class SVGRectAttr extends Attr {
 			return _var?.toString();
 		}
 	}
+
+	contain(
+		...args: Array<
+			| SVGGraphicsElement
+			| Box
+			| Point
+			| Ray
+			| Array<SVGGraphicsElement | Box | Point | Ray>
+		>
+	) {
+		let bbox = contain(args);
+		const { _var } = this;
+		if (_var instanceof BoxMut) {
+			_var.copy(bbox);
+		} else {
+			this._var = bbox;
+		}
+		return this;
+	}
 }
 
-import { BoxMut } from "svggeom";
+function contain(
+	args: Array<
+		| SVGGraphicsElement
+		| Box
+		| Point
+		| Ray
+		| Array<SVGGraphicsElement | Box | Point | Ray>
+	>
+) {
+	let bbox = BoxMut.new() as BoxMut;
+	for (const v of args) {
+		if (v instanceof Array) {
+			bbox.mergeSelf(contain(v));
+		} else if (v instanceof Box) {
+			bbox.mergeSelf(v);
+		} else if (v instanceof Point || v instanceof Ray) {
+			const { x, y } = v;
+			bbox.mergeSelf(Box.new(x, y, 0, 0));
+		} else {
+			try {
+				bbox.mergeSelf(v.boundingBox(true));
+			} catch (err) {
+				console.error(`Failed to merge ${v.constructor.name} ${bbox.constructor.name}(${bbox})`);
+				throw err;
+			}
+		}
+	}
+	return bbox;
+}
+
+import { BoxMut, Box, Point, Ray } from "svggeom";
 import { Attr } from "../attr.js";
+import { SVGGraphicsElement } from "./element.js";

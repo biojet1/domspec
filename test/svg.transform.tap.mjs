@@ -42,31 +42,14 @@ tap.test("transform", function (t) {
 	t.same(R2.getBBox().toArray(), [10 + 50 - 10, 20 + 50 - 10, 100, 200]);
 	t.same(R3.getBBox().toArray(), [10 + 100, 20 + 100, 100, 200]);
 	t.same(R4.getBBox().toArray(), [10 + 100 - 10, 20 + 100 - 10, 100, 200]);
-	// t.same(R1.ownerSVGElement.id, "VPE");
-	// t.same(R1.nearestViewportElement.id, "VPE");
-	// t.same(R1.farthestViewportElement.id, "VPA");
-	// t.same(VPE.viewportElement.id, "VPD");
-	// t.same(VPE.ownerSVGElement.id, "VPD");
-	// t.same(VPE.nearestViewportElement.id, "VPD");
-	// t.same(VPE.farthestViewportElement.id, "VPA");
-	// t.same(VPA.farthestViewportElement, null);
-	// t.same(VPA.nearestViewportElement, null);
-	// t.same(VPA.ownerSVGElement, null);
-	// t.same(VPA.viewportElement, null);
-	// t.same(R1._isViewportElement, 0);
+
 	t.same(R3.parentCTM().describe(), Matrix.translate(100, 100).describe());
-	t.same(
-		R3.myCTM().describe(),
-		Matrix.translate(100, 100).describe()
-	);
+	t.same(R3.myCTM().describe(), Matrix.translate(100, 100).describe());
 	t.same(R4.parentCTM().describe(), Matrix.translate(100, 100).describe());
-	t.same(
-		R4.myCTM().describe(),
-		Matrix.translate(90, 90).describe()
-	);
+	t.same(R4.myCTM().describe(), Matrix.translate(90, 90).describe());
 	// t.same(R4.myCTM().describe(), Matrix.translate(90, 90).describe());
 
-	console.log(R3.myCTM());
+	// console.log(R3.myCTM());
 	// console.log("R3p", R3.parentCTM().describe());
 	// console.log("R3t", R3.myCTM().describe());
 	// console.log("R4t", R3.myCTM().describe());
@@ -87,29 +70,29 @@ tap.test("transform", function (t) {
 	// console.log("N", tr.at(1, R4CTM.inverse()).postMultiply(R4PTM).describe());
 	// console.log("X", tr.at(1, R4PTM.inverse()).multiply(R4CTM).describe());
 	// console.log("N", tr.at(1, R4PTM.inverse()).postMultiply(R4CTM).describe());
+	t.end();
+});
+import fs from "fs";
 
-	// console.log("m", m.multiply(R3.parentCTM().inverse()).describe());
-	// console.log("m", R3.myCTM().inverse().multiply(m).describe());
-	// // translate(-90 0)
+tap.test("viewportTM", function (t) {
+	const doc = parser.parseFromString(
+		fs.readFileSync("test/res/preserveAspectRatio.svg", { encoding: "utf-8" })
+	);
+	const top = doc.documentElement;
+	const U1 = doc.getElementById("U1");
 
-	// console.log("translate(-90 0) translate(-110,-10)");
-	// console.log("m", m.multiply(R4CTM.inverse()).describe());
-	// console.log("m", m.multiply(R4CTM).describe());
-	// console.log("m", m.multiply(R4CTM).inverse().describe());
-	// console.log("m", m.inverse().multiply(R4CTM).describe());
-	// console.log("m", m.multiply(R4PTM).describe());
-	// console.log("m", m.multiply(R4PTM.inverse()).describe());
-	// console.log("m", m.multiply(R4PTM).inverse().describe());
-	// console.log("m", m.inverse().multiply(R4.parentCTM()).describe());
+	console.log(U1.parentNode.viewportTM());
+	console.log(U1.getBBox());
+	console.log(U1.parentNode.getBBox());
 
-	// console.log("m", R4PTM.multiply(m).describe());
-	// console.log("m", R4PTM.multiply(m).inverse().describe());
-	// console.log("m", R4PTM.multiply(m.inverse()).describe());
+	let g =  doc.getElementById("slice-group-2");
+	let vp = g.querySelector(`svg[preserveAspectRatio="xMaxYMax slice"]`);
+	// let rect = g.querySelector(`rect`);
+	console.log(g.querySelector(`rect`).shapeBox());
+	t.same(vp.getBBox().toArray(), [390, 220, 50, 30]);
+	// t.same(g.querySelector(`rect`).shapeBox(true).toArray(), [390, 220, 49, 29]);
 
-	// const M = tr.at(f, T.inverse());
-	// node.transformM = p.inverse().multiply(M.multiply(T))
-	// node.transformM = M.multiply(T).multiply(p)
-	// node.transformM = M.multiply(T).multiply(p.inverse())
+	// x { _x: 390, _y: 220, _h: 30, _w: 50 }
 
 	t.end();
 });

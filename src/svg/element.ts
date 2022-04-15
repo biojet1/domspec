@@ -113,6 +113,7 @@ export class SVGGraphicsElement extends SVGElement {
 		}
 		return true;
 	}
+
 	refElement() {
 		const id =
 			this.getAttributeNS("http://www.w3.org/1999/xlink", "href") ||
@@ -133,6 +134,16 @@ export class SVGGraphicsElement extends SVGElement {
 	myCTM(): Matrix {
 		const { parentNode: parent, transformM } = this;
 		if (parent) {
+			// if (parent instanceof SVGSVGElement) {
+			// 	return parent
+			// 		.viewportTM()
+			// 		.multiply(parent.myCTM())
+			// 		.multiply(transformM);
+			// 	// return parent
+			// 	// 	.myCTM()
+			// 	// 	.multiply(parent.viewportTM())
+			// 	// 	.multiply(transformM);
+			// } else
 			if (parent instanceof SVGGraphicsElement) {
 				return parent.myCTM().multiply(transformM);
 			}
@@ -142,10 +153,15 @@ export class SVGGraphicsElement extends SVGElement {
 
 	parentCTM(): Matrix {
 		const { parentNode: parent } = this;
-
-		return parent && parent instanceof SVGGraphicsElement
-			? parent.myCTM()
-			: Matrix.identity();
+		if (parent) {
+			// if (parent instanceof SVGSVGElement) {
+			// 	return parent.myCTM().multiply(parent.viewportTM());
+			// } else
+			if (parent instanceof SVGGraphicsElement) {
+				return parent.myCTM();
+			}
+		}
+		return Matrix.identity();
 	}
 	// parentCTM(), myCTM(), myTM(), transformM
 
@@ -582,6 +598,35 @@ export class SVGSVGElement extends SVGGraphicsElement {
 		return 1;
 	}
 
+	viewportTM() {
+		const w = this.width.baseVal.value;
+		const h = this.height.baseVal.value;
+		const x = this.x.baseVal.value;
+		const y = this.y.baseVal.value;
+		const v = this.viewBox.baseVal;
+		let vx, vy, vw, vh;
+		if (v) {
+			vx = v.x;
+			vy = v.y;
+			vw = v.width;
+			vh = v.height;
+		} else {
+			return Matrix.identity();
+		}
+		const [tx, ty, sx, sy] = viewbox_transform(
+			x,
+			y,
+			w,
+			h,
+			vx,
+			vy,
+			vw,
+			vh,
+			this.getAttribute("preserveAspectRatio")
+		);
+		return Matrix.translate(tx, ty).scale(sx, sy);
+	}
+
 	shapeBox(T?: Matrix | boolean): Box {
 		return shapeBoxVP(this, T);
 	}
@@ -802,7 +847,11 @@ import { Element } from "../element.js";
 import { userUnit, SVGLength, SVGLengthAttr } from "./length.js";
 import { SVGLengthListAttr, SVGLengthList } from "./length-list.js";
 import { SVGRectAttr } from "./rect.js";
-import { SVGTransformListAttr, SVGTransform } from "./attr-transform.js";
+import {
+	SVGTransformListAttr,
+	SVGTransform,
+	viewbox_transform,
+} from "./attr-transform.js";
 import { DOMException } from "../event-target.js";
 export { SVGLength, SVGTransform };
 // const excl = /^SVGGraphicsElement|SVGGeometryElement|SVGFE[A-Z].+$/;

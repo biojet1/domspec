@@ -72,27 +72,191 @@ tap.test("transform", function (t) {
 	// console.log("N", tr.at(1, R4PTM.inverse()).postMultiply(R4CTM).describe());
 	t.end();
 });
+
 import fs from "fs";
+function closeEnough(a, b, threshold = 1e-6) {
+	return Math.abs(b - a) <= threshold;
+}
 
 tap.test("viewportTM", function (t) {
 	const doc = parser.parseFromString(
-		fs.readFileSync("test/res/preserveAspectRatio.svg", { encoding: "utf-8" })
+		fs.readFileSync("test/res/preserveAspectRatio.svg", {
+			encoding: "utf-8",
+		})
 	);
 	const top = doc.documentElement;
 	const U1 = doc.getElementById("U1");
+	const VR1 = doc.getElementById("VR1");
+	const RECT = doc.getElementById("RECT");
 
-	console.log(U1.parentNode.viewportTM());
-	console.log(U1.getBBox());
-	console.log(U1.parentNode.getBBox());
+	// console.log(U1.parentNode.viewportTM());
+	// console.log("U1.getBBox()", U1.getBBox());
+	// console.log(U1.parentNode.getBBox());
 
-	let g =  doc.getElementById("slice-group-2");
-	let vp = g.querySelector(`svg[preserveAspectRatio="xMaxYMax slice"]`);
-	// let rect = g.querySelector(`rect`);
-	console.log(g.querySelector(`rect`).shapeBox());
-	t.same(vp.getBBox().toArray(), [390, 220, 50, 30]);
-	// t.same(g.querySelector(`rect`).shapeBox(true).toArray(), [390, 220, 49, 29]);
+	let r, u, g, v;
 
-	// x { _x: 390, _y: 220, _h: 30, _w: 50 }
+	[
+		["V_A", "xMinYMin meet", 1, 0, 0, 1, 100, 60],
+		["V_B", "xMidYMid meet", 1, 0, 0, 1, 170, 60],
+		["V_C", "xMaxYMax meet", 1, 0, 0, 1, 100, 130],
+		["V_D", "xMinYMin meet", 1, 0, 0, 1, 250, 60],
+		["V_E", "xMidYMid meet", 1, 0, 0, 1, 300, 60],
+		["V_F", "xMaxYMax meet", 1, 0, 0, 1, 350, 60],
+		["V_G", "xMinYMin slice", 1, 0, 0, 1, 100, 220],
+		["V_H", "xMidYMid slice", 1, 0, 0, 1, 150, 220],
+		["V_I", "xMaxYMax slice", 1, 0, 0, 1, 200, 220],
+		["V_J", "xMinYMin slice", 1, 0, 0, 1, 250, 220],
+		["V_K", "xMidYMid slice", 1, 0, 0, 1, 320, 220],
+		["V_L", "xMaxYMax slice", 1, 0, 0, 1, 390, 220],
+	].forEach(([id, par, a, b, c, d, e, f]) => {
+		const m = Matrix.new(a, b, c, d, e, f);
+		const v = doc.getElementById(id);
+		const u = v.myCTM();
+		t.same(u.toString(), m.toString(), par);
+		// console.log();
+	});
+	[
+		["V_A", 0.75, 0, 0, 0.75, 100, 60],
+		["V_B", 0.75, 0, 0, 0.75, 183.75, 60],
+		["V_C", 0.75, 0, 0, 0.75, 127.5, 130],
+		["V_D", 1, 0, 0, 1, 250, 60],
+		["V_E", 1, 0, 0, 1, 300, 70],
+		["V_F", 1, 0, 0, 1, 350, 80],
+		["V_G", 1.5, 0, 0, 1.5, 100, 220],
+		["V_H", 1.5, 0, 0, 1.5, 142.5, 220],
+		["V_I", 1.5, 0, 0, 1.5, 185, 220],
+		["V_J", 1.6666666269302368, 0, 0, 1.6666666269302368, 250, 220],
+		[
+			"V_K",
+			1.6666666269302368,
+			0,
+			0,
+			1.6666666269302368,
+			320,
+			201.6666717529297,
+		],
+		[
+			"V_L",
+			1.6666666269302368,
+			0,
+			0,
+			1.6666666269302368,
+			390,
+			183.33334350585938,
+		],
+	].forEach(([id, a, b, c, d, e, f]) => {
+		const m = Matrix.new(a, b, c, d, e, f);
+		const v = doc.getElementById(id);
+		const u = v.querySelector("use");
+		const w = u.myCTM();
+		t.ok(w.equals(m, 1e-4), `${id} ${w} ${m}`);
+		// console.log();
+	});
+	[
+		["V_A", 100.375, 60.375, 21.75, 29.25],
+		["V_B", 184.125, 60.375, 21.75, 29.25],
+		["V_C", 127.875, 130.375, 21.75, 29.25],
+		["V_D", 250.5, 60.5, 29, 39],
+		["V_E", 300.5, 70.5, 29, 39],
+		["V_F", 350.5, 80.5, 29, 39],
+		["V_G", 100.75, 220.75, 43.5, 58.5],
+		["V_H", 143.25, 220.75, 43.5, 58.5],
+		["V_I", 185.75, 220.75, 43.5, 58.5],
+		[
+			"V_J",
+			250.83333331346512,
+			220.83333331346512,
+			48.33333218097687,
+			64.99999845027924,
+		],
+		[
+			"V_K",
+			320.8333333134651,
+			202.5000050663948,
+			48.33333218097687,
+			64.99999845027924,
+		],
+		[
+			"V_L",
+			390.8333333134651,
+			184.1666768193245,
+			48.33333218097687,
+			64.99999845027924,
+		],
+	].forEach(([id, x, y, w, h]) => {
+		const v = doc.getElementById(id);
+		const u = v.querySelector("use");
+		const r = u.shapeBox(true);
 
+		t.ok(closeEnough(r.x, x), `${id} x ${x} ${r.x}`);
+		t.ok(closeEnough(r.y, y, 1E-4), `${id} y ${y} ${r.y}`);
+		t.ok(closeEnough(r.width, w, 1E-5), `${id} width ${w} ${r.width}`);
+		t.ok(closeEnough(r.height, h, 1E-5), `${id} height ${h} ${r.height}`);
+		// console.log();
+	});
+
+	const a = Array.from(
+		doc.documentElement.querySelectorAll(`svg[preserveAspectRatio]`)
+	);
+
+	a.forEach((v) => {
+		const u = v.querySelector(`use`);
+		const b = u.getBBox();
+		const r = RECT.cloneNode();
+		r.id = `R${v.getAttribute("preserveAspectRatio")}`;
+		r.x.baseVal.value = b.x;
+		r.y.baseVal.value = b.y;
+		r.width.baseVal.value = b.width;
+		r.height.baseVal.value = b.height;
+		top.appendChild(r);
+	});
+
+	// console.log(a);
+	writeFileSync(`/tmp/aspect.svg`, doc.documentElement.outerHTML);
 	t.end();
 });
+import { createWriteStream, writeFileSync, WriteStream } from "fs";
+
+if (0) {
+	Array.from(
+		document.documentElement.querySelectorAll(`svg[preserveAspectRatio]`)
+	).map((v, i) => {
+		v.id = `V_${(i + 10).toString(26).toUpperCase()}`;
+
+		return (i + 10).toString(26);
+	});
+	Array.from(
+		document.documentElement.querySelectorAll(`svg[preserveAspectRatio]`)
+	).map((v) => {
+		const p = v.getAttribute("preserveAspectRatio");
+		const b = v.getBoundingClientRect();
+		const m = v.getCTM();
+		return [v.id, p, m.a, m.b, m.c, m.d, m.e, m.f];
+	});
+	Array.from(
+		document.documentElement.querySelectorAll(`svg[preserveAspectRatio]`)
+	).map((v) => {
+		const b = v.querySelector("use").getBBox();
+		return [v.id, [b.x, b.y, b.width, b.height]];
+	});
+	Array.from(
+		document.documentElement.querySelectorAll(`svg[preserveAspectRatio]`)
+	).map((v) => {
+		const u = v.querySelector("use");
+		const m = u.getScreenCTM();
+		return [v.id, m.a, m.b, m.c, m.d, m.e, m.f];
+	});
+	Array.from(
+		document.documentElement.querySelectorAll(`svg[preserveAspectRatio]`)
+	).map((v) => {
+		const u = v.querySelector("use");
+		const m = u.getScreenCTM();
+		const r = u.getBBox();
+		const a = DOMPoint.fromPoint({ x: r.x, y: r.y }).matrixTransform(m);
+		const b = DOMPoint.fromPoint({
+			x: r.x + r.width,
+			y: r.y + r.height,
+		}).matrixTransform(m);
+		return [v.id, a.x, a.y, b.x - a.x, b.y - a.y];
+	});
+}

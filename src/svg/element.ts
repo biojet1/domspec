@@ -134,23 +134,30 @@ export class SVGGraphicsElement extends SVGElement {
 	myCTM(): Matrix {
 		const { parentNode: parent, transformM } = this;
 		if (parent) {
-			// if (parent instanceof SVGSVGElement) {
-			// 	return parent
-			// 		.viewportTM()
-			// 		.multiply(parent.myCTM())
-			// 		.multiply(transformM);
-			// 	// return parent
-			// 	// 	.myCTM()
-			// 	// 	.multiply(parent.viewportTM())
-			// 	// 	.multiply(transformM);
-			// } else
+			// https://svgwg.org/svg2-draft/coords.html#ComputingAViewportsTransform
+			if (parent instanceof SVGSVGElement) {
+				// return parent
+				// 	.viewportTM()
+				// 	.multiply(parent.myCTM())
+				// 	.multiply(transformM);
+				// return parent
+				// 	.myCTM()
+				// 	.multiply(parent.viewportTM())
+				// 	.multiply(transformM)
+				const p = parent.parentCTM();
+				const t = parent.transformM;
+				const v = parent.viewportTM();
+				return p.multiply(t.postMultiply(v)).multiply(transformM);
+			}
 			if (parent instanceof SVGGraphicsElement) {
 				return parent.myCTM().multiply(transformM);
 			}
 		}
 		return transformM;
 	}
-
+	descendantsCTM(): Matrix {
+		return this.myCTM();
+	}
 	parentCTM(): Matrix {
 		const { parentNode: parent } = this;
 		if (parent) {
@@ -597,19 +604,32 @@ export class SVGSVGElement extends SVGGraphicsElement {
 	get _isViewportElement() {
 		return 1;
 	}
+	descendantsCTM(): Matrix {
+		return this.myCTM().multiply(this.viewportTM());
+	}
 
 	viewportTM() {
 		const w = this.width.baseVal.value;
 		const h = this.height.baseVal.value;
 		const x = this.x.baseVal.value;
 		const y = this.y.baseVal.value;
-		const v = this.viewBox.baseVal;
+		// const v = this.viewBox.baseVal;
+		if(!(w && h)){
+			return Matrix.identity();
+		}
+		const a = this.getAttribute("viewBox");
 		let vx, vy, vw, vh;
-		if (v) {
-			vx = v.x;
-			vy = v.y;
-			vw = v.width;
-			vh = v.height;
+		if (a) {
+			const {
+				x: _x,
+				y: _y,
+				width: _width,
+				height: _height,
+			} = Box.parse(a);
+			vx = _x;
+			vy = _y;
+			vw = _width;
+			vh = _height;
 		} else {
 			return Matrix.identity();
 		}
@@ -624,7 +644,11 @@ export class SVGSVGElement extends SVGGraphicsElement {
 			vh,
 			this.getAttribute("preserveAspectRatio")
 		);
+		// return Matrix.identity();
+		// return Matrix.scale(sx, sy).translate(tx, ty);
 		return Matrix.translate(tx, ty).scale(sx, sy);
+		// console.log(`translate(${tx} ${ty}) scale(${sx} ${sy})`);
+		// return Matrix.parse(`translate(${tx} ${ty}) scale(${sx} ${sy})`);
 	}
 
 	shapeBox(T?: Matrix | boolean): Box {

@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="450px" height="300px">
+<svg xmlns="http://www.w3.org/2000/svg" width="450px" height="300px" viewBox="0 0 450 300">
   <desc>Example PreserveAspectRatio - illustrates preserveAspectRatio attribute</desc>
   <style type="text/css">
     text { font-size: 9; }
@@ -32,21 +32,22 @@
     <g>
       <text y="-10">xMin*</text>
       <rect x=".5" y=".5" width="49" height="29"/>
-      <svg preserveAspectRatio="xMinYMin meet" viewBox="0 0 30 40" width="50" height="30">
+      <svg preserveAspectRatio="xMinYMin meet" viewBox="0 0 30 40" width="50" height="30" id="V_A">
         <use href="#smile"/>
       </svg>
     </g>
     <g transform="translate(70,0)">
       <text y="-10">xMid*</text>
       <rect x=".5" y=".5" width="49" height="29"/>
-      <svg preserveAspectRatio="xMidYMid meet" viewBox="0 0 30 40" width="50" height="30">
+      <svg preserveAspectRatio="xMidYMid meet" viewBox="0 0 30 40" width="50" height="30" id="V_B">
         <use href="#smile"/>
+        <!-- <rect  x=".5" y=".5" width="29" height="39" style="fill:green;stroke:pink"/> -->
       </svg>
     </g>
     <g transform="translate(0,70)">
       <text y="-10">xMax*</text>
       <rect x=".5" y=".5" width="49" height="29"/>
-      <svg preserveAspectRatio="xMaxYMax meet" viewBox="0 0 30 40" width="50" height="30">
+      <svg preserveAspectRatio="xMaxYMax meet" viewBox="0 0 30 40" width="50" height="30" id="V_C">
         <use href="#smile"/>
       </svg>
     </g>
@@ -56,21 +57,21 @@
     <g>
       <text y="-10">*YMin</text>
       <rect x=".5" y=".5" width="29" height="59"/>
-      <svg preserveAspectRatio="xMinYMin meet" viewBox="0 0 30 40" width="30" height="60">
+      <svg preserveAspectRatio="xMinYMin meet" viewBox="0 0 30 40" width="30" height="60" id="V_D">
         <use href="#smile"/>
       </svg>
     </g>
     <g transform="translate(50, 0)">
       <text y="-10">*YMid</text>
       <rect x=".5" y=".5" width="29" height="59"/>
-      <svg preserveAspectRatio="xMidYMid meet" viewBox="0 0 30 40" width="30" height="60">
+      <svg preserveAspectRatio="xMidYMid meet" viewBox="0 0 30 40" width="30" height="60" id="V_E">
         <use href="#smile"/>
       </svg>
     </g>
     <g transform="translate(100, 0)">
       <text y="-10">*YMax</text>
       <rect x=".5" y=".5" width="29" height="59"/>
-      <svg preserveAspectRatio="xMaxYMax meet" viewBox="0 0 30 40" width="30" height="60">
+      <svg preserveAspectRatio="xMaxYMax meet" viewBox="0 0 30 40" width="30" height="60" id="V_F">
         <use href="#smile"/>
       </svg>
     </g>
@@ -80,21 +81,21 @@
     <g>
       <text y="-10">xMin*</text>
       <rect x=".5" y=".5" width="29" height="59"/>
-      <svg preserveAspectRatio="xMinYMin slice" viewBox="0 0 30 40" width="30" height="60">
+      <svg preserveAspectRatio="xMinYMin slice" viewBox="0 0 30 40" width="30" height="60" id="V_G">
         <use href="#smile"/>
       </svg>
     </g>
     <g transform="translate(50,0)">
       <text y="-10">xMid*</text>
       <rect x=".5" y=".5" width="29" height="59"/>
-      <svg preserveAspectRatio="xMidYMid slice" viewBox="0 0 30 40" width="30" height="60">
+      <svg preserveAspectRatio="xMidYMid slice" viewBox="0 0 30 40" width="30" height="60" id="V_H">
         <use href="#smile"/>
       </svg>
     </g>
     <g transform="translate(100,0)">
       <text y="-10">xMax*</text>
       <rect x=".5" y=".5" width="29" height="59"/>
-      <svg preserveAspectRatio="xMaxYMax slice" viewBox="0 0 30 40" width="30" height="60">
+      <svg preserveAspectRatio="xMaxYMax slice" viewBox="0 0 30 40" width="30" height="60" id="V_I">
         <use href="#smile"/>
       </svg>
     </g>
@@ -104,25 +105,26 @@
     <g>
       <text y="-10">*YMin</text>
       <rect x=".5" y=".5" width="49" height="29"/>
-      <svg preserveAspectRatio="xMinYMin slice" viewBox="0 0 30 40" width="50" height="30">
+      <svg preserveAspectRatio="xMinYMin slice" viewBox="0 0 30 40" width="50" height="30" id="V_J">
         <use href="#smile"/>
       </svg>
     </g>
     <g transform="translate(70,0)">
       <text y="-10">*YMid</text>
       <rect x=".5" y=".5" width="49" height="29"/>
-      <svg preserveAspectRatio="xMidYMid slice" viewBox="0 0 30 40" width="50" height="30">
+      <svg preserveAspectRatio="xMidYMid slice" viewBox="0 0 30 40" width="50" height="30" id="V_K">
         <use href="#smile"/>
       </svg>
     </g>
     <g transform="translate(140,0)">
       <text y="-10">*YMax</text>
-      <rect x=".5" y=".5" width="49" height="29"/>
-      <svg preserveAspectRatio="xMaxYMax slice" viewBox="0 0 30 40" width="50" height="30">
+      <rect x=".5" y=".5" width="49" height="29" id="R1"/>
+      <svg preserveAspectRatio="xMaxYMax slice" viewBox="0 0 30 40" width="50" height="30" id="V_L">
         <use href="#smile" id="U1"/>
+        <!-- <rect id="VR1" x=".5" y=".5" width="29" height="39" style="fill:green;stroke:pink"/> -->
       </svg>
     </g>
   </g>
   <rect x="0" y="0" width="100%" height="100%"/>
-<rect x="390.5" y="220.5" width="39" height="29" style="stroke:magenta"/>
+  <rect id="RECT" x="390.5" y="220.5" width="39" height="29" style="stroke:magenta; opacity:.5"/>
 </svg>

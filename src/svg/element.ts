@@ -127,6 +127,7 @@ export class SVGGraphicsElement extends SVGElement {
 	}
 
 	composedTransform(): Matrix {
+		throw new Error("Depreciated")
 		// depreciated
 		return this.myCTM();
 	}

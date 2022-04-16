@@ -149,6 +149,10 @@ tap.test("viewportTM", function (t) {
 		const v = doc.getElementById(id);
 		const u = v.querySelector("use");
 		const w = u.myCTM();
+		t.ok(v.nearestViewportElement === top);
+		t.ok(v.farthestViewportElement === top);
+		t.ok(u.farthestViewportElement === top);
+		t.ok(u.nearestViewportElement === v);
 		t.ok(w.equals(m, 1e-4), `${id} ${w} ${m}`);
 		// console.log();
 	});

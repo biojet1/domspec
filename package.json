@@ -1,63 +1,64 @@
 {
-  "name": "svgdom-ts",
-  "version": "1.0.0",
-  "description": "SVG DOM Implementation",
-  "main": "dist/all.js",
-  "scripts": {
-    "test": "tap test/parse.mjs",
-    "madge": "node test/madge.cjs",
-    "test_xml": "python test/gen.py > test/test.xml",
-    "rm-map": "find dist -name '*.js.map' -type f -delete",
-    "c8test": "c8 npx tap --no-coverage --reporter=terse 'test/*.tap.?js' 'test/wpt-o?/*.tap.?js'",
-    "wpt": "c8 npx tap --no-coverage --reporter=terse 'test/wpt-o?/*.tap.?js'",
-    "wpt-run-try": "env TRY=1 tap --node-arg=--trace-warnings --node-arg=--unhandled-rejections=strict --bail test/wpt-run.tap.mjs",
-    "wpt-run-ok": "env tap -t600 --node-arg=--trace-warnings --node-arg=--unhandled-rejections=strict --bail test/wpt-run.tap.mjs",
-    "c8report": "c8 report -r text-lcov > coverage/lcov.info",
-    "c8rephtml": "c8 report -r html",
-    "html:switch": "env SWITCH=html node test/elements.js",
-    "html:class": "env CLASS=html node test/elements.js",
-    "html:import": "env IMPORT=html node test/elements.js",
-    "svg:switch": "env SWITCH=svg node test/elements.js",
-    "svg:import": "env IMPORT=svg node test/elements.js",
-    "compile": "tsc -d --sourcemap",
-    "prepare": "tsc -d --removeComments",
-    "up:devel": "python -B -m ghdevapi.up -A biojet1/svgdom-ts . -m . -r devel -a",
-    "up": "python -B -m ghdevapi up -A biojet1/svgdom-ts . -m . -r main -a"
-  },
-  "author": "",
-  "type": "module",
-  "exports": {
-    ".": "./dist/all.js"
-  },
-  "license": "ISC",
-  "dependencies": {
-    "@types/sax": "^1.2.3",
-    "css-select": "^4.1.3",
-    "htmlparser2": "^7.1.1",
-    "image-size": "",
-    "saxes": "^5.0.1"
-  },
-  "peerDependencies": {
-    "node-fetch": "*",
-    "svggeom": "git://github.com/biojet1/svggeom#main"
-  },
-  "files": [
-    "dist"
-  ],
-  "c8": {
-    "reports-dir": "/tmp/.c8/rep",
-    "temp-directory": "/tmp/.c8/tmp",
-    "src": "dist"
-  },
-  "tap": {
-    "timeout": 90,
-    "coverage": false
-  },
-  "devDependencies": {
-    "chai": "^4.3.4",
-    "jsdom": "^16.6.0",
-    "mocha-sugar-free": "^1.4.0",
-    "source-map-support": "^0.5.19",
-    "tap": "^15.0.9"
-  }
+	"name": "svgdom-ts",
+	"version": "1.0.0",
+	"description": "SVG DOM Implementation",
+	"main": "dist/all.js",
+	"scripts": {
+		"test": "tap test/parse.mjs",
+		"madge": "node test/madge.cjs",
+		"test_xml": "python test/gen.py > test/test.xml",
+		"rm-map": "find dist -name '*.js.map' -type f -delete",
+		"c8test": "c8 npx tap --no-coverage --reporter=terse 'test/*.tap.?js' 'test/wpt-o?/*.tap.?js'",
+		"wpt": "c8 npx tap --no-coverage --reporter=terse 'test/wpt-o?/*.tap.?js'",
+		"wpt-run-try": "env TRY=1 tap --node-arg=--trace-warnings --node-arg=--unhandled-rejections=strict --bail test/wpt-run.tap.mjs",
+		"wpt-run-ok": "env tap -t600 --node-arg=--trace-warnings --node-arg=--unhandled-rejections=strict --bail test/wpt-run.tap.mjs",
+		"c8report": "c8 report -r text-lcov > coverage/lcov.info",
+		"c8rephtml": "c8 report -r html",
+		"html:switch": "env SWITCH=html node test/elements.js",
+		"html:class": "env CLASS=html node test/elements.js",
+		"html:import": "env IMPORT=html node test/elements.js",
+		"svg:switch": "env SWITCH=svg node test/elements.js",
+		"svg:import": "env IMPORT=svg node test/elements.js",
+		"compile": "tsc -d --sourcemap",
+		"prepare": "tsc -d --removeComments",
+		"up:devel": "python -B -m ghdevapi.up -A biojet1/svgdom-ts . -m . -r devel -a",
+		"up": "python -B -m ghdevapi up -A biojet1/svgdom-ts . -m . -r main -a"
+	},
+	"author": "",
+	"type": "module",
+	"exports": {
+		".": "./dist/all.js"
+	},
+	"license": "ISC",
+	"dependencies": {
+		"@types/sax": "^1.2.3",
+		"css-select": "^4.1.3",
+		"htmlparser2": "^7.1.1",
+		"image-size": "",
+		"saxes": "^5.0.1"
+	},
+	"peerDependencies": {
+		"node-fetch": "*",
+		"svggeom": "git://github.com/biojet1/svggeom#main"
+	},
+	"files": ["dist"],
+	"c8": {
+		"reports-dir": "/tmp/.c8/rep",
+		"temp-directory": "/tmp/.c8/tmp",
+		"src": "dist"
+	},
+	"tap": {
+		"timeout": 90,
+		"coverage": false
+	},
+	"devDependencies": {
+		"chai": "^4.3.4",
+		"jsdom": "^16.6.0",
+		"mocha-sugar-free": "^1.4.0",
+		"source-map-support": "^0.5.19",
+		"tap": "^15.0.9"
+	},
+	"prettier": {
+		"useTabs": true
+	}
 }

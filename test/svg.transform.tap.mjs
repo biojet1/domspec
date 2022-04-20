@@ -92,8 +92,7 @@ tap.test("viewportTM", function (t) {
 	// console.log(U1.parentNode.viewportTM());
 	// console.log("U1.getBBox()", U1.getBBox());
 	// console.log(U1.parentNode.getBBox());
-
-	let r, u, g, v;
+	t.same(top.viewportTM().toString(), Matrix.identity().toString());
 
 	[
 		["V_A", "xMinYMin meet", 1, 0, 0, 1, 100, 60],
@@ -193,9 +192,35 @@ tap.test("viewportTM", function (t) {
 		const r = u.shapeBox(true);
 
 		t.ok(closeEnough(r.x, x), `${id} x ${x} ${r.x}`);
-		t.ok(closeEnough(r.y, y, 1E-4), `${id} y ${y} ${r.y}`);
-		t.ok(closeEnough(r.width, w, 1E-5), `${id} width ${w} ${r.width}`);
-		t.ok(closeEnough(r.height, h, 1E-5), `${id} height ${h} ${r.height}`);
+		t.ok(closeEnough(r.y, y, 1e-4), `${id} y ${y} ${r.y}`);
+		t.ok(closeEnough(r.width, w, 1e-5), `${id} width ${w} ${r.width}`);
+		t.ok(closeEnough(r.height, h, 1e-5), `${id} height ${h} ${r.height}`);
+		// console.log();
+	});
+	[
+		// ["G_B", 20.5, 40.5, 29, 39],
+		// ["G_C", 10.5, 120.5, 49, 29],
+		// ["G_D", 20.5, 190.5, 29, 59],
+		// ["G_F", 100.375, 60.375, 49.125, 29.25],
+		// ["G_G", 170.5, 60.375, 49, 29.25],
+		// ["G_H", 100.5, 130.375, 49.125, 29.25],
+		// ["G_J", 250.5, 60.5, 29, 59],
+		// ["G_K", 300.5, 60.5, 29, 59],
+		// ["G_L", 350.5, 60.5, 29, 59],
+		// ["G_N", 100.5, 220.5, 43.75, 59],
+		// ["G_O", 143.25, 220.5, 43.5, 59],
+		// ["G_P", 185.75, 220.5, 43.75, 59],
+		["G_11", 250.5, 220.5, 49, 65.33332824707031],
+		// ["G_12", 320.5, 202.50000190734863, 49, 64.99999237060547],
+		// ["G_13", 390.5, 184.16666793823242, 49, 65.33332824707031],
+	].forEach(([id, x, y, w, h]) => {
+		const v = doc.getElementById(id);
+		const r = v.shapeBox(true);
+
+		t.ok(closeEnough(r.x, x), `${id} x ${x} ${r.x}`);
+		t.ok(closeEnough(r.y, y, 1e-4), `${id} y ${y} ${r.y}`);
+		t.ok(closeEnough(r.width, w, 1e-5), `${id} width ${w} ${r.width}`);
+		t.ok(closeEnough(r.height, h, 1e-5), `${id} height ${h} ${r.height}`);
 		// console.log();
 	});
 
@@ -228,6 +253,11 @@ if (0) {
 		v.id = `V_${(i + 10).toString(26).toUpperCase()}`;
 
 		return (i + 10).toString(26);
+	});
+	Array.from(document.documentElement.querySelectorAll(`g`)).map((v, i) => {
+		if (!v.id) {
+			v.id = `G_${(i + 10).toString(26).toUpperCase()}`;
+		}
 	});
 	Array.from(
 		document.documentElement.querySelectorAll(`svg[preserveAspectRatio]`)
@@ -263,4 +293,18 @@ if (0) {
 		}).matrixTransform(m);
 		return [v.id, a.x, a.y, b.x - a.x, b.y - a.y];
 	});
+	document.querySelectorAll(`text`).forEach((x) => x.remove());
+
+	Array.from(document.documentElement.querySelectorAll(`g[id]`))
+		.filter((v) => v.id.startsWith("G_"))
+		.map((v) => {
+			const m = v.getScreenCTM();
+			const r = v.getBBox();
+			const a = DOMPoint.fromPoint({ x: r.x, y: r.y }).matrixTransform(m);
+			const b = DOMPoint.fromPoint({
+				x: r.x + r.width,
+				y: r.y + r.height,
+			}).matrixTransform(m);
+			return [v.id, a.x, a.y, b.x - a.x, b.y - a.y];
+		});
 }

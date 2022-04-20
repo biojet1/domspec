@@ -211,34 +211,11 @@ export class SVGGraphicsElement extends SVGElement {
 			if (!parent) {
 				throw new Error(`root not reached`);
 			} else if (parent instanceof SVGGraphicsElement) {
-				// if (parent.viewportElement) {
-				// 	tm = tm.postMultiply(parent.transformM);
-				// } else {
 				tm = tm.postMultiply(parent.innerTM);
-				// }
 			}
 			parent = parent.parentNode;
 		}
 		return tm;
-
-		// } else {
-		// 	if (parent) {
-		// 		if (root === parent) {
-		// 			return transformM;
-		// 		}
-		// 		if (parent instanceof SVGGraphicsElement) {
-		// 			return parent.composeTM(root).multiply(transformM);
-		// 		} else if (root) {
-		// 			throw new Error(`root not reached`);
-		// 		}
-		// 	} else {
-		// 		if (root) {
-		// 			throw new Error(`root not reached`);
-		// 		}
-		// 		return transformM;
-		// 	}
-		// }
-		return Matrix.identity();
 	}
 	// parentCTM(), myCTM(), myTM(), transformM
 	shapeBox(T?: Matrix | boolean): Box {

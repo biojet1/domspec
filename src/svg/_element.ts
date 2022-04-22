@@ -3,6 +3,15 @@ export class SVGElement extends Element {
 	get _isViewportElement() {
 		return 0;
 	}
+	get _nearestVP(): SVGElement | null {
+		let cur: SVGElement = this;
+		do {
+			if (1 === cur._isViewportElement) {
+				return cur;
+			}
+		} while ((cur = cur.parentElement as SVGElement));
+		return null;
+	}
 	get viewportElement(): SVGElement | null {
 		let parent: SVGElement = this;
 		while ((parent = parent.parentElement as SVGElement)) {
@@ -48,9 +57,11 @@ export class SVGGraphicsElement extends SVGElement {
 			case 'x2':
 			case 'y1':
 			case 'y2':
-			case 'width':
-			case 'height':
 				return new SVGLengthAttr(name);
+			case 'width':
+				return new SVGLengthWAttr(name);
+			case 'height':
+				return new SVGLengthHAttr(name);
 			case 'viewBox':
 				return new SVGRectAttr(name);
 			// return new SVGLengthListAttr(name);
@@ -125,9 +136,8 @@ export class SVGGraphicsElement extends SVGElement {
 		}
 		return farthest;
 	}
-	// elementTM
-	// innerTM
-	// rootTM
+	// ourTM
+	// ownTM
 	get transformM() {
 		// return Matrix.parse(this.getAttribute("transform") || "");
 		return this.transform.baseVal.consolidate();
@@ -231,6 +241,17 @@ export class SVGGraphicsElement extends SVGElement {
 		// }
 		// return Box.not();
 	}
+	// shapeBBox(T?: Matrix): Box {
+	// 	const E = T === true ? this.myCTM() : T ? T.multiply(this.transformM) : this.transformM;
+	// 	let box = Box.new();
+	// 	for (const sub of this.children) {
+	// 		if (sub instanceof SVGGraphicsElement && sub.canRender()) {
+	// 			box = box.merge(sub.boundingBox(E));
+	// 		}
+	// 	}
+	// 	return box;
+	// }
+
 	boundingBox(M?: Matrix | boolean): Box {
 		const { clip } = this;
 		if (clip) {
@@ -244,8 +265,8 @@ export class SVGGraphicsElement extends SVGElement {
 		}
 	}
 	getBBox() {
-		const box = this.shapeBox(true);
-		// return this.shapeBox(true);
+		// const box = this.shapeBox(true);
+		const box = this.objectBBox();
 		return box.isValid() ? box : Box.empty();
 	}
 	fuseTransform(parentT?: Matrix) {
@@ -265,6 +286,7 @@ export class SVGGraphicsElement extends SVGElement {
 		a && this.removeAttributeNode(a);
 	}
 	/////
+	// ourTM?
 	descendantTM(node: SVGGraphicsElement): Matrix {
 		// subTM or descTM
 		let { parentNode: parent, transformM: tm } = node;
@@ -291,6 +313,17 @@ export class SVGGraphicsElement extends SVGElement {
 	// 	return bb;
 	// }
 	// objectBBox
+	objectBBox(T?: Matrix) {
+		let box = Box.new();
+		for (const sub of this.children) {
+			if (sub instanceof SVGGraphicsElement && sub.canRender()) {
+				const M = sub.transformM;
+				const E = T ? T.multiply(M) : M;
+				box = box.merge(sub.objectBBox(E));
+			}
+		}
+		return box;
+	}
 }
 export class SVGSVGElement extends SVGGraphicsElement {
 	static TAGS = ['svg'];
@@ -367,7 +400,7 @@ export function shapeBoxVP(node: SVGGraphicsElement, T?: Matrix | boolean): Box 
 	return Box.not();
 }
 import { Element } from '../element.js';
-import { userUnit, SVGLength, SVGLengthAttr } from './length.js';
+import { userUnit, SVGLength, SVGLengthAttr, SVGLengthHAttr, SVGLengthWAttr } from './length.js';
 import { SVGRectAttr } from './rect.js';
 import { SVGLengthListAttr, SVGLengthList } from './length-list.js';
 import { SVGTransformListAttr, SVGTransform, viewbox_transform } from './attr-transform.js';

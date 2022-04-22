@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="300" height="400" id="VPA" viewBox="0 0 300 400" version="1.1">
-  <rect id="R0" x="0" y="0" width="300" height="400" style="fill:none;stroke:#a51d2d;stroke-width:1.07471"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="400" id="VPA" viewBox="50 10 300 400" version="1.1">
+  <rect id="R0" rx="50" x="0" y="0" width="300" height="400" style="fill:none;stroke:#a51d2d;stroke-width:1"/>
   <g id="G1" transform="translate(100)" style="fill:none;stroke:#1a5fb4">
     <g id="G2" transform="translate(0 80)" style="fill:none;stroke:#1a5fb4">
       <g id="G3" style="fill:none;stroke:#1a5fb4">

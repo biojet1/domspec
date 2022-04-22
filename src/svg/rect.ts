@@ -69,6 +69,17 @@ export class SVGRectAttr extends Attr {
 		}
 		return this;
 	}
+
+	// calcWidth(){
+	// 	// https://svgwg.org/svg-next/coords.html#Units
+	// 	if (_var instanceof BoxMut) {
+	// 		return _var.width;
+	// 	} else {
+	// 		const {ownerElement} = this;
+	// 		ownerElement
+	// 		return _var?.toString();
+	// 	}
+	// }
 }
 
 function contain(

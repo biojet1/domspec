@@ -16,9 +16,10 @@ tap.test('transform2', function (t) {
 		})
 	);
 	const top = doc.documentElement;
-	const R3 = doc.getElementById('R3');
+	const R0 = doc.getElementById('R0');
 	const R1 = doc.getElementById('R1');
 	const R2 = doc.getElementById('R2');
+	const R3 = doc.getElementById('R3');
 	const G1 = doc.getElementById('G1');
 	const G2 = doc.getElementById('G2');
 	const G4 = doc.getElementById('G4');
@@ -42,9 +43,15 @@ tap.test('transform2', function (t) {
 	].forEach(([id, a, b, c, d, e, f]) => {
 		const v = doc.getElementById(id);
 		const r = v.shapeBox(true);
+		const m = Matrix.new([a, b, c, d, e, f]).toString();
+		t.same(v.composeTM().toString(), m, `composeTM ${id}`);
+		const w = top.innerTM;
+		const u = v.rootTM();
 
-		t.same(v.composeTM().toString(), Matrix.new([a, b, c, d, e, f]).toString(), `composeTM ${id}`);
+		t.same(w.multiply(u).toString(), m, `rootTM ${id} ${w} ${u}`);
 	});
+
+	t.same(R0.composeTM(R0.farthestViewportElement).toString(), Matrix.identity().toString());
 	t.same(R1.composeTM(G4).toString(), Matrix.identity().toString());
 	t.same(R2.composeTM(G4).toString(), Matrix.parse(`translate(-10 -10)`).toString());
 	t.same(R1.composeTM(G2).toString(), Matrix.parse(`translate(-50 -50)`).toString(), `R1.composeTM(G2)`);
@@ -53,6 +60,12 @@ tap.test('transform2', function (t) {
 		Matrix.parse(`translate(-50 -50) translate(-10 -10)`).toString(),
 		`R2.composeTM(G2)`
 	);
+	t.same(
+		R2.rootTM().toString(),
+		Matrix.parse(`translate(100) translate(0 80) translate(-50 -50) translate(-10 -10)`).toString(),
+		`R2.rootTM()`
+	);
+
 	t.throws(() => R1.composeTM(R2), { message: /not reached/ });
 
 	t.same(top.composeTM().toString(), Matrix.identity().toString());
@@ -102,12 +115,14 @@ if (0) {
 		const r = v.getBBox();
 		return [v.id, m.a, m.b, m.c, m.d, m.e, m.f];
 	});
-	Array.from(document.documentElement.querySelectorAll(`*[id]`)).map((v) => {
-		if(v.getBBox){
-		const r = v.getBBox();
-		return [v.id, r.x, r.y, r.width, r.height];
-		}
-	}).filter(v=>!!v);	
+	Array.from(document.documentElement.querySelectorAll(`*[id]`))
+		.map((v) => {
+			if (v.getBBox) {
+				const r = v.getBBox();
+				return [v.id, r.x, r.y, r.width, r.height];
+			}
+		})
+		.filter((v) => !!v);
 	Array.from(document.documentElement.querySelectorAll(`rect[id]`)).map((v) => {
 		const r = v.getBBox();
 		return [v.id, r.x, r.y, r.width, r.height];

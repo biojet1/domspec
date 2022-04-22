@@ -109,17 +109,17 @@ export class SVGLength {
 		if (m) {
 			const num = parseFloat(m[1]);
 			const suf = m.pop();
-			if (!suf) {
-				this._num = num;
-				this._unit = 1;
-				return true;
-			} else {
+			if (suf) {
 				const unit = UNITS.indexOf(suf.toLowerCase());
 				if (unit > 1) {
 					this._num = num;
 					this._unit = unit;
 					return true;
 				}
+			} else {
+				this._num = num;
+				this._unit = 1;
+				return true;
 			}
 		}
 		if (fail) {
@@ -248,7 +248,7 @@ export class SVGLength {
 		} else if (_unit >= 0) {
 			return `${_num}${UNITS[_unit] || ''}`;
 		} else {
-			_unit === -1;
+			// _unit === -1;
 			return `${_num}`;
 		}
 	}
@@ -285,12 +285,6 @@ export class SVGLengthAttr extends Attr {
 		const { _var } = this;
 		if (_var instanceof SVGLength) {
 			_var.parse(value);
-			// try {
-			// 	_var.valueAsString = value;
-			// } catch (err) {
-			// 	console.error(err);
-			// 	// this._var = value;
-			// }
 		} else {
 			this._var = value;
 		}
@@ -310,32 +304,36 @@ export class SVGLengthAttr extends Attr {
 			return _var;
 		} else {
 			const v = (this._var = new SVGLength(_var));
-			const o = this.ownerElement as SVGGraphicsElement;
-			o && _setAssoc(v, o);
+			_setAssoc(v, this);
 			return v;
-			// return (this._var = new SVGLength(_var));
 		}
 	}
 
 	valueOf() {
+		return this._var?.toString();
+		// _var == undefined returns undefined
+		// _var == string returns string
+		// _var == SVGLength returns SVGLength.toString();
+	}
+
+	val() {
 		const { _var } = this;
-		return _var?.toString();
-		// if (_var instanceof SVGLength) {
-		// 	return _var.valueAsString;
-		// } else {
-		// 	return _var?.toString();
-		// }
+		if (_var instanceof SVGLength) {
+			return _var.value;
+		} else if(_var){
+			
+		}
 	}
 }
 
-const _wm_assoc = new WeakMap<any, SVGGraphicsElement>();
+const _wm_assoc = new WeakMap<any, Attr>();
 
-function _setAssoc(that: any, value: SVGGraphicsElement) {
+function _setAssoc(that: any, value: Attr) {
 	_wm_assoc.set(that, value);
 }
 
-function _getAssoc(that: any) {
-	return _wm_assoc.get(that);
+function _getAssoc(that: any) : SVGGraphicsElement | null | undefined{
+	return _wm_assoc.get(that)?.ownerElement as SVGGraphicsElement;
 }
 
 export class SVGLengthW extends SVGLength {
@@ -375,8 +373,7 @@ export class SVGLengthWAttr extends SVGLengthAttr {
 			return _var;
 		} else {
 			const v = (this._var = new SVGLengthW(_var));
-			const o = this.ownerElement as SVGGraphicsElement;
-			o && _setAssoc(v, o);
+			_setAssoc(v, this);
 			return v;
 		}
 	}
@@ -389,8 +386,7 @@ export class SVGLengthHAttr extends SVGLengthAttr {
 			return _var;
 		} else {
 			const v = (this._var = new SVGLengthH(_var));
-			const o = this.ownerElement as SVGGraphicsElement;
-			o && _setAssoc(v, o);
+			_setAssoc(v, this);
 			return v;
 		}
 	}

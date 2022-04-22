@@ -1,24 +1,11 @@
 import tap from 'tap';
-import {
-    Document,
-    SVGDocument
-} from '../dist/document.js';
-import {
-    ParentNode
-} from '../dist/parent-node.js';
-import {
-    DOMParser
-} from '../dist/dom-parse.js';
-import {
-    SVGLength
-} from '../dist/svg/element.js';
-import {
-    Path,
-    Matrix,
-    MatrixInterpolate
-} from 'svggeom';
+import { Document, SVGDocument } from '../dist/document.js';
+import { ParentNode } from '../dist/parent-node.js';
+import { DOMParser } from '../dist/dom-parse.js';
+import { SVGLength } from '../dist/svg/element.js';
+import { Path, Matrix, MatrixInterpolate } from 'svggeom';
 const parser = new DOMParser();
-tap.test('transform', function(t) {
+tap.test('transform', function (t) {
     const doc = parser.parseFromString(`
 <svg xmlns="http://www.w3.org/2000/svg" id="VPA" viewBox="0 0 200 100">
   <g id="G1" transform="translate(100,0)">
@@ -34,7 +21,7 @@ tap.test('transform', function(t) {
     </g>
   </g>
 </svg>
-		`);
+        `);
     const top = doc.documentElement;
     const R1 = doc.getElementById('R1');
     const R2 = doc.getElementById('R2');
@@ -100,10 +87,12 @@ import fs from 'fs';
 function closeEnough(a, b, threshold = 1e-6) {
     return Math.abs(b - a) <= threshold;
 }
-tap.test('viewportTM', function(t) {
-    const doc = parser.parseFromString(fs.readFileSync('test/res/preserveAspectRatio.svg', {
-        encoding: 'utf-8',
-    }));
+tap.test('viewportTM', function (t) {
+    const doc = parser.parseFromString(
+        fs.readFileSync('test/res/preserveAspectRatio.svg', {
+            encoding: 'utf-8',
+        })
+    );
     const top = doc.documentElement;
     const U1 = doc.getElementById('U1');
     const VR1 = doc.getElementById('VR1');
@@ -129,7 +118,10 @@ tap.test('viewportTM', function(t) {
         const m = Matrix.new(a, b, c, d, e, f);
         const v = doc.getElementById(id);
         const u = v.myCTM();
+        const r = v.rootTM();
+
         t.same(u.toString(), m.toString(), par);
+        t.same(r.toString(), m.toString(), par);
         // console.log();
     });
     [
@@ -150,11 +142,16 @@ tap.test('viewportTM', function(t) {
         const v = doc.getElementById(id);
         const u = v.querySelector('use');
         const w = u.myCTM();
+        const r = v.rootTM();
         t.ok(v.nearestViewportElement === top);
         t.ok(v.farthestViewportElement === top);
         t.ok(u.farthestViewportElement === top);
         t.ok(u.nearestViewportElement === v);
         t.ok(w.equals(m, 1e-4), `${id} ${w} ${m}`);
+        const x = r.multiply(v.viewportTM());
+
+        t.ok(x.equals(m, 1e-4), `${id} ${r} ${m}`);
+
         // console.log();
     });
     [
@@ -221,11 +218,7 @@ tap.test('viewportTM', function(t) {
     writeFileSync(`/tmp/aspect.svg`, doc.documentElement.outerHTML);
     t.end();
 });
-import {
-    createWriteStream,
-    writeFileSync,
-    WriteStream
-} from 'fs';
+import { createWriteStream, writeFileSync, WriteStream } from 'fs';
 if (0) {
     Array.from(document.documentElement.querySelectorAll(`svg[preserveAspectRatio]`)).map((v, i) => {
         v.id = `V_${(i + 10).toString(26).toUpperCase()}`;
@@ -257,7 +250,7 @@ if (0) {
         const r = u.getBBox();
         const a = DOMPoint.fromPoint({
             x: r.x,
-            y: r.y
+            y: r.y,
         }).matrixTransform(m);
         const b = DOMPoint.fromPoint({
             x: r.x + r.width,
@@ -266,17 +259,19 @@ if (0) {
         return [v.id, a.x, a.y, b.x - a.x, b.y - a.y];
     });
     document.querySelectorAll(`text`).forEach((x) => x.remove());
-    Array.from(document.documentElement.querySelectorAll(`g[id]`)).filter((v) => v.id.startsWith('G_')).map((v) => {
-        const m = v.getScreenCTM();
-        const r = v.getBBox();
-        const a = DOMPoint.fromPoint({
-            x: r.x,
-            y: r.y
-        }).matrixTransform(m);
-        const b = DOMPoint.fromPoint({
-            x: r.x + r.width,
-            y: r.y + r.height,
-        }).matrixTransform(m);
-        return [v.id, a.x, a.y, b.x - a.x, b.y - a.y];
-    });
+    Array.from(document.documentElement.querySelectorAll(`g[id]`))
+        .filter((v) => v.id.startsWith('G_'))
+        .map((v) => {
+            const m = v.getScreenCTM();
+            const r = v.getBBox();
+            const a = DOMPoint.fromPoint({
+                x: r.x,
+                y: r.y,
+            }).matrixTransform(m);
+            const b = DOMPoint.fromPoint({
+                x: r.x + r.width,
+                y: r.y + r.height,
+            }).matrixTransform(m);
+            return [v.id, a.x, a.y, b.x - a.x, b.y - a.y];
+        });
 }

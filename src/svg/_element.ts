@@ -154,19 +154,35 @@ export class SVGGraphicsElement extends SVGElement {
 	set clip(target: SVGElement | undefined) {
 		target && this.setAttribute('clip-path', target.letId());
 	}
+	get hrefElement() {
+		const id = this.getAttributeNS('http://www.w3.org/1999/xlink', 'href') || this.getAttribute('href');
+		if (id) {
+			const h = id.indexOf('#');
+			return this.ownerDocument?.getElementById(h < 0 ? id : id.substr(h + 1)) as SVGElement;
+		}
+		return null;
+	}
+
+	set hrefElement(target: SVGElement | null) {
+		target && this.setAttributeNS('http://www.w3.org/1999/xlink', 'href', target.letId());
+	}
+
 	canRender() {
 		if (this.getAttribute('display') === 'none') {
 			return false;
 		}
 		return true;
 	}
+
 	refElement() {
-		const id = this.getAttributeNS('http://www.w3.org/1999/xlink', 'href') || this.getAttribute('href');
-		if (id) {
-			const h = id.indexOf('#');
-			return this.ownerDocument?.getElementById(h < 0 ? id : id.substr(h + 1));
-		}
+		return this.hrefElement;
+		// const id = this.getAttributeNS('http://www.w3.org/1999/xlink', 'href') || this.getAttribute('href');
+		// if (id) {
+		// 	const h = id.indexOf('#');
+		// 	return this.ownerDocument?.getElementById(h < 0 ? id : id.substr(h + 1));
+		// }
 	}
+
 	composedTransform(): Matrix {
 		throw new Error('Depreciated');
 		// depreciated
@@ -211,9 +227,8 @@ export class SVGGraphicsElement extends SVGElement {
 	get innerTM(): Matrix {
 		return this.transformM;
 	}
-	composeTM(root?: SVGGraphicsElement): Matrix {
+	composeTM(root?: SVGElement | null): Matrix {
 		const { parentNode, transformM } = this;
-		// if (root) {
 		let tm = Matrix.new(transformM);
 		let parent = parentNode;
 		while (parent != root) {
@@ -227,7 +242,11 @@ export class SVGGraphicsElement extends SVGElement {
 		}
 		return tm;
 	}
-	// parentCTM(), myCTM(), myTM(), transformM
+	rootTM(): Matrix {
+		return this.composeTM(this.farthestViewportElement);
+	}
+
+	//
 	shapeBox(T?: Matrix | boolean): Box {
 		// if (this.canRender()) {
 		const E = T === true ? this.myCTM() : T ? T.multiply(this.transformM) : this.transformM;
@@ -241,16 +260,6 @@ export class SVGGraphicsElement extends SVGElement {
 		// }
 		// return Box.not();
 	}
-	// shapeBBox(T?: Matrix): Box {
-	// 	const E = T === true ? this.myCTM() : T ? T.multiply(this.transformM) : this.transformM;
-	// 	let box = Box.new();
-	// 	for (const sub of this.children) {
-	// 		if (sub instanceof SVGGraphicsElement && sub.canRender()) {
-	// 			box = box.merge(sub.boundingBox(E));
-	// 		}
-	// 	}
-	// 	return box;
-	// }
 
 	boundingBox(M?: Matrix | boolean): Box {
 		const { clip } = this;
@@ -288,21 +297,7 @@ export class SVGGraphicsElement extends SVGElement {
 	/////
 	// ourTM?
 	descendantTM(node: SVGGraphicsElement): Matrix {
-		// subTM or descTM
-		let { parentNode: parent, transformM: tm } = node;
-		for (;;) {
-			if (parent === this) {
-				break;
-			} else if (!parent) {
-				throw new Error(``);
-			} else if (!(parent instanceof SVGGraphicsElement)) {
-				throw new Error(``);
-			} else {
-				tm = tm.postMultiply(parent.transformM);
-				parent = parent.parentNode;
-			}
-		}
-		return tm;
+		return node.composeTM(this);
 	}
 	// descendantsBBox(...nodes: SVGGraphicsElement[]): Matrix {
 	// 	let bb = Box.not();
@@ -313,6 +308,7 @@ export class SVGGraphicsElement extends SVGElement {
 	// 	return bb;
 	// }
 	// objectBBox
+
 	objectBBox(T?: Matrix) {
 		let box = Box.new();
 		for (const sub of this.children) {
@@ -324,6 +320,32 @@ export class SVGGraphicsElement extends SVGElement {
 		}
 		return box;
 	}
+
+	// fitBBox(opt = {}): Box {
+	// 	const { transform } = opt;
+
+	// 	const E = T === true ? this.myCTM() : T ? T.multiply(this.transformM) : this.transformM;
+	// 	let box = Box.new();
+	// 	for (const sub of this.children) {
+	// 		if (sub instanceof SVGGraphicsElement && sub.canRender()) {
+	// 			box = box.merge(sub.boundingBox(E));
+	// 		}
+	// 	}
+	// 	return box;
+	// }
+
+	// shapeBBox(opt = {}): Box {
+	// 	const { transform } = opt;
+
+	// 	const E = T === true ? this.myCTM() : T ? T.multiply(this.transformM) : this.transformM;
+	// 	let box = Box.new();
+	// 	for (const sub of this.children) {
+	// 		if (sub instanceof SVGGraphicsElement && sub.canRender()) {
+	// 			box = box.merge(sub.boundingBox(E));
+	// 		}
+	// 	}
+	// 	return box;
+	// }
 }
 export class SVGSVGElement extends SVGGraphicsElement {
 	static TAGS = ['svg'];

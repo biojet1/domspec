@@ -109,21 +109,17 @@ export class SVGLength {
 		if (m) {
 			const num = parseFloat(m[1]);
 			const suf = m.pop();
-			if (suf) {
+			if (!suf) {
+				this._num = num;
+				this._unit = 1;
+				return true;
+			} else {
 				const unit = UNITS.indexOf(suf.toLowerCase());
 				if (unit > 1) {
 					this._num = num;
 					this._unit = unit;
 					return true;
-				} else {
-					this._num = num;
-					this._unit = 0;
-					return true;
 				}
-			} else {
-				this._num = num;
-				this._unit = 1;
-				return true;
 			}
 		}
 		if (fail) {
@@ -256,7 +252,6 @@ export class SVGLength {
 			return `${_num}`;
 		}
 	}
-
 
 	getRelativeLength(): number {
 		const e = _getAssoc(this);

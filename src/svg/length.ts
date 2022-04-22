@@ -101,7 +101,7 @@ export class SVGLength {
 	}
 
 	set valueAsString(value: string) {
-		this._parse(value, true);
+		this.parse(value, true);
 	}
 
 	parse(value: string, fail = false) {

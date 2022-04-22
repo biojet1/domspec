@@ -61,13 +61,12 @@ export class SVGNumber {
 export class SVGLength {
 	_unit?: number;
 	_num?: number | string;
-	// _num?: number;
-	// _num?: number;
 
 	constructor(value?: string) {
-		// this._num = 0;
-		// this._unit = 1;
-		value == undefined || this.parse(value);
+		if (value == undefined) {
+			this._num = 0;
+			this._unit = 1;
+		} else this.parse(value);
 	}
 
 	get unitType() {
@@ -102,11 +101,10 @@ export class SVGLength {
 	}
 
 	set valueAsString(value: string) {
-		if (!this._parse(value)) {
-			throw DOMException.new('SyntaxError');
-		}
+		this._parse(value, true);
 	}
-	private _parse(value: string) {
+
+	parse(value: string, fail = false) {
 		const m = BOTH_MATCH.exec(value);
 		if (m) {
 			const num = parseFloat(m[1]);
@@ -128,10 +126,9 @@ export class SVGLength {
 				return true;
 			}
 		}
-	}
-	parse(value: string) {
-		if (!this._parse(value)) {
-			// error;
+		if (fail) {
+			throw DOMException.new('SyntaxError');
+		} else {
 			this._num = value;
 			this._unit = -1;
 		}
@@ -146,7 +143,7 @@ export class SVGLength {
 			case 5:
 				return _num as number;
 			case 2: // "%"
-				return ((_num as number) * 100) / this.getFullLength();
+				return ((_num as number) * 100) / this.getRelativeLength();
 			case 3: //  "em"
 			case 4: //  "ex"
 				throw DOMException.new('NotSupportedError');
@@ -175,7 +172,7 @@ export class SVGLength {
 					this._num = value;
 					return;
 				case 2:
-					this._num = (this.getFullLength() * value) / 100;
+					this._num = (this.getRelativeLength() * value) / 100;
 					return;
 				case 3: //  "em"
 				case 4: //  "ex"
@@ -218,7 +215,7 @@ export class SVGLength {
 				this._num = this.value;
 				break;
 			case 2:
-				this._num = (this.getFullLength() * this.value) / 100;
+				this._num = (this.getRelativeLength() * this.value) / 100;
 				break;
 			case 3: //  "em"
 			case 4: //  "ex"
@@ -246,20 +243,6 @@ export class SVGLength {
 				}
 		}
 		this._unit = unitType;
-		// if (unitType > 0 && unitType < 11) {
-		// 	const { value, _unit } = this;
-		// 	this._unit = unitType;
-		// 	try {
-		// 		this.value = value;
-		// 	} catch (err) {
-		// 		this._unit = _unit;
-		// 		throw err;
-		// 	}
-		// } else if (unitType === undefined) {
-		// 	throw new TypeError();
-		// } else {
-		// 	throw DOMException.new('NotSupportedError');
-		// }
 	}
 
 	toString() {
@@ -273,11 +256,9 @@ export class SVGLength {
 			return `${_num}`;
 		}
 	}
-	// getFullLength(): number {
-	// 	throw DOMException.new('NotSupportedError');
-	// }
 
-	getFullLength(): number {
+
+	getRelativeLength(): number {
 		const e = _getAssoc(this);
 		if (e) {
 			const g = e.nearestViewportElement as SVGGraphicsElement;
@@ -363,7 +344,7 @@ function _getAssoc(that: any) {
 }
 
 export class SVGLengthW extends SVGLength {
-	getFullLength(): number {
+	getRelativeLength(): number {
 		const e = _getAssoc(this);
 		if (e) {
 			return (e.nearestViewportElement as SVGGraphicsElement)?.width.baseVal.value ?? 100;
@@ -382,7 +363,7 @@ export class SVGLengthW extends SVGLength {
 }
 
 export class SVGLengthH extends SVGLength {
-	getFullLength(): number {
+	getRelativeLength(): number {
 		const e = _getAssoc(this);
 		if (e) {
 			return (e.nearestViewportElement as SVGGraphicsElement)?.height.baseVal.value ?? 100;

@@ -9,7 +9,7 @@ import fs from "fs";
 import vm from "vm";
   // var insertFunc = Node.prototype.insertBefore;
   global.insertFunc = Node.prototype.insertBefore;
-  console.log(`insertFunc`, insertFunc, Node, Node.prototype);
+  // console.log(`insertFunc`, insertFunc, Node, Node.prototype);
 const src0 = `${process.env.WPT_ROOT}/dom/nodes/pre-insertion-validation-notfound.js`;
 vm.runInThisContext(fs.readFileSync(src0, "utf8"), src0)
 const src1 = `${process.env.WPT_ROOT}/dom/nodes/pre-insertion-validation-hierarchy.js`;

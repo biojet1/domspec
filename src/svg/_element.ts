@@ -245,7 +245,7 @@ export class SVGGraphicsElement extends SVGElement {
 		const { parentNode: parent } = this;
 		if (parent) {
 			if (parent instanceof SVGGraphicsElement) {
-				return parent.myCTM();
+				return parent.rootTM;
 			}
 		}
 		throw new Error('Depreciated');
@@ -287,7 +287,7 @@ export class SVGGraphicsElement extends SVGElement {
 	//
 	shapeBox(T?: Matrix | boolean): Box {
 		// if (this.canRender()) {
-		const E = T === true ? this.myCTM() : T ? T.multiply(this.ownTM) : this.ownTM;
+		const E = T === true ? this.rootTM : T ? T.multiply(this.ownTM) : this.ownTM;
 		let box = Box.new();
 		for (const sub of this.children) {
 			if (sub instanceof SVGGraphicsElement && sub.canRender()) {
@@ -457,7 +457,7 @@ export function shapeBoxVP(node: SVGGraphicsElement, T?: Matrix | boolean): Box 
 	if (width && height) {
 		let b = Box.new(x, y, width, height);
 		if (T === true) {
-			b = b.transform(node.myCTM());
+			b = b.transform(node.rootTM);
 		} else if (T) {
 			b = b.transform(T);
 		} else {

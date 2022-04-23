@@ -38,7 +38,7 @@ export class SVGGeometryElement extends SVGGraphicsElement {
 		let { path } = this;
 		if (path.firstPoint) {
 			if (T === true) {
-				path = path.transform(this.myCTM());
+				path = path.transform(this.rootTM);
 			} else {
 				path = path.transform(this.ownTM);
 				if (T) {
@@ -325,7 +325,7 @@ export class SVGUseElement extends SVGGraphicsElement {
 	}
 
 	shapeBox(T?: Matrix | boolean) {
-		const E = T === true ? this.myCTM() : T ? T.multiply(this.ownTM) : this.ownTM;
+		const E = T === true ? this.rootTM : T ? T.multiply(this.ownTM) : this.ownTM;
 		const ref = this.hrefElement;
 		if (ref) {
 			if (ref instanceof SVGSymbolElement) {
@@ -384,7 +384,7 @@ export class SVGSymbolElement extends SVGGraphicsElement {
 export class SVGTextElement extends SVGTextContentElement {
 	static TAGS = ['text'];
 	shapeBox(T?: Matrix | boolean): Box {
-		const E = T === true ? this.myCTM() : T ? T.multiply(this.ownTM) : this.ownTM;
+		const E = T === true ? this.rootTM : T ? T.multiply(this.ownTM) : this.ownTM;
 		let s;
 		const {
 			x: {
@@ -430,7 +430,7 @@ export class SVGTSpanElement extends SVGTextContentElement {
 		let box = Box.new();
 		// Returns a horrible bounding box that just contains the coord points
 		// of the text without width or height (which is impossible to calculate)
-		const E = T === true ? this.myCTM() : T ? T.multiply(this.ownTM) : this.ownTM;
+		const E = T === true ? this.rootTM : T ? T.multiply(this.ownTM) : this.ownTM;
 		let s;
 		const x1 = this.x.baseVal.value;
 		const y1 = this.y.baseVal.value;

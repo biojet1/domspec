@@ -27,9 +27,9 @@ That's why the circles have different x positions, but the same stroke value.
 	const use1 = doc.getElementById("use1");
 	const use2 = doc.getElementById("use2");
 
-	t.same(use1.refElement().id, "myCircle");
-	t.same(use2.refElement().id, "myCircle");
-	t.same(use2.refElement().id, "myCircle");
+	t.same(use1.hrefElement.id, "myCircle");
+	t.same(use2.hrefElement.id, "myCircle");
+	t.same(use2.hrefElement.id, "myCircle");
 
 	t.same(myCircle.shapeBox().toArray(), [5 - 4, 5 - 4, 4 * 2, 4 * 2]);
 	t.same(use1.shapeBox().toArray(), [11, 1, 8, 8]);
@@ -58,16 +58,16 @@ tap.test("Use+Symbol", function (t) {
 	const U5 = doc.getElementById("U5");
 	const G1 = doc.getElementById("G1");
 	const G2 = doc.getElementById("G2");
-	t.same(U1.refElement().id, "myDot");
-	t.same(U5.refElement().id, "myDot");
-	t.same(U1.shapeBox().toArray(), [5, 5, 10, 10]);
-	t.same(U2.shapeBox().toArray(), [20, 5, 10, 10]);
-	t.same(U3.shapeBox().toArray(), [35, 5, 10, 10]);
-	t.same(U4.shapeBox().toArray(), [50, 5, 10, 10]);
-	t.same(U5.shapeBox().toArray(), [65, 5, 10, 10]);
+	t.same(U1.hrefElement.id, "myDot");
+	t.same(U5.hrefElement.id, "myDot");
+	t.same(U1._shapeBox().toArray(), [5, 5, 10, 10]);
+	t.same(U2._shapeBox().toArray(), [20, 5, 10, 10]);
+	t.same(U3._shapeBox().toArray(), [35, 5, 10, 10]);
+	t.same(U4._shapeBox().toArray(), [50, 5, 10, 10]);
+	t.same(U5._shapeBox().toArray(), [65, 5, 10, 10]);
 
-	t.same(G1.shapeBox().toArray(), [35, 5, 10, 10]);
-	t.same(G2.shapeBox().toArray(), [50, 5, 25, 10]);
+	t.same(G1._shapeBox().toArray(), [35, 5, 10, 10]);
+	t.same(G2._shapeBox().toArray(), [50, 5, 25, 10]);
 
 	t.end();
 });

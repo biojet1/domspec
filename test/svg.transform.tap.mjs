@@ -3,7 +3,7 @@ import { Document, SVGDocument } from '../dist/document.js';
 import { ParentNode } from '../dist/parent-node.js';
 import { DOMParser } from '../dist/dom-parse.js';
 import { SVGLength } from '../dist/svg/element.js';
-import { Path, Matrix, MatrixInterpolate } from 'svggeom';
+import { Path, Matrix, Box, MatrixInterpolate } from 'svggeom';
 const parser = new DOMParser();
 tap.test('transform', function (t) {
     const doc = parser.parseFromString(`
@@ -47,25 +47,11 @@ tap.test('transform', function (t) {
         const r = v.objectBBox();
         t.same(r.toArray(), [x, y, w, h], `getBBox ${id}`);
     });
-    // for (const g of [G1, G2, G3]) {
-    //     t.same(g.getBBox().toArray(), [50, 60, 160, 260], `${g.id} getBBox`);
-    // }
-    // t.same(G4.getBBox().toArray(), [50, 60, 110, 210]);
-    // t.same(R1.getBBox().toArray(), [10 + 50, 20 + 50, 100, 200]);
-    // t.same(R2.getBBox().toArray(), [10 + 50 - 10, 20 + 50 - 10, 100, 200]);
-    // t.same(R3.getBBox().toArray(), [10 + 100, 20 + 100, 100, 200]);
-    // t.same(R4.getBBox().toArray(), [10 + 100 - 10, 20 + 100 - 10, 100, 200]);
-    t.same(R3.parentCTM().describe(), Matrix.translate(100, 100).describe());
-    t.same(R3.myCTM().describe(), Matrix.translate(100, 100).describe());
-    t.same(R4.parentCTM().describe(), Matrix.translate(100, 100).describe());
-    t.same(R4.myCTM().describe(), Matrix.translate(90, 90).describe());
-    // t.same(R4.myCTM().describe(), Matrix.translate(90, 90).describe());
-    // console.log(R3.myCTM());
-    // console.log("R3p", R3.parentCTM().describe());
-    // console.log("R3t", R3.myCTM().describe());
-    // console.log("R4t", R3.myCTM().describe());
-    // console.log("R3i", R3.myCTM().inverse().describe());
-    // const { translate, seq } = MatrixInterpolate;
+    let [p, o] = R3.splitTM();
+    t.same(p.describe(), Matrix.translate(100, 100).describe());
+    t.same(R3.rootTM.describe(), Matrix.translate(100, 100).describe());
+    t.same(R4.splitTM()[0].describe(), Matrix.translate(100, 100).describe());
+    t.same(R4.rootTM.describe(), Matrix.translate(90, 90).describe());
     // const tr = seq(translate(-100, 0));
     // let m, n;
     // const R4CTM = R4.myCTM();
@@ -74,12 +60,7 @@ tap.test('transform', function (t) {
     // m = tr.at(1);
     // n = tr.at(1, R4PTM.inverse());
     // console.log("m", m.describe());
-    // console.log("N", tr.at(1, R4PTM.inverse()).describe());
-    // console.log("N", tr.at(1, R4CTM.inverse()).describe());
-    // console.log("N", tr.at(1, R4CTM.inverse()).multiply(R4PTM).describe());
-    // console.log("N", tr.at(1, R4CTM.inverse()).postMultiply(R4PTM).describe());
     // console.log("X", tr.at(1, R4PTM.inverse()).multiply(R4CTM).describe());
-    // console.log("N", tr.at(1, R4PTM.inverse()).postMultiply(R4CTM).describe());
     t.end();
 });
 import fs from 'fs';
@@ -88,6 +69,9 @@ function closeEnough(a, b, threshold = 1e-6) {
     return Math.abs(b - a) <= threshold;
 }
 tap.test('viewportTM', function (t) {
+    function eqBox(a, b, epsilon = 0, tag) {
+        t.ok(a.equals(b, epsilon), `${tag} [${a}] vs [${b}]`);
+    }
     const doc = parser.parseFromString(
         fs.readFileSync('test/res/preserveAspectRatio.svg', {
             encoding: 'utf-8',
@@ -97,9 +81,15 @@ tap.test('viewportTM', function (t) {
     const U1 = doc.getElementById('U1');
     const VR1 = doc.getElementById('VR1');
     const RECT = doc.getElementById('RECT');
-    // console.log(U1.parentNode.viewportTM());
-    // console.log("U1.getBBox()", U1.getBBox());
-    // console.log(U1.parentNode.getBBox());
+    const G_F = doc.getElementById('G_F');
+    doc.querySelectorAll(`text`).forEach((x) => x.remove());
+    console.log(G_F._shapeBox());
+    // console.log(G_F.querySelector('rect')._shapeBox())
+    // console.log(G_F.querySelector('svg')._shapeBox())
+    for (const sub of G_F.children) {
+        console.log(sub.localName, sub._shapeBox());
+    }
+
     t.same(top.viewportTM().toString(), Matrix.identity().toString());
     [
         ['V_A', 'xMinYMin meet', 1, 0, 0, 1, 100, 60],
@@ -117,10 +107,7 @@ tap.test('viewportTM', function (t) {
     ].forEach(([id, par, a, b, c, d, e, f]) => {
         const m = Matrix.new(a, b, c, d, e, f);
         const v = doc.getElementById(id);
-        const u = v.myCTM();
-        const r = v.rootTM();
-
-        t.same(u.toString(), m.toString(), par);
+        const r = v.rootTM;
         t.same(r.toString(), m.toString(), par);
         // console.log();
     });
@@ -141,17 +128,13 @@ tap.test('viewportTM', function (t) {
         const m = Matrix.new(a, b, c, d, e, f);
         const v = doc.getElementById(id);
         const u = v.querySelector('use');
-        const w = u.myCTM();
-        const r = v.rootTM();
+        const r = v.rootTM;
         t.ok(v.nearestViewportElement === top);
         t.ok(v.farthestViewportElement === top);
         t.ok(u.farthestViewportElement === top);
         t.ok(u.nearestViewportElement === v);
-        t.ok(w.equals(m, 1e-4), `${id} ${w} ${m}`);
         const x = r.multiply(v.viewportTM());
-
         t.ok(x.equals(m, 1e-4), `${id} ${r} ${m}`);
-
         // console.log();
     });
     [
@@ -170,51 +153,90 @@ tap.test('viewportTM', function (t) {
     ].forEach(([id, x, y, w, h]) => {
         const v = doc.getElementById(id);
         const u = v.querySelector('use');
-        const r = u.shapeBox(true);
-        t.ok(closeEnough(r.x, x), `${id} x ${x} ${r.x}`);
-        t.ok(closeEnough(r.y, y, 1e-4), `${id} y ${y} ${r.y}`);
-        t.ok(closeEnough(r.width, w, 1e-5), `${id} width ${w} ${r.width}`);
-        t.ok(closeEnough(r.height, h, 1e-5), `${id} height ${h} ${r.height}`);
-        // console.log();
+        // const r = u.shapeBox(true);
+        const b = Box.new(x, y, w, h);
+        // eqBox(b, r, 2e-5, id);
+        eqBox(b, u._shapeBox(), 2e-5, id);
     });
+
     [
-        // ["G_B", 20.5, 40.5, 29, 39],
-        // ["G_C", 10.5, 120.5, 49, 29],
-        // ["G_D", 20.5, 190.5, 29, 59],
-        // ["G_F", 100.375, 60.375, 49.125, 29.25],
-        // ["G_G", 170.5, 60.375, 49, 29.25],
-        // ["G_H", 100.5, 130.375, 49.125, 29.25],
-        // ["G_J", 250.5, 60.5, 29, 59],
-        // ["G_K", 300.5, 60.5, 29, 59],
-        // ["G_L", 350.5, 60.5, 29, 59],
-        // ["G_N", 100.5, 220.5, 43.75, 59],
-        // ["G_O", 143.25, 220.5, 43.5, 59],
-        // ["G_P", 185.75, 220.5, 43.75, 59],
-        // ["G_11", 250.5, 220.5, 49, 65.33332824707031],
-        // ["G_12", 320.5, 202.50000190734863, 49, 64.99999237060547],
-        // ["G_13", 390.5, 184.16666793823242, 49, 65.33332824707031],
+        ['V_A', [100, 60, 50, 30]],
+        ['V_B', [170, 60, 50, 30]],
+        ['V_C', [100, 130, 50, 30]],
+        ['V_D', [250, 60, 30, 60]],
+        ['V_E', [300, 60, 30, 60]],
+        ['V_F', [350, 60, 30, 60]],
+        ['V_G', [100, 220, 30, 60]],
+        ['V_H', [150, 220, 30, 60]],
+        ['V_I', [200, 220, 30, 60]],
+        ['V_J', [250, 220, 50, 30]],
+        ['V_K', [320, 220, 50, 30]],
+        ['V_L', [390, 220, 50, 30]],
+    ].forEach(([id, [x, y, w, h]]) => {
+        const v = doc.getElementById(id);
+        const b = Box.new(x, y, w, h);
+        // eqBox(b, v.shapeBox(true), 2e-5, `v:shapeBox ${id}`);
+        eqBox(b, v._shapeBox(), 2e-5, `v:_shapeBox ${id}`);
+    });
+
+    [
+        ['G_B', 20.5, 40.5, 29, 39],
+        ['G_C', 10.5, 120.5, 49, 29],
+        ['G_D', 20.5, 190.5, 29, 59],
+        ['G_F', 100, 60, 49.5, 29.5],
+        ['G_G', 170.5, 60, 50.75, 29.5],
+        // ['G_H', 100.5, 130, 64.5, 29.5],
+        // ['G_J', 250, 60, 30, 60],
+        // ['G_K', 300, 60.5, 30, 69.5],
+        // ['G_L', 350, 60.5, 30, 79.5],
+        // ['G_N', 100, 220, 45, 90],
+        // ['G_O', 142.5, 220, 45, 90],
+        // ['G_P', 185, 220, 45, 90],
+        // ['G_11', 250, 220, 83.33332824707031, 50],
+        // ['G_12', 320, 201.6666717529297, 83.33332824707031, 50.01666259765625],
+        // ['G_13', 390, 183.3333282470703, 83.33332824707031, 66.16667175292969],
     ].forEach(([id, x, y, w, h]) => {
         const v = doc.getElementById(id);
-        const r = v.shapeBox(true);
-        t.ok(closeEnough(r.x, x), `${id} x ${x} ${r.x}`);
-        t.ok(closeEnough(r.y, y, 1e-4), `${id} y ${y} ${r.y}`);
-        t.ok(closeEnough(r.width, w, 1e-5), `${id} width ${w} ${r.width}`);
-        t.ok(closeEnough(r.height, h, 1e-5), `${id} height ${h} ${r.height}`);
-        // console.log();
+        const b = Box.new(x, y, w, h);
+        // eqBox(b, v.shapeBox(true), 1, `shapeBox ${id}`);
+        eqBox(b, v._shapeBox(), 1, `_shapeBox ${id}`);
     });
+
     const a = Array.from(doc.documentElement.querySelectorAll(`svg[preserveAspectRatio]`));
     a.forEach((v) => {
-        const u = v.querySelector(`use`);
-        const b = u.getBBox();
+        // const u = v.querySelector(`use`);
+        const u = v.parentNode;
+        // const b = u.getBBox();
+        const b = u._shapeBox();
         const r = RECT.cloneNode();
+        r.setAttribute('stroke-width', '3');
+        r.setAttribute('stroke', 'khaki');
+        r.style.opacity = '';
         r.id = `R${v.getAttribute('preserveAspectRatio')}`;
         r.x.baseVal.value = b.x;
         r.y.baseVal.value = b.y;
+        r.rx.baseVal.value = Math.min(b.width, b.height) / 4;
         r.width.baseVal.value = b.width;
         r.height.baseVal.value = b.height;
         top.appendChild(r);
     });
-    // console.log(a);
+    Array.from(doc.documentElement.querySelectorAll(`g[id]`))
+        .filter((v) => v?.id.startsWith('meet') || v?.id.startsWith('slice'))
+        .forEach((v) => {
+            // const b = u.getBBox();
+            const b = v._shapeBox();
+            const r = RECT.cloneNode();
+            r.setAttribute('stroke-width', '3');
+            r.style.opacity = '';
+            r.style.stroke = 'yellow';
+            r.id = `R${v.id}`;
+            r.x.baseVal.value = b.x;
+            r.y.baseVal.value = b.y;
+            r.rx.baseVal.value = Math.min(b.width, b.height) / 4;
+            r.width.baseVal.value = b.width;
+            r.height.baseVal.value = b.height;
+            top.appendChild(r);
+        }); // console.log(a);
     writeFileSync(`/tmp/aspect.svg`, doc.documentElement.outerHTML);
     t.end();
 });
@@ -245,6 +267,10 @@ if (0) {
         return [v.id, m.a, m.b, m.c, m.d, m.e, m.f];
     });
     Array.from(document.documentElement.querySelectorAll(`svg[preserveAspectRatio]`)).map((v) => {
+        const b = v.getBoundingClientRect();
+        return [v.id, [b.x, b.y, b.width, b.height]];
+    });
+    Array.from(document.documentElement.querySelectorAll(`svg[preserveAspectRatio]`)).map((v) => {
         const u = v.querySelector('use');
         const m = u.getScreenCTM();
         const r = u.getBBox();
@@ -258,7 +284,6 @@ if (0) {
         }).matrixTransform(m);
         return [v.id, a.x, a.y, b.x - a.x, b.y - a.y];
     });
-    document.querySelectorAll(`text`).forEach((x) => x.remove());
     Array.from(document.documentElement.querySelectorAll(`g[id]`))
         .filter((v) => v.id.startsWith('G_'))
         .map((v) => {
@@ -272,6 +297,38 @@ if (0) {
                 x: r.x + r.width,
                 y: r.y + r.height,
             }).matrixTransform(m);
+            v.setAttribute('bbox', `${r.x},${r.y} ${r.width}x${r.height}`);
             return [v.id, a.x, a.y, b.x - a.x, b.y - a.y];
         });
+    Array.from(document.documentElement.querySelectorAll(`g[id]`))
+        .filter((v) => v.id.startsWith('G_'))
+        .map((v) => {
+            const r = v.getBoundingClientRect();
+            return [v.id, r.x, r.y, r.width, r.height];
+        });
+    Array.from(document.documentElement.querySelectorAll(`*`)).map((v) => {
+        const r = v.getBoundingClientRect();
+        v.setAttribute('bcr', `${r.x},${r.y} ${r.width}x${r.height}`);
+        return [v.id, r.x, r.y, r.width, r.height];
+    });
+    Array.from(document.documentElement.querySelectorAll(`svg`)).map((v) => {
+        const r = v.getBBox();
+        v.setAttribute('bbox', `${r.x},${r.y} ${r.width}x${r.height}`);
+    });
+    for (const tag of ['svg', 'rect', 'g', 'use']) {
+        document.documentElement.querySelectorAll(tag).forEach((v) => {
+            const r = v.getBBox();
+            const m = v.getCTM();
+            v.setAttribute('bbox', `${r.x},${r.y} ${r.width}x${r.height}`);
+            v.setAttribute('ctm', `${[m.a, m.b, m.c, m.d, m.e, m.f]}`);
+        });
+    }
+    document.querySelectorAll(`text`).forEach((x) => x.remove());
+    ['path', 'rect', 'circle'].forEach((tag) => {
+        document.documentElement.querySelectorAll(tag).forEach((v) => {
+            v.style.stroke = 'none';
+            v.removeAttribute('stroke-width');
+            v.removeAttribute('stroke');
+        });
+    });
 }

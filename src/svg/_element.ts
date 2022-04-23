@@ -136,24 +136,46 @@ export class SVGGraphicsElement extends SVGElement {
 		}
 		return farthest;
 	}
-	// ourTM
-	// ownTM
 	get transformM() {
+		throw new Error('Depreciated');
+		return this.transform.baseVal.consolidate();
+	}
+
+	set transformM(T: Matrix) {
+		throw new Error('Depreciated');
+		this.setAttribute('transform', T.toString());
+	}
+
+	get ownTM() {
 		// return Matrix.parse(this.getAttribute("transform") || "");
 		return this.transform.baseVal.consolidate();
 	}
-	set transformM(T: Matrix) {
+
+	set ownTM(T: Matrix) {
 		this.setAttribute('transform', T.toString());
 	}
+
 	get clip(): SVGGraphicsElement | undefined {
+		throw new Error('Depreciated');
+		return this.clipElement;
+	}
+
+	set clip(target: SVGElement | undefined) {
+		throw new Error('Depreciated');
+		this.clipElement = target;
+	}
+
+	get clipElement(): SVGGraphicsElement | undefined {
 		const id = this.getAttribute('clip-path');
 		if (id) {
 			return this.ownerDocument?.getElementById(id) as SVGGraphicsElement;
 		}
 	}
-	set clip(target: SVGElement | undefined) {
+
+	set clipElement(target: SVGElement | undefined) {
 		target && this.setAttribute('clip-path', target.letId());
 	}
+
 	get hrefElement() {
 		const id = this.getAttributeNS('http://www.w3.org/1999/xlink', 'href') || this.getAttribute('href');
 		if (id) {
@@ -175,6 +197,7 @@ export class SVGGraphicsElement extends SVGElement {
 	}
 
 	refElement() {
+		throw new Error('Depreciated');
 		return this.hrefElement;
 		// const id = this.getAttributeNS('http://www.w3.org/1999/xlink', 'href') || this.getAttribute('href');
 		// if (id) {
@@ -188,33 +211,36 @@ export class SVGGraphicsElement extends SVGElement {
 		// depreciated
 		return this.myCTM();
 	}
+
 	myCTM(): Matrix {
-		const { parentNode: parent, transformM } = this;
+		const { parentNode: parent, ownTM } = this;
 		if (parent) {
 			// https://svgwg.org/svg2-draft/coords.html#ComputingAViewportsTransform
 			if (parent instanceof SVGSVGElement) {
 				// return parent
 				// 	.viewportTM()
 				// 	.multiply(parent.myCTM())
-				// 	.multiply(transformM);
+				// 	.multiply(ownTM);
 				// return parent
 				// 	.myCTM()
 				// 	.multiply(parent.viewportTM())
-				// 	.multiply(transformM)
+				// 	.multiply(ownTM)
 				if (parent.viewportElement) {
 					const p = parent.parentCTM();
-					const t = parent.transformM;
+					const t = parent.ownTM;
 					const v = parent.viewportTM();
-					return p.multiply(t.postMultiply(v)).multiply(transformM);
+					return p.multiply(t.postMultiply(v)).multiply(ownTM);
 					// (pp * (pv * pt)) * M
-					// return transformM.postMultiply(t).postMultiply(v).postMultiply(p);
+					// return ownTM.postMultiply(t).postMultiply(v).postMultiply(p);
 				}
 			} else if (parent instanceof SVGGraphicsElement) {
-				return parent.myCTM().multiply(transformM);
+				return parent.myCTM().multiply(ownTM);
 			}
 		}
-		return transformM;
+		throw new Error('Depreciated');
+		return ownTM;
 	}
+
 	parentCTM(): Matrix {
 		const { parentNode: parent } = this;
 		if (parent) {
@@ -222,14 +248,29 @@ export class SVGGraphicsElement extends SVGElement {
 				return parent.myCTM();
 			}
 		}
+		throw new Error('Depreciated');
 		return Matrix.identity();
 	}
+
 	get innerTM(): Matrix {
-		return this.transformM;
+		return this.ownTM;
 	}
+	get rootTM(): Matrix {
+		return this.composeTM(this.farthestViewportElement);
+	}
+	splitTM(): Matrix[] {
+		const { parentNode: parent } = this;
+		if (parent) {
+			if (parent instanceof SVGGraphicsElement) {
+				return [parent.rootTM, this.ownTM];
+			}
+		}
+		return [Matrix.identity(), this.ownTM];
+	}
+
 	composeTM(root?: SVGElement | null): Matrix {
-		const { parentNode, transformM } = this;
-		let tm = Matrix.new(transformM);
+		const { parentNode, ownTM } = this;
+		let tm = Matrix.new(ownTM);
 		let parent = parentNode;
 		while (parent != root) {
 			// null == undefined
@@ -242,14 +283,11 @@ export class SVGGraphicsElement extends SVGElement {
 		}
 		return tm;
 	}
-	rootTM(): Matrix {
-		return this.composeTM(this.farthestViewportElement);
-	}
 
 	//
 	shapeBox(T?: Matrix | boolean): Box {
 		// if (this.canRender()) {
-		const E = T === true ? this.myCTM() : T ? T.multiply(this.transformM) : this.transformM;
+		const E = T === true ? this.myCTM() : T ? T.multiply(this.ownTM) : this.ownTM;
 		let box = Box.new();
 		for (const sub of this.children) {
 			if (sub instanceof SVGGraphicsElement && sub.canRender()) {
@@ -299,21 +337,12 @@ export class SVGGraphicsElement extends SVGElement {
 	descendantTM(node: SVGGraphicsElement): Matrix {
 		return node.composeTM(this);
 	}
-	// descendantsBBox(...nodes: SVGGraphicsElement[]): Matrix {
-	// 	let bb = Box.not();
-	// 	for (const node of nodes) {
-	// 		const mt = this.descendantTM(node);
-	// 		bb = node.objectBBox().transform(mt).merge(bb);
-	// 	}
-	// 	return bb;
-	// }
-	// objectBBox
 
 	objectBBox(T?: Matrix) {
 		let box = Box.new();
 		for (const sub of this.children) {
 			if (sub instanceof SVGGraphicsElement && sub.canRender()) {
-				const M = sub.transformM;
+				const M = sub.ownTM;
 				const E = T ? T.multiply(M) : M;
 				box = box.merge(sub.objectBBox(E));
 			}
@@ -321,31 +350,46 @@ export class SVGGraphicsElement extends SVGElement {
 		return box;
 	}
 
-	// fitBBox(opt = {}): Box {
-	// 	const { transform } = opt;
+	_boundingBox(tm?: Matrix): Box {
+		const { clipElement: clip } = this;
+		if (clip) {
+			if (tm) {
+				return this._shapeBox(tm).overlap(clip._boundingBox(tm));
+			} else {
+				return this._shapeBox().overlap(clip._boundingBox());
+			}
+		} else {
+			return this._shapeBox(tm);
+		}
+	}
 
-	// 	const E = T === true ? this.myCTM() : T ? T.multiply(this.transformM) : this.transformM;
-	// 	let box = Box.new();
-	// 	for (const sub of this.children) {
-	// 		if (sub instanceof SVGGraphicsElement && sub.canRender()) {
-	// 			box = box.merge(sub.boundingBox(E));
-	// 		}
-	// 	}
-	// 	return box;
-	// }
+	_shapeBox(tm?: Matrix): Box {
+		const m = tm ? tm.multiply(this.ownTM) : this.rootTM;
+		let box = Box.new();
+		for (const sub of this.children) {
+			if (sub instanceof SVGGraphicsElement && sub.canRender()) {
+				box = box.merge(sub._boundingBox(m));
+			}
+		}
+		return box;
+	}
 
-	// shapeBBox(opt = {}): Box {
-	// 	const { transform } = opt;
-
-	// 	const E = T === true ? this.myCTM() : T ? T.multiply(this.transformM) : this.transformM;
-	// 	let box = Box.new();
-	// 	for (const sub of this.children) {
-	// 		if (sub instanceof SVGGraphicsElement && sub.canRender()) {
-	// 			box = box.merge(sub.boundingBox(E));
-	// 		}
-	// 	}
-	// 	return box;
-	// }
+	_viewportBox(tm?: Matrix): Box {
+		const width = this.width.baseVal.value;
+		const height = this.height.baseVal.value;
+		const x = this.x.baseVal.value;
+		const y = this.y.baseVal.value;
+		if (width && height) {
+			let b = Box.new(x, y, width, height);
+			if (tm) {
+				b = b.transform(tm);
+			} else {
+				b = b.transform(this.rootTM);
+			}
+			return b;
+		}
+		return Box.not();
+	}
 }
 export class SVGSVGElement extends SVGGraphicsElement {
 	static TAGS = ['svg'];
@@ -353,12 +397,10 @@ export class SVGSVGElement extends SVGGraphicsElement {
 		return 1;
 	}
 	get innerTM(): Matrix {
-		// return this.viewportTM().multiply(this.transformM);
-		return this.transformM.multiply(this.viewportTM());
+		// return this.viewportTM().multiply(this.ownTM);
+		return this.ownTM.multiply(this.viewportTM());
 	}
-	// descendantsTM(): Matrix {
-	// 	return this.myCTM().multiply(this.viewportTM());
-	// }
+
 	viewportTM() {
 		const w = this.width.baseVal.value;
 		const h = this.height.baseVal.value;
@@ -389,6 +431,10 @@ export class SVGSVGElement extends SVGGraphicsElement {
 	shapeBox(T?: Matrix | boolean): Box {
 		return shapeBoxVP(this, T);
 	}
+	_shapeBox(tm?: Matrix): Box {
+		return this._viewportBox(tm);
+	}
+
 	defs() {
 		let { ownerDocument, children } = this;
 		if (ownerDocument) {
@@ -415,7 +461,7 @@ export function shapeBoxVP(node: SVGGraphicsElement, T?: Matrix | boolean): Box 
 		} else if (T) {
 			b = b.transform(T);
 		} else {
-			b = b.transform(node.transformM);
+			b = b.transform(node.ownTM);
 		}
 		return b;
 	}

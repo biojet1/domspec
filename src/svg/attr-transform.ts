@@ -293,7 +293,7 @@ export class SVGTransformListAttr extends Attr {
 		const { _var } = this;
 		if (_var instanceof SVGTransformList) {
 			const m = _var.consolidate();
-			if (m && !m.isIdentity()) {
+			if (m && !m.isIdentity) {
 				return m.toString();
 			}
 		} else {

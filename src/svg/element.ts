@@ -40,10 +40,23 @@ export class SVGGeometryElement extends SVGGraphicsElement {
 			if (T === true) {
 				path = path.transform(this.myCTM());
 			} else {
-				path = path.transform(this.transformM);
+				path = path.transform(this.ownTM);
 				if (T) {
 					path = path.transform(T);
 				}
+			}
+			return path.bbox();
+		}
+		return Box.not();
+	}
+
+	_shapeBox(tm?: Matrix) {
+		let { path } = this;
+		if (path.firstPoint) {
+			if (tm) {
+				path = path.transform(tm.multiply(this.ownTM));
+			} else {
+				path = path.transform(this.rootTM);
 			}
 			return path.bbox();
 		}
@@ -270,6 +283,9 @@ export class SVGForeignObjectElement extends SVGGraphicsElement {
 	shapeBox(T?: Matrix | boolean): Box {
 		return shapeBoxVP(this, T);
 	}
+	_shapeBox(tm?: Matrix): Box {
+		return this._viewportBox(tm);
+	}
 }
 
 export class SVGGElement extends SVGGraphicsElement {
@@ -285,6 +301,9 @@ export class SVGImageElement extends SVGGraphicsElement {
 	shapeBox(T?: Matrix | boolean): Box {
 		return shapeBoxVP(this, T);
 	}
+	_shapeBox(tm?: Matrix): Box {
+		return this._viewportBox(tm);
+	}
 }
 
 export class SVGSwitchElement extends SVGGraphicsElement {
@@ -294,7 +313,7 @@ export class SVGSwitchElement extends SVGGraphicsElement {
 export class SVGUseElement extends SVGGraphicsElement {
 	static TAGS = ['use'];
 
-	get transformM() {
+	get ownTM() {
 		// const m = Matrix.parse(this.getAttribute('transform') || '');
 		const m = Matrix.parse(this.getAttribute('transform') || '');
 		const x = this.x.baseVal.value;
@@ -306,8 +325,8 @@ export class SVGUseElement extends SVGGraphicsElement {
 	}
 
 	shapeBox(T?: Matrix | boolean) {
-		const E = T === true ? this.myCTM() : T ? T.multiply(this.transformM) : this.transformM;
-		const ref = this.refElement();
+		const E = T === true ? this.myCTM() : T ? T.multiply(this.ownTM) : this.ownTM;
+		const ref = this.hrefElement;
 		if (ref) {
 			if (ref instanceof SVGSymbolElement) {
 				return (ref as SVGGraphicsElement).shapeBox(E);
@@ -317,9 +336,22 @@ export class SVGUseElement extends SVGGraphicsElement {
 		return Box.not();
 	}
 
+	_shapeBox(tm?: Matrix) {
+		const ref = this.hrefElement;
+		if (ref) {
+			const m = tm ? tm.multiply(this.ownTM) : this.rootTM;
+			if (ref instanceof SVGSymbolElement) {
+				return (ref as SVGGraphicsElement)._shapeBox(m);
+			} else {
+				return (ref as SVGGraphicsElement)._shapeBox(Matrix.identity()).transform(m);
+			}
+		}
+		return Box.not();
+	}
+
 	objectBBox(T?: Matrix) {
-		// const E = T ? T.multiply(this.transformM) : this.transformM;
-		const ref = this.refElement();
+		// const E = T ? T.multiply(this.ownTM) : this.ownTM;
+		const ref = this.hrefElement;
 		if (ref) {
 			if (ref instanceof SVGSymbolElement) {
 				return (ref as SVGGraphicsElement).objectBBox(T);
@@ -327,7 +359,7 @@ export class SVGUseElement extends SVGGraphicsElement {
 			if (T) {
 				return (ref as SVGGraphicsElement).objectBBox(T);
 			}
-			return (ref as SVGGraphicsElement).objectBBox(this.transformM);
+			return (ref as SVGGraphicsElement).objectBBox(this.ownTM);
 		}
 		return Box.not();
 	}
@@ -342,6 +374,9 @@ export class SVGSymbolElement extends SVGGraphicsElement {
 	shapeBox(T?: Matrix | boolean): Box {
 		return shapeBoxVP(this, T);
 	}
+	_shapeBox(tm?: Matrix): Box {
+		return this._viewportBox(tm);
+	}
 }
 
 /// SVGTextContentElement //////////
@@ -349,7 +384,7 @@ export class SVGSymbolElement extends SVGGraphicsElement {
 export class SVGTextElement extends SVGTextContentElement {
 	static TAGS = ['text'];
 	shapeBox(T?: Matrix | boolean): Box {
-		const E = T === true ? this.myCTM() : T ? T.multiply(this.transformM) : this.transformM;
+		const E = T === true ? this.myCTM() : T ? T.multiply(this.ownTM) : this.ownTM;
 		let s;
 		const {
 			x: {
@@ -368,6 +403,25 @@ export class SVGTextElement extends SVGTextContentElement {
 		}
 		return box;
 	}
+	_shapeBox(tm?: Matrix): Box {
+		const m = tm ? tm.multiply(this.ownTM) : this.ownTM;
+		const {
+			x: {
+				baseVal: { value: x },
+			},
+			y: {
+				baseVal: { value: y },
+			},
+		} = this;
+		let box = Box.new();
+		box = box.merge(Box.new(Vec.at(x, y).transform(m).toArray().concat([0, 0])));
+		for (const sub of this.children) {
+			if (sub instanceof SVGGraphicsElement && sub.localName == 'tspan') {
+				box = sub.boundingBox(m).merge(box);
+			}
+		}
+		return box;
+	}
 }
 
 export class SVGTSpanElement extends SVGTextContentElement {
@@ -376,7 +430,7 @@ export class SVGTSpanElement extends SVGTextContentElement {
 		let box = Box.new();
 		// Returns a horrible bounding box that just contains the coord points
 		// of the text without width or height (which is impossible to calculate)
-		const E = T === true ? this.myCTM() : T ? T.multiply(this.transformM) : this.transformM;
+		const E = T === true ? this.myCTM() : T ? T.multiply(this.ownTM) : this.ownTM;
 		let s;
 		const x1 = this.x.baseVal.value;
 		const y1 = this.y.baseVal.value;
@@ -385,6 +439,23 @@ export class SVGTSpanElement extends SVGTextContentElement {
 		const y2 = y1 + fontsize;
 		const a = Vec.at(x1, y1).transform(E);
 		const b = Vec.at(x2, y2).transform(E).sub(a);
+		box = box.merge(Box.new([a.x, a.y, Math.abs(b.x), Math.abs(b.y)]));
+		return box;
+	}
+
+	_shapeBox(tm?: Matrix): Box {
+		const m = tm ? tm.multiply(this.ownTM) : this.ownTM;
+		let box = Box.new();
+		// Returns a horrible bounding box that just contains the coord points
+		// of the text without width or height (which is impossible to calculate)
+		let s;
+		const x1 = this.x.baseVal.value;
+		const y1 = this.y.baseVal.value;
+		const fontsize = 16;
+		const x2 = x1 + 0; // This is impossible to calculate!
+		const y2 = y1 + fontsize;
+		const a = Vec.at(x1, y1).transform(m);
+		const b = Vec.at(x2, y2).transform(m).sub(a);
 		box = box.merge(Box.new([a.x, a.y, Math.abs(b.x), Math.abs(b.y)]));
 		return box;
 	}

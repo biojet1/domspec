@@ -37,7 +37,7 @@ test.test(`ParentNode`, { bail: !CI }, function (t) {
     t.same(doc.getElementById('defs-1').getBBox().toArray(), [0, 0, 0, 0], 'defs-1');
     t.same(doc.getElementById('use-1').getBBox().toArray(), [30, 30, 40, 40], 'use-1');
     t.same(doc.getElementById('group-1').getBBox().toArray(), [30, 30, 40, 40], 'group-1');
-    t.same(doc.getElementById('use-1').refElement().id, 'rect-1', 'use-1 <- rect-1');
+    t.same(doc.getElementById('use-1').hrefElement.id, 'rect-1', 'use-1 <- rect-1');
     t.end();
 
     // [

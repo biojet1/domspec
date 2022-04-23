@@ -12,7 +12,7 @@ const CONVERSIONS: { [k: string]: number } = {
 	pc: 16.0,
 	yd: 3456.0,
 	ft: 1152.0,
-	"": 1.0,
+	'': 1.0,
 };
 
 export function userUnit(src: string, default_value?: number): number {
@@ -39,7 +39,7 @@ export function userUnit(src: string, default_value?: number): number {
 	throw new Error(`Invalid unit ${src}`);
 }
 
-const UNITS = ["", "", "%", "em", "ex", "px", "cm", "mm", "in", "pt", "pc"];
+const UNITS = ['', '', '%', 'em', 'ex', 'px', 'cm', 'mm', 'in', 'pt', 'pc'];
 const CONVS = [0, 1, 1];
 
 export class SVGNumber {
@@ -60,14 +60,13 @@ export class SVGNumber {
 
 export class SVGLength {
 	_unit?: number;
-	// _num?: number|string;
-	_num?: number;
-	// _num?: number;
+	_num?: number | string;
 
 	constructor(value?: string) {
-		// this._num = 0;
-		// this._unit = 1;
-		if (value) this.valueAsString = value;
+		if (value == undefined) {
+			this._num = 0;
+			this._unit = 1;
+		} else this.parse(value);
 	}
 
 	get unitType() {
@@ -77,8 +76,8 @@ export class SVGLength {
 
 	get valueInSpecifiedUnits() {
 		const { _unit = 1 } = this;
-		// return _unit < 0 ? 0 : this._num ?? 0:
-		return this._num ?? 0;
+		return _unit < 0 ? 0 : (this._num as number) ?? 0;
+		// return this._num ?? 0;
 	}
 
 	set valueInSpecifiedUnits(value: number) {
@@ -90,25 +89,45 @@ export class SVGLength {
 	}
 
 	get valueAsString() {
-		const { _num = 0, _unit = 1 } = this;
-		// return _unit < 0 ? "0" : `${_num}${UNITS[_unit] || ""}`:
-		return `${_num}${UNITS[_unit] || ""}`;
+		const { _num, _unit } = this;
+		if (_unit == undefined) {
+			//
+		} else if (_unit >= 0) {
+			return `${_num}${UNITS[_unit] || ''}`;
+		} else {
+			//
+		}
+		return '';
 	}
 
 	set valueAsString(value: string) {
+		this.parse(value, true);
+	}
+
+	parse(value: string, fail = false) {
 		const m = BOTH_MATCH.exec(value);
 		if (m) {
 			const num = parseFloat(m[1]);
-			const unit = UNITS.indexOf((m.pop() || "").toLowerCase());
-			if (unit >= 0) {
+			const suf = m.pop();
+			if (suf) {
+				const unit = UNITS.indexOf(suf.toLowerCase());
+				if (unit > 1) {
+					this._num = num;
+					this._unit = unit;
+					return true;
+				}
+			} else {
 				this._num = num;
-				this._unit = unit;
-				return;
+				this._unit = 1;
+				return true;
 			}
 		}
-		// delete this._num;
-		// delete this._unit;
-		throw DOMException.new("SyntaxError");
+		if (fail) {
+			throw DOMException.new('SyntaxError');
+		} else {
+			this._num = value;
+			this._unit = -1;
+		}
 	}
 
 	get value() {
@@ -118,24 +137,24 @@ export class SVGLength {
 			case 0:
 			case 1:
 			case 5:
-				return _num;
+				return _num as number;
 			case 2: // "%"
-
+				return ((_num as number) * 100) / this.getRelativeLength();
 			case 3: //  "em"
 			case 4: //  "ex"
-				throw DOMException.new("NotSupportedError");
+				throw DOMException.new('NotSupportedError');
 			case 6:
-				return (_num * 4800) / 127;
+				return ((_num as number) * 4800) / 127;
 			case 7:
-				return (_num * 480) / 127;
+				return ((_num as number) * 480) / 127;
 			case 8:
-				return _num * 96;
+				return (_num as number) * 96;
 			case 9:
-				return (_num * 4) / 3;
+				return ((_num as number) * 4) / 3;
 			case 10:
-				return _num * 16;
+				return (_num as number) * 16;
 			default:
-				throw new TypeError(`invalid ${_unit}`);
+				throw new TypeError(`Invalid unit: '${_unit}'`);
 		}
 	}
 
@@ -148,21 +167,12 @@ export class SVGLength {
 				case 5:
 					this._num = value;
 					return;
-				case 2: // "%"
-				{
-					/*
-					const e = _wm_parents[this];
-					if(e){
-						const v = e.nearestViewPort.width.baseVal.value || 100;
-						v*
-
-					}
-
-					*/
-				}
+				case 2:
+					this._num = (this.getRelativeLength() * value) / 100;
+					return;
 				case 3: //  "em"
 				case 4: //  "ex"
-					throw DOMException.new("NotSupportedError");
+					throw DOMException.new('NotSupportedError');
 				case 6:
 					this._num = (127 * value) / 4800;
 					return;
@@ -195,25 +205,64 @@ export class SVGLength {
 	}
 
 	convertToSpecifiedUnits(unitType: number) {
-		if (unitType > 0 && unitType < 11) {
-			const { value, _unit } = this;
-			this._unit = unitType;
-			try {
-				this.value = value;
-			} catch (err) {
-				this._unit = _unit;
-				throw err;
-			}
-		} else if (unitType === undefined) {
-			throw new TypeError();
-		} else {
-			throw DOMException.new("NotSupportedError");
+		switch (unitType) {
+			case 1:
+			case 5:
+				this._num = this.value;
+				break;
+			case 2:
+				this._num = (this.getRelativeLength() * this.value) / 100;
+				break;
+			case 3: //  "em"
+			case 4: //  "ex"
+				throw DOMException.new('NotSupportedError');
+			case 6:
+				this._num = (127 * this.value) / 4800;
+				break;
+			case 7:
+				this._num = (127 * this.value) / 480;
+				break;
+			case 8:
+				this._num = this.value / 96;
+				break;
+			case 9:
+				this._num = (this.value * 3) / 4;
+				break;
+			case 10:
+				this._num = 16 / this.value;
+				break;
+			default:
+				if (unitType == undefined) {
+					throw new TypeError();
+				} else {
+					throw DOMException.new('NotSupportedError');
+				}
 		}
+		this._unit = unitType;
 	}
 
 	toString() {
-		// return _unit < 0 ? _num : `${_num}${UNITS[_unit] || ""}`:
-		return this.valueAsString;
+		const { _num, _unit } = this;
+		if (_unit == undefined) {
+			return null;
+		} else if (_unit >= 0) {
+			return `${_num}${UNITS[_unit] || ''}`;
+		} else {
+			// _unit === -1;
+			return `${_num}`;
+		}
+	}
+
+	getRelativeLength(): number {
+		const e = _getAssoc(this);
+		if (e) {
+			const g = e.nearestViewportElement as SVGGraphicsElement;
+			const w = g?.width.baseVal.value ?? 100;
+			const h = g?.height.baseVal.value ?? 100;
+			return Math.sqrt(w ** 2 + h ** 2);
+		} else {
+			return 100;
+		}
 	}
 
 	static SVG_LENGTHTYPE_UNKNOWN = 0;
@@ -235,12 +284,7 @@ export class SVGLengthAttr extends Attr {
 	set value(value: string) {
 		const { _var } = this;
 		if (_var instanceof SVGLength) {
-			try {
-				_var.valueAsString = value;
-			} catch (err) {
-				console.error(err);
-				// this._var = value;
-			}
+			_var.parse(value);
 		} else {
 			this._var = value;
 		}
@@ -251,27 +295,103 @@ export class SVGLengthAttr extends Attr {
 		if (_var instanceof SVGLength) {
 			return _var.valueAsString;
 		}
-		return _var || "";
+		return _var || '';
 	}
 
+	get baseVal(): SVGLength {
+		const { _var } = this;
+		if (_var instanceof SVGLength) {
+			return _var;
+		} else {
+			const v = (this._var = new SVGLength(_var));
+			_setAssoc(v, this);
+			return v;
+		}
+	}
+
+	valueOf() {
+		return this._var?.toString();
+		// _var == undefined returns undefined
+		// _var == string returns string
+		// _var == SVGLength returns SVGLength.toString();
+	}
+
+	val() {
+		const { _var } = this;
+		if (_var instanceof SVGLength) {
+			return _var.value;
+		} else if(_var){
+			
+		}
+	}
+}
+
+const _wm_assoc = new WeakMap<any, Attr>();
+
+function _setAssoc(that: any, value: Attr) {
+	_wm_assoc.set(that, value);
+}
+
+function _getAssoc(that: any) : SVGGraphicsElement | null | undefined{
+	return _wm_assoc.get(that)?.ownerElement as SVGGraphicsElement;
+}
+
+export class SVGLengthW extends SVGLength {
+	getRelativeLength(): number {
+		const e = _getAssoc(this);
+		if (e) {
+			return (e.nearestViewportElement as SVGGraphicsElement)?.width.baseVal.value ?? 100;
+		} else {
+			return 100;
+		}
+	}
+	// getAutoLength(): number {
+	// 	const e = _getAssoc(this);
+	// 	if (e) {
+	// 		return (e._nearestVP as SVGGraphicsElement)?.width.baseVal.value ?? 100;
+	// 	} else {
+	// 		return 100;
+	// 	}
+	// }
+}
+
+export class SVGLengthH extends SVGLength {
+	getRelativeLength(): number {
+		const e = _getAssoc(this);
+		if (e) {
+			return (e.nearestViewportElement as SVGGraphicsElement)?.height.baseVal.value ?? 100;
+		} else {
+			return 100;
+		}
+	}
+}
+
+export class SVGLengthWAttr extends SVGLengthAttr {
 	get baseVal() {
 		const { _var } = this;
 		if (_var instanceof SVGLength) {
 			return _var;
 		} else {
-			return (this._var = new SVGLength(_var));
-		}
-	}
-
-	valueOf() {
-		const { _var } = this;
-		if (_var instanceof SVGLength) {
-			return _var.valueAsString;
-		} else {
-			return _var?.toString();
+			const v = (this._var = new SVGLengthW(_var));
+			_setAssoc(v, this);
+			return v;
 		}
 	}
 }
 
-import { DOMException } from "../event-target.js";
-import { Attr } from "../attr.js";
+export class SVGLengthHAttr extends SVGLengthAttr {
+	get baseVal() {
+		const { _var } = this;
+		if (_var instanceof SVGLength) {
+			return _var;
+		} else {
+			const v = (this._var = new SVGLengthH(_var));
+			_setAssoc(v, this);
+			return v;
+		}
+	}
+}
+
+import { DOMException } from '../event-target.js';
+import { Attr } from '../attr.js';
+import { SVGGraphicsElement } from './_element.js';

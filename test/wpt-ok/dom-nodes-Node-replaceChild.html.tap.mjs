@@ -85,16 +85,16 @@ test(function () {
 test(function () {
   var doc = document.implementation.createHTMLDocument("title");
   var doc2 = document.implementation.createHTMLDocument("title2");
-    console.log(doc.innerHTML);
+    // console.log(doc.innerHTML);
   assert_throws_dom("HierarchyRequestError", function () {
     doc.replaceChild(doc2, doc.documentElement);
   });
-    console.log(doc.innerHTML);
+    // console.log(doc.innerHTML);
 
   assert_throws_dom("HierarchyRequestError", function () {
-    console.log(doc.createTextNode("text")?.data);
-    console.log(doc.innerHTML);
-    console.log(doc.documentElement?.outerHTML);
+    // console.log(doc.createTextNode("text")?.data);
+    // console.log(doc.innerHTML);
+    // console.log(doc.documentElement?.outerHTML);
     doc.replaceChild(doc.createTextNode("text"), doc.documentElement);
   });
 }, "If the context node is a document, inserting a document or text node should throw a HierarchyRequestError.");

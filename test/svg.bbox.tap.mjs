@@ -1,6 +1,6 @@
-"uses strict";
-import test from "tap";
-import { Document, SVGGraphicsElement, DOMParser, Box } from "../dist/all.js";
+'uses strict';
+import test from 'tap';
+import { Document, SVGGraphicsElement, DOMParser, Box } from '../dist/all.js';
 // import { DOMParser } from "../dist/dom-parse.js";
 
 const CI = true;
@@ -29,65 +29,23 @@ test.test(`ParentNode`, { bail: !CI }, function (t) {
     );
 
     const top = doc.documentElement;
-    const use = doc.getElementById("use-1");
-
-    // console.log(
-    //     "href",
-    //     use.getAttribute("href"),
-    //     `href=${
-    //         use.getAttributeNS("http://www.w3.org/1999/xlink", "href") ||
-    //         use.getAttribute("href")
-    //     }`
-    // );
-    let id =
-        use.getAttributeNS("http://www.w3.org/1999/xlink", "href") ||
-        use.getAttribute("href");
-    // console.log("id", use.refElement().id);
-    // if (id) {
-    //     id =
-    //     console.log("id2", );
-
-    //      use.ownerDocument.getElementById(id.substr(id.indexOf("#")));
-    // }
-
-    // console.log(
-    //     "get",
-    //     use.ownerDocument.getElementById("rect-1").id,
-    //     use.refElement()
-    // );
-
-    // getBBox
-    // let box = Box.new();
-    // for(const e of   doc.getElementById("group-1").children){
-    //     box = box.merge(e.getBBox())
-    //     console.log("group-1 / ", e.id, e.getBBox().toArray(), e.canRender(), e instanceof SVGGraphicsElement, box);
-
-    // }
-
-    t.same(doc.getElementById("rect-1").getBBox().toArray(), [20, 20, 40, 40]);
-    t.same(
-        doc.getElementById("rect-2").getBBox().toArray(),
-        [10, 10, 100, 100]
-    );
-    t.same(
-        doc.getElementById("group-2").getBBox().toArray(),
-        [10, 10, 100, 100],
-        "group-2"
-    );
-    t.same(
-        doc.getElementById("defs-1").getBBox().toArray(),
-        [0, 0, 0, 0],
-        "defs-1"
-    );
-    t.same(
-        doc.getElementById("use-1").getBBox().toArray(),
-        [30, 30, 40, 40],
-        "use-1"
-    );
-    t.same(
-        doc.getElementById("group-1").getBBox().toArray(),
-        [30, 30, 40, 40],
-        "group-1"
-    );
+    const use = doc.getElementById('use-1');
+    t.same(doc.getElementById('rect-1').x.baseVal.value, 20, '.x.baseVal.value');
+    t.same(doc.getElementById('rect-1').getBBox().toArray(), [20, 20, 40, 40], 'rect-1');
+    t.same(doc.getElementById('rect-2').getBBox().toArray(), [10, 10, 100, 100], 'rect-2');
+    t.same(doc.getElementById('group-2').getBBox().toArray(), [10, 10, 100, 100], 'group-2');
+    t.same(doc.getElementById('defs-1').getBBox().toArray(), [0, 0, 0, 0], 'defs-1');
+    t.same(doc.getElementById('use-1').getBBox().toArray(), [30, 30, 40, 40], 'use-1');
+    t.same(doc.getElementById('group-1').getBBox().toArray(), [30, 30, 40, 40], 'group-1');
+    t.same(doc.getElementById('use-1').hrefElement.id, 'rect-1', 'use-1 <- rect-1');
     t.end();
+
+    // [
+    //     ['defs-1', 0, 0, 0, 0],
+    //     ['rect-1', 0, 0, 0, 0],
+    //     ['group-1', 30, 30, 40, 40],
+    //     ['use-1', 30, 30, 40, 40],
+    //     ['group-2', 0, 0, 0, 0],
+    //     ['rect-2', 0, 0, 0, 0],
+    // ];
 });

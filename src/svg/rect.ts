@@ -69,6 +69,17 @@ export class SVGRectAttr extends Attr {
 		}
 		return this;
 	}
+
+	// calcWidth(){
+	// 	// https://svgwg.org/svg-next/coords.html#Units
+	// 	if (_var instanceof BoxMut) {
+	// 		return _var.width;
+	// 	} else {
+	// 		const {ownerElement} = this;
+	// 		ownerElement
+	// 		return _var?.toString();
+	// 	}
+	// }
 }
 
 function contain(
@@ -91,7 +102,7 @@ function contain(
 			bbox.mergeSelf(Box.new(x, y, 0, 0));
 		} else {
 			try {
-				bbox.mergeSelf(v.boundingBox(true));
+				bbox.mergeSelf(v._boundingBox());
 			} catch (err) {
 				console.error(`Failed to merge ${v.constructor.name} ${bbox.constructor.name}(${bbox})`);
 				throw err;

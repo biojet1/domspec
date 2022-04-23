@@ -73,13 +73,11 @@ export class SVGTransformList extends Array<SVGTransform> {
 	public static parse(d: string): SVGTransformList {
 		const tl = new SVGTransformList();
 		for (const str of d.split(/\)\s*,?\s*/).slice(0, -1)) {
-			const kv = str.trim().split("(");
+			const kv = str.trim().split('(');
 			const name = kv[0].trim();
 			const args = kv[1].split(/[\s,]+/).map((str) => parseFloat(str));
 			// console.log(name, args);
-			tl.appendItem(
-				(SVGTransform as any)[name](...args) as any as SVGTransform
-			);
+			tl.appendItem((SVGTransform as any)[name](...args) as any as SVGTransform);
 		}
 		return tl;
 	}
@@ -148,10 +146,14 @@ export class SVGTransform extends MatrixMut {
 					return `translate(${e},${f})`; // SVG_TRANSFORM_TRANSLATE
 				}
 			} else if (a || d) {
-				return `scale(${a},${d})`; // SVG_TRANSFORM_SCALE
+				if (a === 1 && d === 1) {
+					//
+				} else {
+					return `scale(${a},${d})`; // SVG_TRANSFORM_SCALE
+				}
 			}
 		}
-		return `matrix(${a},${b},${c},${d},${e},${f})`; // SVG_TRANSFORM_MATRIX
+		return `matrix(${a} ${b} ${c} ${d} ${e} ${f})`; // SVG_TRANSFORM_MATRIX
 	}
 
 	setTranslate(x = 0, y = 0) {
@@ -199,14 +201,7 @@ export class SVGTransform extends MatrixMut {
 				cosθ = cos(θ);
 				sinθ = sin(θ);
 		}
-		this.setHexad(
-			cosθ,
-			sinθ,
-			-sinθ,
-			cosθ,
-			x ? -cosθ * x + sinθ * y + x : 0,
-			y ? -sinθ * x - cosθ * y + y : 0
-		);
+		this.setHexad(cosθ, sinθ, -sinθ, cosθ, x ? -cosθ * x + sinθ * y + x : 0, y ? -sinθ * x - cosθ * y + y : 0);
 	}
 	setSkewX(x: number) {
 		this.setHexad(1, 0, tan(radians((this.θ = x))), 1, 0, 0);
@@ -249,14 +244,7 @@ export class SVGTransform extends MatrixMut {
 	static skewY(y: number) {
 		return new SVGTransform([1, tan(radians(y)), 0, 1, 0, 0]);
 	}
-	static matrix(
-		a: number,
-		b: number,
-		c: number,
-		d: number,
-		e: number,
-		f: number
-	) {
+	static matrix(a: number, b: number, c: number, d: number, e: number, f: number) {
 		return new SVGTransform([a, b, c, d, e, f]);
 	}
 	[shot: string]: any;
@@ -285,9 +273,9 @@ export class SVGTransformListAttr extends Attr {
 	get value() {
 		const { _var } = this;
 		if (_var instanceof SVGTransformList) {
-			return _var.consolidate()?.toString() || "";
+			return _var.consolidate()?.toString() || '';
 		}
-		return _var || "";
+		return _var || '';
 	}
 
 	get baseVal() {
@@ -305,7 +293,7 @@ export class SVGTransformListAttr extends Attr {
 		const { _var } = this;
 		if (_var instanceof SVGTransformList) {
 			const m = _var.consolidate();
-			if (m && !m.isIdentity()) {
+			if (m && !m.isIdentity) {
 				return m.toString();
 			}
 		} else {
@@ -317,5 +305,54 @@ const { tan, cos, sin, PI } = Math;
 const radians = function (d: number) {
 	return ((d % 360) * PI) / 180;
 };
-import { Matrix, MatrixMut } from "svggeom";
-import { Attr } from "../attr.js";
+import { Matrix, MatrixMut } from 'svggeom';
+import { Attr } from '../attr.js';
+
+export function viewbox_transform(
+	e_x: number,
+	e_y: number,
+	e_width: number,
+	e_height: number,
+	vb_x: number,
+	vb_y: number,
+	vb_width: number,
+	vb_height: number,
+	aspect?: string | null
+) {
+	// https://svgwg.org/svg2-draft/coords.html#ComputingAViewportsTransform
+	//  Let align be the align value of preserveAspectRatio, or 'xMidYMid' if preserveAspectRatio is not defined.
+	let [align = 'xmidymid', meet_or_slice = 'meet'] = aspect ? aspect.toLowerCase().split(' ') : [];
+	// Initialize scale-x to e-width/vb-width.
+	let scale_x = e_width / vb_width;
+	// Initialize scale-y to e-height/vb-height.
+	let scale_y = e_height / vb_height;
+	// If align is not 'none' and meetOrSlice is 'meet', set the larger of scale-x and scale-y to the smaller.
+	if (align != 'none' && meet_or_slice == 'meet') {
+		scale_x = scale_y = Math.min(scale_x, scale_y);
+	} else if (align != 'none' && meet_or_slice == 'slice') {
+		// Otherwise, if align is not 'none' and v is 'slice', set the smaller of scale-x and scale-y to the larger
+		scale_x = scale_y = Math.max(scale_x, scale_y);
+	}
+	// Initialize translate-x to e-x - (vb-x * scale-x).
+	let translate_x = e_x - vb_x * scale_x;
+	// Initialize translate-y to e-y - (vb-y * scale-y)
+	let translate_y = e_y - vb_y * scale_y;
+	// If align contains 'xMid', add (e-width - vb-width * scale-x) / 2 to translate-x.
+	if (align.indexOf('xmid') >= 0) {
+		translate_x += (e_width - vb_width * scale_x) / 2.0;
+	}
+	// If align contains 'xMax', add (e-width - vb-width * scale-x) to translate-x.
+	if (align.indexOf('xmax') >= 0) {
+		translate_x += e_width - vb_width * scale_x;
+	}
+	// If align contains 'yMid', add (e-height - vb-height * scale-y) / 2 to translate-y.
+	if (align.indexOf('ymid') >= 0) {
+		translate_y += (e_height - vb_height * scale_y) / 2.0;
+	}
+	//  If align contains 'yMax', add (e-height - vb-height * scale-y) to translate-y.
+	if (align.indexOf('ymax') >= 0) {
+		translate_y += e_height - vb_height * scale_y;
+	}
+	// translate(translate-x, translate-y) scale(scale-x, scale-y)
+	return [translate_x, translate_y, scale_x, scale_y];
+}

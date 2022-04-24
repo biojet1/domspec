@@ -34,20 +34,8 @@ export class SVGGeometryElement extends SVGGraphicsElement {
 		return Box.not();
 	}
 
-	shapeBox(T?: Matrix | boolean) {
-		let { path } = this;
-		if (path.firstPoint) {
-			if (T === true) {
-				path = path.transform(this.rootTM);
-			} else {
-				path = path.transform(this.ownTM);
-				if (T) {
-					path = path.transform(T);
-				}
-			}
-			return path.bbox();
-		}
-		return Box.not();
+	shapeBox(T?: Matrix) {
+		return this._shapeBox(T);
 	}
 
 	_shapeBox(tm?: Matrix) {
@@ -280,8 +268,8 @@ export class SVGForeignObjectElement extends SVGGraphicsElement {
 	get _isViewportElement() {
 		return 2;
 	}
-	shapeBox(T?: Matrix | boolean): Box {
-		return shapeBoxVP(this, T);
+	shapeBox(T?: Matrix): Box {
+		return this._shapeBox(T);
 	}
 	_shapeBox(tm?: Matrix): Box {
 		return this._viewportBox(tm);
@@ -298,8 +286,8 @@ export class SVGImageElement extends SVGGraphicsElement {
 	get _isViewportElement() {
 		return 1;
 	}
-	shapeBox(T?: Matrix | boolean): Box {
-		return shapeBoxVP(this, T);
+	shapeBox(T?: Matrix): Box {
+		return this._shapeBox(T);
 	}
 	_shapeBox(tm?: Matrix): Box {
 		return this._viewportBox(tm);
@@ -324,16 +312,8 @@ export class SVGUseElement extends SVGGraphicsElement {
 		return m;
 	}
 
-	shapeBox(T?: Matrix | boolean) {
-		const E = T === true ? this.rootTM : T ? T.multiply(this.ownTM) : this.ownTM;
-		const ref = this.hrefElement;
-		if (ref) {
-			if (ref instanceof SVGSymbolElement) {
-				return (ref as SVGGraphicsElement).shapeBox(E);
-			}
-			return (ref as SVGGraphicsElement).shapeBox().transform(E);
-		}
-		return Box.not();
+	shapeBox(T?: Matrix) {
+		return this._shapeBox(T);
 	}
 
 	_shapeBox(tm?: Matrix) {
@@ -371,8 +351,8 @@ export class SVGSymbolElement extends SVGGraphicsElement {
 	get _isViewportElement() {
 		return 1;
 	}
-	shapeBox(T?: Matrix | boolean): Box {
-		return shapeBoxVP(this, T);
+	shapeBox(T?: Matrix): Box {
+		return this._shapeBox(T);
 	}
 	_shapeBox(tm?: Matrix): Box {
 		return this._viewportBox(tm);
@@ -383,25 +363,8 @@ export class SVGSymbolElement extends SVGGraphicsElement {
 
 export class SVGTextElement extends SVGTextContentElement {
 	static TAGS = ['text'];
-	shapeBox(T?: Matrix | boolean): Box {
-		const E = T === true ? this.rootTM : T ? T.multiply(this.ownTM) : this.ownTM;
-		let s;
-		const {
-			x: {
-				baseVal: { value: x },
-			},
-			y: {
-				baseVal: { value: y },
-			},
-		} = this;
-		let box = Box.new();
-		box = box.merge(Box.new(Vec.at(x, y).transform(E).toArray().concat([0, 0])));
-		for (const sub of this.children) {
-			if (sub instanceof SVGGraphicsElement && sub.localName == 'tspan') {
-				box = sub.boundingBox(E).merge(box);
-			}
-		}
-		return box;
+	shapeBox(T?: Matrix): Box {
+		return this._shapeBox(T);
 	}
 	_shapeBox(tm?: Matrix): Box {
 		const m = tm ? tm.multiply(this.ownTM) : this.ownTM;
@@ -426,21 +389,8 @@ export class SVGTextElement extends SVGTextContentElement {
 
 export class SVGTSpanElement extends SVGTextContentElement {
 	static TAGS = ['tspan'];
-	shapeBox(T?: Matrix | boolean) {
-		let box = Box.new();
-		// Returns a horrible bounding box that just contains the coord points
-		// of the text without width or height (which is impossible to calculate)
-		const E = T === true ? this.rootTM : T ? T.multiply(this.ownTM) : this.ownTM;
-		let s;
-		const x1 = this.x.baseVal.value;
-		const y1 = this.y.baseVal.value;
-		const fontsize = 16;
-		const x2 = x1 + 0; // This is impossible to calculate!
-		const y2 = y1 + fontsize;
-		const a = Vec.at(x1, y1).transform(E);
-		const b = Vec.at(x2, y2).transform(E).sub(a);
-		box = box.merge(Box.new([a.x, a.y, Math.abs(b.x), Math.abs(b.y)]));
-		return box;
+	shapeBox(T?: Matrix) {
+		return this._shapeBox(T);
 	}
 
 	_shapeBox(tm?: Matrix): Box {
@@ -554,7 +504,7 @@ export class SVGScriptElement extends SVGElement {
 	// }
 }
 
-import { SVGElement, SVGSVGElement, SVGGraphicsElement, shapeBoxVP } from './_element.js';
+import { SVGElement, SVGSVGElement, SVGGraphicsElement } from './_element.js';
 import { SVGTransformListAttr, SVGTransform } from './attr-transform.js';
 import { DOMException } from '../event-target.js';
 export { SVGLength, SVGLengthAttr } from './length.js';

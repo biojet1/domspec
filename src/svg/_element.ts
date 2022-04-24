@@ -3,15 +3,15 @@ export class SVGElement extends Element {
 	get _isViewportElement() {
 		return 0;
 	}
-	get _nearestVP(): SVGElement | null {
-		let cur: SVGElement = this;
-		do {
-			if (1 === cur._isViewportElement) {
-				return cur;
-			}
-		} while ((cur = cur.parentElement as SVGElement));
-		return null;
-	}
+	// get _nearestVP(): SVGElement | null {
+	// 	let cur: SVGElement = this;
+	// 	do {
+	// 		if (1 === cur._isViewportElement) {
+	// 			return cur;
+	// 		}
+	// 	} while ((cur = cur.parentElement as SVGElement));
+	// 	return null;
+	// }
 	get viewportElement(): SVGElement | null {
 		let parent: SVGElement = this;
 		while ((parent = parent.parentElement as SVGElement)) {
@@ -146,28 +146,30 @@ export class SVGGraphicsElement extends SVGElement {
 		this.setAttribute('transform', T.toString());
 	}
 
-	get clipElement(): SVGGraphicsElement | undefined {
-		const id = this.getAttribute('clip-path');
-		if (id) {
-			return this.ownerDocument?.getElementById(id) as SVGGraphicsElement;
-		}
+	get clipElement(): SVGGraphicsElement | null {
+		const v = this.getAttribute('clip-path');
+		const a = v && /#([^#\(\)\s]+)/.exec(v);
+		return a ? (this.ownerDocument?.getElementById(a[1]) as SVGGraphicsElement) : null;
 	}
 
-	set clipElement(target: SVGElement | undefined) {
-		target && this.setAttribute('clip-path', target.letId());
+	set clipElement(target: SVGElement | null) {
+		if (target) {
+			this.setAttribute('clip-path', `url(#${target.letId()})`);
+		} else {
+			this.removeAttribute('clip-path');
+		}
 	}
 
 	get hrefElement() {
 		const id = this.getAttributeNS('http://www.w3.org/1999/xlink', 'href') || this.getAttribute('href');
 		if (id) {
-			const h = id.indexOf('#');
-			return this.ownerDocument?.getElementById(h < 0 ? id : id.substr(h + 1)) as SVGElement;
+			return this.ownerDocument?.getElementById(id.substr(id.indexOf('#') + 1)) as SVGElement;
 		}
 		return null;
 	}
 
 	set hrefElement(target: SVGElement | null) {
-		target && this.setAttributeNS('http://www.w3.org/1999/xlink', 'href', target.letId());
+		target && this.setAttributeNS('http://www.w3.org/1999/xlink', 'href', `#${target.letId()}`);
 	}
 
 	canRender() {
@@ -342,13 +344,12 @@ export class SVGSVGElement extends SVGGraphicsElement {
 	defs() {
 		let { ownerDocument, children } = this;
 		if (ownerDocument) {
-			for (const sub of children) {
+			for (const sub of this.children) {
 				if (sub.localName == 'defs') {
 					return sub;
 				}
 			}
-			const defs = ownerDocument.createElement('defs');
-			return defs;
+			return this.insertAdjacentElement('afterbegin', ownerDocument.createElement('defs'));
 		}
 		throw new Error(`No ownerDocument`);
 	}

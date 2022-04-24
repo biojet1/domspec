@@ -12,6 +12,7 @@ export class SVGTextContentElement extends SVGGraphicsElement {}
 
 export class SVGGeometryElement extends SVGGraphicsElement {
 	describe(): string {
+		/* c8 ignore next */
 		throw new Error('NotImplemented');
 	}
 
@@ -79,21 +80,9 @@ export class SVGPathElement extends SVGGeometryElement {
 		return this.getAttribute('d') || '';
 	}
 	fuseTransform(parentT?: Matrix) {
-		const a = this.getAttributeNode('transform');
-		const d = this.describe();
-
-		if (parentT) {
-			if (a) {
-				parentT = parentT.multiply(Matrix.parse(a.value));
-			}
-		} else if (a) {
-			parentT = Matrix.parse(a.value);
-		}
-
-		if (d && parentT) {
-			this.setAttribute('d', Path.parse(d).transform(parentT).describe());
-		}
-		a && this.removeAttributeNode(a);
+		let tm = parentT ? this.ownTM.postMultiply(parentT) : this.ownTM;
+		this.setAttribute('d', Path.parse(this.describe()).transform(tm).describe());
+		this.removeAttribute('transform');
 	}
 }
 
@@ -123,32 +112,25 @@ export class SVGRectElement extends SVGGeometryElement {
 		return `M ${x} ${y} h ${width} v ${height} h ${-width} Z`;
 	}
 	fuseTransform(parentT?: Matrix) {
-		const a = this.getAttributeNode('transform');
-		if (parentT) {
-			a && (parentT = parentT.multiply(Matrix.parse(a.value)));
-		} else if (a) {
-			parentT = Matrix.parse(a.value);
-		}
-		if (parentT) {
-			const { a: scale_x, b: skew_x, c: skew_y, d: scale_y, e: translate_x, f: translate_y } = parentT;
-			if (skew_x == 0 && skew_y == 0) {
-				const { abs } = Math;
-				let w = this.width.baseVal.value;
-				let h = this.height.baseVal.value;
-				let x = this.x.baseVal.value;
-				let y = this.y.baseVal.value;
-				x *= scale_x;
-				x += translate_x;
-				y *= scale_y;
-				y += translate_y;
-				this.x.baseVal.value = x;
-				this.y.baseVal.value = y;
-				this.width.baseVal.value = abs(w * scale_x);
-				this.height.baseVal.value = abs(h * scale_y);
-				a && this.removeAttributeNode(a);
-			} else {
-				throw new Error(`fuseTransform of ${this.constructor.name} with skew_x == ${skew_x}, skew_y == ${skew_y}`);
-			}
+		let tm = parentT ? this.ownTM.postMultiply(parentT) : this.ownTM;
+		const { a: scale_x, b: skew_x, c: skew_y, d: scale_y, e: translate_x, f: translate_y } = tm;
+		if (skew_x == 0 && skew_y == 0) {
+			const { abs } = Math;
+			let w = this.width.baseVal.value;
+			let h = this.height.baseVal.value;
+			let x = this.x.baseVal.value;
+			let y = this.y.baseVal.value;
+			x *= scale_x;
+			x += translate_x;
+			y *= scale_y;
+			y += translate_y;
+			this.x.baseVal.value = x;
+			this.y.baseVal.value = y;
+			this.width.baseVal.value = abs(w * scale_x);
+			this.height.baseVal.value = abs(h * scale_y);
+			this.removeAttribute('transform');
+		} else {
+			throw new Error(`fuseTransform of ${this.constructor.name} with skew_x == ${skew_x}, skew_y == ${skew_y}`);
 		}
 	}
 }
@@ -163,23 +145,20 @@ export class SVGLineElement extends SVGGeometryElement {
 		return `M ${x1} ${y1} L ${x2} ${y2}`;
 	}
 	fuseTransform(parentT: Matrix) {
-		const a = this.getAttributeNode('transform');
-		if (a) {
-			let m = Matrix.parse(a.value);
+		let tm = parentT ? this.ownTM.postMultiply(parentT) : this.ownTM;
+		if (!tm.isIdentity) {
 			let x1 = this.x1.baseVal.value;
 			let x2 = this.x2.baseVal.value;
 			let y1 = this.y1.baseVal.value;
 			let y2 = this.y2.baseVal.value;
-			parentT && (m = parentT.multiply(m));
-
-			[x1, y1] = Vec.pos(x1, y1).transform(m);
-			[x2, y2] = Vec.pos(x2, y2).transform(m);
+			[x1, y1] = Vec.pos(x1, y1).transform(tm);
+			[x2, y2] = Vec.pos(x2, y2).transform(tm);
 			this.x1.baseVal.value = x1;
 			this.x2.baseVal.value = x2;
 			this.y1.baseVal.value = y1;
 			this.y2.baseVal.value = y2;
-			this.removeAttributeNode(a);
 		}
+		this.removeAttribute('transform');
 	}
 }
 
@@ -201,23 +180,18 @@ export class SVGPolygonElement extends SVGGeometryElement {
 		return p ? `M ${p} Z` : '';
 	}
 	fuseTransform(parentT?: Matrix) {
-		const a = this.getAttributeNode('transform');
-		if (parentT) {
-			a && (parentT = parentT.multiply(Matrix.parse(a.value)));
-		} else if (a) {
-			parentT = Matrix.parse(a.value);
-		}
-		const l =
-			parentT &&
-			this.getAttribute('points')
+		let tm = parentT ? this.ownTM.postMultiply(parentT) : this.ownTM;
+		if (!tm.isIdentity) {
+			const l = this.getAttribute('points')
 				?.split(/(\s+)/)
 				.filter((e) => e.trim().length > 0)
 				.map((e) => e.split(',').map((v) => parseFloat(v)))
 				.map((e) => Vec.pos(e[0], e[1]))
-				.map((e) => [...e.transform(parentT)])
+				.map((e) => [...e.transform(tm)])
 				.map((e) => `${e[0]},${e[1]}`);
-		l && this.setAttribute('points', l.join(' '));
-		a && this.removeAttributeNode(a);
+			l && this.setAttribute('points', l.join(' '));
+		}
+		this.removeAttribute('transform');
 	}
 }
 
@@ -228,23 +202,18 @@ export class SVGPolylineElement extends SVGGeometryElement {
 		return p ? `M ${p}` : '';
 	}
 	fuseTransform(parentT?: Matrix) {
-		const a = this.getAttributeNode('transform');
-		if (parentT) {
-			a && (parentT = parentT.multiply(Matrix.parse(a.value)));
-		} else if (a) {
-			parentT = Matrix.parse(a.value);
-		}
-		const l =
-			parentT &&
-			this.getAttribute('points')
+		let tm = parentT ? this.ownTM.postMultiply(parentT) : this.ownTM;
+		if (!tm.isIdentity) {
+			const l = this.getAttribute('points')
 				?.split(/(\s+)/)
 				.filter((e) => e.trim().length > 0)
 				.map((e) => e.split(',').map((v) => parseFloat(v)))
 				.map((e) => Vec.pos(e[0], e[1]))
-				.map((e) => [...e.transform(parentT)])
+				.map((e) => [...e.transform(tm)])
 				.map((e) => `${e[0]},${e[1]}`);
-		l && this.setAttribute('points', l.join(' '));
-		a && this.removeAttributeNode(a);
+			l && this.setAttribute('points', l.join(' '));
+		}
+		this.removeAttribute('transform');
 	}
 }
 

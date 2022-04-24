@@ -52,13 +52,17 @@ tap.test('transform', function (t) {
     t.same(R3.rootTM.describe(), Matrix.translate(100, 100).describe());
     t.same(R4.splitTM()[0].describe(), Matrix.translate(100, 100).describe());
     t.same(R4.rootTM.describe(), Matrix.translate(90, 90).describe());
+    [p, o] = top.splitTM();
+    t.same(p.describe(), Matrix.identity().describe());
+    t.same(o.describe(), Matrix.identity().describe());
+    [p, o] = G1.splitTM();
+    t.same(p.describe(), Matrix.identity().describe());
+    t.same(o.describe(), Matrix.translate(100).describe());
     // const tr = seq(translate(-100, 0));
-    // let m, n;
     // const R4CTM = R4.myCTM();
-    // const R4STM = R4.transforM;
     // const R4PTM = R4.parentCTM();
-    // m = tr.at(1);
-    // n = tr.at(1, R4PTM.inverse());
+    // let m = tr.at(1);
+    // let n = tr.at(1, R4PTM.inverse());
     // console.log("m", m.describe());
     // console.log("X", tr.at(1, R4PTM.inverse()).multiply(R4CTM).describe());
     t.end();
@@ -83,12 +87,12 @@ tap.test('viewportTM', function (t) {
     const RECT = doc.getElementById('RECT');
     const G_F = doc.getElementById('G_F');
     doc.querySelectorAll(`text`).forEach((x) => x.remove());
-    console.log(G_F._shapeBox());
+    // console.log(G_F._shapeBox());
     // console.log(G_F.querySelector('rect')._shapeBox())
     // console.log(G_F.querySelector('svg')._shapeBox())
-    for (const sub of G_F.children) {
-        console.log(sub.localName, sub._shapeBox());
-    }
+    // for (const sub of G_F.children) {
+    //     console.log(sub.localName, sub._shapeBox());
+    // }
 
     t.same(top.viewportTM().toString(), Matrix.identity().toString());
     [

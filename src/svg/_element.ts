@@ -3,15 +3,15 @@ export class SVGElement extends Element {
 	get _isViewportElement() {
 		return 0;
 	}
-	get _nearestVP(): SVGElement | null {
-		let cur: SVGElement = this;
-		do {
-			if (1 === cur._isViewportElement) {
-				return cur;
-			}
-		} while ((cur = cur.parentElement as SVGElement));
-		return null;
-	}
+	// get _nearestVP(): SVGElement | null {
+	// 	let cur: SVGElement = this;
+	// 	do {
+	// 		if (1 === cur._isViewportElement) {
+	// 			return cur;
+	// 		}
+	// 	} while ((cur = cur.parentElement as SVGElement));
+	// 	return null;
+	// }
 	get viewportElement(): SVGElement | null {
 		let parent: SVGElement = this;
 		while ((parent = parent.parentElement as SVGElement)) {
@@ -136,15 +136,6 @@ export class SVGGraphicsElement extends SVGElement {
 		}
 		return farthest;
 	}
-	get transformM() {
-		throw new Error('Depreciated');
-		return this.transform.baseVal.consolidate();
-	}
-
-	set transformM(T: Matrix) {
-		throw new Error('Depreciated');
-		this.setAttribute('transform', T.toString());
-	}
 
 	get ownTM() {
 		// return Matrix.parse(this.getAttribute("transform") || "");
@@ -155,38 +146,30 @@ export class SVGGraphicsElement extends SVGElement {
 		this.setAttribute('transform', T.toString());
 	}
 
-	get clip(): SVGGraphicsElement | undefined {
-		throw new Error('Depreciated');
-		return this.clipElement;
+	get clipElement(): SVGGraphicsElement | null {
+		const v = this.getAttribute('clip-path');
+		const a = v && /#([^#\(\)\s]+)/.exec(v);
+		return a ? (this.ownerDocument?.getElementById(a[1]) as SVGGraphicsElement) : null;
 	}
 
-	set clip(target: SVGElement | undefined) {
-		throw new Error('Depreciated');
-		this.clipElement = target;
-	}
-
-	get clipElement(): SVGGraphicsElement | undefined {
-		const id = this.getAttribute('clip-path');
-		if (id) {
-			return this.ownerDocument?.getElementById(id) as SVGGraphicsElement;
+	set clipElement(target: SVGElement | null) {
+		if (target) {
+			this.setAttribute('clip-path', `url(#${target.letId()})`);
+		} else {
+			this.removeAttribute('clip-path');
 		}
-	}
-
-	set clipElement(target: SVGElement | undefined) {
-		target && this.setAttribute('clip-path', target.letId());
 	}
 
 	get hrefElement() {
 		const id = this.getAttributeNS('http://www.w3.org/1999/xlink', 'href') || this.getAttribute('href');
 		if (id) {
-			const h = id.indexOf('#');
-			return this.ownerDocument?.getElementById(h < 0 ? id : id.substr(h + 1)) as SVGElement;
+			return this.ownerDocument?.getElementById(id.substr(id.indexOf('#') + 1)) as SVGElement;
 		}
 		return null;
 	}
 
 	set hrefElement(target: SVGElement | null) {
-		target && this.setAttributeNS('http://www.w3.org/1999/xlink', 'href', target.letId());
+		target && this.setAttributeNS('http://www.w3.org/1999/xlink', 'href', `#${target.letId()}`);
 	}
 
 	canRender() {
@@ -194,62 +177,6 @@ export class SVGGraphicsElement extends SVGElement {
 			return false;
 		}
 		return true;
-	}
-
-	refElement() {
-		throw new Error('Depreciated');
-		return this.hrefElement;
-		// const id = this.getAttributeNS('http://www.w3.org/1999/xlink', 'href') || this.getAttribute('href');
-		// if (id) {
-		// 	const h = id.indexOf('#');
-		// 	return this.ownerDocument?.getElementById(h < 0 ? id : id.substr(h + 1));
-		// }
-	}
-
-	composedTransform(): Matrix {
-		throw new Error('Depreciated');
-		// depreciated
-		return this.myCTM();
-	}
-
-	myCTM(): Matrix {
-		const { parentNode: parent, ownTM } = this;
-		if (parent) {
-			// https://svgwg.org/svg2-draft/coords.html#ComputingAViewportsTransform
-			if (parent instanceof SVGSVGElement) {
-				// return parent
-				// 	.viewportTM()
-				// 	.multiply(parent.myCTM())
-				// 	.multiply(ownTM);
-				// return parent
-				// 	.myCTM()
-				// 	.multiply(parent.viewportTM())
-				// 	.multiply(ownTM)
-				if (parent.viewportElement) {
-					const p = parent.parentCTM();
-					const t = parent.ownTM;
-					const v = parent.viewportTM();
-					return p.multiply(t.postMultiply(v)).multiply(ownTM);
-					// (pp * (pv * pt)) * M
-					// return ownTM.postMultiply(t).postMultiply(v).postMultiply(p);
-				}
-			} else if (parent instanceof SVGGraphicsElement) {
-				return parent.myCTM().multiply(ownTM);
-			}
-		}
-		throw new Error('Depreciated');
-		return ownTM;
-	}
-
-	parentCTM(): Matrix {
-		const { parentNode: parent } = this;
-		if (parent) {
-			if (parent instanceof SVGGraphicsElement) {
-				return parent.rootTM;
-			}
-		}
-		throw new Error('Depreciated');
-		return Matrix.identity();
 	}
 
 	get innerTM(): Matrix {
@@ -285,56 +212,28 @@ export class SVGGraphicsElement extends SVGElement {
 	}
 
 	//
-	shapeBox(T?: Matrix | boolean): Box {
-		// if (this.canRender()) {
-		const E = T === true ? this.rootTM : T ? T.multiply(this.ownTM) : this.ownTM;
-		let box = Box.new();
-		for (const sub of this.children) {
-			if (sub instanceof SVGGraphicsElement && sub.canRender()) {
-				box = box.merge(sub.boundingBox(E));
-			}
-		}
-		return box;
-		// }
-		// return Box.not();
+	shapeBox(T?: Matrix): Box {
+		return this._shapeBox(T);
 	}
 
-	boundingBox(M?: Matrix | boolean): Box {
-		const { clip } = this;
-		if (clip) {
-			if (M === true) {
-				return this.shapeBox(true).overlap(clip.boundingBox(this.myCTM()));
-			} else {
-				return this.shapeBox(M).overlap(clip.boundingBox(M));
-			}
-		} else {
-			return this.shapeBox(M);
-		}
+	boundingBox(T?: Matrix): Box {
+		return this._boundingBox(T);
 	}
 	getBBox() {
-		// const box = this.shapeBox(true);
 		const box = this.objectBBox();
 		return box.isValid() ? box : Box.empty();
 	}
 	fuseTransform(parentT?: Matrix) {
-		const a = this.getAttributeNode('transform');
-		if (parentT) {
-			if (a) {
-				parentT = parentT.multiply(Matrix.parse(a.value));
-			}
-		} else if (a) {
-			parentT = Matrix.parse(a.value);
-		}
+		let tm = parentT ? this.ownTM.postMultiply(parentT) : this.ownTM;
 		for (const sub of this.children) {
 			if (sub instanceof SVGGraphicsElement) {
-				sub.fuseTransform(parentT);
+				sub.fuseTransform(tm);
 			}
 		}
-		a && this.removeAttributeNode(a);
+		this.removeAttribute('transform');
 	}
 	/////
-	// ourTM?
-	descendantTM(node: SVGGraphicsElement): Matrix {
+	_descendantTM(node: SVGGraphicsElement): Matrix {
 		return node.composeTM(this);
 	}
 
@@ -428,8 +327,8 @@ export class SVGSVGElement extends SVGGraphicsElement {
 		// console.log(`translate(${tx} ${ty}) scale(${sx} ${sy})`);
 		// return Matrix.parse(`translate(${tx} ${ty}) scale(${sx} ${sy})`);
 	}
-	shapeBox(T?: Matrix | boolean): Box {
-		return shapeBoxVP(this, T);
+	shapeBox(T?: Matrix): Box {
+		return this._shapeBox(T);
 	}
 	_shapeBox(tm?: Matrix): Box {
 		return this._viewportBox(tm);
@@ -438,35 +337,20 @@ export class SVGSVGElement extends SVGGraphicsElement {
 	defs() {
 		let { ownerDocument, children } = this;
 		if (ownerDocument) {
-			for (const sub of children) {
+			for (const sub of this.children) {
 				if (sub.localName == 'defs') {
 					return sub;
 				}
 			}
 			const defs = ownerDocument.createElement('defs');
-			return defs;
+			this.insertAdjacentElement('afterbegin', defs);
+			return defs; // avoids error "Object is possibly 'null'"
+
 		}
 		throw new Error(`No ownerDocument`);
 	}
 }
-export function shapeBoxVP(node: SVGGraphicsElement, T?: Matrix | boolean): Box {
-	const width = node.width.baseVal.value;
-	const height = node.height.baseVal.value;
-	const x = node.x.baseVal.value;
-	const y = node.y.baseVal.value;
-	if (width && height) {
-		let b = Box.new(x, y, width, height);
-		if (T === true) {
-			b = b.transform(node.rootTM);
-		} else if (T) {
-			b = b.transform(T);
-		} else {
-			b = b.transform(node.ownTM);
-		}
-		return b;
-	}
-	return Box.not();
-}
+
 import { Element } from '../element.js';
 import { userUnit, SVGLength, SVGLengthAttr, SVGLengthHAttr, SVGLengthWAttr } from './length.js';
 import { SVGRectAttr } from './rect.js';

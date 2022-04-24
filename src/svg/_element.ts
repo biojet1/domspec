@@ -224,20 +224,13 @@ export class SVGGraphicsElement extends SVGElement {
 		return box.isValid() ? box : Box.empty();
 	}
 	fuseTransform(parentT?: Matrix) {
-		const a = this.getAttributeNode('transform');
-		if (parentT) {
-			if (a) {
-				parentT = parentT.multiply(Matrix.parse(a.value));
-			}
-		} else if (a) {
-			parentT = Matrix.parse(a.value);
-		}
+		let tm = parentT ? this.ownTM.postMultiply(parentT) : this.ownTM;
 		for (const sub of this.children) {
 			if (sub instanceof SVGGraphicsElement) {
-				sub.fuseTransform(parentT);
+				sub.fuseTransform(tm);
 			}
 		}
-		a && this.removeAttributeNode(a);
+		this.removeAttribute("transform");
 	}
 	/////
 	_descendantTM(node: SVGGraphicsElement): Matrix {

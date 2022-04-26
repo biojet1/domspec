@@ -335,7 +335,6 @@ export class SVGLengthAttr extends Attr {
 		if (_var instanceof SVGLength) {
 			return _var.value;
 		} else if (_var != undefined) {
-
 		}
 	}
 }
@@ -357,16 +356,12 @@ export class SVGLengthW extends SVGLength {
 			const v = e.nearestViewportElement as SVGGraphicsElement;
 			if (v) {
 				return v.viewBox.calcWidth();
-				// const n = v.viewBox.calcWidth();
-				// // const n = v.width.baseVal.value;
-				// // const [p] = v.splitTM();
-				// // const scale = p.multiply(v.innerTM).a;
-				// // const scale = v.innerTM.a;
-				// const scale = v.innerTM.a;
-				// return n * scale;
+			}
+			if (e instanceof SVGSVGElement) {
+				return 100; // https://svgwg.org/svg2-draft/geometry.html#Sizing
 			}
 		}
-		return 100;
+		return 0;
 	}
 }
 
@@ -377,14 +372,12 @@ export class SVGLengthH extends SVGLength {
 			const v = e.nearestViewportElement as SVGGraphicsElement;
 			if (v) {
 				return v.viewBox.calcHeight();
-				// const n = v.viewBox.calcHeight();
-				// const n = v.height.baseVal.value;
-				// const scale = v.splitTM()[0].multiply(v.innerTM).a;
-				// const scale = v.innerTM.d;
-				// return n * scale;
+			}
+			if (e instanceof SVGSVGElement) {
+				return 100;
 			}
 		}
-		return 100;
+		return 0;
 	}
 }
 
@@ -438,4 +431,4 @@ export class SVGLengthYAttr extends SVGLengthAttr {
 
 import { DOMException } from '../event-target.js';
 import { Attr } from '../attr.js';
-import { SVGGraphicsElement } from './_element.js';
+import { SVGGraphicsElement, SVGSVGElement } from './_element.js';

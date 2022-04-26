@@ -7,8 +7,8 @@ import { SVGLength } from '../dist/svg/element.js';
 import { Path, Box } from 'svggeom';
 
 const parser = new DOMParser();
-function closeEnough(t, a, b, threshold = 1e-6) {
-	t.ok(Math.abs(b - a) <= threshold, `${a} ${b} ${threshold}`);
+function closeEnough(t, a, b, threshold = 1e-6, tag) {
+	t.ok(Math.abs(b - a) <= threshold, `${tag} ${a} ${b} ${threshold}`);
 }
 function eqBox(t, a, b, epsilon = 0, tag) {
 	t.ok(a.equals(b, epsilon), `${tag} [${a}] vs [${b}]`);
@@ -49,20 +49,47 @@ tap.test('Use+Symbol', function (t) {
 
 	// // t.same(R1._shapeBox().toArray(), [200, 175, 50, 40]);
 	// // t.same(R3._shapeBox().toArray(), [250, 175, 50, 40]);
+	[
+		['C4', 0, 150, 192],
+		['C1', 35.355342864990234, 150, 70],
+		['C2', 40, 55, 70],
+		['C3', 4.527692794799805, 5, 4],
+		['C5', 5, 5, 5],
+	].forEach(([id, r, cx, cy]) => {
+		const v = document.getElementById(id);
+		closeEnough(t, v.r.baseVal.value, r, 1e-4, `${id} r`);
+		closeEnough(t, v.cx.baseVal.value, cx, 1e-6, `${id} cy`);
+		closeEnough(t, v.cy.baseVal.value, cy, 1e-6, `${id} cy`);
+	});
+
+	[
+		['V1', 200, 0, 100, 400],
+		['R1', 0, 0, 5, 4],
+		['R3', 5, 0, 5, 4],
+		['R4', 0, 4, 5, 4],
+		['V2', 0, 200, 300, 100],
+	].forEach(([id, x, y, w, h]) => {
+		const v = document.getElementById(id);
+		closeEnough(t, v.x.baseVal.value, x, 1e-4, `${id} x`);
+		closeEnough(t, v.y.baseVal.value, y, 1e-6, `${id} y`);
+		closeEnough(t, v.width.baseVal.value, w, 1e-6, `${id} width`);
+		closeEnough(t, v.height.baseVal.value, h, 1e-6, `${id} height`);
+	});
 
 	[
 		// ['C4', 0, 0, 0, 0],
-		// ['C1', 114.61666870117188, 34.633331298828125, 70.76666259765625, 70.75],
-		// ['C2', 15, 30, 80, 80],
-		// ['V1', 200, 0, 100, 400],
-		// ['C3', 204.6666717529297, 154.6666717529297, 90.66665649414062, 90.66665649414062],
+		['C1', 114.61666870117188, 34.633331298828125, 70.76666259765625, 70.75],
+		['C2', 15, 30, 80, 80],
+		['V1', 200, 0, 100, 400],
+		['C3', 204.6666717529297, 154.6666717529297, 90.66665649414062, 90.66665649414062],
 		['R1', 200, 160, 50, 40],
 		['R3', 250, 160, 50, 40],
 		['R4', 200, 200, 50, 40],
+		['V2', 0, 200, 300, 100],
 	].forEach(([id, x, y, w, h]) => {
 		const v = document.getElementById(id);
 		const b = Box.new(x, y, w, h);
-		eqBox(t, b, v._shapeBox(), 1e-9, id);
+		eqBox(t, b, v._shapeBox(), x - ~~x === 0 ? 1e-9 : 1, id);
 	});
 
 	t.end();
@@ -73,5 +100,17 @@ if (0) {
 		const r = v.getBoundingClientRect();
 		v.setAttribute('bcr', `${r.x},${r.y} ${r.width}x${r.height}`);
 		return [v.id, r.x, r.y, r.width, r.height];
+	});
+	Array.from(document.documentElement.querySelectorAll(`circle[id]`)).map((v) => {
+		const r = v.getBoundingClientRect();
+		const a = [v.r.baseVal.value, v.cx.baseVal.value, v.cy.baseVal.value];
+		v.setAttribute('geom', `${a[0]} ${a[1]},${a[2]}`);
+		return [v.id, ...a];
+	});
+	Array.from(document.documentElement.querySelectorAll(`rect[id], svg[id]`)).map((v) => {
+		const r = v.getBoundingClientRect();
+		const a = [v.x.baseVal.value, v.y.baseVal.value, v.width.baseVal.value, v.height.baseVal.value];
+		v.setAttribute('geom', `${a[0]},${a[1]} ${a[2]}x${a[3]}`);
+		return [v.id, ...a];
 	});
 }

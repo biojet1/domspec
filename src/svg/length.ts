@@ -256,13 +256,16 @@ export class SVGLength {
 	getRelativeLength(): number {
 		const e = _getAssoc(this);
 		if (e) {
-			const g = e.nearestViewportElement as SVGGraphicsElement;
-			const w = g?.width.baseVal.value ?? 100;
-			const h = g?.height.baseVal.value ?? 100;
-			return Math.sqrt(w ** 2 + h ** 2) / Math.sqrt(2);
-		} else {
-			return 100;
+			const v = e.nearestViewportElement as SVGGraphicsElement;
+			if (v) {
+				const b = v.viewBox;
+				const w = b.calcWidth();
+				const h = b.calcHeight();
+				// return Math.sqrt(w ** 2 + h ** 2) / Math.sqrt(2);
+				return Math.sqrt((w ** 2 + h ** 2) / 2);
+			}
 		}
+		return 0;
 	}
 
 	static SVG_LENGTHTYPE_UNKNOWN = 0;

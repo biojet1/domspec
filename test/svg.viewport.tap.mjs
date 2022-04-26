@@ -68,6 +68,7 @@ tap.test('Use+Symbol', function (t) {
 		['R3', 5, 0, 5, 4],
 		['R4', 0, 4, 5, 4],
 		['V2', 0, 200, 300, 100],
+		['V3', 0, 0, 10, 10],
 	].forEach(([id, x, y, w, h]) => {
 		const v = document.getElementById(id);
 		closeEnough(t, v.x.baseVal.value, x, 1e-4, `${id} x`);

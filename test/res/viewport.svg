@@ -1,4 +1,4 @@
-<svg id="V0" viewBox="0 0 300 400" width="300" height="400" xmlns="http://www.w3.org/2000/svg" >
+<svg id="V0" width="300" height="400" xmlns="http://www.w3.org/2000/svg" >
   <rect rx="20" x="0" y="0" width="300" height="400" />
   <circle id="C4" cx="150" cy="5.08cm" fill="blue"/>
   <circle id="C1" cx="150" cy="70" r="10%" fill="green"/>
@@ -15,6 +15,9 @@
   </svg>
   <svg id="V2" viewBox="0 0 10 10" y="200" height="100">
     <circle id="C5" cx="50%" cy="50%" r="50%" fill="orange" />
+  <svg id="V3">
+    <line id="L1" x1="0%" y1="25%" x2="50%" x3="75%" fill="orange" />
 
+  </svg>
   </svg>
 </svg>

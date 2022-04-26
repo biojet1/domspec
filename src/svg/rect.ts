@@ -81,6 +81,10 @@ export class SVGRectAttr extends Attr {
 		}
 		const o = this.ownerElement as SVGGraphicsElement;
 		if (o) {
+			const a = o.width;
+			if (a.specified) {
+				return a.baseVal.value;
+			}
 			const v = o.nearestViewportElement as SVGSVGElement;
 			if (v) {
 				const n = v.viewBox.calcWidth();
@@ -89,7 +93,7 @@ export class SVGRectAttr extends Attr {
 			}
 		}
 
-		throw new Error(`calcWidth`);
+		// throw new Error(`calcWidth`);
 		return 100;
 	}
 	calcHeight(): number {
@@ -106,6 +110,11 @@ export class SVGRectAttr extends Attr {
 		}
 		const o = this.ownerElement as SVGGraphicsElement;
 		if (o) {
+			const a = o.height;
+			if (a.specified) {
+				return a.baseVal.value;
+			}
+
 			const v = o.nearestViewportElement as SVGSVGElement;
 			if (v) {
 				const n = v.viewBox.calcHeight();
@@ -114,7 +123,7 @@ export class SVGRectAttr extends Attr {
 			}
 		}
 
-		throw new Error(`calcWidth`);
+		// throw new Error(`calcWidth`);
 		return 100;
 	}
 }

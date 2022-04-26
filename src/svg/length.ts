@@ -360,9 +360,7 @@ export class SVGLengthW extends SVGLength {
 			if (v) {
 				return v.viewBox.calcWidth();
 			}
-			if (e instanceof SVGSVGElement) {
-				return 100; // https://svgwg.org/svg2-draft/geometry.html#Sizing
-			}
+			// https://svgwg.org/svg2-draft/geometry.html#Sizing
 		}
 		return 0;
 	}
@@ -375,9 +373,6 @@ export class SVGLengthH extends SVGLength {
 			const v = e.nearestViewportElement as SVGGraphicsElement;
 			if (v) {
 				return v.viewBox.calcHeight();
-			}
-			if (e instanceof SVGSVGElement) {
-				return 100;
 			}
 		}
 		return 0;

@@ -48,11 +48,20 @@ export class SVGGraphicsElement extends SVGElement {
 		switch (name) {
 			case 'r':
 				return new SVGLengthAttr(name);
+			case 'width':
+				if (this instanceof SVGSVGElement) {
+					return new SVGLengthWAttr(name);
+				} // fall
+
 			case 'x':
 			case 'cx':
 			case 'x1':
 			case 'x2':
 				return new SVGLengthXAttr(name);
+			case 'height':
+				if (this instanceof SVGSVGElement) {
+					return new SVGLengthHAttr(name);
+				} // fall
 			case 'y':
 			case 'cy':
 			case 'y1':
@@ -60,12 +69,8 @@ export class SVGGraphicsElement extends SVGElement {
 				return new SVGLengthYAttr(name);
 			case 'rx':
 			case 'ry':
-			// TODO
+				// TODO
 				return new SVGLengthAttr(name);
-			case 'width':
-				return new SVGLengthWAttr(name);
-			case 'height':
-				return new SVGLengthHAttr(name);
 			case 'viewBox':
 				return new SVGRectAttr(name);
 			// return new SVGLengthListAttr(name);
@@ -294,12 +299,10 @@ export class SVGGraphicsElement extends SVGElement {
 		return Box.not();
 	}
 	calcWidth() {
-		const w = this.getAttribute("width");
-		if(w){
-
+		const w = this.getAttribute('width');
+		if (w) {
 		}
 	}
-	
 }
 export class SVGSVGElement extends SVGGraphicsElement {
 	static TAGS = ['svg'];
@@ -310,7 +313,6 @@ export class SVGSVGElement extends SVGGraphicsElement {
 		// return this.viewportTM().multiply(this.ownTM);
 		return this.ownTM.multiply(this.viewportTM());
 	}
-
 
 	viewportTM() {
 		const w = this.width.baseVal.value;
@@ -359,7 +361,15 @@ export class SVGSVGElement extends SVGGraphicsElement {
 }
 
 import { Element } from '../element.js';
-import { userUnit, SVGLength, SVGLengthAttr, SVGLengthHAttr, SVGLengthWAttr, SVGLengthXAttr, SVGLengthYAttr } from './length.js';
+import {
+	userUnit,
+	SVGLength,
+	SVGLengthAttr,
+	SVGLengthHAttr,
+	SVGLengthWAttr,
+	SVGLengthXAttr,
+	SVGLengthYAttr,
+} from './length.js';
 import { SVGRectAttr } from './rect.js';
 import { SVGLengthListAttr, SVGLengthList } from './length-list.js';
 import { SVGTransformListAttr, SVGTransform, viewbox_transform } from './attr-transform.js';

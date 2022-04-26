@@ -14,7 +14,7 @@ function eqBox(t, a, b, epsilon = 0, tag) {
 	t.ok(a.equals(b, epsilon), `${tag} [${a}] vs [${b}]`);
 }
 
-tap.test('Use+Symbol', function (t) {
+tap.test('Geoms 1', function (t) {
 	const document = parser.parseFromString(fs.readFileSync('test/res/viewport.svg', { encoding: 'utf-8' }));
 	const svg = document.documentElement;
 	const V1 = document.getElementById('V1');
@@ -91,6 +91,24 @@ tap.test('Use+Symbol', function (t) {
 		const v = document.getElementById(id);
 		const b = Box.new(x, y, w, h);
 		eqBox(t, b, v._shapeBox(), x - ~~x === 0 ? 1e-9 : 1, id);
+	});
+
+	t.end();
+});
+tap.test('Geoms 2', function (t) {
+	const document = parser.parseFromString(fs.readFileSync('test/res/viewport2.svg', { encoding: 'utf-8' }));
+	const svg = document.documentElement;
+	[
+		['R0', 0, 0, 0, 0],
+		['V1', 0, 0, 80, 400],
+		['V2', 99, 0, 80, 400],
+		['V3', 0, 132, 80, 400],
+	].forEach(([id, x, y, w, h]) => {
+		const v = document.getElementById(id);
+		closeEnough(t, v.x.baseVal.value, x, 1e-4, `${id} x`);
+		closeEnough(t, v.y.baseVal.value, y, 1e-6, `${id} y`);
+		closeEnough(t, v.width.baseVal.value, w, 1e-6, `${id} width`);
+		closeEnough(t, v.height.baseVal.value, h, 1e-6, `${id} height`);
 	});
 
 	t.end();

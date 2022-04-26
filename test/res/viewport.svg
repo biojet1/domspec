@@ -1,4 +1,4 @@
-<svg id="V0" width="300" height="400" xmlns="http://www.w3.org/2000/svg" >
+<svg id="V0" viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg" >
   <rect rx="20" x="0" y="0" width="300" height="400" />
   <circle id="C4" cx="150" cy="5.08cm" fill="blue"/>
   <circle id="C1" cx="150" cy="70" r="10%" fill="green"/>

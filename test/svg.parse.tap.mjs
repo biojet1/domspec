@@ -79,7 +79,7 @@ tap.test('SVG getPointAtLength getTotalLength', function (t) {
 	const PG1 = doc.getElementById('PG1');
 	PL1.fuseTransform();
 	svg.fuseTransform();
-	console.log(svg.outerHTML);
+	// console.log(svg.outerHTML);
 	t.same(PL1.getAttribute('points'), '-300,400 -400,400');
 	t.same(Path.parse(PL1.toPathElement().getAttribute('d')).toString(), Path.parse('M-300,400L-400,400').toString());
 	t.same(Path.parse(PG1.toPathElement().getAttribute('d')).toString(), Path.parse('M400,300L300,300Z').toString());

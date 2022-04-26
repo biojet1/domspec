@@ -47,16 +47,20 @@ export class SVGGraphicsElement extends SVGElement {
 		// console.log("newAttributeNode", name);
 		switch (name) {
 			case 'r':
+				return new SVGLengthAttr(name);
 			case 'x':
-			case 'y':
-			case 'rx':
-			case 'ry':
 			case 'cx':
-			case 'cy':
 			case 'x1':
 			case 'x2':
+				return new SVGLengthXAttr(name);
+			case 'y':
+			case 'cy':
 			case 'y1':
 			case 'y2':
+				return new SVGLengthYAttr(name);
+			case 'rx':
+			case 'ry':
+			// TODO
 				return new SVGLengthAttr(name);
 			case 'width':
 				return new SVGLengthWAttr(name);
@@ -230,7 +234,7 @@ export class SVGGraphicsElement extends SVGElement {
 				sub.fuseTransform(tm);
 			}
 		}
-		this.removeAttribute("transform");
+		this.removeAttribute('transform');
 	}
 	/////
 	_descendantTM(node: SVGGraphicsElement): Matrix {
@@ -289,6 +293,13 @@ export class SVGGraphicsElement extends SVGElement {
 		}
 		return Box.not();
 	}
+	calcWidth() {
+		const w = this.getAttribute("width");
+		if(w){
+
+		}
+	}
+	
 }
 export class SVGSVGElement extends SVGGraphicsElement {
 	static TAGS = ['svg'];
@@ -299,6 +310,7 @@ export class SVGSVGElement extends SVGGraphicsElement {
 		// return this.viewportTM().multiply(this.ownTM);
 		return this.ownTM.multiply(this.viewportTM());
 	}
+
 
 	viewportTM() {
 		const w = this.width.baseVal.value;
@@ -321,11 +333,7 @@ export class SVGSVGElement extends SVGGraphicsElement {
 			return Matrix.identity();
 		}
 		const [tx, ty, sx, sy] = viewbox_transform(x, y, w, h, vx, vy, vw, vh, this.getAttribute('preserveAspectRatio'));
-		// return Matrix.identity();
-		// return Matrix.scale(sx, sy).translate(tx, ty);
 		return Matrix.translate(tx, ty).scale(sx, sy);
-		// console.log(`translate(${tx} ${ty}) scale(${sx} ${sy})`);
-		// return Matrix.parse(`translate(${tx} ${ty}) scale(${sx} ${sy})`);
 	}
 	shapeBox(T?: Matrix): Box {
 		return this._shapeBox(T);
@@ -342,14 +350,16 @@ export class SVGSVGElement extends SVGGraphicsElement {
 					return sub;
 				}
 			}
-			return this.insertAdjacentElement('afterbegin', ownerDocument.createElement('defs'));
+			const defs = ownerDocument.createElement('defs');
+			this.insertAdjacentElement('afterbegin', defs);
+			return defs; // avoids error "Object is possibly 'null'"
 		}
 		throw new Error(`No ownerDocument`);
 	}
 }
 
 import { Element } from '../element.js';
-import { userUnit, SVGLength, SVGLengthAttr, SVGLengthHAttr, SVGLengthWAttr } from './length.js';
+import { userUnit, SVGLength, SVGLengthAttr, SVGLengthHAttr, SVGLengthWAttr, SVGLengthXAttr, SVGLengthYAttr } from './length.js';
 import { SVGRectAttr } from './rect.js';
 import { SVGLengthListAttr, SVGLengthList } from './length-list.js';
 import { SVGTransformListAttr, SVGTransform, viewbox_transform } from './attr-transform.js';

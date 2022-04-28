@@ -1,0 +1,12 @@
+<svg id="V0" width="300" height="400" xmlns="http://www.w3.org/2000/svg" >
+  <rect id="R0"/>
+  <circle id="C0"/>
+  <svg id="V4">
+  </svg>
+  <svg id="V1" width="80">
+  </svg>
+  <svg id="V2" x="33%" width="80">
+  </svg>
+  <svg id="V3" y="33%" width="80">
+  </svg>
+</svg>

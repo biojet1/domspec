@@ -25,7 +25,7 @@ export class SVGRectAttr extends Attr {
 			const { x, y, width, height } = _var;
 			return `${x} ${y} ${width} ${height}`;
 		}
-		return _var || "";
+		return _var || '';
 	}
 
 	get baseVal() {
@@ -41,6 +41,10 @@ export class SVGRectAttr extends Attr {
 		}
 	}
 
+	get specified() {
+		return this._var != undefined;
+	}
+
 	valueOf() {
 		const { _var } = this;
 		if (_var instanceof BoxMut) {
@@ -51,46 +55,138 @@ export class SVGRectAttr extends Attr {
 		}
 	}
 
-	contain(
-		...args: Array<
-			| SVGGraphicsElement
-			| Box
-			| Point
-			| Ray
-			| Array<SVGGraphicsElement | Box | Point | Ray>
-		>
-	) {
+	contain(...args: Array<SVGGraphicsElement | Box | Point | Ray | Array<SVGGraphicsElement | Box | Point | Ray>>) {
 		let bbox = contain(args);
 		const { _var } = this;
 		if (_var instanceof BoxMut) {
 			_var.copy(bbox);
 		} else {
-			this._var = bbox;
+			this._var = BoxMut.new(bbox) as BoxMut;
 		}
 		return this;
 	}
 
-	// calcWidth(){
-	// 	// https://svgwg.org/svg-next/coords.html#Units
-	// 	if (_var instanceof BoxMut) {
-	// 		return _var.width;
-	// 	} else {
-	// 		const {ownerElement} = this;
-	// 		ownerElement
-	// 		return _var?.toString();
-	// 	}
-	// }
+	contain2(...args: Array<SVGGraphicsElement | Box | Point | Ray | Array<SVGGraphicsElement | Box | Point | Ray>>) {
+		let bbox = contain(args);
+		const o = this.ownerElement as SVGGraphicsElement;
+		if (o) {
+			if (o.nearestViewportElement) {
+				const [p, m] = o.splitTM();
+				bbox = bbox.transform(p.multiply(o.innerTM).inverse());
+			}
+		}
+		const { _var } = this;
+		if (_var instanceof BoxMut) {
+			_var.copy(bbox);
+		} else {
+			this._var = BoxMut.new(bbox) as BoxMut;
+		}
+		return this;
+	}
+	// https://svgwg.org/svg-next/coords.html#Units
+	calcWidth(): number {
+		const { _var } = this;
+		if (_var instanceof BoxMut) {
+			return _var.width;
+		} else if (_var) {
+			try {
+				this._var = BoxMut.parse(_var) as BoxMut;
+				return this._var.width;
+			} catch (err) {
+				//pass
+			}
+		}
+		const o = this.ownerElement as SVGGraphicsElement;
+		if (o) {
+			const a = o.width;
+			if (a.specified) {
+				return a.baseVal.value;
+			}
+			const v = o.nearestViewportElement as SVGSVGElement;
+			if (v) {
+				const n = v.viewBox.calcWidth();
+				const scale = v.innerTM.inverse().d;
+				return n * scale;
+			}
+		}
+
+		// throw new Error(`calcWidth`);
+		return 100;
+	}
+	calcHeight(): number {
+		const { _var } = this;
+		if (_var instanceof BoxMut) {
+			return _var.height;
+		} else if (_var) {
+			try {
+				this._var = BoxMut.parse(_var) as BoxMut;
+				return this._var.height;
+			} catch (err) {
+				//pass
+			}
+		}
+		const o = this.ownerElement as SVGGraphicsElement;
+		if (o) {
+			const a = o.height;
+			if (a.specified) {
+				return a.baseVal.value;
+			}
+
+			const v = o.nearestViewportElement as SVGSVGElement;
+			if (v) {
+				const n = v.viewBox.calcHeight();
+				const scale = v.innerTM.inverse().d;
+				return n * scale;
+			}
+		}
+
+		// throw new Error(`calcWidth`);
+		return 100;
+	}
+	calcBox(): Box {
+		const { _var } = this;
+		if (_var instanceof BoxMut) {
+			return _var;
+		} else if (_var) {
+			try {
+				return (this._var = BoxMut.parse(_var) as BoxMut);
+			} catch (err) {
+				//pass
+			}
+		}
+		let x = 0,
+			y = 0,
+			w = 100,
+			h = 100;
+		const o = this.ownerElement as SVGGraphicsElement;
+		if (o) {
+			let a;
+			x = o.x.baseVal.value;
+			y = o.y.baseVal.value;
+			a = o.height;
+			if (a.specified) {
+				h = a.baseVal.value;
+			} else {
+				const v = o.nearestViewportElement as SVGSVGElement;
+				if (v) {
+					h = v.viewBox.calcHeight();
+				}
+			}
+			a = o.width;
+			if (a.specified) {
+				w = a.baseVal.value;
+			} else {
+				const v = o.nearestViewportElement as SVGSVGElement;
+				if (v) {
+					w = v.viewBox.calcWidth();
+				}
+			}
+		}
+		return Box.forRect(x, y, w, h);
+	}
 }
 
-function contain(
-	args: Array<
-		| SVGGraphicsElement
-		| Box
-		| Point
-		| Ray
-		| Array<SVGGraphicsElement | Box | Point | Ray>
-	>
-) {
+function contain(args: Array<SVGGraphicsElement | Box | Point | Ray | Array<SVGGraphicsElement | Box | Point | Ray>>) : Box{
 	let bbox = BoxMut.new() as BoxMut;
 	for (const v of args) {
 		if (v instanceof Array) {
@@ -112,6 +208,7 @@ function contain(
 	return bbox;
 }
 
-import { BoxMut, Box, Point, Ray } from "svggeom";
-import { Attr } from "../attr.js";
-import { SVGGraphicsElement } from "./element.js";
+import { BoxMut, Box, Point, Ray } from 'svggeom';
+import { Attr } from '../attr.js';
+import { SVGGraphicsElement } from './element.js';
+import { SVGSVGElement } from './_element.js';

@@ -221,8 +221,8 @@ export class SVGTransform extends MatrixMut {
 	static translate(x = 0, y = 0) {
 		return new SVGTransform([1, 0, 0, 1, x, y]);
 	}
-	static scale(sx: number, sy: number = 0) {
-		return new SVGTransform([sx, 0, 0, sy, 0, 0]);
+	static scale(sx: number, sy?: number) {
+		return new SVGTransform([sx, 0, 0, sy ?? sx, 0, 0]);
 	}
 	static rotate(ang: number, x: number = 0, y: number = 0) {
 		const θ = ((ang % 360) * PI) / 180;
@@ -289,6 +289,10 @@ export class SVGTransformListAttr extends Attr {
 		}
 	}
 
+	get specified() {
+		return this._var != undefined;
+	}
+
 	valueOf() {
 		const { _var } = this;
 		if (_var instanceof SVGTransformList) {
@@ -301,7 +305,7 @@ export class SVGTransformListAttr extends Attr {
 		}
 	}
 }
-const { tan, cos, sin, PI } = Math;
+const { tan, cos, sin, PI, min, max } = Math;
 const radians = function (d: number) {
 	return ((d % 360) * PI) / 180;
 };
@@ -328,10 +332,10 @@ export function viewbox_transform(
 	let scale_y = e_height / vb_height;
 	// If align is not 'none' and meetOrSlice is 'meet', set the larger of scale-x and scale-y to the smaller.
 	if (align != 'none' && meet_or_slice == 'meet') {
-		scale_x = scale_y = Math.min(scale_x, scale_y);
+		scale_x = scale_y = min(scale_x, scale_y);
 	} else if (align != 'none' && meet_or_slice == 'slice') {
 		// Otherwise, if align is not 'none' and v is 'slice', set the smaller of scale-x and scale-y to the larger
-		scale_x = scale_y = Math.max(scale_x, scale_y);
+		scale_x = scale_y = max(scale_x, scale_y);
 	}
 	// Initialize translate-x to e-x - (vb-x * scale-x).
 	let translate_x = e_x - vb_x * scale_x;

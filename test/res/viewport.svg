@@ -1,8 +1,25 @@
-<svg viewBox="0 0 300 400" width="300" height="400" xmlns="http://www.w3.org/2000/svg" stroke="red" fill="grey">
+<svg id="V0" viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg" >
   <rect rx="20" x="0" y="0" width="300" height="400" />
-  <circle cx="150" cy="200" r="50%" />
-  <circle cx="150" cy="200" r="176" />
-  <svg viewBox="0 0 10 5" x="200" width="100">
-    <circle cx="50%" cy="50%" r="50%" />
+  <circle id="C4" cx="150" cy="5.08cm" fill="blue"/>
+  <circle id="C1" cx="150" cy="70" r="10%" fill="green"/>
+  <circle id="C2" cx="55" cy="70" r="40" fill="yellow" />
+
+  <svg id="V1" viewBox="0 0 10 8" x="200" width="100">
+   <rect  x="0" y="0" width="100%" height="100%" fill="grey" />
+    <circle id="C3" cx="50%" cy="50%" r="50%" fill="orange" />
+
+   <rect id="R1" rx="1" x="0%" y="0" width="5" height="50%" fill="cyan" />
+   <rect id="R3" rx="1" x="50%" width="5" height="50%" fill="magenta" />
+   <rect id="R4" rx="1" x="??" y="50%" width="5" height="50%" fill="orangered" />
+
   </svg>
+  <svg id="V2" viewBox="0 0 10 10" y="200" height="100">
+    <circle id="C5" cx="50%" cy="50%" r="50%" fill="orange" />
+  <svg id="V3">
+    <line id="L1" x1="0%" y1="25%" x2="50%" x3="75%" fill="orange" />
+
+  </svg>
+  </svg>
+  <rect id="R5" x="200" y="160" width="50" height="40" style="fill:#81b4fe;stroke:none;opacity:0.51361244"/>
+
 </svg>

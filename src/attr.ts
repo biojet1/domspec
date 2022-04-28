@@ -73,25 +73,14 @@ export abstract class Attr extends Node {
 
 		return attr;
 	}
-
 	isEqualNode(node: Node) {
 		if (this === node) {
 			return true;
 		} else if (!node || this.nodeType !== node.nodeType) {
 			return false;
 		}
-		let {
-			namespaceURI: nsB,
-			prefix: prefixB,
-			localName: localB,
-			value: valB,
-		} = node as Attr;
-		let {
-			namespaceURI: nsA,
-			prefix: prefixA,
-			localName: localA,
-			value: valA,
-		} = this;
+		let { namespaceURI: nsB, prefix: prefixB, localName: localB, value: valB } = node as Attr;
+		let { namespaceURI: nsA, prefix: prefixA, localName: localA, value: valA } = this;
 		return (
 			localA === localB &&
 			// (localA ? localA === localB : !localB) &&
@@ -109,7 +98,7 @@ export class StringAttr extends Attr {
 		return this[VALUE] ?? null;
 	}
 	get value() {
-		return this[VALUE] || "";
+		return this[VALUE] || '';
 	}
 	set value(value: string) {
 		this[VALUE] = value;
@@ -125,7 +114,7 @@ export class TypedAttr<T extends Typed> extends Attr {
 	[VALUE]?: T | string;
 	get value() {
 		const { [VALUE]: val } = this;
-		return val ? val.toString() : "";
+		return val ? val.toString() : '';
 	}
 	set value(value: string) {
 		this[VALUE] = value;
@@ -160,9 +149,9 @@ export class TypedAttr<T extends Typed> extends Attr {
 // 	return m;
 // };
 
-import { Node } from "./node.js";
-import { validateAndExtract } from "./namespace.js";
-import { Document } from "./document.js";
+import { Node } from './node.js';
+import { validateAndExtract } from './namespace.js';
+import { Document } from './document.js';
 // test/wpt/dom-nodes-Document-createAttribute.html.tap.mjs
 // test/wpt/dom-nodes-Document-importNode.html.tap.mjs
 // test/wpt/dom-nodes-Node-cloneNode.html.tap.mjs

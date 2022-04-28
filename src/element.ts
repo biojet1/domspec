@@ -1,5 +1,5 @@
-import { NEXT, PREV, END, Node } from "./node.js";
-import { ParentNode, EndNode } from "./parent-node.js";
+import { NEXT, PREV, END, Node } from './node.js';
+import { ParentNode, EndNode } from './parent-node.js';
 export const DATASET = Symbol();
 
 function* attributes(node: Element) {
@@ -63,19 +63,19 @@ export class Element extends ParentNode {
 	}
 
 	get id() {
-		return this.getAttribute("id") || "";
+		return this.getAttribute('id') || '';
 	}
 
 	set id(id: string) {
-		this.setAttribute("id", id);
+		this.setAttribute('id', id);
 	}
 
 	get className() {
-		return this.getAttribute("class") || "";
+		return this.getAttribute('class') || '';
 	}
 
 	set className(str: string) {
-		this.setAttribute("class", str);
+		this.setAttribute('class', str);
 	}
 
 	//// DOM: </specialGetters>
@@ -123,11 +123,7 @@ export class Element extends ParentNode {
 	newAttributeNode(name: string): Attr {
 		return new StringAttr(name);
 	}
-	newAttributeNodeNS(
-		nsu: string | null,
-		name: string,
-		localName: string
-	): Attr {
+	newAttributeNodeNS(nsu: string | null, name: string, localName: string): Attr {
 		return new StringAttr(name, localName);
 	}
 	letAttributeNode(name: string) {
@@ -141,8 +137,7 @@ export class Element extends ParentNode {
 		}
 		const node = this.newAttributeNode(name);
 		node.ownerDocument = ownerDocument;
-		const ref =
-			(attr && (attr instanceof Attr ? attr : attr[PREV])) || this;
+		const ref = (attr && (attr instanceof Attr ? attr : attr[PREV])) || this;
 		node._attach(ref, ref[NEXT] || this[END], this);
 		return node;
 	}
@@ -179,8 +174,7 @@ export class Element extends ParentNode {
 		node._ns = ns;
 		node._prefix = prefix;
 		node.ownerDocument = ownerDocument;
-		const ref =
-			(attr && (attr instanceof Attr ? attr : attr[PREV])) || this;
+		const ref = (attr && (attr instanceof Attr ? attr : attr[PREV])) || this;
 		node._attach(ref, ref[NEXT] || this[END], this);
 		return node;
 	}
@@ -192,16 +186,12 @@ export class Element extends ParentNode {
 	}
 	setAttributeNodeNS(node: Attr) {
 		const { parentNode } = node;
-		const prev = this.getAttributeNodeNS(
-			node.namespaceURI || null,
-			node.localName
-		);
+		const prev = this.getAttributeNodeNS(node.namespaceURI || null, node.localName);
 		if (node === prev) {
 			return node;
 		} else if (parentNode) {
 			throw DOMException.new(`InUseAttributeError`);
 		} else if (prev) {
-			// prev.insertLeft(node).remove();
 			const ref = prev[PREV] || this;
 			prev.remove();
 			node.remove();
@@ -209,13 +199,7 @@ export class Element extends ParentNode {
 		} else {
 			let attr = this[NEXT];
 			for (; attr && attr instanceof Attr; attr = attr[NEXT]);
-			// if (attr) {
-			// 	// node.remove().parentNode = this;
-			// 	// attr.insertLeft(node);
-
-			// }
-			const ref =
-				(attr && (attr instanceof Attr ? attr : attr[PREV])) || this;
+			const ref = (attr && (attr instanceof Attr ? attr : attr[PREV])) || this;
 			node.remove();
 			node._attach(ref, ref[NEXT] || this[END], this);
 		}
@@ -268,7 +252,7 @@ export class Element extends ParentNode {
 				return true;
 			}
 		} else if (force == true || force === undefined) {
-			this.setAttribute(name, "");
+			this.setAttribute(name, '');
 			return true;
 		}
 		return false;
@@ -286,33 +270,24 @@ export class Element extends ParentNode {
 	//// DOM: </Attributes>
 	// <selectors>
 	matches(selectors: string) {
-		const test = prepareMatch(this, selectors + "");
+		const test = prepareMatch(this, selectors + '');
 		return test(this);
 	}
 	closest(selectors: string) {
 		let cur: Element | null = this;
-
-		if (0) {
-			while (cur && !cur.matches(selectors)) {
-				cur = cur.parentElement;
-			}
-			return cur;
-		} else {
-			let test;
-
-			try {
-				test = prepareMatch(cur, selectors + "");
-			} catch {
-				return null;
-			}
-			do {
-				if (test(cur)) {
-					return cur;
-				}
-				cur = cur.parentElement;
-			} while (cur);
+		let test;
+		try {
+			test = prepareMatch(cur, selectors + '');
+		} catch {
 			return null;
 		}
+		do {
+			if (test(cur)) {
+				return cur;
+			}
+			cur = cur.parentElement;
+		} while (cur);
+		return null;
 	}
 	// </selectors>
 
@@ -327,17 +302,13 @@ export class Element extends ParentNode {
 	lookupNamespaceURI(prefix: string): string | null {
 		const { namespaceURI, prefix: this_prefix } = this;
 
-		if (namespaceURI && this_prefix ? this_prefix === prefix : !prefix)
-			return namespaceURI || null;
+		if (namespaceURI && this_prefix ? this_prefix === prefix : !prefix) return namespaceURI || null;
 
 		let attr = this[NEXT];
 		for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
 			if (attr.namespaceURI === XMLNS) {
 				const { prefix: prefixA, localName: localNameA } = attr;
-				if (
-					(prefixA === "xmlns" && localNameA === prefix) ||
-					(!prefix && !prefixA && localNameA === "xmlns")
-				) {
+				if ((prefixA === 'xmlns' && localNameA === prefix) || (!prefix && !prefixA && localNameA === 'xmlns')) {
 					return attr.value || null;
 				}
 			}
@@ -356,7 +327,7 @@ export class Element extends ParentNode {
 		for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
 			if (attr.namespaceURI === XMLNS) {
 				const { prefix: prefixA, value: valueA } = attr;
-				if (prefixA === "xmlns" && valueA === ns) {
+				if (prefixA === 'xmlns' && valueA === ns) {
 					return attr.localName;
 				}
 			}
@@ -367,7 +338,7 @@ export class Element extends ParentNode {
 	}
 
 	isDefaultNamespace(namespaceURI: string) {
-		const ns1 = this.lookupNamespaceURI("");
+		const ns1 = this.lookupNamespaceURI('');
 		return ns1 ? ns1 === namespaceURI : !namespaceURI;
 	}
 
@@ -378,31 +349,28 @@ export class Element extends ParentNode {
 		}
 
 		switch (position) {
-			case "beforebegin":
+			case 'beforebegin':
 				if (parentNode) {
 					parentNode.insertBefore(element, this);
 				} else {
 					return null;
 				}
 				break;
-			case "afterend":
+			case 'afterend':
 				if (parentNode) {
 					parentNode.insertBefore(element, this.nextSibling);
 				} else {
 					return null;
 				}
 				break;
-			case "afterbegin":
+			case 'afterbegin':
 				this.insertBefore(element, this.firstChild);
 				break;
-			case "beforeend":
+			case 'beforeend':
 				this.insertBefore(element, null);
 				break;
 			default:
-				throw DOMException.new(
-					"SyntaxError",
-					`Invalid position ${position}`
-				);
+				throw DOMException.new('SyntaxError', `Invalid position ${position}`);
 		}
 		return element;
 	}
@@ -412,20 +380,20 @@ export class Element extends ParentNode {
 		const node = ownerDocument && ownerDocument.createTextNode(text);
 		if (node)
 			switch (position) {
-				case "beforebegin":
+				case 'beforebegin':
 					if (parentNode) {
 						parentNode.insertBefore(node, this);
 					}
 					break;
-				case "afterend":
+				case 'afterend':
 					if (parentNode) {
 						parentNode.insertBefore(node, this.nextSibling);
 					}
 					break;
-				case "afterbegin":
+				case 'afterbegin':
 					this.insertBefore(node, this.firstChild);
 					break;
-				case "beforeend":
+				case 'beforeend':
 					this.insertBefore(node, null);
 					break;
 				case null:
@@ -433,17 +401,14 @@ export class Element extends ParentNode {
 					break;
 
 				default:
-					throw DOMException.new(
-						"SyntaxError",
-						`Invalid position ${position}`
-					);
+					throw DOMException.new('SyntaxError', `Invalid position ${position}`);
 			}
 	}
 
 	get style() {
-		const attr = this.getAttributeNode("style");
+		const attr = this.getAttributeNode('style');
 		if (!attr) {
-			const node = new StyleAttr("style");
+			const node = new StyleAttr('style');
 			this.setAttributeNode(node);
 			return node.proxy;
 		} else if (attr instanceof StyleAttr) {
@@ -451,20 +416,20 @@ export class Element extends ParentNode {
 		} else {
 			attr.remove();
 			const ref = attr[PREV] || this;
-			const node = new StyleAttr("style");
+			const node = new StyleAttr('style');
 			node._attach(ref, ref[NEXT] || this[END], this);
 			node.value = attr.value;
 			return node.proxy;
 		}
 	}
 	set style(value: CSSStyleDeclaration) {
-		this.setAttribute("style", value.toString());
+		this.setAttribute('style', value.toString());
 	}
 	get classList() {
-		const attr = this.getAttributeNode("class");
+		const attr = this.getAttributeNode('class');
 		if (!attr) {
 			// console.log("StyleAttr:NEW");
-			const node = new ClassAttr("class");
+			const node = new ClassAttr('class');
 			this.setAttributeNode(node);
 			return node.tokens;
 		} else if (attr instanceof ClassAttr) {
@@ -474,7 +439,7 @@ export class Element extends ParentNode {
 			// console.log("StyleAttr:REP");
 			attr.remove();
 			const ref = attr[PREV] || this;
-			const node = new ClassAttr("class");
+			const node = new ClassAttr('class');
 			node._attach(ref, ref[NEXT] || this[END], this);
 			node.value = attr.value;
 			return node.tokens;
@@ -482,30 +447,15 @@ export class Element extends ParentNode {
 	}
 
 	get dataset() {
-		return (
-			this[DATASET] ||
-			(this[DATASET] = new Proxy<Element>(this, dsHandler))
-		);
+		return this[DATASET] || (this[DATASET] = new Proxy<Element>(this, dsHandler));
 	}
 
 	cloneNode(deep?: boolean) {
-		const {
-			ownerDocument,
-			namespaceURI,
-			localName,
-			prefix,
-			tagName,
-			qualifiedName,
-		} = this;
+		const { ownerDocument, namespaceURI, localName, prefix, tagName, qualifiedName } = this;
 		// const node = new (this.constructor as any)(localName, namespaceURI, prefix, tagName);
 		const node: ParentNode = ownerDocument
 			? ownerDocument.createElementNS(namespaceURI, qualifiedName)
-			: new (this.constructor as any)(
-					localName,
-					namespaceURI,
-					prefix,
-					tagName
-			  );
+			: new (this.constructor as any)(localName, namespaceURI, prefix, tagName);
 
 		if (ownerDocument) node.ownerDocument = ownerDocument;
 		// if (namespaceURI) node.namespaceURI = namespaceURI;
@@ -526,21 +476,13 @@ export class Element extends ParentNode {
 			for (; cur != fin; cur = cur.endNode[NEXT] || fin) {
 				switch (cur.nodeType) {
 					case 1: // ELEMENT_NODE
-						cur.cloneNode(deep)._attach(
-							end[PREV] || node,
-							end,
-							node
-						);
+						cur.cloneNode(deep)._attach(end[PREV] || node, end, node);
 						break;
 					case 3: // TEXT_NODE
 					case 4: // CDATA_SECTION_NODE
 					case 7: // PROCESSING_INSTRUCTION_NODE
 					case 8: // COMMENT_NODE
-						cur.cloneNode(deep)._attach(
-							end[PREV] || node,
-							end,
-							node
-						);
+						cur.cloneNode(deep)._attach(end[PREV] || node, end, node);
 						break;
 					case 2: // ATTRIBUTE_NODE
 					case 9: // DOCUMENT_NODE
@@ -616,24 +558,13 @@ export class Element extends ParentNode {
 	}
 
 	letId() {
-		let id = this.getAttribute("id");
+		let id = this.getAttribute('id');
 		if (!id) {
-			this.setAttribute("id", (id = nextUniqueId().toString(36)));
+			this.setAttribute('id', (id = nextUniqueId().toString(36)));
 		}
 		return id;
 	}
 }
-
-// function checkQName(name: string) {
-// 	if (!name) {
-// 		throw DOMException.new("InvalidCharacterError", `!'${name}'`);
-// 	} else if (name.indexOf(":") < 0) {
-// 		return checkName(name);
-// 	} else if (!/^[_A-Za-z]\w*:[_A-Za-z][\w_-]*$/.test(name)) {
-// 		throw DOMException.new("InvalidCharacterError", `'${name}'`);
-// 	}
-// 	return true;
-// }
 
 function toCamelCase(name: string) {
 	return name.slice(5).replace(/-([a-z])/g, (_, $1) => $1.toUpperCase());
@@ -643,9 +574,7 @@ function fromCamelCase(name: string) {
 	if (/-[a-z]/.test(name)) {
 		throw new Error(`Unexpected dataset name`);
 	}
-	return (
-		"data-" + name.replace(/([A-Z])/g, (_, $1) => `-${$1.toLowerCase()}`)
-	);
+	return 'data-' + name.replace(/([A-Z])/g, (_, $1) => `-${$1.toLowerCase()}`);
 }
 
 export const dsHandler = {
@@ -654,7 +583,7 @@ export const dsHandler = {
 	},
 
 	set(element: Element, name: string, value: string) {
-		element.setAttribute(fromCamelCase(name), value + "");
+		element.setAttribute(fromCamelCase(name), value + '');
 		return true;
 	},
 	has(element: Element, name: string) {
@@ -669,29 +598,12 @@ export const dsHandler = {
 	},
 
 	ownKeys(element: Element) {
-		// function* gen() {
-		// 	let attr = element[NEXT];
-		// 	for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
-		// 		const { namespaceURI, name } = attr;
-		// 		if (
-		// 			(!namespaceURI || namespaceURI === "") &&
-		// 			name.startsWith("data-")
-		// 		) {
-		// 			yield toCamelCase(name);
-		// 		}
-		// 	}
-		// }
-		// // console.log("ownKeys [..]", [...gen()]);
-		// return [...gen()];
 		return Array.from(
 			(function* () {
 				let attr = element[NEXT];
 				for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
 					const { namespaceURI, name } = attr;
-					if (
-						(!namespaceURI || namespaceURI === "") &&
-						name.startsWith("data-")
-					) {
+					if ((!namespaceURI || namespaceURI === '') && name.startsWith('data-')) {
 						// console.log("ownKeys", name, toCamelCase(name));
 						yield toCamelCase(name);
 					}
@@ -717,15 +629,15 @@ function nextUniqueId() {
 	return ++_id_int == 0 ? ++_id_int : _id_int;
 }
 
-import { XMLNS } from "./namespace.js";
-import { StringAttr, Attr } from "./attr.js";
-import { ChildNode } from "./child-node.js";
-import { StyleAttr } from "./attr-style.js";
-import { ClassAttr } from "./attr-class.js";
-import { NamedNodeMap, AttributesHandler } from "./named-node-map.js";
-import { enumXMLDump } from "./dom-serialize.js";
-import { validateAndExtract, checkName, HTML_NS } from "./namespace.js";
-import { prepareMatch } from "./css/match.js";
-import { DOMException } from "./event-target.js";
+import { XMLNS } from './namespace.js';
+import { StringAttr, Attr } from './attr.js';
+import { ChildNode } from './child-node.js';
+import { StyleAttr } from './attr-style.js';
+import { ClassAttr } from './attr-class.js';
+import { NamedNodeMap, AttributesHandler } from './named-node-map.js';
+import { enumXMLDump } from './dom-serialize.js';
+import { validateAndExtract, checkName, HTML_NS } from './namespace.js';
+import { prepareMatch } from './css/match.js';
+import { DOMException } from './event-target.js';
 
 export { NamedNodeMap };

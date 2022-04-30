@@ -29,25 +29,33 @@ tap.test('Geoms 1', function (t) {
 	const n = Matrix.translate(60, 10);
 	const R = R1.rootTM
 	const [P, M] = R1.splitTM();
+				const T = P.multiply(M);
+
 // translate(-60,-10)
 // translate(-160,-170)
 // translate(-160 -110)scale(2 2)
 	// t.same(R.toString(), Matrix.translate(40, 60).toString())
 	// t.same(R2.rootTM.toString(), Matrix.translate(40, 60).toString())
+	t.same(R.toString(), T.toString())
 	t.same(R3.rootTM.toString(), Matrix.identity().toString())
 	// t.same(R2.parentNode.rootTM.toString(), Matrix.translate(40, 0).toString())
-	 console.log(R);
-	 console.log(P);
+	 console.log('R', R);
+	 console.log('P', P);
+	 console.log('M', M);
+	 console.log('m', m);
 	// console.log(R.inverse().describe());
-	console.log(P.inverse().describe());
-	console.log(P.inverse().multiply(m).describe());
+	// console.log(P.inverse().describe());
+	// console.log(P.inverse().multiply(m).describe());
 	// console.log(R.inverse().multiply(m).describe());
 
-	console.log(m.inverse().describe());
-	console.log(m.inverse().multiply(P).describe());
-	console.log(m.inverse().postMultiply(P).describe());
-	console.log(R.inverse().postMultiply(P));
-	console.log(P.inverse().postMultiply(R));
+	// console.log(m.inverse().describe());
+	// console.log(m.inverse().multiply(P).describe());
+	// console.log(m.inverse().postMultiply(P).describe());
+	// console.log(R.inverse().postMultiply(P));
+	console.log("A", P.inverse().multiply(m).describe());
+	console.log("B", P.inverse().multiply(m).inverse().describe());
+	console.log("C", R.inverse().multiply(m).describe());
+	console.log("D", R.inverse().multiply(m).inverse().describe());
 	console.log(P.multiply(R.inverse()));
 	console.log(P.multiply(R.inverse().multiply(m)));
 	console.log(P.multiply(R.inverse().multiply(m)).inverse().describe());
@@ -68,13 +76,17 @@ tap.test('Geoms 1', function (t) {
 
 	console.log(P.multiply(n.inverse()).describe());
 	console.log(P.inverse().multiply(n).describe());
-	
 	console.log(P.inverse().multiply(n.inverse()).multiply(P).describe());
 	console.log(P.inverse().multiply(m.inverse()).multiply(R).describe());
 
-	console.log(P.inverse().multiply(m.inverse()).multiply(R).describe());
-	console.log(P.inverse().multiply(m).multiply(R).describe());
+	console.log(R.inverse().multiply(m).multiply(P).inverse().describe()); // OK
+	console.log(P.multiply(M).inverse().multiply(m).multiply(P).inverse().describe()); // OK
+	console.log(P.inverse().multiply(R.inverse().multiply(m).inverse()).describe()); // OK
+	console.log(P.multiply(R.inverse().multiply(m)).inverse().describe());
+	// console.log(M.multiply(P.multiply(m.inverse())).describe());
+ 
 
+;
 
 	// console.log(n.multiply(P.inverse()).describe());
 	// console.log(n.inverse().multiply(P).describe());

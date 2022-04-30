@@ -93,7 +93,7 @@ export class SVGRectAttr extends Attr {
 				this._var = BoxMut.parse(_var) as BoxMut;
 				return this._var.width;
 			} catch (err) {
-				//pass
+				console.error(`Failed to parse as Box "${_var}"`)
 			}
 		}
 		const o = this.ownerElement as SVGGraphicsElement;
@@ -105,8 +105,9 @@ export class SVGRectAttr extends Attr {
 			const v = o.nearestViewportElement as SVGSVGElement;
 			if (v) {
 				const n = v.viewBox.calcWidth();
-				const scale = v.innerTM.inverse().d;
-				return n * scale;
+				return n;
+				// const scale = v.innerTM.inverse().d;
+				// return n * scale;
 			}
 		}
 
@@ -122,7 +123,7 @@ export class SVGRectAttr extends Attr {
 				this._var = BoxMut.parse(_var) as BoxMut;
 				return this._var.height;
 			} catch (err) {
-				//pass
+				console.error(`Failed to parse as Box "${_var}"`)
 			}
 		}
 		const o = this.ownerElement as SVGGraphicsElement;
@@ -135,8 +136,11 @@ export class SVGRectAttr extends Attr {
 			const v = o.nearestViewportElement as SVGSVGElement;
 			if (v) {
 				const n = v.viewBox.calcHeight();
-				const scale = v.innerTM.inverse().d;
-				return n * scale;
+				return n;
+				// const scale = v.innerTM.inverse().d;
+				// return n * scale;
+			} else if (o as SVGSVGElement) {
+
 			}
 		}
 
@@ -151,7 +155,7 @@ export class SVGRectAttr extends Attr {
 			try {
 				return (this._var = BoxMut.parse(_var) as BoxMut);
 			} catch (err) {
-				//pass
+				console.error(`Failed to parse as Box "${_var}"`)
 			}
 		}
 		let x = 0,
@@ -186,7 +190,9 @@ export class SVGRectAttr extends Attr {
 	}
 }
 
-function contain(args: Array<SVGGraphicsElement | Box | Point | Ray | Array<SVGGraphicsElement | Box | Point | Ray>>) : Box{
+function contain(
+	args: Array<SVGGraphicsElement | Box | Point | Ray | Array<SVGGraphicsElement | Box | Point | Ray>>
+): Box {
 	let bbox = BoxMut.new() as BoxMut;
 	for (const v of args) {
 		if (v instanceof Array) {
@@ -210,5 +216,4 @@ function contain(args: Array<SVGGraphicsElement | Box | Point | Ray | Array<SVGG
 
 import { BoxMut, Box, Point, Ray } from 'svggeom';
 import { Attr } from '../attr.js';
-import { SVGGraphicsElement } from './element.js';
-import { SVGSVGElement } from './_element.js';
+import { SVGGraphicsElement, SVGSVGElement } from './element.js';

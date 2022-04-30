@@ -310,6 +310,9 @@ export class SVGGraphicsElement extends SVGElement {
 		that.appendChild(this);
 
 	}
+	layout(){
+		return new SVGLayout(this);
+	}
 }
 export class SVGSVGElement extends SVGGraphicsElement {
 	static TAGS = ['svg'];
@@ -385,5 +388,6 @@ import {
 	SVGLengthYAttr,
 } from './length.js';
 import { SVGRectAttr } from './rect.js';
+import { SVGLayout } from './layout.js';
 import { SVGLengthListAttr, SVGLengthList } from './length-list.js';
 import { SVGTransformListAttr, SVGTransform, viewbox_transform } from './attr-transform.js';

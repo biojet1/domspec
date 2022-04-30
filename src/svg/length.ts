@@ -268,7 +268,6 @@ export class SVGLength {
 		return 0;
 	}
 
-
 	static SVG_LENGTHTYPE_UNKNOWN = 0;
 	static SVG_LENGTHTYPE_NUMBER = 1;
 	static SVG_LENGTHTYPE_PERCENTAGE = 2;
@@ -335,6 +334,7 @@ export class SVGLengthAttr extends Attr {
 		// _var == string returns string
 		// _var == SVGLength returns SVGLength.toString();
 	}
+
 	get specified() {
 		return this._var != undefined;
 	}
@@ -365,6 +365,14 @@ export class SVGLengthW extends SVGLength {
 			const v = e.nearestViewportElement as SVGGraphicsElement;
 			if (v) {
 				return v.viewBox.calcWidth();
+			} else if (e instanceof SVGSVGElement) {
+				const a = e.viewBox;
+				if (a.specified) {
+					const b = a.baseVal;
+					if (b) {
+						return b.width;
+					}
+				}
 			}
 		}
 		return 0;
@@ -378,6 +386,14 @@ export class SVGLengthH extends SVGLength {
 			const v = e.nearestViewportElement as SVGGraphicsElement;
 			if (v) {
 				return v.viewBox.calcHeight();
+			} else if (e instanceof SVGSVGElement) {
+				const a = e.viewBox;
+				if (a.specified) {
+					const b = a.baseVal;
+					if (b) {
+						return b.height;
+					}
+				}
 			}
 		}
 		return 0;
@@ -398,11 +414,10 @@ export class SVGLengthWAttr extends SVGLengthAttr {
 		const { _var } = this;
 		if (_var instanceof SVGLength) {
 			_var.convertToSpecifiedUnits(1);
-		}else{
-					//(this._var = _var = this.auto())
+		} else {
+			//(this._var = _var = this.auto())
 		}
 	}
-
 }
 
 export class SVGLengthHAttr extends SVGLengthAttr {

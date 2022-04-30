@@ -14,6 +14,16 @@ function closeEnough(t, a, b, threshold = 1e-6, tag) {
 function eqBox(t, a, b, epsilon = 0, tag) {
     t.ok(a.equals(b, epsilon), `${tag} [${a}] vs [${b}]`);
 }
+
+function test_circle_geom(t, document) {
+    return ([id, r, cx, cy]) => {
+        const v = document.getElementById(id);
+        closeEnough(t, v.r.baseVal.value, r, 1e-4, `${id} r`);
+        closeEnough(t, v.cx.baseVal.value, cx, 1e-6, `${id} cy`);
+        closeEnough(t, v.cy.baseVal.value, cy, 1e-6, `${id} cy`);
+    };
+}
+
 tap.test('Geoms 1', function (t) {
     const document = parser.parseFromString(
         fs.readFileSync('test/res/viewport.svg', {
@@ -53,12 +63,8 @@ tap.test('Geoms 1', function (t) {
         ['C2', 40, 55, 70],
         ['C3', 4.527692794799805, 5, 4],
         ['C5', 5, 5, 5],
-    ].forEach(([id, r, cx, cy]) => {
-        const v = document.getElementById(id);
-        closeEnough(t, v.r.baseVal.value, r, 1e-4, `${id} r`);
-        closeEnough(t, v.cx.baseVal.value, cx, 1e-6, `${id} cy`);
-        closeEnough(t, v.cy.baseVal.value, cy, 1e-6, `${id} cy`);
-    });
+        ['C6', 1, 5, 5],
+    ].forEach(test_circle_geom(t, document));
     [
         ['V1', 200, 0, 100, 400],
         ['R1', 0, 0, 5, 4],
@@ -66,6 +72,9 @@ tap.test('Geoms 1', function (t) {
         ['R4', 0, 4, 5, 4],
         ['V2', 0, 200, 300, 100],
         ['V3', 0, 0, 10, 10],
+        ['R5', 200, 160, 50, 40],
+        ['R6', 200, 160, 50, 40],
+        ['V0', 0, 0, 300, 400],
     ].forEach(([id, x, y, w, h]) => {
         const v = document.getElementById(id);
         closeEnough(t, v.x.baseVal.value, x, 1e-4, `${id} x`);
@@ -74,7 +83,7 @@ tap.test('Geoms 1', function (t) {
         closeEnough(t, v.height.baseVal.value, h, 1e-6, `${id} height`);
     });
     [
-        // ['C4', 0, 0, 0, 0],
+        ['C4', 0, 0, 0, 0],
         ['C1', 114.61666870117188, 34.633331298828125, 70.76666259765625, 70.75],
         ['C2', 15, 30, 80, 80],
         ['V1', 200, 0, 100, 400],
@@ -83,10 +92,16 @@ tap.test('Geoms 1', function (t) {
         ['R3', 250, 160, 50, 40],
         ['R4', 200, 200, 50, 40],
         ['V2', 0, 200, 300, 100],
+        ['C5', 100, 200, 100, 100],
+        ['V3', 100, 200, 100, 100],
+        ['L1', 100, 225, 50, 50],
+        ['R5', 200, 160, 50, 40],
+        ['R6', 250, 200, 50, 40],
     ].forEach(([id, x, y, w, h]) => {
         const v = document.getElementById(id);
         const b = Box.new(x, y, w, h);
-        eqBox(t, b, v._shapeBox(), x - ~~x === 0 ? 1e-9 : 1, id);
+        const r = v._shapeBox();
+        eqBox(t, b, r.isValid() ? r : Box.empty(), x - ~~x === 0 ? 1e-9 : 1, id);
     });
     const R5 = document.getElementById('R5');
     const [p, m] = V1.splitTM();
@@ -96,8 +111,12 @@ tap.test('Geoms 1', function (t) {
     console.log(p.multiply(V1.innerTM).inverse());
     console.log(V1.rootTM.multiply(V1.innerTM).inverse());
     V1.viewBox.contain2(R5._shapeBox());
-     console.log(V1.viewBox.baseVal);
-   
+    console.log(V1.viewBox.baseVal);
+    [['L1', 0, 2.5, 5, 7.5]].forEach(([id, x1, y1, x2, y2]) => {
+        const v = document.getElementById(id);
+        console.log(v.outerHTML);
+        t.same([v.x1.baseVal.value, v.y1.baseVal.value, v.x2.baseVal.value, v.y2.baseVal.value], [x1, y1, x2, y2]);
+    });
 
     t.end();
 });
@@ -178,4 +197,13 @@ if (0) {
         v.setAttribute('geom', `${a[0]},${a[1]} ${a[2]}x${a[3]}`);
         return [v.id, ...a];
     });
+    ((a) => {
+        window.geom_lines = a;
+    })(
+        Array.from(document.documentElement.querySelectorAll(`line[id]`)).map((v) => {
+            const [x1, y1, x2, y2] = [v.x1.baseVal.value, v.y1.baseVal.value, v.x2.baseVal.value, v.y2.baseVal.value];
+            v.setAttribute('pts', `${x1},${y1} ${x2},${y2}`);
+            return [v.id, x1, y1, x2, y2];
+        })
+    );
 }

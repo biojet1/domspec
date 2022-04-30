@@ -61,11 +61,28 @@ export class SVGRectAttr extends Attr {
 		if (_var instanceof BoxMut) {
 			_var.copy(bbox);
 		} else {
-			this._var = bbox;
+			this._var = BoxMut.new(bbox) as BoxMut;
 		}
 		return this;
 	}
 
+	contain2(...args: Array<SVGGraphicsElement | Box | Point | Ray | Array<SVGGraphicsElement | Box | Point | Ray>>) {
+		let bbox = contain(args);
+		const o = this.ownerElement as SVGGraphicsElement;
+		if (o) {
+			if (o.nearestViewportElement) {
+				const [p, m] = o.splitTM();
+				bbox = bbox.transform(p.multiply(o.innerTM).inverse());
+			}
+		}
+		const { _var } = this;
+		if (_var instanceof BoxMut) {
+			_var.copy(bbox);
+		} else {
+			this._var = BoxMut.new(bbox) as BoxMut;
+		}
+		return this;
+	}
 	// https://svgwg.org/svg-next/coords.html#Units
 	calcWidth(): number {
 		const { _var } = this;
@@ -76,7 +93,7 @@ export class SVGRectAttr extends Attr {
 				this._var = BoxMut.parse(_var) as BoxMut;
 				return this._var.width;
 			} catch (err) {
-				//pass
+				console.error(`Failed to parse as Box "${_var}"`)
 			}
 		}
 		const o = this.ownerElement as SVGGraphicsElement;
@@ -88,8 +105,9 @@ export class SVGRectAttr extends Attr {
 			const v = o.nearestViewportElement as SVGSVGElement;
 			if (v) {
 				const n = v.viewBox.calcWidth();
-				const scale = v.innerTM.inverse().d;
-				return n * scale;
+				return n;
+				// const scale = v.innerTM.inverse().d;
+				// return n * scale;
 			}
 		}
 
@@ -105,7 +123,7 @@ export class SVGRectAttr extends Attr {
 				this._var = BoxMut.parse(_var) as BoxMut;
 				return this._var.height;
 			} catch (err) {
-				//pass
+				console.error(`Failed to parse as Box "${_var}"`)
 			}
 		}
 		const o = this.ownerElement as SVGGraphicsElement;
@@ -118,17 +136,63 @@ export class SVGRectAttr extends Attr {
 			const v = o.nearestViewportElement as SVGSVGElement;
 			if (v) {
 				const n = v.viewBox.calcHeight();
-				const scale = v.innerTM.inverse().d;
-				return n * scale;
+				return n;
+				// const scale = v.innerTM.inverse().d;
+				// return n * scale;
+			} else if (o as SVGSVGElement) {
+
 			}
 		}
 
 		// throw new Error(`calcWidth`);
 		return 100;
 	}
+	calcBox(): Box {
+		const { _var } = this;
+		if (_var instanceof BoxMut) {
+			return _var;
+		} else if (_var) {
+			try {
+				return (this._var = BoxMut.parse(_var) as BoxMut);
+			} catch (err) {
+				console.error(`Failed to parse as Box "${_var}"`)
+			}
+		}
+		let x = 0,
+			y = 0,
+			w = 100,
+			h = 100;
+		const o = this.ownerElement as SVGGraphicsElement;
+		if (o) {
+			let a;
+			x = o.x.baseVal.value;
+			y = o.y.baseVal.value;
+			a = o.height;
+			if (a.specified) {
+				h = a.baseVal.value;
+			} else {
+				const v = o.nearestViewportElement as SVGSVGElement;
+				if (v) {
+					h = v.viewBox.calcHeight();
+				}
+			}
+			a = o.width;
+			if (a.specified) {
+				w = a.baseVal.value;
+			} else {
+				const v = o.nearestViewportElement as SVGSVGElement;
+				if (v) {
+					w = v.viewBox.calcWidth();
+				}
+			}
+		}
+		return Box.forRect(x, y, w, h);
+	}
 }
 
-function contain(args: Array<SVGGraphicsElement | Box | Point | Ray | Array<SVGGraphicsElement | Box | Point | Ray>>) {
+function contain(
+	args: Array<SVGGraphicsElement | Box | Point | Ray | Array<SVGGraphicsElement | Box | Point | Ray>>
+): Box {
 	let bbox = BoxMut.new() as BoxMut;
 	for (const v of args) {
 		if (v instanceof Array) {
@@ -152,5 +216,4 @@ function contain(args: Array<SVGGraphicsElement | Box | Point | Ray | Array<SVGG
 
 import { BoxMut, Box, Point, Ray } from 'svggeom';
 import { Attr } from '../attr.js';
-import { SVGGraphicsElement } from './element.js';
-import { SVGSVGElement } from './_element.js';
+import { SVGGraphicsElement, SVGSVGElement } from './element.js';

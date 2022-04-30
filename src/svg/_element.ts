@@ -303,6 +303,16 @@ export class SVGGraphicsElement extends SVGElement {
 		if (w) {
 		}
 	}
+	placeTo(that:SVGGraphicsElement) {
+		const m1 = that.rootTM;
+		const m2 = this.rootTM;
+
+		that.appendChild(this);
+
+	}
+	layout(){
+		return new SVGLayout(this);
+	}
 }
 export class SVGSVGElement extends SVGGraphicsElement {
 	static TAGS = ['svg'];
@@ -358,6 +368,13 @@ export class SVGSVGElement extends SVGGraphicsElement {
 		}
 		throw new Error(`No ownerDocument`);
 	}
+	geom2UU(){
+		this.width.baseVal.convertToSpecifiedUnits(1);
+		this.height.baseVal.convertToSpecifiedUnits(1);
+		for(const x in ['r', 'x', 'y', 'cx', 'cy', 'rx', 'ry', 'x1', 'x2', 'y1', 'y2','width', 'height']){
+			this.getAttributeNode(x)
+		}
+	}
 }
 
 import { Element } from '../element.js';
@@ -371,5 +388,6 @@ import {
 	SVGLengthYAttr,
 } from './length.js';
 import { SVGRectAttr } from './rect.js';
+import { SVGLayout } from './layout.js';
 import { SVGLengthListAttr, SVGLengthList } from './length-list.js';
 import { SVGTransformListAttr, SVGTransform, viewbox_transform } from './attr-transform.js';

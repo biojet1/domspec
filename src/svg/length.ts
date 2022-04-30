@@ -306,9 +306,6 @@ export class SVGLengthAttr extends Attr {
 		if (_var instanceof SVGLength) {
 			return _var;
 		} else {
-			// const v = (this._var = new SVGLength(_var));
-			// _setAssoc(v, this);
-			// return v;
 			let v = this.parse(_var);
 			_setAssoc(v, this);
 			return v;
@@ -321,23 +318,31 @@ export class SVGLengthAttr extends Attr {
 				return (this._var = v);
 			}
 		}
-		return new SVGLength('0');
+		return new SVGLength();
 	}
+	// parse2(s?: string) {
+	// 	let v = this.auto();
+	// 	if (s && v.parse(s)) {
+	// 		return (this._var = v);
+	// 	}
+	// 	return v;
+	// }
+
 	valueOf() {
 		return this._var?.toString();
 		// _var == undefined returns undefined
 		// _var == string returns string
 		// _var == SVGLength returns SVGLength.toString();
 	}
+
 	get specified() {
 		return this._var != undefined;
 	}
 
-	val() {
+	toUU() {
 		const { _var } = this;
 		if (_var instanceof SVGLength) {
-			return _var.value;
-		} else if (_var != undefined) {
+			_var.convertToSpecifiedUnits(1);
 		}
 	}
 }
@@ -352,6 +357,7 @@ function _getAssoc(that: any): SVGGraphicsElement | null | undefined {
 	return _wm_assoc.get(that)?.ownerElement as SVGGraphicsElement;
 }
 
+// https://svgwg.org/svg2-draft/geometry.html#Sizing
 export class SVGLengthW extends SVGLength {
 	getRelativeLength(): number {
 		const e = _getAssoc(this);
@@ -359,8 +365,15 @@ export class SVGLengthW extends SVGLength {
 			const v = e.nearestViewportElement as SVGGraphicsElement;
 			if (v) {
 				return v.viewBox.calcWidth();
+			} else if (e instanceof SVGSVGElement) {
+				const a = e.viewBox;
+				if (a.specified) {
+					const b = a.baseVal;
+					if (b) {
+						return b.width;
+					}
+				}
 			}
-			// https://svgwg.org/svg2-draft/geometry.html#Sizing
 		}
 		return 0;
 	}
@@ -373,6 +386,14 @@ export class SVGLengthH extends SVGLength {
 			const v = e.nearestViewportElement as SVGGraphicsElement;
 			if (v) {
 				return v.viewBox.calcHeight();
+			} else if (e instanceof SVGSVGElement) {
+				const a = e.viewBox;
+				if (a.specified) {
+					const b = a.baseVal;
+					if (b) {
+						return b.height;
+					}
+				}
 			}
 		}
 		return 0;
@@ -388,6 +409,14 @@ export class SVGLengthWAttr extends SVGLengthAttr {
 			}
 		}
 		return new SVGLengthW('100%');
+	}
+	toUU() {
+		const { _var } = this;
+		if (_var instanceof SVGLength) {
+			_var.convertToSpecifiedUnits(1);
+		} else {
+			//(this._var = _var = this.auto())
+		}
 	}
 }
 
@@ -411,7 +440,7 @@ export class SVGLengthXAttr extends SVGLengthAttr {
 				return (this._var = v);
 			}
 		}
-		return new SVGLengthW('0');
+		return new SVGLengthW();
 	}
 }
 
@@ -423,7 +452,7 @@ export class SVGLengthYAttr extends SVGLengthAttr {
 				return (this._var = v);
 			}
 		}
-		return new SVGLengthH('0');
+		return new SVGLengthH();
 	}
 }
 

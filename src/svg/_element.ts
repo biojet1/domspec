@@ -303,15 +303,39 @@ export class SVGGraphicsElement extends SVGElement {
 		if (w) {
 		}
 	}
-	placeTo(that:SVGGraphicsElement) {
+	placeTo(that: SVGGraphicsElement) {
 		const m1 = that.rootTM;
 		const m2 = this.rootTM;
 
 		that.appendChild(this);
-
 	}
-	layout(){
+	layout() {
 		return new SVGLayout(this);
+	}
+	//////////////////
+
+
+
+	popTM(name?: string) {
+		if (name == null) {
+			for (const c of this.children) {
+				if (c.localName == 'desc' && c.hasAttribute('name')) {
+					c.remove();
+				}
+			}
+		} else {
+			for (const c of this.children) {
+				if (c.localName == 'desc' && c.getAttribute('name') == name) {
+					c.remove();
+					const tm = c.getAttribute('tm');
+					if (tm) {
+						return tm;
+					} else {
+						return '';
+					}
+				}
+			}
+		}
 	}
 }
 export class SVGSVGElement extends SVGGraphicsElement {
@@ -368,11 +392,11 @@ export class SVGSVGElement extends SVGGraphicsElement {
 		}
 		throw new Error(`No ownerDocument`);
 	}
-	geom2UU(){
+	geom2UU() {
 		this.width.baseVal.convertToSpecifiedUnits(1);
 		this.height.baseVal.convertToSpecifiedUnits(1);
-		for(const x in ['r', 'x', 'y', 'cx', 'cy', 'rx', 'ry', 'x1', 'x2', 'y1', 'y2','width', 'height']){
-			this.getAttributeNode(x)
+		for (const x in ['r', 'x', 'y', 'cx', 'cy', 'rx', 'ry', 'x1', 'x2', 'y1', 'y2', 'width', 'height']) {
+			this.getAttributeNode(x);
 		}
 	}
 }

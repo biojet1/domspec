@@ -1,22 +1,25 @@
+const root = document.documentElement;
+root.id || (root.id = 'V0');
+
 ((a) => {
     window.geom_lines = a;
 })(
-    Array.from(document.documentElement.querySelectorAll(`line[id]`)).map((v) => {
+    Array.from(root.querySelectorAll(`line[id]`)).map((v) => {
         const [x1, y1, x2, y2] = [v.x1.baseVal.value, v.y1.baseVal.value, v.x2.baseVal.value, v.y2.baseVal.value];
         v.setAttribute('geom', `${x1},${y1} ${x2},${y2}`);
         return [v.id, x1, y1, x2, y2];
     })
 );
 
-window.geom_rects = Array.from(document.documentElement.querySelectorAll(`rect[id], svg[id]`))
-    .concat(document.documentElement)
+window.geom_rects = Array.from(root.querySelectorAll(`rect[id], svg[id]`))
+    .concat(root)
     .map((v) => {
         const a = [v.x.baseVal.value, v.y.baseVal.value, v.width.baseVal.value, v.height.baseVal.value];
         v.setAttribute('geom', `${a[0]},${a[1]} ${a[2]}x${a[3]}`);
         return [v.id, ...a];
     });
 
-window.geom_marus = Array.from(document.documentElement.querySelectorAll(`circle`))
+window.geom_marus = Array.from(root.querySelectorAll(`circle`))
     .map((v) => {
         const r = v.getBoundingClientRect();
         const a = [v.r.baseVal.value, v.cx.baseVal.value, v.cy.baseVal.value];
@@ -24,7 +27,7 @@ window.geom_marus = Array.from(document.documentElement.querySelectorAll(`circle
         return [v.id, ...a];
     })
     .filter((v) => v[0]);
-window.boxes = Array.from(document.documentElement.querySelectorAll(`*[id]`)).map((v) => {
+window.boxes = Array.from(root.querySelectorAll(`*[id]`)).map((v) => {
     const r = v.getBoundingClientRect();
     v.setAttribute('bcr', `${r.x},${r.y} ${r.width}x${r.height}`);
     return [v.id, r.x, r.y, r.width, r.height];
@@ -50,21 +53,61 @@ const transformRect = (rect, matrix) => {
     // return {x: _left, y: _top, width: _right - _left, height: _bottom - _top}
 };
 
-window.boxes = Array.from(document.documentElement.querySelectorAll(`*[id]`)).map((v) => {
+window.boxes = Array.from(root.querySelectorAll(`*[id]`)).map((v) => {
     const r = v.getBoundingClientRect();
     v.setAttribute('bcr', `${r.x},${r.y} ${r.width}x${r.height}`);
     return [v.id, r.x, r.y, r.width, r.height];
 });
 
-window.bboxes = Array.from(document.documentElement.querySelectorAll(`*[id]`)).map((v) => {
+window.bboxes = Array.from(root.querySelectorAll(`*[id]`)).map((v) => {
     const r = v.getBBox();
     v.setAttribute('bb', `${r.x},${r.y} ${r.width}x${r.height}`);
 
     return [v.id, r.x, r.y, r.width, r.height];
 });
 
-document.documentElement.querySelectorAll(`*[id]`).forEach((v) => {
+window.root_tms = Array.from(root.querySelectorAll(`*[id]`)).map((v) => {
+    const { a, b, c, d, e, f } = v.getTransformToElement(root);
+    return [v.id, a, b, c, d, e, f];
+});
+root.querySelectorAll(`*`).forEach((v) => {
+    const { a, b, c, d, e, f } = v.getTransformToElement(root);
+    v.setAttribute('rtr', `${a} ${b} ${c} ${d} ${e} ${f}`);
+});
+
+root.querySelectorAll(`*[id]`).forEach((v) => {
     window[v.id] = v;
 });
 
-window[document.documentElement.id] = document.documentElement;
+window[root.id] = root;
+
+function generateSelector(context) {
+    let index, pathSelector, localName;
+
+    if (context == 'null') throw 'not an dom reference';
+    // call getIndex function
+    index = getIndex(context);
+
+    while (context.tagName) {
+        // selector path
+        pathSelector = context.localName + (pathSelector ? '>' + pathSelector : '');
+        context = context.parentNode;
+    }
+    // selector path for nth of type
+    pathSelector = pathSelector + `:nth-of-type(${index})`;
+    return pathSelector;
+}
+
+// get index for nth of type element
+function getIndex(node) {
+    let i = 1;
+    let tagName = node.tagName;
+
+    while (node.previousSibling) {
+        node = node.previousSibling;
+        if (node.nodeType === 1 && tagName.toLowerCase() == node.tagName.toLowerCase()) {
+            i++;
+        }
+    }
+    return i;
+}

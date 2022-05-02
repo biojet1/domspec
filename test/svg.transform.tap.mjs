@@ -6,7 +6,7 @@ import { SVGLength } from '../dist/svg/element.js';
 import { Path, Matrix, Box, MatrixInterpolate } from 'svggeom';
 const parser = new DOMParser();
 tap.test('transform', function (t) {
-    const doc = parser.parseFromString(`
+    const document = parser.parseFromString(`
 <svg xmlns="http://www.w3.org/2000/svg" id="VPA" viewBox="0 0 200 100">
   <g id="G1" transform="translate(100,0)">
     <g id="G2" transform="translate(0,100)">
@@ -22,15 +22,15 @@ tap.test('transform', function (t) {
   </g>
 </svg>
         `);
-    const top = doc.documentElement;
-    const R1 = doc.getElementById('R1');
-    const R2 = doc.getElementById('R2');
-    const R3 = doc.getElementById('R3');
-    const R4 = doc.getElementById('R4');
-    const G1 = doc.getElementById('G1');
-    const G2 = doc.getElementById('G2');
-    const G3 = doc.getElementById('G3');
-    const G4 = doc.getElementById('G4');
+    const top = document.documentElement;
+    const R1 = document.getElementById('R1');
+    const R2 = document.getElementById('R2');
+    const R3 = document.getElementById('R3');
+    const R4 = document.getElementById('R4');
+    const G1 = document.getElementById('G1');
+    const G2 = document.getElementById('G2');
+    const G3 = document.getElementById('G3');
+    const G4 = document.getElementById('G4');
     [
         // ['defs13', 0, 0, 0, 0],
         // ['R3X', 0, 0, 110, 210],
@@ -43,7 +43,7 @@ tap.test('transform', function (t) {
         ['R3', 10, 20, 100, 200],
         // ['R4', 10, 20, 100, 200],
     ].forEach(([id, x, y, w, h]) => {
-        const v = doc.getElementById(id);
+        const v = document.getElementById(id);
         const r = v.objectBBox();
         t.same(r.toArray(), [x, y, w, h], `getBBox ${id}`);
     });
@@ -76,23 +76,17 @@ tap.test('viewportTM', function (t) {
     function eqBox(a, b, epsilon = 0, tag) {
         t.ok(a.equals(b, epsilon), `${tag} [${a}] vs [${b}]`);
     }
-    const doc = parser.parseFromString(
+    const document = parser.parseFromString(
         fs.readFileSync('test/res/preserveAspectRatio.svg', {
             encoding: 'utf-8',
         })
     );
-    const top = doc.documentElement;
-    const U1 = doc.getElementById('U1');
-    const VR1 = doc.getElementById('VR1');
-    const RECT = doc.getElementById('RECT');
-    const G_F = doc.getElementById('G_F');
-    doc.querySelectorAll(`text`).forEach((x) => x.remove());
-    // console.log(G_F._shapeBox());
-    // console.log(G_F.querySelector('rect')._shapeBox())
-    // console.log(G_F.querySelector('svg')._shapeBox())
-    // for (const sub of G_F.children) {
-    //     console.log(sub.localName, sub._shapeBox());
-    // }
+    const top = document.documentElement;
+    const U1 = document.getElementById('U1');
+    const VR1 = document.getElementById('VR1');
+    const RECT = document.getElementById('RECT');
+    const G_F = document.getElementById('G_F');
+    document.querySelectorAll(`text`).forEach((x) => x.remove());
 
     t.same(top.viewportTM().toString(), Matrix.identity().toString());
     [
@@ -110,7 +104,7 @@ tap.test('viewportTM', function (t) {
         ['V_L', 'xMaxYMax slice', 1, 0, 0, 1, 390, 220],
     ].forEach(([id, par, a, b, c, d, e, f]) => {
         const m = Matrix.new(a, b, c, d, e, f);
-        const v = doc.getElementById(id);
+        const v = document.getElementById(id);
         const r = v.rootTM;
         t.same(r.toString(), m.toString(), par);
         // console.log();
@@ -130,7 +124,7 @@ tap.test('viewportTM', function (t) {
         ['V_L', 1.6666666269302368, 0, 0, 1.6666666269302368, 390, 183.33334350585938],
     ].forEach(([id, a, b, c, d, e, f]) => {
         const m = Matrix.new(a, b, c, d, e, f);
-        const v = doc.getElementById(id);
+        const v = document.getElementById(id);
         const u = v.querySelector('use');
         const r = v.rootTM;
         t.ok(v.nearestViewportElement === top);
@@ -155,7 +149,7 @@ tap.test('viewportTM', function (t) {
         ['V_K', 320.8333333134651, 202.5000050663948, 48.33333218097687, 64.99999845027924],
         ['V_L', 390.8333333134651, 184.1666768193245, 48.33333218097687, 64.99999845027924],
     ].forEach(([id, x, y, w, h]) => {
-        const v = doc.getElementById(id);
+        const v = document.getElementById(id);
         const u = v.querySelector('use');
         // const r = u.shapeBox(true);
         const b = Box.new(x, y, w, h);
@@ -177,7 +171,7 @@ tap.test('viewportTM', function (t) {
         ['V_K', [320, 220, 50, 30]],
         ['V_L', [390, 220, 50, 30]],
     ].forEach(([id, [x, y, w, h]]) => {
-        const v = doc.getElementById(id);
+        const v = document.getElementById(id);
         const b = Box.new(x, y, w, h);
         // eqBox(b, v.shapeBox(true), 2e-5, `v:shapeBox ${id}`);
         eqBox(b, v._shapeBox(), 2e-5, `v:_shapeBox ${id}`);
@@ -200,13 +194,12 @@ tap.test('viewportTM', function (t) {
         // ['G_12', 320, 201.6666717529297, 83.33332824707031, 50.01666259765625],
         // ['G_13', 390, 183.3333282470703, 83.33332824707031, 66.16667175292969],
     ].forEach(([id, x, y, w, h]) => {
-        const v = doc.getElementById(id);
+        const v = document.getElementById(id);
         const b = Box.new(x, y, w, h);
-        // eqBox(b, v.shapeBox(true), 1, `shapeBox ${id}`);
         eqBox(b, v._shapeBox(), 1, `_shapeBox ${id}`);
     });
 
-    const a = Array.from(doc.documentElement.querySelectorAll(`svg[preserveAspectRatio]`));
+    const a = Array.from(document.documentElement.querySelectorAll(`svg[preserveAspectRatio]`));
     a.forEach((v) => {
         // const u = v.querySelector(`use`);
         const u = v.parentNode;
@@ -224,7 +217,7 @@ tap.test('viewportTM', function (t) {
         r.height.baseVal.value = b.height;
         top.appendChild(r);
     });
-    Array.from(doc.documentElement.querySelectorAll(`g[id]`))
+    Array.from(document.documentElement.querySelectorAll(`g[id]`))
         .filter((v) => v?.id.startsWith('meet') || v?.id.startsWith('slice'))
         .forEach((v) => {
             // const b = u.getBBox();
@@ -241,40 +234,84 @@ tap.test('viewportTM', function (t) {
             r.height.baseVal.value = b.height;
             top.appendChild(r);
         }); // console.log(a);
-    writeFileSync(`/tmp/aspect.svg`, doc.documentElement.outerHTML);
+
+    [
+        ['smile', 1, 0, 0, 1, 0, 0],
+        ['G_B', 1, 0, 0, 1, 20, 40],
+        ['G_C', 1, 0, 0, 1, 10, 120],
+        ['G_D', 1, 0, 0, 1, 20, 190],
+        ['meet-group-1', 1, 0, 0, 1, 100, 60],
+        ['G_F', 1, 0, 0, 1, 100, 60],
+        ['V_A', 1, 0, 0, 1, 100, 60],
+        ['G_G', 1, 0, 0, 1, 170, 60],
+        ['V_B', 1, 0, 0, 1, 170, 60],
+        ['G_H', 1, 0, 0, 1, 100, 130],
+        ['V_C', 1, 0, 0, 1, 100, 130],
+        ['meet-group-2', 1, 0, 0, 1, 250, 60],
+        ['G_J', 1, 0, 0, 1, 250, 60],
+        ['V_D', 1, 0, 0, 1, 250, 60],
+        ['G_K', 1, 0, 0, 1, 300, 60],
+        ['V_E', 1, 0, 0, 1, 300, 60],
+        ['G_L', 1, 0, 0, 1, 350, 60],
+        ['V_F', 1, 0, 0, 1, 350, 60],
+        ['slice-group-1', 1, 0, 0, 1, 100, 220],
+        ['G_N', 1, 0, 0, 1, 100, 220],
+        ['V_G', 1, 0, 0, 1, 100, 220],
+        ['G_O', 1, 0, 0, 1, 150, 220],
+        ['V_H', 1, 0, 0, 1, 150, 220],
+        ['G_P', 1, 0, 0, 1, 200, 220],
+        ['V_I', 1, 0, 0, 1, 200, 220],
+        ['slice-group-2', 1, 0, 0, 1, 250, 220],
+        ['G_11', 1, 0, 0, 1, 250, 220],
+        ['V_J', 1, 0, 0, 1, 250, 220],
+        ['G_12', 1, 0, 0, 1, 320, 220],
+        ['V_K', 1, 0, 0, 1, 320, 220],
+        ['G_13', 1, 0, 0, 1, 390, 220],
+        ['R1', 1, 0, 0, 1, 390, 220],
+        ['V_L', 1, 0, 0, 1, 390, 220],
+        ['U1', 1.6666666269302368, 0, 0, 1.6666666269302368, 390, 183.33334350585938],
+        ['RECT', 1, 0, 0, 1, 0, 0],
+    ].forEach(([id, a, b, c, d, e, f]) => {
+        const v = document.getElementById(id);
+        const m = Matrix.new(a, b, c, d, e, f);
+        const r = v.rootTM;
+        t.ok(m.equals(r, 1e-4), `${id} ${r} ${m}`);
+    });
+
+    writeFileSync(`/tmp/aspect.svg`, document.documentElement.outerHTML);
     t.end();
 });
 import { createWriteStream, writeFileSync, WriteStream } from 'fs';
 if (0) {
-    Array.from(document.documentElement.querySelectorAll(`svg[preserveAspectRatio]`)).map((v, i) => {
+    Array.from(documentument.documentElement.querySelectorAll(`svg[preserveAspectRatio]`)).map((v, i) => {
         v.id = `V_${(i + 10).toString(26).toUpperCase()}`;
         return (i + 10).toString(26);
     });
-    Array.from(document.documentElement.querySelectorAll(`g`)).map((v, i) => {
+    Array.from(documentument.documentElement.querySelectorAll(`g`)).map((v, i) => {
         if (!v.id) {
             v.id = `G_${(i + 10).toString(26).toUpperCase()}`;
         }
     });
-    Array.from(document.documentElement.querySelectorAll(`svg[preserveAspectRatio]`)).map((v) => {
+    Array.from(documentument.documentElement.querySelectorAll(`svg[preserveAspectRatio]`)).map((v) => {
         const p = v.getAttribute('preserveAspectRatio');
         const b = v.getBoundingClientRect();
         const m = v.getCTM();
         return [v.id, p, m.a, m.b, m.c, m.d, m.e, m.f];
     });
-    Array.from(document.documentElement.querySelectorAll(`svg[preserveAspectRatio]`)).map((v) => {
+    Array.from(documentument.documentElement.querySelectorAll(`svg[preserveAspectRatio]`)).map((v) => {
         const b = v.querySelector('use').getBBox();
         return [v.id, [b.x, b.y, b.width, b.height]];
     });
-    Array.from(document.documentElement.querySelectorAll(`svg[preserveAspectRatio]`)).map((v) => {
+    Array.from(documentument.documentElement.querySelectorAll(`svg[preserveAspectRatio]`)).map((v) => {
         const u = v.querySelector('use');
         const m = u.getScreenCTM();
         return [v.id, m.a, m.b, m.c, m.d, m.e, m.f];
     });
-    Array.from(document.documentElement.querySelectorAll(`svg[preserveAspectRatio]`)).map((v) => {
+    Array.from(documentument.documentElement.querySelectorAll(`svg[preserveAspectRatio]`)).map((v) => {
         const b = v.getBoundingClientRect();
         return [v.id, [b.x, b.y, b.width, b.height]];
     });
-    Array.from(document.documentElement.querySelectorAll(`svg[preserveAspectRatio]`)).map((v) => {
+    Array.from(documentument.documentElement.querySelectorAll(`svg[preserveAspectRatio]`)).map((v) => {
         const u = v.querySelector('use');
         const m = u.getScreenCTM();
         const r = u.getBBox();
@@ -288,7 +325,7 @@ if (0) {
         }).matrixTransform(m);
         return [v.id, a.x, a.y, b.x - a.x, b.y - a.y];
     });
-    Array.from(document.documentElement.querySelectorAll(`g[id]`))
+    Array.from(documentument.documentElement.querySelectorAll(`g[id]`))
         .filter((v) => v.id.startsWith('G_'))
         .map((v) => {
             const m = v.getScreenCTM();
@@ -304,32 +341,32 @@ if (0) {
             v.setAttribute('bbox', `${r.x},${r.y} ${r.width}x${r.height}`);
             return [v.id, a.x, a.y, b.x - a.x, b.y - a.y];
         });
-    Array.from(document.documentElement.querySelectorAll(`g[id]`))
+    Array.from(documentument.documentElement.querySelectorAll(`g[id]`))
         .filter((v) => v.id.startsWith('G_'))
         .map((v) => {
             const r = v.getBoundingClientRect();
             return [v.id, r.x, r.y, r.width, r.height];
         });
-    Array.from(document.documentElement.querySelectorAll(`*`)).map((v) => {
+    Array.from(documentument.documentElement.querySelectorAll(`*`)).map((v) => {
         const r = v.getBoundingClientRect();
         v.setAttribute('bcr', `${r.x},${r.y} ${r.width}x${r.height}`);
         return [v.id, r.x, r.y, r.width, r.height];
     });
-    Array.from(document.documentElement.querySelectorAll(`svg`)).map((v) => {
+    Array.from(documentument.documentElement.querySelectorAll(`svg`)).map((v) => {
         const r = v.getBBox();
         v.setAttribute('bbox', `${r.x},${r.y} ${r.width}x${r.height}`);
     });
     for (const tag of ['svg', 'rect', 'g', 'use']) {
-        document.documentElement.querySelectorAll(tag).forEach((v) => {
+        documentument.documentElement.querySelectorAll(tag).forEach((v) => {
             const r = v.getBBox();
             const m = v.getCTM();
             v.setAttribute('bbox', `${r.x},${r.y} ${r.width}x${r.height}`);
             v.setAttribute('ctm', `${[m.a, m.b, m.c, m.d, m.e, m.f]}`);
         });
     }
-    document.querySelectorAll(`text`).forEach((x) => x.remove());
+    documentument.querySelectorAll(`text`).forEach((x) => x.remove());
     ['path', 'rect', 'circle'].forEach((tag) => {
-        document.documentElement.querySelectorAll(tag).forEach((v) => {
+        documentument.documentElement.querySelectorAll(tag).forEach((v) => {
             v.style.stroke = 'none';
             v.removeAttribute('stroke-width');
             v.removeAttribute('stroke');

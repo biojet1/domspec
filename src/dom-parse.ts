@@ -45,6 +45,9 @@ function domParse(doc: Document, top: Document | Element | ParentNode, options?:
 		if (!ns) {
 			ns = (parent as Element)?.namespaceURI;
 		}
+		if (!ns && doc.isSVG) {
+			ns = "http://www.w3.org/2000/svg";
+		}
 		let tag;
 		if (ns) {
 			tag = doc.createElementNS(ns, name);

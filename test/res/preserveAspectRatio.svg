@@ -1,9 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="450px" height="300px" viewBox="0 0 450 300">
   <desc>Example PreserveAspectRatio - illustrates preserveAspectRatio attribute</desc>
-  <style type="text/css">
-    text { font-size: 9; }
-    rect { fill: none; stroke: blue; }
-  </style>
+  <style type="text/css">text { font-size: 9; }
+    rect { fill: none; stroke: blue; }</style>
   <defs>
     <g id="smile">
       <rect x=".5" y=".5" width="29" height="39" style="fill:black;stroke:red"/>
@@ -40,7 +38,7 @@
       <rect x=".5" y=".5" width="49" height="29"/>
       <svg preserveAspectRatio="xMidYMid meet" viewBox="0 0 30 40" width="50" height="30" id="V_B">
         <use href="#smile"/>
-        <!-- <rect  x=".5" y=".5" width="29" height="39" style="fill:green;stroke:pink"/> -->
+        <!-- <rect  x=".5" y=".5" width="29" height="39" style="fill:green;stroke:pink"/>-->
       </svg>
     </g>
     <g transform="translate(0,70)" id="G_H">
@@ -120,10 +118,11 @@
       <rect x=".5" y=".5" width="49" height="29" id="R1"/>
       <svg preserveAspectRatio="xMaxYMax slice" viewBox="0 0 30 40" width="50" height="30" id="V_L">
         <use href="#smile" id="U1"/>
-        <!-- <rect id="VR1" x=".5" y=".5" width="29" height="39" style="fill:green;stroke:pink"/> -->
+        <!-- <rect id="VR1" x=".5" y=".5" width="29" height="39" style="fill:green;stroke:pink"/>-->
       </svg>
     </g>
   </g>
   <rect x="0" y="0" width="100%" height="100%"/>
   <rect id="RECT" x="390.5" y="220.5" width="39" height="29" style="stroke:magenta; opacity:.5"/>
+  <script href="metrics.js"></script>
 </svg>

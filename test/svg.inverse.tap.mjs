@@ -77,12 +77,25 @@ tap.test('Geoms 1', function (t) {
 	console.log(P.multiply(n.inverse()).describe());
 	console.log(P.inverse().multiply(n).describe());
 	console.log(P.inverse().multiply(n.inverse()).multiply(P).describe());
-	console.log(P.inverse().multiply(m.inverse()).multiply(R).describe());
 
+	console.log(P.inverse().multiply(m.inverse()).multiply(R).describe());
 	console.log(R.inverse().multiply(m).multiply(P).inverse().describe()); // OK
 	console.log(P.multiply(M).inverse().multiply(m).multiply(P).inverse().describe()); // OK
 	console.log(P.inverse().multiply(R.inverse().multiply(m).inverse()).describe()); // OK
-	console.log(P.multiply(R.inverse().multiply(m)).inverse().describe());
+
+	const x = P.inverse().multiply(m)
+
+
+	console.log("X", x, x.describe());
+	console.log(x.multiply(M).multiply(x.inverse()).describe()); 
+
+	console.log(x.multiply(M).describe(), M.multiply(x).describe());
+	console.log(x.multiply(M).inverse().describe(), M.multiply(x).inverse().describe());
+	console.log(x.inverse().multiply(M).describe(), M.inverse().multiply(x).describe());
+	console.log(M.inverse().multiply(x).inverse().describe());
+	console.log(x.inverse().multiply(M).inverse().describe());
+
+
 	// console.log(M.multiply(P.multiply(m.inverse())).describe());
  
 

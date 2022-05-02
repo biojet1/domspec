@@ -80,10 +80,31 @@ export class SVGLayout {
 		});
 	}
 
-	findTM(name: string, node: SVGGraphicsElement) {
+	restoreTM(name: string, ...nodes: Array<SVGGraphicsElement>) {
+		nodes.forEach((node) => {
+			const t = node.getAttribute('transform') ?? '';
+			for (const c of node.children) {
+				if (c.localName == 'desc' && c.getAttribute('name') == name) {
+					c.setAttribute('tm', t);
+					return;
+				}
+			}
+			const c = node.ownerDocument?.createElement('desc');
+			if (c) {
+				c.setAttribute('tm', t);
+				c.setAttribute('name', name);
+				node.appendChild(c);
+			}
+		});
+	}
+
+	namedTM(name: string, node: SVGGraphicsElement) {
 		for (const c of node.children) {
 			if (c.localName == 'desc' && c.getAttribute('name') == name) {
-				return c.getAttribute('tm');
+				const tm = c.getAttribute('tm');
+				if (tm != null) {
+					return tm;
+				}
 			}
 		}
 	}
@@ -92,7 +113,12 @@ export class SVGLayout {
 		for (const c of node.children) {
 			if (c.localName == 'desc' && c.getAttribute('name') == name) {
 				c.remove();
-				return c.getAttribute('tm');
+				const tm = c.getAttribute('tm');
+				if (tm) {
+					return tm;
+				} else {
+					return '';
+				}
 			}
 		}
 	}

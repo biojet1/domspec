@@ -1,0 +1,76 @@
+<svg id="V0" width="300" height="400" viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg" >
+  <rect rx="10" x="0" y="0" width="300" height="400" fill="darkgrey"/>
+  <!--   <circle id="C4" cx="150" cy="5.08cm" fill="blue"/>-->
+  <circle id="C1" cx="140" cy="120" r="4" fill="green"/>
+  <g transform="translate(0, 120)">
+    <g transform="translate(140, 0)">
+      <g transform="rotate(90)">
+        <g transform="scale(2)">
+          <g transform="translate(-40, -10)">
+            <circle id="C2" cx="0" cy="0" r="1" fill="yellow" />
+            <circle transform="" cx="0" cy="0" r="1" fill="red" />
+            <rect transform="scale(2)" x="0" y="0" width="20" height="20" fill="grey" id="R4" />
+            <rect transform="rotate(45)" x="0" y="0" width="20" height="20" fill="yellow" id="R3"/>
+            <rect transform="translate(-30, -20)" x="0" y="0" width="20" height="20" fill="orange" id="R2"/>
+            <rect transform="" x="0" y="0" width="20" height="20" stroke="blue" fill="none" id="R1"/>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <rect
+     style="fill:none;stroke:#5b2d07;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:1,4;stroke-dashoffset:0"
+     width="40"
+     height="40"
+     x="160"
+     y="-20" />
+  <rect
+     style="fill:none;stroke:#5b2d07;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:1,4;stroke-dashoffset:0"
+     width="80"
+     height="80"
+     x="80"
+     y="40" />
+  <rect
+     style="fill:none;stroke:#5b2d07;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:1,4;stroke-dashoffset:0"
+     width="20"
+     height="30"
+     x="140"
+     y="40" />
+  <rect
+     style="fill:none;stroke:#5b2d07;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:1,4;stroke-dashoffset:0"
+     width="20"
+     height="30"
+     x="180"
+     y="-20" />
+  <rect
+     style="fill:none;stroke:#5b2d07;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:1,4;stroke-dashoffset:0"
+     width="40"
+     height="40"
+     x="120"
+     y="40" transform="translate(-80 -40)scale(2 2)"
+
+     />
+  <rect
+     style="fill:none;stroke:#5b2d07;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:1,4;stroke-dashoffset:0"
+     width="40"
+     height="40"
+     x="160"
+     y="-20" transform="translate(-80 -40)scale(2 2)"/>
+  <g transform="translate(-80 -40)scale(2 2)">
+    <rect
+     style="fill:none;stroke:#5b2d07;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:1,4;stroke-dashoffset:0"
+     width="20"
+     height="20"
+     x="0"
+     y="0" transform="matrix(-1.4142136,1.4142136,-1.4142136,-1.4142136,160,40.000001)"/>
+  </g>
+
+  <rect
+     style="fill:none;stroke:#5b2d07;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:1,4;stroke-dashoffset:0"
+     width="80"
+     height="80"
+     x="80"
+     y="40"  transform="translate(-80 -40)scale(2 2)"/>
+  
+  <script href="metrics.js"></script>
+</svg>

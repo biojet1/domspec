@@ -89,22 +89,22 @@ tap.test('Geoms 1', function (t) {
 	console.log(Matrix.translate(-50));
 	t.same(R5.ownTM.describe(), 'translate(0 -40)');
 	t.same(R6.ownTM.describe(), 'translate(0 40)');
-lay.saveTM("A", R5, R6);
+	lay.saveTM('A', R5, R6);
 	console.log(R6.outerHTML);
+	lay.align({ hGap: 5 });
+	{
+		const LV3 = new Lay(V3);
 
-
-
-	const LV3 = new Lay(V3);
-
-	[
-		['C6', 4, 4, 2, 2],
-		['L1', 0, 2.5, 5, 5],
-	].forEach(([id, x, y, w, h]) => {
-		const v = document.getElementById(id);
-		const b = Box.new(x, y, w, h);
-		const r = LV3.boundingBox(v);
-		eqBox(t, b, r.isValid() ? r : Box.empty(), x - ~~x === 0 ? 1e-9 : 1, id);
-	});
+		[
+			['C6', 4, 4, 2, 2],
+			['L1', 0, 2.5, 5, 5],
+		].forEach(([id, x, y, w, h]) => {
+			const v = document.getElementById(id);
+			const b = Box.new(x, y, w, h);
+			const r = LV3.boundingBox(v);
+			eqBox(t, b, r.isValid() ? r : Box.empty(), x - ~~x === 0 ? 1e-9 : 1, id);
+		});
+	}
 
 	t.end();
 });

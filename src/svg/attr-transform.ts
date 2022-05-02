@@ -41,6 +41,7 @@ export class SVGTransformList extends Array<SVGTransform> {
 		this.push(m);
 		return m;
 	}
+
 	consolidate() {
 		let { [0]: first, length: n } = this;
 		const m = new SVGTransform();
@@ -80,6 +81,9 @@ export class SVGTransformList extends Array<SVGTransform> {
 			tl.appendItem((SVGTransform as any)[name](...args) as any as SVGTransform);
 		}
 		return tl;
+	}
+	public static new(m: SVGTransform): SVGTransformList {
+		return new SVGTransformList(m);
 	}
 }
 
@@ -259,12 +263,14 @@ export class SVGTransform extends MatrixMut {
 }
 
 export class SVGTransformListAttr extends Attr {
-	_var?: SVGTransformList | string;
+	_var?: SVGTransformList | Matrix | string;
 
 	set value(value: string) {
 		const { _var } = this;
 		if (_var instanceof SVGTransformList) {
 			_var.initialize(SVGTransform.parse(value));
+		} else if (_var instanceof Matrix) {
+			this._var = Matrix.parse(value);
 		} else {
 			this._var = value;
 		}
@@ -274,6 +280,8 @@ export class SVGTransformListAttr extends Attr {
 		const { _var } = this;
 		if (_var instanceof SVGTransformList) {
 			return _var.consolidate()?.toString() || '';
+		} else if (_var instanceof Matrix) {
+			return _var.toString();
 		}
 		return _var || '';
 	}
@@ -282,6 +290,9 @@ export class SVGTransformListAttr extends Attr {
 		const { _var } = this;
 		if (_var instanceof SVGTransformList) {
 			return _var;
+		} else if (_var instanceof Matrix) {
+			const { a, b, c, d, e, f } = _var;
+			return (this._var = new SVGTransformList(new SVGTransform([a, b, c, d, e, f])));
 		} else if (_var) {
 			return (this._var = SVGTransformList.parse(_var));
 		} else {
@@ -303,6 +314,73 @@ export class SVGTransformListAttr extends Attr {
 		} else {
 			return _var?.toString();
 		}
+	}
+
+	saveAs(name: string) {
+		const o = this.ownerElement as SVGGraphicsElement;
+		if (o) {
+			const t = o.getAttribute('transform') ?? '';
+			for (const c of o.children) {
+				if (c.localName == 'desc' && c.getAttribute('name') == name) {
+					c.setAttribute('tm', t);
+					return;
+				}
+			}
+			const c = o.ownerDocument?.createElement('desc');
+			if (c) {
+				c.setAttribute('tm', t);
+				c.setAttribute('name', name);
+				o.appendChild(c);
+			}
+		}
+		return this;
+	}
+
+	restore(name: string) {
+		// restoreSaved?
+		const o = this.ownerElement as SVGGraphicsElement;
+		if (o) {
+			for (const c of o.children) {
+				if (c.localName == 'desc' && c.getAttribute('name') == name) {
+					const tm = c.getAttribute('tm');
+					if (tm != null) {
+						o.setAttribute('transform', tm);
+						break;
+					}
+				}
+			}
+		}
+		return this;
+	}
+
+	getSaved(name: string) {
+		// getSaved?
+		const o = this.ownerElement;
+		if (o) {
+			for (const c of o.children) {
+				if (c.localName == 'desc' && c.getAttribute('name') == name) {
+					const tm = c.getAttribute('tm');
+					if (tm != null) {
+						return Matrix.parse(tm);
+					}
+				}
+			}
+		}
+	}
+
+	apply(m: Matrix) {
+		const { _var } = this;
+		if (_var instanceof SVGTransformList) {
+			const { a, b, c, d, e, f } = _var.consolidate().multiply(m);
+			return _var.initialize(new SVGTransform([a, b, c, d, e, f]));
+		} else if (_var instanceof Matrix) {
+			return (this._var = _var.multiply(m));
+		} else if (_var) {
+			return (this._var = Matrix.parse(_var).multiply(m));
+		} else {
+			return (this._var = Matrix.new(m));
+		}
+		return this;
 	}
 }
 const { tan, cos, sin, PI, min, max } = Math;
@@ -360,3 +438,5 @@ export function viewbox_transform(
 	// translate(translate-x, translate-y) scale(scale-x, scale-y)
 	return [translate_x, translate_y, scale_x, scale_y];
 }
+
+import { SVGElement, SVGSVGElement, SVGGraphicsElement } from './_element.js';

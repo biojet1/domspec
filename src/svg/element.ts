@@ -477,4 +477,5 @@ import { SVGElement, SVGSVGElement, SVGGraphicsElement } from './_element.js';
 import { SVGTransformListAttr, SVGTransform } from './attr-transform.js';
 import { DOMException } from '../event-target.js';
 export { SVGLength, SVGLengthAttr } from './length.js';
+export { SVGLayout } from './layout.js';
 export { SVGElement, SVGGraphicsElement, SVGSVGElement, SVGTransform };

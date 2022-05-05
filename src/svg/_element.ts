@@ -197,7 +197,9 @@ export class SVGGraphicsElement extends SVGElement {
 	splitTM(): Matrix[] {
 		const { parentNode: parent } = this;
 		if (parent) {
-			if (parent instanceof SVGGraphicsElement) {
+			if (parent instanceof SVGSVGElement) {
+				return [parent.rootTM.multiply(parent.viewportTM()), this.ownTM];
+			} else if (parent instanceof SVGGraphicsElement) {
 				return [parent.rootTM, this.ownTM];
 			}
 		}
@@ -313,8 +315,6 @@ export class SVGGraphicsElement extends SVGElement {
 		return new SVGLayout(this);
 	}
 	//////////////////
-
-
 
 	popTM(name?: string) {
 		if (name == null) {

@@ -4,6 +4,8 @@ import { SVGGraphicsElement, SVGSVGElement } from './_element.js';
 export class SVGLayout {
 	_root: SVGGraphicsElement;
 
+	// SVGLayout: apply transforms relative to '_root'
+
 	constructor(node: SVGGraphicsElement) {
 		this._root = node;
 	}
@@ -41,7 +43,8 @@ export class SVGLayout {
 	}
 
 	rootTM(node: SVGGraphicsElement) {
-		return node.composeTM(this._root);
+		const { _root } = this;
+		return node.composeTM(_root);
 	}
 
 	splitTM(node: SVGGraphicsElement): Matrix[] {
@@ -57,69 +60,16 @@ export class SVGLayout {
 		return [Matrix.identity(), node.ownTM];
 	}
 
-	transform(m: Matrix, node: SVGGraphicsElement) {
-		const [P, M] = this.splitTM(node);
-		node.ownTM = P.multiply(M).inverse().multiply(m).inverse().multiply(P);
-	}
-
-	saveTM(name: string, ...nodes: Array<SVGGraphicsElement>) {
+	transform(m: Matrix, ...nodes: Array<SVGGraphicsElement>) {
 		nodes.forEach((node) => {
-			const t = node.getAttribute('transform') ?? '';
-			for (const c of node.children) {
-				if (c.localName == 'desc' && c.getAttribute('name') == name) {
-					c.setAttribute('tm', t);
-					return;
-				}
-			}
-			const c = node.ownerDocument?.createElement('desc');
-			if (c) {
-				c.setAttribute('tm', t);
-				c.setAttribute('name', name);
-				node.appendChild(c);
-			}
+			const [P, M] = this.splitTM(node);
+			node.ownTM = P.inverse().multiply(m).multiply(P).multiply(M);
 		});
 	}
-
-	restoreTM(name: string, ...nodes: Array<SVGGraphicsElement>) {
-		nodes.forEach((node) => {
-			const t = node.getAttribute('transform') ?? '';
-			for (const c of node.children) {
-				if (c.localName == 'desc' && c.getAttribute('name') == name) {
-					c.setAttribute('tm', t);
-					return;
-				}
-			}
-			const c = node.ownerDocument?.createElement('desc');
-			if (c) {
-				c.setAttribute('tm', t);
-				c.setAttribute('name', name);
-				node.appendChild(c);
-			}
-		});
-	}
-
-	namedTM(name: string, node: SVGGraphicsElement) {
-		for (const c of node.children) {
-			if (c.localName == 'desc' && c.getAttribute('name') == name) {
-				const tm = c.getAttribute('tm');
-				if (tm != null) {
-					return tm;
-				}
-			}
-		}
-	}
-
-	popTM(name: string, node: SVGGraphicsElement) {
-		for (const c of node.children) {
-			if (c.localName == 'desc' && c.getAttribute('name') == name) {
-				c.remove();
-				const tm = c.getAttribute('tm');
-				if (tm) {
-					return tm;
-				} else {
-					return '';
-				}
-			}
-		}
+	toParent(parent: SVGGraphicsElement, node: SVGGraphicsElement) {
+		const childTM = this.rootTM(node);
+		const parentTM = this.rootTM(parent);
+		parent.appendChild(node);
+		node.ownTM = parentTM.inverse().multiply(childTM);
 	}
 }

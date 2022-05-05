@@ -197,13 +197,53 @@ export class SVGGraphicsElement extends SVGElement {
 	splitTM(): Matrix[] {
 		const { parentNode: parent } = this;
 		if (parent) {
-			if (parent instanceof SVGSVGElement) {
-				return [parent.rootTM.multiply(parent.viewportTM()), this.ownTM];
-			} else if (parent instanceof SVGGraphicsElement) {
-				return [parent.rootTM, this.ownTM];
+			if (parent instanceof SVGGraphicsElement) {
+				if (parent.parentNode) {
+					if (parent instanceof SVGSVGElement) {
+						return [parent.rootTM.multiply(parent.viewportTM()), this.ownTM];
+					}
+					return [parent.rootTM, this.ownTM];
+				}
 			}
 		}
 		return [Matrix.identity(), this.ownTM];
+	}
+
+	localTM(): Matrix {
+		// transform applied to decendants
+		const { parentNode: parent, ownTM } = this;
+		if (!parent) {
+			if (this instanceof SVGSVGElement) {
+				return Matrix.identity();
+			}
+		} else if (parent instanceof SVGGraphicsElement) {
+			if (this instanceof SVGSVGElement) {
+				return parent.localTM().multiply(ownTM.multiply(this.viewportTM()));
+			}
+			return parent.localTM().multiply(ownTM);
+		}
+		return ownTM;
+	}
+	docTM(): Matrix {
+		// transform applied to itself relative to document root
+		const { parentNode: parent, ownTM } = this;
+		if (!parent) {
+			if (this instanceof SVGSVGElement) {
+				return Matrix.identity();
+			}
+		} else if (parent instanceof SVGGraphicsElement) {
+			return parent.localTM().multiply(ownTM);
+		}
+		return ownTM;
+	}
+	pairTM(): Matrix[] {
+		const { parentNode: parent, ownTM } = this;
+
+		if (parent instanceof SVGGraphicsElement) {
+			return [parent.localTM(), ownTM];
+		}
+
+		return [Matrix.identity(), ownTM];
 	}
 
 	composeTM(root?: SVGElement | null): Matrix {

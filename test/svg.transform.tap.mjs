@@ -58,13 +58,6 @@ tap.test('transform', function (t) {
     [p, o] = G1.splitTM();
     t.same(p.describe(), Matrix.identity().describe());
     t.same(o.describe(), Matrix.translate(100).describe());
-    // const tr = seq(translate(-100, 0));
-    // const R4CTM = R4.myCTM();
-    // const R4PTM = R4.parentCTM();
-    // let m = tr.at(1);
-    // let n = tr.at(1, R4PTM.inverse());
-    // console.log("m", m.describe());
-    // console.log("X", tr.at(1, R4PTM.inverse()).multiply(R4CTM).describe());
     t.end();
 });
 import fs from 'fs';

@@ -89,9 +89,9 @@ tap.test('Geoms 1', function (t) {
 	console.log(Matrix.translate(-50));
 	t.same(R5.ownTM.describe(), 'translate(0 -40)');
 	t.same(R6.ownTM.describe(), 'translate(0 40)');
-	lay.saveTM('A', R5, R6);
-	console.log(R6.outerHTML);
-	lay.align({ hGap: 5 });
+	// lay.saveTM('A', R5, R6);
+	// console.log(R6.outerHTML);
+	// lay.align({ hGap: 5 });
 	{
 		const LV3 = new Lay(V3);
 

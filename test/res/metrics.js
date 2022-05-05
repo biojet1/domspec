@@ -52,6 +52,7 @@ const transformRect = (rect, matrix) => {
     return DOMRect.fromRect({ x: _left, y: _top, width: _right - _left, height: _bottom - _top }); // or just
     // return {x: _left, y: _top, width: _right - _left, height: _bottom - _top}
 };
+const graphics = Array.from(root.querySelectorAll(`*`)).filter((v) => v instanceof SVGGraphicsElement);
 
 window.boxes = Array.from(root.querySelectorAll(`*[id]`)).map((v) => {
     const r = v.getBoundingClientRect();
@@ -59,21 +60,21 @@ window.boxes = Array.from(root.querySelectorAll(`*[id]`)).map((v) => {
     return [v.id, r.x, r.y, r.width, r.height];
 });
 
-window.bboxes = Array.from(root.querySelectorAll(`*[id]`)).map((v) => {
-    const r = v.getBBox();
-    v.setAttribute('bb', `${r.x},${r.y} ${r.width}x${r.height}`);
+window.bboxes = Array.from(root.querySelectorAll(`*[id]`))
+    .filter((v) => !!v.getBBox)
+    .map((v) => {
+        const r = v.getBBox();
+        v.setAttribute('bb', `${r.x},${r.y} ${r.width}x${r.height}`);
 
-    return [v.id, r.x, r.y, r.width, r.height];
-});
+        return [v.id, r.x, r.y, r.width, r.height];
+    });
 
-window.root_tms = Array.from(root.querySelectorAll(`*[id]`)).map((v) => {
-    const { a, b, c, d, e, f } = v.getTransformToElement(root);
-    return [v.id, a, b, c, d, e, f];
-});
-root.querySelectorAll(`*`).forEach((v) => {
-    const { a, b, c, d, e, f } = v.getTransformToElement(root);
-    v.setAttribute('rtr', `${a} ${b} ${c} ${d} ${e} ${f}`);
-});
+window.root_tms = Array.from(root.querySelectorAll(`*[id]`))
+    .filter((v) => !!v.getTransformToElement)
+    .map((v) => {
+        const { a, b, c, d, e, f } = v.getTransformToElement(root);
+        return [v.id, a, b, c, d, e, f];
+    });
 
 root.querySelectorAll(`*[id]`).forEach((v) => {
     window[v.id] = v;
@@ -110,4 +111,86 @@ function getIndex(node) {
         }
     }
     return i;
+}
+
+const letId = (() => {
+    let _id_map = {};
+    function nextUniqueId(name) {
+        if (_id_map[name]) {
+            ++_id_map[name];
+        } else {
+            _id_map[name] = 1;
+        }
+        return `${name}_${_id_map[name]}`;
+    }
+
+    return (node) => {
+        let id = node.getAttribute('id');
+        if (!id) {
+            id = nextUniqueId(node.localName);
+            node.setAttribute('id', id);
+        }
+        return id;
+    };
+})();
+
+function trBox(r, m) {
+    const a = DOMPoint.fromPoint({
+        x: r.x,
+        y: r.y,
+    }).matrixTransform(m);
+    const b = DOMPoint.fromPoint({
+        x: r.x + r.width,
+        y: r.y + r.height,
+    }).matrixTransform(m);
+    return DOMRect.fromRect({ x: a.x, y: a.y, width: b.x - a.x, height: b.y - a.y });
+}
+function transformBox(r, m) {
+    let xMin = Infinity;
+    let xMax = -Infinity;
+    let yMin = Infinity;
+    let maxY = -Infinity;
+    const { x, y, bottom, right } = r;
+    [
+        [x, y],
+        [right, y],
+        [x, bottom],
+        [right, bottom],
+    ].forEach(function ([px, py]) {
+        const { x, y } = DOMPoint.fromPoint({ x: px, y: py }).matrixTransform(m);
+
+        xMin = Math.min(xMin, x);
+        xMax = Math.max(xMax, x);
+        yMin = Math.min(yMin, y);
+        maxY = Math.max(maxY, y);
+    });
+    return DOMRect.fromRect({ x: xMin, y: yMin, width: Math.abs(xMax - xMin), height: Math.abs(maxY - yMin) });
+}
+
+{
+    let metrix = (window.metrix = {});
+    graphics.forEach((v) => {
+        const root_tm = v.getTransformToElement(root);
+        const { a, b, c, d, e, f } = root_tm;
+        v.style.strokeWidth = 0;
+        const r = v.getBoundingClientRect();
+        const rb = v.getBBox();
+        const root_box = transformBox(r, root.getScreenCTM().inverse());
+  
+
+        // v.setAttribute('bb', `${r.x},${r.y} ${r.width}x${r.height}`);
+        metrix[letId(v)] = {
+            root_tm: [a, b, c, d, e, f],
+            tag_name: v.localName,
+            rect: [r.x, r.y, r.width, r.height],
+            box: [rb.x, rb.y, rb.width, rb.height],
+            root_box: [root_box.x, root_box.y, root_box.width, root_box.height],
+        };
+
+        v.setAttribute('bcr', `${r.x},${r.y} ${r.width}x${r.height}`);
+        v.setAttribute('root_tm', `${a} ${b} ${c} ${d} ${e} ${f}`);
+        v.setAttribute('bbox', `${rb.x},${rb.y} ${rb.width}x${rb.height}`);
+        v.setAttribute('rb', `${root_box.x},${root_box.y} ${root_box.width}x${root_box.height}`);
+    });
+    metrix['-'] = root.outerHTML;
 }

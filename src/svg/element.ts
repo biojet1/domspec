@@ -42,6 +42,11 @@ export class SVGGeometryElement extends SVGGraphicsElement {
 	_shapeBox(tm?: Matrix) {
 		let { path } = this;
 		if (path.firstPoint) {
+			// if (tm) {
+			// 	return path.bbox().transform(tm.multiply(this.ownTM));
+			// } else {
+			// 	return path.bbox().transform(this.rootTM);
+			// }
 			if (tm) {
 				path = path.transform(tm.multiply(this.ownTM));
 			} else {

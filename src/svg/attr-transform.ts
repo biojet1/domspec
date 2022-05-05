@@ -354,7 +354,6 @@ export class SVGTransformListAttr extends Attr {
 	}
 
 	getSaved(name: string) {
-		// getSaved?
 		const o = this.ownerElement;
 		if (o) {
 			for (const c of o.children) {
@@ -362,6 +361,22 @@ export class SVGTransformListAttr extends Attr {
 					const tm = c.getAttribute('tm');
 					if (tm != null) {
 						return Matrix.parse(tm);
+					}
+				}
+			}
+		}
+	}
+
+	removeSaved(name?: string) {
+		const o = this.ownerElement;
+		if (o) {
+			for (const c of o.children) {
+				if (c.localName == 'desc') {
+					const tm = c.getAttribute('tm');
+					if (tm != null) {
+						if (name == null || c.getAttribute('name') == name) {
+							c.remove();
+						}
 					}
 				}
 			}

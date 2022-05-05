@@ -10,7 +10,7 @@ import { Path, Box, Matrix } from 'svggeom';
 import { SVGLayout } from '../dist/svg/layout.js';
 
 function apply(m, node) {
-	const [P, M] = node.splitTM();
+	const [P, M] = node.pairTM();
 	const L = P.inverse().multiply(m).multiply(P);
 	const R = P.multiply(M);
 
@@ -78,7 +78,8 @@ tap.test('layout1', { bail: 0 }, function (t) {
 			t.ok(r.equals(m, 1e-3), `${id} ${r.describe()} ${m.describe()}`);
 			const n = metrix.tag_name == 'svg' ? l.multiply(v.viewportTM().inverse()) : l;
 
-			t.ok(r.equals(n, 1e-3), `${id} ${l.describe()} ${o.describe()}`);
+			t.ok(r.equals(n, 1e-3), `localTM ${id} ${l.describe()} ${o.describe()}`);
+			t.ok(r.equals(v.docTM(), 1e-3), `docTM ${id} ${r.describe()} ${v.docTM().describe()}`);
 			if ((metrix.tag_name != 'defs', !b0.isEmpty())) {
 				eqBox(t, b0, b1, 1e-1, id);
 			}
@@ -124,8 +125,6 @@ tap.test('localTM()', { bail: 0 }, function (t) {
 	const R8 = document.getElementById('R8');
 	const R9 = document.getElementById('R9');
 
-	t.same(R9.localTM().describe(), Matrix.identity().describe());
-	t.same(R8.localTM().describe(), Matrix.translate(-10, -10).describe());
 	t.same(document.getElementById('G1').localTM().describe(), Matrix.translate(100, 0).describe());
 	t.same(document.getElementById('G2').localTM().describe(), Matrix.translate(100, 100).describe());
 	t.same(document.getElementById('G3').localTM().describe(), Matrix.translate(100, 100).describe());
@@ -136,6 +135,8 @@ tap.test('localTM()', { bail: 0 }, function (t) {
 	t.same(document.getElementById('R4').localTM().describe(), Matrix.translate(90, 90).describe());
 	t.same(document.documentElement.localTM().describe(), Matrix.identity().describe());
 	[
+		['R9', '', ''],
+		['R8', 'translate(-10, -10)', 'translate(-10, -10)'],
 		['V2', '', ''],
 		['V1', 'translate(20, -30)', 'translate(20,-30)'],
 		['C1', '', ''],

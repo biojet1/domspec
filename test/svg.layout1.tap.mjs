@@ -51,6 +51,33 @@ function eqBox(t, a, b, epsilon = 0, tag) {
 
 import { createWriteStream, writeFileSync, WriteStream } from 'fs';
 
+function viewbox_transform(e_x, e_y, e_width, e_height, vb_x, vb_y, vb_width, vb_height, aspect) {
+	let [align = 'xmidymid', meet_or_slice = 'meet'] = aspect ? aspect.toLowerCase().split(' ') : [];
+	let scale_x = e_width / vb_width;
+	let scale_y = e_height / vb_height;
+	if (align != 'none' && meet_or_slice == 'meet') {
+		scale_x = scale_y = min(scale_x, scale_y);
+	} else if (align != 'none' && meet_or_slice == 'slice') {
+		// Otherwise, if align is not 'none' and v is 'slice', set the smaller of scale-x and scale-y to the larger
+		scale_x = scale_y = max(scale_x, scale_y);
+	}
+	let translate_x = e_x - vb_x * scale_x;
+	let translate_y = e_y - vb_y * scale_y;
+	if (align.indexOf('xmid') >= 0) {
+		translate_x += (e_width - vb_width * scale_x) / 2.0;
+	}
+	if (align.indexOf('xmax') >= 0) {
+		translate_x += e_width - vb_width * scale_x;
+	}
+	if (align.indexOf('ymid') >= 0) {
+		translate_y += (e_height - vb_height * scale_y) / 2.0;
+	}
+	if (align.indexOf('ymax') >= 0) {
+		translate_y += e_height - vb_height * scale_y;
+	}
+	return [translate_x, translate_y, scale_x, scale_y];
+}
+
 tap.test('layout1', { bail: 0 }, function (t) {
 	for (const f of glob.sync('test/res/*.metrix.json')) {
 		const data = JSON.parse(fs.readFileSync(f, 'utf8'));
@@ -66,6 +93,8 @@ tap.test('layout1', { bail: 0 }, function (t) {
 			const m = Matrix.new(a, b, c, d, e, f);
 			const v = document.getElementById(id);
 			const r = v.rootTM;
+			const l = v.localTM();
+			const o = v.ownTM;
 			const b0 = Box.forRect(x, y, w, h);
 			const b1 = v.boundingBox();
 			root.insertAdjacentHTML(
@@ -74,6 +103,9 @@ tap.test('layout1', { bail: 0 }, function (t) {
 			);
 
 			t.ok(r.equals(m, 1e-3), `${id} ${r.describe()} ${m.describe()}`);
+			const n = metrix.tag_name == 'svg' ? l.multiply(v.viewportTM().inverse()) : l;
+
+			t.ok(r.equals(n, 1e-3), `${id} ${l.describe()} ${o.describe()}`);
 			if ((metrix.tag_name != 'defs', !b0.isEmpty())) {
 				eqBox(t, b0, b1, 1e-1, id);
 			}

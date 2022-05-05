@@ -1,15 +1,11 @@
 import { Point, Ray, Box, Matrix } from 'svggeom';
 import { SVGGraphicsElement, SVGSVGElement } from './_element.js';
-
 export class SVGLayout {
 	_root: SVGGraphicsElement;
-
 	// SVGLayout: apply transforms relative to '_root'
-
 	constructor(node: SVGGraphicsElement) {
 		this._root = node;
 	}
-
 	boundingBox(...args: Array<SVGGraphicsElement | Box | Point | Ray | Array<SVGGraphicsElement | Box | Point | Ray>>) {
 		let bbox = Box.new();
 		for (const v of args) {
@@ -41,23 +37,35 @@ export class SVGLayout {
 		}
 		return bbox;
 	}
-
 	rootTM(node: SVGGraphicsElement) {
 		const { _root } = this;
 		return node.composeTM(_root);
 	}
-
 	splitTM(node: SVGGraphicsElement): Matrix[] {
 		const { parentNode: parent } = node;
-		if (parent) {
-			if (parent instanceof SVGGraphicsElement) {
-				const { _root } = this;
-				if (parent !== _root) {
-					return [this.rootTM(parent), node.ownTM];
-				}
+		if (parent instanceof SVGGraphicsElement) {
+			const { _root } = this;
+			if (parent !== _root) {
+				return [this.rootTM(parent), node.ownTM];
 			}
 		}
 		return [Matrix.identity(), node.ownTM];
+	}
+	localTM(node: SVGGraphicsElement): Matrix {
+		// transform applied to decendants
+		const { _root } = this;
+		const { parentNode: parent, ownTM } = node;
+		if (!parent) {
+			throw new Error(`root not reached`);
+		} else if (parent === _root) {
+			// fall
+		} else if (parent instanceof SVGGraphicsElement) {
+			if (node instanceof SVGSVGElement) {
+				return this.localTM(parent).multiply(ownTM.multiply(node.viewportTM()));
+			}
+			return this.localTM(parent).multiply(ownTM);
+		}
+		return ownTM;
 	}
 
 	transform(m: Matrix, ...nodes: Array<SVGGraphicsElement>) {

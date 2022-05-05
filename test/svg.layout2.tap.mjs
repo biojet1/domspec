@@ -7,27 +7,22 @@ import { SVGLength } from '../dist/svg/element.js';
 import { Path, Box, Matrix } from 'svggeom';
 import { SVGLayout } from '../dist/svg/layout.js';
 
-function apply(m, node) {
+function apply2(m, node) {
 	const [P, M] = node.splitTM();
 	const L = P.inverse().multiply(m).multiply(P);
-	const R = P.multiply(M);
-
-	const I = L.inverse();
-
-	// const T = M.multiply(R.inverse().multiply(m)).inverse();
-	// const T = P.inverse().multiply(m).inverse().multiply(M).inverse();
 	let S, T;
-	T = S = R.inverse().multiply(m).multiply(P);
-	if (M.isIdentity == false) {
-		T = M.multiply(T).inverse(); // R1,R2 OK
-		// T = T.multiply(M).inverse() // R1,R2 OK
-		// T = T.inverse()
-	}
-	// T = R.inverse().multiply(m).multiply(P)
 	T = L.multiply(M); // R1,R2,R3,R4 OK
 	node.ownTM = T;
-
-	 console.log('trans', node.id, `[${T.describe()}]\n\tL[${L.describe()}]\n\tS[${S.describe()}]\n\t-> ${T.describe()}`);
+	console.log('trans', node.id, `[${T.describe()}]\n\tL[${L.describe()}]\n\t-> ${T.describe()}`);
+}
+function apply(m, node) {
+	const P = node.parentNode.localTM();
+	const M = node.ownTM;
+	const L = P.inverse().multiply(m).multiply(P);
+	let T;
+	T = L.multiply(M); // R1,R2,R3,R4 OK
+	node.ownTM = T;
+	console.log('trans', node.id, `[${T.describe()}]\n\tL[${L.describe()}]\n\t-> ${T.describe()}`);
 }
 
 function toParent(parent, i) {

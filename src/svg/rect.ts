@@ -68,12 +68,13 @@ export class SVGRectAttr extends Attr {
 
 	contain2(...args: Array<SVGGraphicsElement | Box | Point | Ray | Array<SVGGraphicsElement | Box | Point | Ray>>) {
 		let bbox = contain(args);
-		const o = this.ownerElement as SVGGraphicsElement;
-		if (o) {
-			if (o.nearestViewportElement) {
-				const [p, m] = o.splitTM();
-				bbox = bbox.transform(p.multiply(o.innerTM).inverse());
-			}
+		const o = this.ownerElement;
+		if (o instanceof SVGGraphicsElement) {
+			// if (o.nearestViewportElement) {
+			// 	const [p, m] = o.splitTM();
+			// 	bbox = bbox.transform(p.multiply(o.innerTM).inverse());
+			// }
+			bbox = bbox.transform(o.localTM().inverse());
 		}
 		const { _var } = this;
 		if (_var instanceof BoxMut) {

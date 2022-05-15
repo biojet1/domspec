@@ -331,7 +331,7 @@ export class SVGLengthAttr extends Attr {
 	valueOf() {
 		return this._var?.toString();
 		// _var == undefined returns undefined
-		// _var == string returns string
+		// _var == string returns String.toString()
 		// _var == SVGLength returns SVGLength.toString();
 	}
 

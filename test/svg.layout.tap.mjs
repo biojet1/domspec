@@ -83,9 +83,9 @@ tap.test('Geoms 1', function (t) {
 		const r = lay.boundingBox(v);
 		eqBox(t, b, r.isValid() ? r : Box.empty(), x - ~~x === 0 ? 1e-9 : 1, id);
 	});
-	lay.trans(Matrix.translate(0, -40), R5);
+	lay.transform(Matrix.translate(0, -40), R5);
 	// console.log(Matrix.translate(50).describe())
-	lay.trans(Matrix.translate(-50), R6);
+	lay.transform(Matrix.translate(-50), R6);
 	console.log(Matrix.translate(-50));
 	t.same(R5.ownTM.describe(), 'translate(0 -40)');
 	t.same(R6.ownTM.describe(), 'translate(0 40)');
@@ -108,8 +108,3 @@ tap.test('Geoms 1', function (t) {
 
 	t.end();
 });
-if (0) {
-	const svg = document.documentElement;
-	svg.setAttribute('width', '300px');
-	svg.setAttribute('height', 400);
-}

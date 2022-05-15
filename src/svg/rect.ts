@@ -57,6 +57,10 @@ export class SVGRectAttr extends Attr {
 
 	contain(...args: Array<SVGGraphicsElement | Box | Point | Ray | Array<SVGGraphicsElement | Box | Point | Ray>>) {
 		let bbox = contain(args);
+		const o = this.ownerElement;
+		if (o instanceof SVGGraphicsElement) {
+			bbox = bbox.transform(o.localTM().inverse());
+		}
 		const { _var } = this;
 		if (_var instanceof BoxMut) {
 			_var.copy(bbox);
@@ -67,22 +71,7 @@ export class SVGRectAttr extends Attr {
 	}
 
 	contain2(...args: Array<SVGGraphicsElement | Box | Point | Ray | Array<SVGGraphicsElement | Box | Point | Ray>>) {
-		let bbox = contain(args);
-		const o = this.ownerElement;
-		if (o instanceof SVGGraphicsElement) {
-			// if (o.nearestViewportElement) {
-			// 	const [p, m] = o.splitTM();
-			// 	bbox = bbox.transform(p.multiply(o.innerTM).inverse());
-			// }
-			bbox = bbox.transform(o.localTM().inverse());
-		}
-		const { _var } = this;
-		if (_var instanceof BoxMut) {
-			_var.copy(bbox);
-		} else {
-			this._var = BoxMut.new(bbox) as BoxMut;
-		}
-		return this;
+		return this.contain(...args);
 	}
 	// https://svgwg.org/svg-next/coords.html#Units
 	calcWidth(): number {

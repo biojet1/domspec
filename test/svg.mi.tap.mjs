@@ -77,7 +77,7 @@ tap.test('Mi', function (t) {
             ]);
             for (const v of [u, w]) {
                 let M = t.at(1, Matrix.identity());
-                let [p, m] = v.splitTM();
+                let [p, m] = v.pairTM();
                 // console.log(p, m, M);
                 v.ownTM = p.inverse().multiply(M).multiply(p);
             }
@@ -101,7 +101,7 @@ tap.test('Mi', function (t) {
     //     // });
 
     //     let M = t.at(1, Matrix.identity());
-    //     let [p, m] = v.splitTM();
+    //     let [p, m] = v.pairTM();
     //     // console.log(p, m, M);
     //     v.ownTM = p.inverse().multiply(M).multiply(p);
     // });

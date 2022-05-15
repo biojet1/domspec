@@ -205,7 +205,14 @@ export class SVGTransform extends MatrixMut {
 				cosθ = cos(θ);
 				sinθ = sin(θ);
 		}
-		this.setHexad(cosθ, sinθ, -sinθ, cosθ, x ? -cosθ * x + sinθ * y + x : 0, y ? -sinθ * x - cosθ * y + y : 0);
+		this.setHexad(
+			cosθ,
+			sinθ,
+			-sinθ,
+			cosθ,
+			x ? -cosθ * x + sinθ * y + x : 0,
+			y ? -sinθ * x - cosθ * y + y : 0,
+		);
 	}
 	setSkewX(x: number) {
 		this.setHexad(1, 0, tan(radians((this.θ = x))), 1, 0, 0);
@@ -316,10 +323,10 @@ export class SVGTransformListAttr extends Attr {
 		}
 	}
 
-	saveAs(name: string) {
+	saveAs(name: string, m?: Matrix) {
 		const o = this.ownerElement as SVGGraphicsElement;
 		if (o) {
-			const t = o.getAttribute('transform') ?? '';
+			const t = m == undefined ? o.getAttribute('transform') ?? '' : m.toString();
 			for (const c of o.children) {
 				if (c.localName == 'desc' && c.getAttribute('name') == name) {
 					c.setAttribute('tm', t);
@@ -414,7 +421,7 @@ export function viewbox_transform(
 	vb_y: number,
 	vb_width: number,
 	vb_height: number,
-	aspect?: string | null
+	aspect?: string | null,
 ) {
 	// https://svgwg.org/svg2-draft/coords.html#ComputingAViewportsTransform
 	//  Let align be the align value of preserveAspectRatio, or 'xMidYMid' if preserveAspectRatio is not defined.

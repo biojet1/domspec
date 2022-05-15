@@ -7,14 +7,7 @@ import { SVGLength } from '../dist/svg/element.js';
 import { Path, Box, Matrix } from 'svggeom';
 import { SVGLayout } from '../dist/svg/layout.js';
 
-function apply2(m, node) {
-	const [P, M] = node.splitTM();
-	const L = P.inverse().multiply(m).multiply(P);
-	let S, T;
-	T = L.multiply(M); // R1,R2,R3,R4 OK
-	node.ownTM = T;
-	console.log('trans', node.id, `[${T.describe()}]\n\tL[${L.describe()}]\n\t-> ${T.describe()}`);
-}
+
 function apply(m, node) {
 	const P = node.parentNode.localTM();
 	const M = node.ownTM;

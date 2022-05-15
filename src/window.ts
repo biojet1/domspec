@@ -1,9 +1,9 @@
 /*
 s = """*/
-import { Document, HTMLDocument } from "./document.js";
-import { EventTarget, MessageEvent } from "./event-target.js";
-import * as html_elements from "./html/element.js";
-import * as all from "./all.js";
+import { Document, HTMLDocument } from './document.js';
+import { EventTarget, MessageEvent } from './event-target.js';
+import * as html_elements from './html/element.js';
+import * as all from './all.js';
 
 // """
 
@@ -35,7 +35,7 @@ export class Window extends EventTarget {
 	constructor(doc?: Document) {
 		super();
 		doc && this.setDocument(doc);
-		if (!("HTMLDocument" in Window)) {
+		if (!('HTMLDocument' in Window)) {
 			for (const k of Object.getOwnPropertyNames(html_elements)) {
 				Reflect.set(this, k, Reflect.get(html_elements, k));
 			}
@@ -64,10 +64,10 @@ export class Window extends EventTarget {
 		return this;
 	}
 	get parent(): Window {
-		return this._parent || this;
+		return this._parent ?? this;
 	}
 	get name() {
-		return this._name || "";
+		return this._name ?? '';
 	}
 
 	get top() {
@@ -84,14 +84,12 @@ export class Window extends EventTarget {
 		if (!_frames) {
 			this._frames = _frames = new Proxy<Window>(this, {
 				get(window: Window, key: string) {
-					if (typeof key === "symbol") {
+					if (typeof key === 'symbol') {
 						//pass
 					} else if (/^-?\d+$/.test(key)) {
 						let i = parseInt(key);
 						let { document } = window;
-						for (const frame of document.getElementsByTagName(
-							"iframe"
-						)) {
+						for (const frame of document.getElementsByTagName('iframe')) {
 							if (0 === i--) {
 								let win = frmwm.get(frame);
 								win || frmwm.set(frame, (win = new Window()));
@@ -184,7 +182,7 @@ export class Window extends EventTarget {
 		// TODO: event.data - structured clone message - requires cloning DOM nodes
 		const { window: source } = globalThis;
 		setTimeout(() => {
-			const event = new MessageEvent("message", {
+			const event = new MessageEvent('message', {
 				data: message,
 				source: source as any as EventTarget,
 			});
@@ -198,19 +196,17 @@ export class Window extends EventTarget {
 		// console.log("loadURL: ", params);
 		function mimeTypeFor(s: string) {
 			if (/\.svg$/.test(s)) {
-				return "image/svg+xml";
+				return 'image/svg+xml';
 			} else if (/\.xhtml?$/.test(s)) {
-				return "application/xhtml+xml";
+				return 'application/xhtml+xml';
 			} else if (/\.html?$/.test(s)) {
-				return "application/xhtml+xml";
+				return 'application/xhtml+xml';
 			} else if (/\.xml$/.test(s)) {
-				return "application/xml";
+				return 'application/xml';
 			}
 		}
-		const rl =
-			(params.resourceLoader as ResourceLoader) ||
-			Document.resourceLoader;
-		if (url.indexOf("file:") === 0) {
+		const rl = (params.resourceLoader as ResourceLoader) || Document.resourceLoader;
+		if (url.indexOf('file:') === 0) {
 			// const file = fileURLToPath(url);
 			const strm = await rl.readStream(url);
 			if (strm) {
@@ -228,9 +224,7 @@ export class Window extends EventTarget {
 			if (response) {
 				const { body } = response;
 				if (body) {
-					doc = Document.new(
-						response.headers.get("content-type") || mimeTypeFor(url)
-					);
+					doc = Document.new(response.headers.get('content-type') || mimeTypeFor(url));
 					doc._location = url;
 					const sax = pushDOMParser(this.setDocument(doc), params);
 					for await (const chunk of body) {
@@ -249,26 +243,24 @@ export class Window extends EventTarget {
 	async loadURL(url: string, params?: any) {
 		function mimeTypeFor(s: string) {
 			if (/\.svg$/.test(s)) {
-				return "image/svg+xml";
+				return 'image/svg+xml';
 			} else if (/\.xhtml?$/.test(s)) {
-				return "application/xhtml+xml";
+				return 'application/xhtml+xml';
 			} else if (/\.html?$/.test(s)) {
-				return "text/html";
+				return 'text/html';
 			} else if (/\.xml$/.test(s)) {
-				return "application/xml";
+				return 'application/xml';
 			}
 		}
-		const rl =
-			(params.resourceLoader as ResourceLoader) ||
-			Document.resourceLoader;
+		const rl = (params.resourceLoader as ResourceLoader) || Document.resourceLoader;
 		// let p: Promise<[string, AsyncIterableIterator<string | Buffer>]>;
 		let mt: string;
 		let it: AsyncIterableIterator<string | Buffer>;
 
-		[mt, it] = await (url.indexOf("file:") === 0
+		[mt, it] = await (url.indexOf('file:') === 0
 			? rl.readStream(url).then((strm) => {
 					if (strm) {
-						return ["", strm[Symbol.asyncIterator]()];
+						return ['', strm[Symbol.asyncIterator]()];
 					} else {
 						throw new Error();
 					}
@@ -276,10 +268,7 @@ export class Window extends EventTarget {
 			: rl.fetch(url).then((response) => {
 					const { body } = response;
 					if (body) {
-						return [
-							response.headers.get("content-type") || "",
-							body[Symbol.asyncIterator](),
-						];
+						return [response.headers.get('content-type') || '', body[Symbol.asyncIterator]()];
 					} else {
 						throw new Error(`No response body ${url}`);
 					}
@@ -329,6 +318,9 @@ Object.defineProperties(Window.prototype, {
 	clearTimeout: {
 		value: clearTimeout,
 	},
+	clearInterval: {
+		value: clearInterval,
+	},
 	setTimeout: {
 		value: setTimeout,
 	},
@@ -337,9 +329,9 @@ Object.defineProperties(Window.prototype, {
 	},
 });
 
-import { ResourceLoader } from "./resource.js";
-import { DOMImplementation } from "./dom-implementation.js";
-import { pushDOMParser, htmlParser2 } from "./dom-parse.js";
+import { ResourceLoader } from './resource.js';
+import { DOMImplementation } from './dom-implementation.js';
+import { pushDOMParser, htmlParser2 } from './dom-parse.js';
 // import { fileURLToPath, pathToFileURL } from "url";
 // import fs from "fs";
 

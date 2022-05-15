@@ -17,16 +17,7 @@ export class SVGLayout {
 				const { x, y } = v;
 				bbox = Box.new(x, y, 0, 0).merge(bbox);
 			} else {
-				const { _root } = this;
-				const parent = v.parentNode;
-				let p;
-				if (parent === _root) {
-					p = Matrix.identity();
-				} else if (parent instanceof SVGSVGElement) {
-					p = this.rootTM(parent as SVGGraphicsElement).multiply(parent.viewportTM());
-				} else {
-					p = this.rootTM(parent as SVGGraphicsElement);
-				}
+				const [p, o] = this.pairTM(v);
 				try {
 					bbox = v._boundingBox(p).merge(bbox);
 				} catch (err) {
@@ -41,15 +32,17 @@ export class SVGLayout {
 		const { _root } = this;
 		return node.composeTM(_root);
 	}
-	splitTM(node: SVGGraphicsElement): Matrix[] {
-		const { parentNode: parent } = node;
-		if (parent instanceof SVGGraphicsElement) {
-			const { _root } = this;
-			if (parent !== _root) {
-				return [this.rootTM(parent), node.ownTM];
-			}
+	pairTM(node: SVGGraphicsElement): Matrix[] {
+		const { parentNode: parent, ownTM } = node;
+		const { _root } = this;
+		if (!parent) {
+			throw new Error(`root not reached`);
+		} else if (parent === _root) {
+			// fall
+		} else if (parent instanceof SVGGraphicsElement) {
+			return [this.localTM(parent), ownTM];
 		}
-		return [Matrix.identity(), node.ownTM];
+		return [Matrix.identity(), ownTM];
 	}
 	localTM(node: SVGGraphicsElement): Matrix {
 		// transform applied to decendants
@@ -58,6 +51,9 @@ export class SVGLayout {
 		if (!parent) {
 			throw new Error(`root not reached`);
 		} else if (parent === _root) {
+			if (node instanceof SVGSVGElement) {
+				return ownTM.multiply(node.viewportTM());
+			}
 			// fall
 		} else if (parent instanceof SVGGraphicsElement) {
 			if (node instanceof SVGSVGElement) {
@@ -70,7 +66,7 @@ export class SVGLayout {
 
 	transform(m: Matrix, ...nodes: Array<SVGGraphicsElement>) {
 		nodes.forEach((node) => {
-			const [P, M] = this.splitTM(node);
+			const [P, M] = this.pairTM(node);
 			node.ownTM = P.inverse().multiply(m).multiply(P).multiply(M);
 		});
 	}

@@ -224,6 +224,18 @@ export class SVGGraphicsElement extends SVGElement {
 		}
 		return ownTM;
 	}
+	docTM(): Matrix {
+		// transform applied to itself relative to document root
+		const { parentNode: parent, ownTM } = this;
+		if (!parent) {
+			if (this instanceof SVGSVGElement) {
+				return Matrix.identity();
+			}
+		} else if (parent instanceof SVGGraphicsElement) {
+			return parent.localTM().multiply(ownTM);
+		}
+		return ownTM;
+	}
 	pairTM(): Matrix[] {
 		const { parentNode: parent, ownTM } = this;
 

@@ -15,7 +15,7 @@ function apply(m, node) {
 	let T;
 	T = L.multiply(M); // R1,R2,R3,R4 OK
 	node.ownTM = T;
-	console.log('trans', node.id, `[${T.describe()}]\n\tL[${L.describe()}]\n\t-> ${T.describe()}`);
+	// console.log('trans', node.id, `[${T.describe()}]\n\tL[${L.describe()}]\n\t-> ${T.describe()}`);
 }
 
 function toParent(parent, i) {

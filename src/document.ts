@@ -329,7 +329,8 @@ export abstract class Document extends NonElementParentNode {
 		if (window) {
 			return window;
 		}
-		_wMapDocWin.set(this, (window = new Window()));
+		window = new Window();
+		window.setDocument(this);
 		return window;
 	}
 

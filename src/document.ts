@@ -1,9 +1,9 @@
-import { NonElementParentNode } from "./non-element-parent-node.js";
+import { NonElementParentNode } from './non-element-parent-node.js';
 
 export abstract class Document extends NonElementParentNode {
 	//// Dom
 	contentType: string;
-	defaultView?: Window;
+	// defaultView?: Window;
 	currentScript?: Element;
 	_domImpl?: DOMImplementation;
 	_location?: URL | string;
@@ -12,20 +12,20 @@ export abstract class Document extends NonElementParentNode {
 	protected constructor(contentType?: string) {
 		super();
 		// this.documentURI = "about:blank";
-		this.contentType = contentType || "application/xml";
+		this.contentType = contentType || 'application/xml';
 	}
 	get documentURI() {
 		const { _location } = this;
-		return _location ? _location.toString() : "about:blank";
+		return _location ? _location.toString() : 'about:blank';
 	}
 	get URL() {
 		return this.documentURI;
 	}
 	get compatMode() {
-		return "CSS1Compat";
+		return 'CSS1Compat';
 	}
 	get characterSet() {
-		return "UTF-8";
+		return 'UTF-8';
 	}
 	get charset() {
 		return this.characterSet;
@@ -37,7 +37,7 @@ export abstract class Document extends NonElementParentNode {
 		return 9;
 	}
 	get nodeName() {
-		return "#document";
+		return '#document';
 	}
 	get documentElement() {
 		return this.firstElementChild;
@@ -60,22 +60,22 @@ export abstract class Document extends NonElementParentNode {
 		return null;
 	}
 	get body() {
-		for (const cur of this.getElementsByTagName("body")) {
+		for (const cur of this.getElementsByTagName('body')) {
 			return cur as Element;
 		}
 		return null;
 	}
 	get title() {
-		for (const cur of this.getElementsByTagName("title")) {
+		for (const cur of this.getElementsByTagName('title')) {
 			return cur.textContent;
 		}
-		return "";
+		return '';
 	}
 	get head() {
-		for (const cur of this.getElementsByTagName("head")) {
+		for (const cur of this.getElementsByTagName('head')) {
 			return cur;
 		}
-		return "";
+		return '';
 	}
 	get implementation() {
 		const { _domImpl } = this;
@@ -101,16 +101,13 @@ export abstract class Document extends NonElementParentNode {
 	}
 
 	createElement(localName: string) {
-		const node = createElement(this, localName + "");
+		const node = createElement(this, localName + '');
 		node.ownerDocument = this;
 		return node;
 	}
 
-	createElementNS(
-		ns: string | null | undefined,
-		qualifiedName: string
-	): Element {
-		const node = createElement(this, qualifiedName + "", ns || "");
+	createElementNS(ns: string | null | undefined, qualifiedName: string): Element {
+		const node = createElement(this, qualifiedName + '', ns || '');
 		node.ownerDocument = this;
 		return node;
 	}
@@ -131,7 +128,7 @@ export abstract class Document extends NonElementParentNode {
 	}
 	createCDATASection(text: string) {
 		if (this.isHTML) {
-			throw DOMException.new("NotSupportedError");
+			throw DOMException.new('NotSupportedError');
 		}
 		const node = new CDATASection(text);
 		node.ownerDocument = this;
@@ -146,12 +143,9 @@ export abstract class Document extends NonElementParentNode {
 		// console.log("createAttribute:", name, this.contentType);
 		// const node = Attr.create(name + "", this.contentType);
 		if (!name) {
-			name += "";
+			name += '';
 			if (!name) {
-				throw DOMException.new(
-					"InvalidCharacterError",
-					`name='${name}'`
-				);
+				throw DOMException.new('InvalidCharacterError', `name='${name}'`);
 			}
 		}
 		// if (!/^[A-Za-z:_]+[\w:\.\xB7-]*$/.test(name)) {
@@ -162,10 +156,7 @@ export abstract class Document extends NonElementParentNode {
 			name = name.toLowerCase();
 		}
 
-		const node = new StringAttr(
-			name,
-			this.isHTML ? name.toLowerCase() : name
-		);
+		const node = new StringAttr(name, this.isHTML ? name.toLowerCase() : name);
 		node.ownerDocument = this;
 		return node;
 	}
@@ -190,10 +181,10 @@ export abstract class Document extends NonElementParentNode {
 	}
 
 	get isHTML() {
-		return this.contentType == "text/html";
+		return this.contentType == 'text/html';
 	}
 	get isSVG() {
-		return this.contentType == "image/svg+xml";
+		return this.contentType == 'image/svg+xml';
 	}
 
 	cloneNode(deep?: boolean) {
@@ -217,11 +208,7 @@ export abstract class Document extends NonElementParentNode {
 					case 7: // PROCESSING_INSTRUCTION_NODE
 					case 8: // COMMENT_NODE
 					case 10: // DOCUMENT_TYPE_NODE
-						cur.cloneNode()._attach(
-							end[PREV] /* c8 ignore next */ || node,
-							end,
-							node
-						);
+						cur.cloneNode()._attach(end[PREV] /* c8 ignore next */ || node, end, node);
 						break;
 					// case 3: // TEXT_NODE
 					// case 4: // CDATA_SECTION_NODE
@@ -245,7 +232,7 @@ export abstract class Document extends NonElementParentNode {
 			// 	break;
 			case 9: // DOCUMENT_NODE
 			case -1:
-				throw DOMException.new("NotSupportedError");
+				throw DOMException.new('NotSupportedError');
 		}
 		let { startNode: cur, endNode: end, parentNode, ownerDocument } = node;
 		parentNode /* c8 ignore next */ && node.remove();
@@ -262,10 +249,7 @@ export abstract class Document extends NonElementParentNode {
 		} else*/ {
 			do {
 				cur.ownerDocument = this;
-			} while (
-				cur !== end &&
-				(cur = cur[NEXT] || /* c8 ignore next */ end)
-			);
+			} while (cur !== end && (cur = cur[NEXT] || /* c8 ignore next */ end));
 		}
 		return node;
 	}
@@ -274,8 +258,8 @@ export abstract class Document extends NonElementParentNode {
 	}
 	*_toNodes(nodes: Array<string | ChildNode>): IterableIterator<ChildNode> {
 		for (const [i, node] of nodes.entries()) {
-			if (typeof node === "string" || !node) {
-				yield this.createTextNode(node + "") as ChildNode;
+			if (typeof node === 'string' || !node) {
+				yield this.createTextNode(node + '') as ChildNode;
 			} else
 				switch (node.nodeType) {
 					case undefined:
@@ -284,18 +268,11 @@ export abstract class Document extends NonElementParentNode {
 						{
 							if (this.firstElementChild) {
 								if ((node as ParentNode).firstElementChild) {
-									throw DOMException.new(
-										"HierarchyRequestError"
-									);
+									throw DOMException.new('HierarchyRequestError');
 								}
 							} else {
-								if (
-									(node as ParentNode).firstElementChild
-										?.nextElementSibling
-								) {
-									throw DOMException.new(
-										"HierarchyRequestError"
-									);
+								if ((node as ParentNode).firstElementChild?.nextElementSibling) {
+									throw DOMException.new('HierarchyRequestError');
 								}
 							}
 							for (const cur of (node as ParentNode).childNodes) {
@@ -307,7 +284,7 @@ export abstract class Document extends NonElementParentNode {
 					case 10: {
 						// DOCUMENT_TYPE_NODE
 						if (this.doctype) {
-							throw DOMException.new("HierarchyRequestError");
+							throw DOMException.new('HierarchyRequestError');
 						}
 						yield node;
 						break;
@@ -316,12 +293,8 @@ export abstract class Document extends NonElementParentNode {
 						let j = i;
 						for (const C = nodes.length; ++j < C; ) {
 							const n = nodes[j];
-							if (
-								n &&
-								typeof n !== "string" &&
-								n.nodeType === 1
-							) {
-								throw DOMException.new("HierarchyRequestError");
+							if (n && typeof n !== 'string' && n.nodeType === 1) {
+								throw DOMException.new('HierarchyRequestError');
 							}
 						}
 					}
@@ -335,7 +308,7 @@ export abstract class Document extends NonElementParentNode {
 	get location() {
 		const { _location } = this;
 		if (_location) {
-			if (typeof _location === "string") {
+			if (typeof _location === 'string') {
 				return (this._location = new URL(_location));
 			}
 			return _location;
@@ -350,15 +323,24 @@ export abstract class Document extends NonElementParentNode {
 	get baseURI() {
 		return documentBaseURL(this);
 	}
-	static _fetcher?: (
-		url: RequestInfo,
-		init?: RequestInit
-	) => Promise<Response>;
 
+	get defaultView(): Window | null {
+		let window = _wMapDocWin.get(this);
+		if (window) {
+			return window;
+		}
+		window = new Window();
+		window.setDocument(this);
+		return window;
+	}
+
+	set defaultView(window: Window | null) {
+		window ? _wMapDocWin.set(this, window) : _wMapDocWin.delete(this);
+	}
 	static async fetch(url: RequestInfo, init?: RequestInit) {
-		console.info("Document.fetch");
-		return import("node-fetch").then((mod) => {
-			console.info("node-fetch imported");
+		console.info('Document.fetch');
+		return import('node-fetch').then((mod) => {
+			console.info('node-fetch imported');
 			Document.fetch = mod.default;
 			return mod.default(url, init);
 		});
@@ -366,11 +348,11 @@ export abstract class Document extends NonElementParentNode {
 
 	static new(mimeType?: string) {
 		switch (mimeType) {
-			case "image/svg+xml":
+			case 'image/svg+xml':
 				return new SVGDocument(mimeType);
-			case "application/xhtml+xml":
+			case 'application/xhtml+xml':
 				break;
-			case "text/html":
+			case 'text/html':
 				return new HTMLDocument(mimeType);
 		}
 		return new XMLDocument(mimeType);
@@ -382,20 +364,27 @@ export abstract class Document extends NonElementParentNode {
 	// xhtml: "application/xhtml+xml",
 	// xml: "application/xml",
 	// svg: "image/svg+xml",
+	static setWindow(document: Document, window: Window) {
+		_wMapDocWin.set(document, window);
+	}
+	static getWindow(document: Document) {
+		return _wMapDocWin.get(document);
+	}
 }
 
 let _resourceLoader: ResourceLoader;
+let _wMapDocWin = new WeakMap<Document, Window>();
 
-import { RequestInfo, RequestInit } from "node-fetch";
+import { RequestInfo, RequestInit } from 'node-fetch';
 
 export class XMLDocument extends Document {
-	constructor(mimeType = "application/xml") {
+	constructor(mimeType = 'application/xml') {
 		super(mimeType);
 	}
 }
 
 export class HTMLDocument extends Document {
-	constructor(contentType = "text/html") {
+	constructor(contentType = 'text/html') {
 		super(contentType);
 	}
 	get isHTML() {
@@ -404,31 +393,26 @@ export class HTMLDocument extends Document {
 }
 
 export class SVGDocument extends Document {
-	constructor(contentType = "image/svg+xml") {
+	constructor(contentType = 'image/svg+xml') {
 		super(contentType);
 	}
 	get isSVG() {
 		return true;
 	}
 }
-import { ResourceLoader } from "./resource.js";
-import { HTML_NS, SVG_NS, validateAndExtract, checkName } from "./namespace.js";
-import { ChildNode } from "./child-node.js";
-import { EndNode, ParentNode } from "./parent-node.js";
-import { Element } from "./element.js";
-import { createElement } from "./elements.js";
-import { Attr, StringAttr } from "./attr.js";
-import {
-	Comment,
-	Text,
-	CDATASection,
-	ProcessingInstruction,
-} from "./character-data.js";
-import { DocumentFragment } from "./document-fragment.js";
-import { DOMImplementation, documentBaseURL } from "./dom-implementation.js";
-import { Window } from "./window.js";
-import { DocumentType } from "./document-type.js";
-import { NEXT, PREV, END, Node } from "./node.js";
-import { createEvent } from "./event.js";
-import { DOMException } from "./event-target.js";
+import { ResourceLoader } from './resource.js';
+import { HTML_NS, SVG_NS, validateAndExtract, checkName } from './namespace.js';
+import { ChildNode } from './child-node.js';
+import { EndNode, ParentNode } from './parent-node.js';
+import { Element } from './element.js';
+import { createElement } from './elements.js';
+import { Attr, StringAttr } from './attr.js';
+import { Comment, Text, CDATASection, ProcessingInstruction } from './character-data.js';
+import { DocumentFragment } from './document-fragment.js';
+import { DOMImplementation, documentBaseURL } from './dom-implementation.js';
+import { Window } from './window.js';
+import { DocumentType } from './document-type.js';
+import { NEXT, PREV, END, Node } from './node.js';
+import { createEvent } from './event.js';
+import { DOMException } from './event-target.js';
 export { DOMImplementation };

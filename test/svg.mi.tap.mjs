@@ -66,7 +66,7 @@ tap.test('Mi', function (t) {
             // let t = MatrixInterpolate.parse({ translate: [200, 200] });
             // let t = MatrixInterpolate.parse({ translate: A.boundingBox().center.sub(center) });
              
-            console.log(S.id, S._boundingBox().center.sub(b.center), b);
+            // console.log(S.id, S._boundingBox().center.sub(b.center), b);
 
             let t = MatrixInterpolate.parse([
                 { translate: S._boundingBox().center.sub(b.center), weight: 2 },

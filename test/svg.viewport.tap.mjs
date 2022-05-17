@@ -114,7 +114,7 @@ tap.test('Geoms 1', function (t) {
     // console.log(V1.viewBox.baseVal);
     [['L1', 0, 2.5, 5, 7.5]].forEach(([id, x1, y1, x2, y2]) => {
         const v = document.getElementById(id);
-        console.log(v.outerHTML);
+        // console.log(v.outerHTML);
         t.same([v.x1.baseVal.value, v.y1.baseVal.value, v.x2.baseVal.value, v.y2.baseVal.value], [x1, y1, x2, y2]);
     });
 

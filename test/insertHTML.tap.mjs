@@ -34,8 +34,8 @@ tap.test('transform', function (t) {
     R4.insertAdjacentHTML('afterbegin' ,'<g>svg</g>');
 
         // t.same(o.describe(), Matrix.translate(100).describe());
-        console.log(R4.outerHTML)
-        console.log(R4.firstChild.constructor.name)
+        // console.log(R4.outerHTML)
+        // console.log(R4.firstChild.constructor.name)
 
     t.end();
 });

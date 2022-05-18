@@ -105,53 +105,6 @@ export class StringAttr extends Attr {
 	}
 }
 
-export abstract class Typed {
-	abstract toString(): string;
-	// abstract constructor (value?:string) : Typed;
-}
-
-export class TypedAttr<T extends Typed> extends Attr {
-	[VALUE]?: T | string;
-	get value() {
-		const { [VALUE]: val } = this;
-		return val ? val.toString() : '';
-	}
-	set value(value: string) {
-		this[VALUE] = value;
-	}
-	// into() {
-	// 	const { [VALUE]: val } = this;
-	// 	if (typeof val === "string") {
-	// 		return (this[VALUE] = new T(val));
-	// 	} else {
-	// 		return val || (this[VALUE] = new T());
-	// 	}
-	// 	// return typeof val === "string"
-	// 	// 	? (this[VALUE] = T.parse(val))
-	// 	// 	: val || (this[VALUE] = T.parse());
-	// }
-}
-
-// const rep = function (m: string) {
-// 	switch (m) {
-// 		// '   &apos;
-// 		// case "\xA0":
-// 		// 	return "&nbsp;";
-// 		case "&":
-// 			return "&amp;";
-// 		case "<":
-// 			return "&lt;";
-// 		case ">":
-// 			return "&gt;";
-// 		case '"':
-// 			return "&quot;";
-// 	}
-// 	return m;
-// };
-
 import { Node } from './node.js';
 import { validateAndExtract } from './namespace.js';
 import { Document } from './document.js';
-// test/wpt/dom-nodes-Document-createAttribute.html.tap.mjs
-// test/wpt/dom-nodes-Document-importNode.html.tap.mjs
-// test/wpt/dom-nodes-Node-cloneNode.html.tap.mjs

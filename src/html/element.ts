@@ -15,17 +15,20 @@ export class HTMLTemplateElement extends HTMLElement {
 }
 export class HTMLAnchorElement extends HTMLElement {
 	get href() {
-		const link = this.getAttributeNS(null, "href");
-		return link ? link : "";
+		const link = this.getAttributeNS(null, 'href');
+		return link ? link : '';
 		// return link ? decodeURI(link) : "";
 	}
 	set href(value: string) {
-		this.setAttributeNS(null, "href", encodeURI(value));
+		this.setAttributeNS(null, 'href', encodeURI(value));
 	}
 }
+export class HTMLStyleElement extends HTMLElement {
+	// TODO:
+}
 
-import { Element } from "../element.js";
-import { DocumentFragment } from "../document-fragment.js";
+import { Element } from '../element.js';
+import { DocumentFragment } from '../document-fragment.js';
 
 export class HTMLAreaElement extends HTMLElement {}
 export class HTMLAudioElement extends HTMLElement {}
@@ -79,7 +82,6 @@ export class HTMLSelectElement extends HTMLElement {}
 export class HTMLSlotElement extends HTMLElement {}
 export class HTMLSourceElement extends HTMLElement {}
 export class HTMLSpanElement extends HTMLElement {}
-export class HTMLStyleElement extends HTMLElement {}
 export class HTMLTableCaptionElement extends HTMLElement {}
 export class HTMLTableCellElement extends HTMLElement {}
 export class HTMLTableColElement extends HTMLElement {}

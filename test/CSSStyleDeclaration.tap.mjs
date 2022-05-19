@@ -21,7 +21,8 @@ tap.test('Mutability', function (t) {
     style.padding = '5px';
     style.border = '1px solid';
 
-    // console.log(style);
+    // console.log(style.cssText);
+    // console.log(style._map);
 
     t.equal(style.border, '1px solid', 'border');
     t.equal(style.padding, '5px', 'padding');

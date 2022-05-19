@@ -8,7 +8,7 @@ class CSSMap extends Map<string, String> {}
 
 class CSSValue extends String {
 	priority?: string;
-	hidden?: boolean;
+	short?: string;
 }
 
 interface IStyleDec {
@@ -50,11 +50,15 @@ function format(_map?: CSSMap) {
 					break;
 				default:
 					if (typeof v === 'object') {
-						const o = v as CSSValue;
-						if (!o.hidden) {
-							const p = o.priority;
-							p && arr.push(`${deCamelize(key)}: ${v} !${p};`);
+						const u = v as CSSValue;
+						if (u.short) {
 							break;
+						} else {
+							const p = u.priority;
+							if (p) {
+								arr.push(`${deCamelize(key)}: ${v} !${p};`);
+								break;
+							}
 						}
 					}
 					arr.push(`${deCamelize(key)}: ${v};`);
@@ -275,7 +279,7 @@ function setProperty(
 	name: string,
 	value?: String,
 	priority?: string,
-	hidden?: boolean,
+	short?: string,
 ) {
 	L1: switch (name) {
 		case 'margin':
@@ -299,32 +303,27 @@ function setProperty(
 					break;
 				default:
 					const a = value.split(/\s+/);
-					// _map.delete(`${name}-top`);
-					// _map.delete(`${name}-right`);
-					// _map.delete(`${name}-bottom`);
-					// _map.delete(`${name}-left`);
-					// hidden = true;
 					const s = _map.size;
 					if (a.length > 3) {
-						setProperty(_map, `${name}-top`, a[0], priority, true);
-						setProperty(_map, `${name}-right`, a[1], priority, true);
-						setProperty(_map, `${name}-bottom`, a[2], priority, true);
-						setProperty(_map, `${name}-left`, a[3], priority, true);
+						setProperty(_map, `${name}-top`, a[0], priority, name);
+						setProperty(_map, `${name}-right`, a[1], priority, name);
+						setProperty(_map, `${name}-bottom`, a[2], priority, name);
+						setProperty(_map, `${name}-left`, a[3], priority, name);
 					} else if (a.length > 2) {
-						setProperty(_map, `${name}-top`, a[0], priority, true);
-						setProperty(_map, `${name}-right`, a[1], priority, true);
-						setProperty(_map, `${name}-bottom`, a[2], priority, true);
-						setProperty(_map, `${name}-left`, a[1], priority, true);
+						setProperty(_map, `${name}-top`, a[0], priority, name);
+						setProperty(_map, `${name}-right`, a[1], priority, name);
+						setProperty(_map, `${name}-bottom`, a[2], priority, name);
+						setProperty(_map, `${name}-left`, a[1], priority, name);
 					} else if (a.length > 1) {
-						setProperty(_map, `${name}-top`, a[0], priority, true);
-						setProperty(_map, `${name}-right`, a[1], priority, true);
-						setProperty(_map, `${name}-bottom`, a[0], priority, true);
-						setProperty(_map, `${name}-left`, a[1], priority, true);
+						setProperty(_map, `${name}-top`, a[0], priority, name);
+						setProperty(_map, `${name}-right`, a[1], priority, name);
+						setProperty(_map, `${name}-bottom`, a[0], priority, name);
+						setProperty(_map, `${name}-left`, a[1], priority, name);
 					} else if (a.length > 0) {
-						setProperty(_map, `${name}-top`, a[0], priority, true);
-						setProperty(_map, `${name}-right`, a[0], priority, true);
-						setProperty(_map, `${name}-bottom`, a[0], priority, true);
-						setProperty(_map, `${name}-left`, a[0], priority, true);
+						setProperty(_map, `${name}-top`, a[0], priority, name);
+						setProperty(_map, `${name}-right`, a[0], priority, name);
+						setProperty(_map, `${name}-bottom`, a[0], priority, name);
+						setProperty(_map, `${name}-left`, a[0], priority, name);
 					}
 					if (_map.size == s) {
 						// nothing added
@@ -333,6 +332,8 @@ function setProperty(
 			}
 			// return;
 		}
+		// TODO:
+		// border...
 	}
 	switch (value) {
 		case undefined:
@@ -346,28 +347,27 @@ function setProperty(
 		default:
 			const v = _map.get(name);
 			if (v === undefined) {
-				if (priority || hidden) {
-					const v = new CSSValue(value);
-					priority && (v.priority = priority);
-					hidden == undefined || (v.hidden = hidden);
-					_map.set(name, v);
+				if (priority || short) {
+					const u = new CSSValue(value);
+					priority && (u.priority = priority);
+					short && (u.short = short);
+					_map.set(name, u);
 				} else {
 					_map.set(name, value);
 				}
 			} else if (typeof v === 'object') {
-				const o = v as CSSValue;
-				if (o.toString() == value) {
-					priority !== o.priority && (o.priority = priority);
-					// hidden == undefined || (v.hidden = hidden);
-					// no hidden
+				const u = v as CSSValue;
+				delete u.short;
+				if (u.toString() == value) {
+					if (priority !== u.priority) {
+						u.priority = priority;
+					}
 				} else {
 					if (priority) {
 						const u = new CSSValue(value);
 						u.priority = priority;
-						// no hidden
 						_map.set(name, u);
 					} else {
-						hidden == undefined || (o.hidden = hidden);
 						_map.set(name, value);
 					}
 				}
@@ -375,15 +375,14 @@ function setProperty(
 				if (priority) {
 					const u = new CSSValue(value);
 					u.priority = priority;
-					// no hidden
+					// no short
 					_map.set(name, u);
 				}
 			} else {
 				if (priority) {
 					const u = new CSSValue(value);
 					u.priority = priority;
-					// no hidden
-
+					// no short
 					_map.set(name, u);
 				} else {
 					_map.set(name, value);

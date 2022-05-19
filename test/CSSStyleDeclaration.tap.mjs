@@ -6,6 +6,8 @@ tap.test('margin padding', function (t) {
     style.cssText = 'margin: 15px; padding: 2px;';
     t.equal(style.margin, '15px', 'margin');
     t.equal(style.padding, '2px', 'padding');
+    style.cssText = '';
+    t.equal(style.cssText, '', 'cssText');
     t.end();
 });
 
@@ -19,7 +21,7 @@ tap.test('Mutability', function (t) {
     style.padding = '5px';
     style.border = '1px solid';
 
-console.log(style);
+    console.log(style);
 
     t.equal(style.border, '1px solid', 'border');
     t.equal(style.padding, '5px', 'padding');

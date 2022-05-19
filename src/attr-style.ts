@@ -4,7 +4,15 @@ export function deCamelize(s: string) {
 	});
 }
 
-class CSSMap extends Map<string, String> {}
+class CSSMap extends Map<string, String> {
+	// _long?: CSSMap;
+	// get long() {
+	// 	return this._long || (this._long = new CSSMap());
+	// }
+	// get longq() {
+	// 	return this._long || undefined;
+	// }
+}
 
 class CSSValue extends String {
 	priority?: string;
@@ -61,15 +69,25 @@ function format(_map?: CSSMap) {
 	}
 	return '';
 }
+let _lwp: WeakMap<CSSMap, CSSMap>;
+
+function longMapOf(map: CSSMap) {
+	const lwm = _lwp ?? (_lwp = new WeakMap<CSSMap, CSSMap>());
+	let lm = lwm.get(map);
+	return lm ?? (lwm.set(map, (lm = new CSSMap())), lm);
+}
 
 export class CSSStyleDeclaration {
 	val?: CSSMap;
+
 	get _map() {
 		return this.val || (this.val = new CSSMap());
 	}
+
 	get _mapq() {
 		return this.val || undefined;
 	}
+
 	get cssText() {
 		return format(this._mapq);
 	}
@@ -213,29 +231,34 @@ const handler = {
 					return self.cssText;
 				};
 		}
-		if (typeof key === 'symbol') {
-			if (key === Symbol.iterator) {
-				return () => {
-					const { _mapq: _map } = self;
-					return _map ? _map.keys() : [].values();
-				};
-			}
-			// return self[Symbol.iterator];
-			// console.log(`handler: symbol ${key}`);
-			return undefined;
-		} else if (/^-?\d+$/.test(key)) {
-			let i = parseInt(key);
-			for (const v of self._map.keys()) {
-				if (0 === i--) {
-					return v;
-				} else if (i < 0) {
-					break;
+		const { _mapq: _map } = self;
+		if (_map) {
+			if (typeof key === 'symbol') {
+				if (key === Symbol.iterator) {
+					return () => {
+						const { _mapq: _map } = self;
+						return _map ? _map.keys() : [].values();
+					};
 				}
+			} else if (/^-?\d+$/.test(key)) {
+				let i = parseInt(key);
+				for (const v of _map.keys()) {
+					if (0 === i--) {
+						return v;
+					} else if (i < 0) {
+						break;
+					}
+				}
+			} else {
+				key = deCamelize(key);
+				const val = _map.get(key);
+				if (val != undefined) {
+					return val;
+				}
+
+				return _lwp?.get(_map)?.get(key);
 			}
-			return undefined;
 		}
-		key = deCamelize(key);
-		return self._map.get(key);
 	},
 	set(self: StyleAttr, key: string, value: string) {
 		if (key in StyleAttr.prototype) {
@@ -277,26 +300,31 @@ function setProperty(_map: CSSMap, name: string, value?: String, priority?: stri
 					break;
 				default:
 					const a = value.split(/\s+/);
+					_map.delete(`${name}-top`);
+					_map.delete(`${name}-right`);
+					_map.delete(`${name}-bottom`);
+					_map.delete(`${name}-left`);
+					const long = longMapOf(_map);
 					if (a.length > 3) {
-						setProperty(_map, `${name}-top`, a[0], priority);
-						setProperty(_map, `${name}-right`, a[1], priority);
-						setProperty(_map, `${name}-bottom`, a[2], priority);
-						setProperty(_map, `${name}-left`, a[3], priority);
+						setProperty(long, `${name}-top`, a[0], priority);
+						setProperty(long, `${name}-right`, a[1], priority);
+						setProperty(long, `${name}-bottom`, a[2], priority);
+						setProperty(long, `${name}-left`, a[3], priority);
 					} else if (a.length > 2) {
-						setProperty(_map, `${name}-top`, a[0], priority);
-						setProperty(_map, `${name}-right`, a[1], priority);
-						setProperty(_map, `${name}-bottom`, a[2], priority);
-						setProperty(_map, `${name}-left`, a[1], priority);
+						setProperty(long, `${name}-top`, a[0], priority);
+						setProperty(long, `${name}-right`, a[1], priority);
+						setProperty(long, `${name}-bottom`, a[2], priority);
+						setProperty(long, `${name}-left`, a[1], priority);
 					} else if (a.length > 1) {
-						setProperty(_map, `${name}-top`, a[0], priority);
-						setProperty(_map, `${name}-right`, a[1], priority);
-						setProperty(_map, `${name}-bottom`, a[0], priority);
-						setProperty(_map, `${name}-left`, a[1], priority);
+						setProperty(long, `${name}-top`, a[0], priority);
+						setProperty(long, `${name}-right`, a[1], priority);
+						setProperty(long, `${name}-bottom`, a[0], priority);
+						setProperty(long, `${name}-left`, a[1], priority);
 					} else if (a.length > 0) {
-						setProperty(_map, `${name}-top`, a[0], priority);
-						setProperty(_map, `${name}-right`, a[0], priority);
-						setProperty(_map, `${name}-bottom`, a[0], priority);
-						setProperty(_map, `${name}-left`, a[0], priority);
+						setProperty(long, `${name}-top`, a[0], priority);
+						setProperty(long, `${name}-right`, a[0], priority);
+						setProperty(long, `${name}-bottom`, a[0], priority);
+						setProperty(long, `${name}-left`, a[0], priority);
 					}
 			}
 			// return;

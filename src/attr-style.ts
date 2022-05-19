@@ -4,18 +4,11 @@ export function deCamelize(s: string) {
 	});
 }
 
-class CSSMap extends Map<string, String> {
-	// _long?: CSSMap;
-	// get long() {
-	// 	return this._long || (this._long = new CSSMap());
-	// }
-	// get longq() {
-	// 	return this._long || undefined;
-	// }
-}
+class CSSMap extends Map<string, String> {}
 
 class CSSValue extends String {
 	priority?: string;
+	hidden?: boolean;
 }
 
 interface IStyleDec {
@@ -57,9 +50,11 @@ function format(_map?: CSSMap) {
 					break;
 				default:
 					if (typeof v === 'object') {
-						const p = (v as CSSValue).priority;
-						if (p) {
-							arr.push(`${deCamelize(key)}: ${v} !${p};`);
+						const o = v as CSSValue;
+						if (!o.hidden) {
+							const p = o.priority;
+							p && arr.push(`${deCamelize(key)}: ${v} !${p};`);
+							break;
 						}
 					}
 					arr.push(`${deCamelize(key)}: ${v};`);
@@ -68,13 +63,6 @@ function format(_map?: CSSMap) {
 		return arr.join(' ');
 	}
 	return '';
-}
-let _lwp: WeakMap<CSSMap, CSSMap>;
-
-function longMapOf(map: CSSMap) {
-	const lwm = _lwp ?? (_lwp = new WeakMap<CSSMap, CSSMap>());
-	let lm = lwm.get(map);
-	return lm ?? (lwm.set(map, (lm = new CSSMap())), lm);
 }
 
 export class CSSStyleDeclaration {
@@ -195,14 +183,31 @@ const handler = {
 			case 'getPropertyValue':
 				return (name: string) => {
 					const { _mapq: _map } = self;
-					return (_map && _map.size > 0 && _map.get(name)?.valueOf()) || '';
+					if (_map) {
+						const v = _map.get(name);
+						if (v != undefined) {
+							return v.valueOf();
+						}
+					}
+				};
+
+			case 'getPropertyPriority':
+				return (name: string) => {
+					const { _mapq: _map } = self;
+					if (_map) {
+						let v = _map.get(name);
+						if (typeof v === 'object') {
+							return (v as CSSValue).priority || '';
+						}
+					}
+					return '';
 				};
 			case 'removeProperty':
 				return (name: string) => {
 					const { _mapq: _map } = self;
 					if (_map && _map.size > 0) {
 						const v = _map.get(name);
-						if (v !== undefined) {
+						if (v != undefined) {
 							_map.delete(name);
 							return v;
 						}
@@ -210,20 +215,10 @@ const handler = {
 					return null;
 				};
 
-			case 'getPropertyPriority':
-				return (name: string) => {
-					const { _mapq: _map } = self;
-					if (_map && _map.size > 0) {
-						const v = _map.get(name);
-						if (typeof v === 'object') {
-							return (v as CSSValue).priority || '';
-						}
-					}
-					return '';
-				};
-
 			case 'length':
 				return self._map.size;
+			case '_map':
+				return self._map;
 			case 'cssText':
 				return self.cssText;
 			case 'toString':
@@ -255,8 +250,6 @@ const handler = {
 				if (val != undefined) {
 					return val;
 				}
-
-				return _lwp?.get(_map)?.get(key);
 			}
 		}
 	},
@@ -277,7 +270,13 @@ const handler = {
 	},
 };
 
-function setProperty(_map: CSSMap, name: string, value?: String, priority?: string) {
+function setProperty(
+	_map: CSSMap,
+	name: string,
+	value?: String,
+	priority?: string,
+	hidden?: boolean,
+) {
 	L1: switch (name) {
 		case 'margin':
 		case 'padding': {
@@ -300,31 +299,36 @@ function setProperty(_map: CSSMap, name: string, value?: String, priority?: stri
 					break;
 				default:
 					const a = value.split(/\s+/);
-					_map.delete(`${name}-top`);
-					_map.delete(`${name}-right`);
-					_map.delete(`${name}-bottom`);
-					_map.delete(`${name}-left`);
-					const long = longMapOf(_map);
+					// _map.delete(`${name}-top`);
+					// _map.delete(`${name}-right`);
+					// _map.delete(`${name}-bottom`);
+					// _map.delete(`${name}-left`);
+					// hidden = true;
+					const s = _map.size;
 					if (a.length > 3) {
-						setProperty(long, `${name}-top`, a[0], priority);
-						setProperty(long, `${name}-right`, a[1], priority);
-						setProperty(long, `${name}-bottom`, a[2], priority);
-						setProperty(long, `${name}-left`, a[3], priority);
+						setProperty(_map, `${name}-top`, a[0], priority, true);
+						setProperty(_map, `${name}-right`, a[1], priority, true);
+						setProperty(_map, `${name}-bottom`, a[2], priority, true);
+						setProperty(_map, `${name}-left`, a[3], priority, true);
 					} else if (a.length > 2) {
-						setProperty(long, `${name}-top`, a[0], priority);
-						setProperty(long, `${name}-right`, a[1], priority);
-						setProperty(long, `${name}-bottom`, a[2], priority);
-						setProperty(long, `${name}-left`, a[1], priority);
+						setProperty(_map, `${name}-top`, a[0], priority, true);
+						setProperty(_map, `${name}-right`, a[1], priority, true);
+						setProperty(_map, `${name}-bottom`, a[2], priority, true);
+						setProperty(_map, `${name}-left`, a[1], priority, true);
 					} else if (a.length > 1) {
-						setProperty(long, `${name}-top`, a[0], priority);
-						setProperty(long, `${name}-right`, a[1], priority);
-						setProperty(long, `${name}-bottom`, a[0], priority);
-						setProperty(long, `${name}-left`, a[1], priority);
+						setProperty(_map, `${name}-top`, a[0], priority, true);
+						setProperty(_map, `${name}-right`, a[1], priority, true);
+						setProperty(_map, `${name}-bottom`, a[0], priority, true);
+						setProperty(_map, `${name}-left`, a[1], priority, true);
 					} else if (a.length > 0) {
-						setProperty(long, `${name}-top`, a[0], priority);
-						setProperty(long, `${name}-right`, a[0], priority);
-						setProperty(long, `${name}-bottom`, a[0], priority);
-						setProperty(long, `${name}-left`, a[0], priority);
+						setProperty(_map, `${name}-top`, a[0], priority, true);
+						setProperty(_map, `${name}-right`, a[0], priority, true);
+						setProperty(_map, `${name}-bottom`, a[0], priority, true);
+						setProperty(_map, `${name}-left`, a[0], priority, true);
+					}
+					if (_map.size == s) {
+						// nothing added
+						return;
 					}
 			}
 			// return;
@@ -342,24 +346,28 @@ function setProperty(_map: CSSMap, name: string, value?: String, priority?: stri
 		default:
 			const v = _map.get(name);
 			if (v === undefined) {
-				if (priority) {
+				if (priority || hidden) {
 					const v = new CSSValue(value);
-					v.priority = priority;
+					priority && (v.priority = priority);
+					hidden == undefined || (v.hidden = hidden);
 					_map.set(name, v);
 				} else {
 					_map.set(name, value);
 				}
 			} else if (typeof v === 'object') {
-				if (v.toString() == value) {
-					if (priority !== (v as CSSValue).priority) {
-						(v as CSSValue).priority = priority;
-					}
+				const o = v as CSSValue;
+				if (o.toString() == value) {
+					priority !== o.priority && (o.priority = priority);
+					// hidden == undefined || (v.hidden = hidden);
+					// no hidden
 				} else {
 					if (priority) {
 						const u = new CSSValue(value);
 						u.priority = priority;
+						// no hidden
 						_map.set(name, u);
 					} else {
+						hidden == undefined || (o.hidden = hidden);
 						_map.set(name, value);
 					}
 				}
@@ -367,12 +375,15 @@ function setProperty(_map: CSSMap, name: string, value?: String, priority?: stri
 				if (priority) {
 					const u = new CSSValue(value);
 					u.priority = priority;
+					// no hidden
 					_map.set(name, u);
 				}
 			} else {
 				if (priority) {
 					const u = new CSSValue(value);
 					u.priority = priority;
+					// no hidden
+
 					_map.set(name, u);
 				} else {
 					_map.set(name, value);

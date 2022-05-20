@@ -425,9 +425,10 @@ export class Element extends ParentNode {
 			return node.proxy;
 		}
 	}
-	// set style(value: CSSStyleDeclaration) {
-	// 	this.setAttribute('style', value.toString());
-	// }
+
+	set style(value: any) {
+		this.setAttribute('style', value.toString());
+	}
 
 	get attributeStyleMap() {
 		return this.style._map;

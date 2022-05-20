@@ -51,11 +51,14 @@ let node = document.createElement('div');
 		'red',
 		'attributeStyleMap get',
 	);
-	node.attributeStyleMap.set('color', null);
+	node.attributeStyleMap.set('color', '');
 	assert(node.style.color, '', 'attributeStyleMap set');
 
 	node.style.display = 'none';
 	assert(node.toString(), `<div style="display: none;"></div>`, 'display=none');
+	assert(node.style[0], `display`, '.style[0]');
+	assert(node.style[-1], undefined, '.style[-1]');
+	assert(node.style.constructor.name, 'CSSStyleDeclaration', 'style.constructor');
 	node.style.display = '';
 	assert(node.toString(), '<div></div>', "setter as ''");
 }

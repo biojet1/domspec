@@ -308,7 +308,10 @@ export class Element extends ParentNode {
 		for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
 			if (attr.namespaceURI === XMLNS) {
 				const { prefix: prefixA, localName: localNameA } = attr;
-				if ((prefixA === 'xmlns' && localNameA === prefix) || (!prefix && !prefixA && localNameA === 'xmlns')) {
+				if (
+					(prefixA === 'xmlns' && localNameA === prefix) ||
+					(!prefix && !prefixA && localNameA === 'xmlns')
+				) {
 					return attr.value || null;
 				}
 			}
@@ -422,9 +425,15 @@ export class Element extends ParentNode {
 			return node.proxy;
 		}
 	}
-	set style(value: CSSStyleDeclaration) {
+
+	set style(value: any) {
 		this.setAttribute('style', value.toString());
 	}
+
+	get attributeStyleMap() {
+		return this.style._map;
+	}
+
 	get classList() {
 		const attr = this.getAttributeNode('class');
 		if (!attr) {
@@ -608,7 +617,7 @@ export const dsHandler = {
 						yield toCamelCase(name);
 					}
 				}
-			})()
+			})(),
 		);
 	},
 

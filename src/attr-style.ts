@@ -3,9 +3,14 @@ export function deCamelize(s: string) {
 		return g1 + '-' + g2.toLowerCase();
 	});
 }
+// StylePropertyMap
+class CSSMap extends Map<string, String> {
+	append(key: string, value: string) {
+		this.set(key, value);
+	}
+}
 
-class CSSMap extends Map<string, String> {}
-
+// CSSStyleValue
 class CSSValue extends String {
 	priority?: string;
 	short?: string;
@@ -99,6 +104,29 @@ export class CSSStyleDeclaration {
 		const self = new CSSStyleDeclaration();
 		return new Proxy<CSSStyleDeclaration>(self, handlerFor(self));
 	}
+
+	getPropertyValue(name: string) {
+		const { _mapq: _map } = this;
+		if (_map) {
+			const v = _map.get(name);
+			if (v != undefined) {
+				return v.valueOf();
+			}
+		}
+	}
+	getPropertyPriority(name: string) {
+		const { _mapq: _map } = this;
+		if (_map) {
+			let v = _map.get(name);
+			if (typeof v === 'object') {
+				return (v as CSSValue).priority || '';
+			}
+		}
+		return '';
+	}
+	setProperty(name: string, value?: String, priority?: string) {
+		return setProperty(this._map, name, value, priority);
+	}
 }
 
 export class StyleAttr extends Attr {
@@ -188,27 +216,10 @@ export class StyleAttr extends Attr {
 }
 
 function handlerFor(self: IStyleDec) {
-	const _setProperty = (name: string, value?: string, priority?: string) =>
-		setProperty(self._map, name, value, priority);
-	const _getPropertyValue = (name: string) => {
-		const { _mapq: _map } = self;
-		if (_map) {
-			const v = _map.get(name);
-			if (v != undefined) {
-				return v.valueOf();
-			}
-		}
-	};
-	const _getPropertyPriority = (name: string) => {
-		const { _mapq: _map } = self;
-		if (_map) {
-			let v = _map.get(name);
-			if (typeof v === 'object') {
-				return (v as CSSValue).priority || '';
-			}
-		}
-		return '';
-	};
+	const _setProperty = CSSStyleDeclaration.prototype.setProperty.bind(self);
+	const _getPropertyValue = CSSStyleDeclaration.prototype.getPropertyValue.bind(self);
+	const _getPropertyPriority = CSSStyleDeclaration.prototype.getPropertyPriority.bind(self);
+
 	const _removeProperty = (name: string) => {
 		const { _mapq: _map } = self;
 		if (_map && _map.size > 0) {
@@ -251,152 +262,57 @@ function handlerFor(self: IStyleDec) {
 				case 'cssText':
 					return self.cssText;
 				case 'toString':
-					return toString;
+					return _toString;
 			}
 
 			if (typeof key === 'symbol') {
 				if (key === Symbol.iterator) {
 					return _iter;
 				}
-			}
-			const { _mapq: _map } = self;
-			if (_map) {
-				if (/^-?\d+$/.test(key)) {
-					let i = parseInt(key);
-					for (const v of _map.keys()) {
-						if (0 === i--) {
-							return v;
-						} else if (i < 0) {
-							break;
+			} else {
+				const { _mapq: _map } = self;
+				if (_map) {
+					if (/^-?\d+$/.test(key)) {
+						let i = parseInt(key);
+						for (const v of _map.keys()) {
+							if (0 === i--) {
+								return v;
+							} else if (i < 0) {
+								break;
+							}
 						}
-					}
-				} else {
-					key = deCamelize(key);
-					const val = _map.get(key);
-					if (val != undefined) {
-						return val;
+					} else {
+						key = deCamelize(key);
+						const val = _map.get(key);
+						if (val != undefined) {
+							return val;
+						}
+						return '';
 					}
 				}
 			}
 		},
 		set(self: IStyleDec, key: string, value: string) {
-			if (key in CSSStyleDeclaration.prototype) {
-				switch (key) {
-					case 'cssText':
-						self.cssText = value;
-						break;
-					default:
-						throw new Error(`cant set "${key}"`);
-				}
-				// (StyleAttr.prototype as any)[key];
-			} else {
-				setProperty(self._map, deCamelize(key), value);
+			switch (key) {
+				case 'cssText':
+					self.cssText = value;
+					break;
+				case 'setProperty':
+				case 'getPropertyValue':
+				case 'getPropertyPriority':
+				case 'removeProperty':
+				case 'length':
+				case 'constructor':
+				case '_map':
+				case 'toString':
+					throw new Error(`cant set "${key}"`);
+				default:
+					setProperty(self._map, deCamelize(key), value);
 			}
 			return true;
 		},
 	};
 }
-
-// const handler = {
-// 	get(self: IStyleDec, key: string, receiver?: any) {
-// 		switch (key) {
-// 			case 'setProperty':
-// 				return (name: string, value?: string, priority?: string) =>
-// 					setProperty(self._map, name, value, priority);
-
-// 			case 'getPropertyValue':
-// 				return (name: string) => {
-// 					const { _mapq: _map } = self;
-// 					if (_map) {
-// 						const v = _map.get(name);
-// 						if (v != undefined) {
-// 							return v.valueOf();
-// 						}
-// 					}
-// 				};
-
-// 			case 'getPropertyPriority':
-// 				return (name: string) => {
-// 					const { _mapq: _map } = self;
-// 					if (_map) {
-// 						let v = _map.get(name);
-// 						if (typeof v === 'object') {
-// 							return (v as CSSValue).priority || '';
-// 						}
-// 					}
-// 					return '';
-// 				};
-// 			case 'removeProperty':
-// 				return (name: string) => {
-// 					const { _mapq: _map } = self;
-// 					if (_map && _map.size > 0) {
-// 						const v = _map.get(name);
-// 						if (v != undefined) {
-// 							_map.delete(name);
-// 							return v;
-// 						}
-// 					}
-// 					return null;
-// 				};
-
-// 			case 'length':
-// 				return self._map.size;
-// 			case 'constructor':
-// 				return CSSStyleDeclaration;
-// 			case '_map':
-// 				return self._map;
-// 			case 'cssText':
-// 				return self.cssText;
-// 			case 'toString':
-// 				return () => {
-// 					return self.cssText;
-// 				};
-// 		}
-
-// 		if (typeof key === 'symbol') {
-// 			if (key === Symbol.iterator) {
-// 				return () => {
-// 					const { _mapq: _map } = self;
-// 					return _map ? _map.keys() : [].values();
-// 				};
-// 			}
-// 		}
-// 		const { _mapq: _map } = self;
-// 		if (_map) {
-// 			if (/^-?\d+$/.test(key)) {
-// 				let i = parseInt(key);
-// 				for (const v of _map.keys()) {
-// 					if (0 === i--) {
-// 						return v;
-// 					} else if (i < 0) {
-// 						break;
-// 					}
-// 				}
-// 			} else {
-// 				key = deCamelize(key);
-// 				const val = _map.get(key);
-// 				if (val != undefined) {
-// 					return val;
-// 				}
-// 			}
-// 		}
-// 	},
-// 	set(self: StyleAttr, key: string, value: string) {
-// 		if (key in StyleAttr.prototype) {
-// 			switch (key) {
-// 				case 'cssText':
-// 					self.cssText = value;
-// 					break;
-// 				default:
-// 					throw new Error(`cant set "${key}"`);
-// 			}
-// 			// (StyleAttr.prototype as any)[key];
-// 		} else {
-// 			setProperty(self._map, deCamelize(key), value);
-// 		}
-// 		return true;
-// 	},
-// };
 
 function setProperty(
 	_map: CSSMap,

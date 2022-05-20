@@ -5,20 +5,16 @@ export function deCamelize(s: string) {
 }
 // StylePropertyMap
 class CSSMap extends Map<string, String> {
-	append(key: string, value: String) {
-		this.set(key, value);
-	}
+	// append(key: string, value: String) {
+	// 	this.set(key, value);
+	// }
 
 	set(name: string, value: String): this {
 		switch (value) {
 			case undefined:
-				break;
-			case '':
-				super.delete(name);
-				break;
 			case null:
-				super.set(name, '');
-				break;
+			case '':
+				throw new TypeError('Invalid type for property');
 			default:
 				super.set(name, value);
 		}
@@ -36,7 +32,7 @@ class CSSMap extends Map<string, String> {
 					if (k && v) {
 						const m = v.match(/(.+)\s*!\s*(\w+)$/);
 						if (m) {
-							const u = new CSSValue(m[1]);
+							const u = new CSSValue(m[1].trim());
 							u.priority = m[2];
 							super.set(k, u);
 						} else {
@@ -53,13 +49,17 @@ class CSSMap extends Map<string, String> {
 			if (v) {
 				if (typeof v === 'object') {
 					const u = v as CSSValue;
-					if (!u.short) {
+					if (u.short) {
+						continue;
+					} else {
 						const p = u.priority;
-						p && arr.push(`${key}: ${v} !${p};`);
+						if (p) {
+							arr.push(`${key}: ${v} !${p};`);
+							continue;
+						}
 					}
-				} else {
-					arr.push(`${key}: ${v};`);
 				}
+				arr.push(`${key}: ${v};`);
 			}
 		}
 		return arr.join(' ');
@@ -114,6 +114,7 @@ export class CSSStyleDeclaration {
 				return v.valueOf();
 			}
 		}
+		return '';
 	}
 	getPropertyPriority(name: string) {
 		const { _mapq: _map } = this;
@@ -139,7 +140,7 @@ export class CSSStyleDeclaration {
 				return v;
 			}
 		}
-		return null;
+		return '';
 	}
 }
 
@@ -321,7 +322,7 @@ function setProperty(
 			_map.delete(name);
 			break;
 		case null:
-			_map.set(name, '');
+			_map.delete(name);
 			break;
 		default:
 			const v = _map.get(name);

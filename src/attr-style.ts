@@ -1,216 +1,176 @@
-// export const fullHex = function (hex: string) {
-// 	return hex.length === 4
-// 		? [
-// 				"#",
-// 				hex.substring(1, 2),
-// 				hex.substring(1, 2),
-// 				hex.substring(2, 3),
-// 				hex.substring(2, 3),
-// 				hex.substring(3, 4),
-// 				hex.substring(3, 4),
-// 		  ].join("")
-// 		: hex;
-// };
-
-// export const hexToRGB = function (
-// 	valOrMap: string
-// 	// | Map<string, string>
-// ): string {
-// if (valOrMap instanceof Map) {
-// 	for (const [key, val] of valOrMap) {
-// 		valOrMap.set(key, hexToRGB(val));
-// 	}
-// 	return valOrMap;
-// } else
-
-// 	if (/#[0-9a-f]{3,6}/.test(valOrMap)) {
-// 		valOrMap = fullHex(valOrMap);
-// 		return (
-// 			"rgb(" +
-// 			[
-// 				parseInt(valOrMap.slice(1, 3), 16),
-// 				parseInt(valOrMap.slice(3, 5), 16),
-// 				parseInt(valOrMap.slice(5, 7), 16),
-// 			].join(",") +
-// 			")"
-// 		);
-// 	} else {
-// 		return valOrMap;
-// 	}
-// };
-
 export function deCamelize(s: string) {
 	return String(s).replace(/([a-z])([A-Z])/g, function (m, g1, g2) {
-		return g1 + "-" + g2.toLowerCase();
+		return g1 + '-' + g2.toLowerCase();
 	});
 }
-
-// export function camelCase(s: string) {
-// 	return String(s).replace(/([a-z])-([a-z])/g, function (m, g1, g2) {
-// 		return g1 + g2.toUpperCase();
-// 	});
-// }
-
-// export const cssToMap = function (css: string) {
-// 	return new Map<string, string>(
-// 		css
-// 			.split(/\s*;\s*/)
-// 			.filter(function (el) {
-// 				return !!el;
-// 			})
-// 			.map(function (el): [string, string] {
-// 				const a = el.split(/\s*:\s*/);
-
-// 				return [a[0], a[1] || ""];
-// 			})
-// 	);
-// };
-
-// export const mapToCss = function (myMap: Map<string, string>) {
-// 	const arr: string[] = [];
-// 	for (const [key, val] of myMap) {
-// 		switch (val) {
-// 			case null:
-// 			case undefined:
-// 			case "":
-// 				break;
-// 			default:
-// 				arr.push(`${deCamelize(key)} : ${val}`);
-// 		}
-// 	}
-// 	return arr.join("; ");
-// };
 
 class CSSMap extends Map<string, String> {}
 
 class CSSValue extends String {
 	priority?: string;
+	short?: string;
 }
 
-export class StyleAttr extends Attr {
-	val?: CSSMap;
-	// val?: CSSMap|string;
-	_proxy?: any;
+interface IStyleDec {
+	_map: CSSMap;
+	_mapq: CSSMap | undefined;
+	cssText: string;
+}
 
-	format() {
-		let { mapq: map } = this;
-		if (!map) {
-			return "";
+function parse(_map: CSSMap, css: string) {
+	for (const s of css.split(/\s*;\s*/)) {
+		if (s) {
+			const i = s.indexOf(':');
+			if (i > 0) {
+				const k = s.substring(0, i).trim();
+				const v = s.substring(i + 1).trim();
+				if (k && v) {
+					const m = v.match(/(.+)\s*!\s*(\w+)$/);
+					if (m) {
+						const u = new CSSValue(m[1]);
+						u.priority = m[2];
+						_map.set(k, u);
+					} else {
+						_map.set(k, v);
+					}
+				}
+			}
 		}
+	}
+}
+
+function format(_map?: CSSMap) {
+	if (_map) {
 		const arr: string[] = [];
-		for (const [key, v] of map) {
+		for (const [key, v] of _map) {
 			switch (v) {
 				case null:
 				case undefined:
-				case "":
+				case '':
 					break;
 				default:
-					if (typeof v === "object") {
-						const p = (v as CSSValue).priority;
-						if (p) {
-							arr.push(`${deCamelize(key)}: ${v} !${p};`);
+					if (typeof v === 'object') {
+						const u = v as CSSValue;
+						if (u.short) {
+							break;
+						} else {
+							const p = u.priority;
+							if (p) {
+								arr.push(`${deCamelize(key)}: ${v} !${p};`);
+								break;
+							}
 						}
 					}
 					arr.push(`${deCamelize(key)}: ${v};`);
 			}
 		}
-		return arr.join(" ");
+		return arr.join(' ');
 	}
+	return '';
+}
 
-	parse(css: string) {
-		let { map } = this;
-		map.clear();
-		for (const s of css.split(/\s*;\s*/)) {
-			if (s) {
-				const i = s.indexOf(":");
-				if (i > 0) {
-					const k = s.substring(0, i).trim();
-					const v = s.substring(i + 1).trim();
-					if (k && v) {
-						const m = v.match(/(.+)\s*!\s*(\w+)$/);
-						if (m) {
-							const u = new CSSValue(m[1]);
-							u.priority = m[2];
-							map.set(k, u);
-						} else {
-							map.set(k, v);
-						}
-					}
-				}
-				// const [k, v] = s.split(/\s*:\s*/);
+export class CSSStyleDeclaration {
+	val?: CSSMap;
 
-				// if (a[0]) {
-				// 	map.set(a[0], a[1] || "");
-				// }
-			}
-		}
-	}
-	get map() {
+	get _map() {
 		return this.val || (this.val = new CSSMap());
 	}
-	get mapq() {
-		return this.val || null;
+
+	get _mapq() {
+		return this.val || undefined;
 	}
 
 	get cssText() {
-		return this.format();
+		return format(this._mapq);
 	}
 
 	set cssText(value: string) {
-		this.parse(value);
+		const { _map } = this;
+		_map.clear();
+		parse(_map, value);
+	}
+
+	[Symbol.iterator]() {
+		const { _mapq: _map } = this;
+		return _map ? _map.keys() : [].values();
+	}
+
+	static new() {
+		return new Proxy<CSSStyleDeclaration>(new CSSStyleDeclaration(), handler);
+	}
+}
+
+export class StyleAttr extends Attr {
+	val?: CSSMap;
+	_proxy?: any;
+
+	get _map() {
+		return this.val || (this.val = new CSSMap());
+	}
+	get _mapq() {
+		return this.val || undefined;
+	}
+
+	get cssText() {
+		return format(this._mapq);
+	}
+
+	set cssText(value: string) {
+		const { _map } = this;
+		_map.clear();
+		parse(_map, value);
 	}
 
 	set value(value: string) {
-		this.parse(value);
-		// this.val = value;
+		this.cssText = value;
 	}
+
 	get value() {
-		return this.format() || "";
+		return format(this._mapq);
 	}
+
 	[Symbol.iterator]() {
-		const { mapq: map } = this;
-		return map ? map.keys() : [].values();
+		const { _mapq: _map } = this;
+		return _map ? _map.keys() : [].values();
 	}
 
 	get proxy() {
-		return (
-			this._proxy || (this._proxy = new Proxy<StyleAttr>(this, handler))
-		);
+		return this._proxy || (this._proxy = new Proxy<StyleAttr>(this, handler));
 	}
 
 	toString() {
-		return this.format();
+		return this.value;
 	}
 
 	remove() {
-		const { mapq: map } = this;
-		map && map.clear();
+		const { _mapq: _map } = this;
+		_map && _map.clear();
 		return super.remove();
 	}
 
 	setProperty(name: string, value?: String, priority?: string) {
-		return setProperty(this.map, name, value, priority);
+		return setProperty(this._map, name, value, priority);
 	}
 	getPropertyPriority(name: string) {
-		const { mapq: map } = this;
-		if (map && map.size > 0) {
-			const v = map.get(name);
-			if (typeof v === "object") {
-				return (v as CSSValue).priority || "";
+		const { _mapq: _map } = this;
+		if (_map && _map.size > 0) {
+			const v = _map.get(name);
+			if (typeof v === 'object') {
+				return (v as CSSValue).priority || '';
 			}
 		}
-		return "";
+		return '';
 	}
 	getPropertyValue(name: string) {
-		const { mapq: map } = this;
-		return (map && map.size > 0 && map.get(name)?.valueOf()) || "";
+		const { _mapq: _map } = this;
+		return (_map && _map.size > 0 && _map.get(name)?.valueOf()) || '';
 	}
 	removeProperty(name: string) {
-		const { mapq: map } = this;
-		if (map && map.size > 0) {
-			const v = map.get(name);
+		const { _mapq: _map } = this;
+		if (_map && _map.size > 0) {
+			const v = _map.get(name);
 			if (v !== undefined) {
-				map.delete(name);
+				_map.delete(name);
 				return v;
 			}
 		}
@@ -218,86 +178,98 @@ export class StyleAttr extends Attr {
 	}
 
 	valueOf() {
-		return this.format() || null;
+		return format(this._mapq) || null;
 	}
 }
 
 const handler = {
-	get(self: StyleAttr, key: string, receiver?: any) {
+	get(self: IStyleDec, key: string, receiver?: any) {
 		switch (key) {
-			case "setProperty":
+			case 'setProperty':
 				return (name: string, value?: string, priority?: string) =>
-					setProperty(self.map, name, value, priority);
+					setProperty(self._map, name, value, priority);
 
-			case "getPropertyValue":
+			case 'getPropertyValue':
 				return (name: string) => {
-					const { mapq: map } = self;
-					return (
-						(map && map.size > 0 && map.get(name)?.valueOf()) || ""
-					);
+					const { _mapq: _map } = self;
+					if (_map) {
+						const v = _map.get(name);
+						if (v != undefined) {
+							return v.valueOf();
+						}
+					}
 				};
-			case "removeProperty":
+
+			case 'getPropertyPriority':
 				return (name: string) => {
-					const { mapq: map } = self;
-					if (map && map.size > 0) {
-						const v = map.get(name);
-						if (v !== undefined) {
-							map.delete(name);
+					const { _mapq: _map } = self;
+					if (_map) {
+						let v = _map.get(name);
+						if (typeof v === 'object') {
+							return (v as CSSValue).priority || '';
+						}
+					}
+					return '';
+				};
+			case 'removeProperty':
+				return (name: string) => {
+					const { _mapq: _map } = self;
+					if (_map && _map.size > 0) {
+						const v = _map.get(name);
+						if (v != undefined) {
+							_map.delete(name);
 							return v;
 						}
 					}
 					return null;
 				};
 
-			case "getPropertyPriority":
-				return (name: string) => {
-					const { mapq: map } = self;
-					if (map && map.size > 0) {
-						const v = map.get(name);
-						if (typeof v === "object") {
-							return (v as CSSValue).priority || "";
-						}
-					}
-					return "";
-				};
-
-			case "length":
-				return self.map.size;
-			case "cssText":
+			case 'length':
+				return self._map.size;
+			case 'constructor':
+				return CSSStyleDeclaration;
+			case '_map':
+				return self._map;
+			case 'cssText':
 				return self.cssText;
-			case "toString":
+			case 'toString':
 				return () => {
 					return self.cssText;
 				};
 		}
-		if (typeof key === "symbol") {
+
+		if (typeof key === 'symbol') {
 			if (key === Symbol.iterator) {
 				return () => {
-					const { mapq: map } = self;
-					return map ? map.keys() : [].values();
+					const { _mapq: _map } = self;
+					return _map ? _map.keys() : [].values();
 				};
 			}
-			// return self[Symbol.iterator];
-			console.log(`handler: symbol ${key}`);
-			return undefined;
-		} else if (/^-?\d+$/.test(key)) {
-			let i = parseInt(key);
-			for (const v of self.map.keys()) {
-				if (0 === i--) {
-					return v;
-				} else if (i < 0) {
-					break;
+		}
+		const { _mapq: _map } = self;
+		if (_map) {
+			if (/^-?\d+$/.test(key)) {
+				let i = parseInt(key);
+				for (const v of _map.keys()) {
+					if (0 === i--) {
+						return v;
+					} else if (i < 0) {
+						break;
+					}
+				}
+			} else {
+				key = deCamelize(key);
+				const val = _map.get(key);
+				if (val != undefined) {
+					return val;
 				}
 			}
-			return undefined;
 		}
-		key = deCamelize(key);
-		return self.map.get(key);
 	},
 	set(self: StyleAttr, key: string, value: string) {
 		if (key in StyleAttr.prototype) {
 			switch (key) {
-				case "cssText":
+				case 'cssText':
 					self.cssText = value;
 					break;
 				default:
@@ -305,115 +277,128 @@ const handler = {
 			}
 			// (StyleAttr.prototype as any)[key];
 		} else {
-			setProperty(self.map, deCamelize(key), value);
+			setProperty(self._map, deCamelize(key), value);
 		}
 		return true;
 	},
 };
 
 function setProperty(
-	map: CSSMap,
+	_map: CSSMap,
 	name: string,
 	value?: String,
-	priority?: string
+	priority?: string,
+	short?: string,
 ) {
 	L1: switch (name) {
-		case "margin":
-		case "padding": {
+		case 'margin':
+		case 'padding': {
 			switch (value) {
 				case undefined:
 					break;
 				case null:
-					map.set(name, "");
+					_map.set(name, '');
 					break;
-				case "inherit":
-				case "initial":
-				case "unset":
-				case "revert":
+				case 'inherit':
+				case 'initial':
+				case 'unset':
+				case 'revert':
 					break L1;
-				case "":
-					map.delete(`${name}-top`);
-					map.delete(`${name}-right`);
-					map.delete(`${name}-bottom`);
-					map.delete(`${name}-left`);
+				case '':
+					_map.delete(`${name}-top`);
+					_map.delete(`${name}-right`);
+					_map.delete(`${name}-bottom`);
+					_map.delete(`${name}-left`);
 					break;
 				default:
 					const a = value.split(/\s+/);
+					const s = _map.size;
 					if (a.length > 3) {
-						setProperty(map, `${name}-top`, a[0], priority);
-						setProperty(map, `${name}-right`, a[1], priority);
-						setProperty(map, `${name}-bottom`, a[2], priority);
-						setProperty(map, `${name}-left`, a[3], priority);
+						setProperty(_map, `${name}-top`, a[0], priority, name);
+						setProperty(_map, `${name}-right`, a[1], priority, name);
+						setProperty(_map, `${name}-bottom`, a[2], priority, name);
+						setProperty(_map, `${name}-left`, a[3], priority, name);
 					} else if (a.length > 2) {
-						setProperty(map, `${name}-top`, a[0], priority);
-						setProperty(map, `${name}-right`, a[1], priority);
-						setProperty(map, `${name}-bottom`, a[2], priority);
-						setProperty(map, `${name}-left`, a[1], priority);
+						setProperty(_map, `${name}-top`, a[0], priority, name);
+						setProperty(_map, `${name}-right`, a[1], priority, name);
+						setProperty(_map, `${name}-bottom`, a[2], priority, name);
+						setProperty(_map, `${name}-left`, a[1], priority, name);
 					} else if (a.length > 1) {
-						setProperty(map, `${name}-top`, a[0], priority);
-						setProperty(map, `${name}-right`, a[1], priority);
-						setProperty(map, `${name}-bottom`, a[0], priority);
-						setProperty(map, `${name}-left`, a[1], priority);
+						setProperty(_map, `${name}-top`, a[0], priority, name);
+						setProperty(_map, `${name}-right`, a[1], priority, name);
+						setProperty(_map, `${name}-bottom`, a[0], priority, name);
+						setProperty(_map, `${name}-left`, a[1], priority, name);
 					} else if (a.length > 0) {
-						setProperty(map, `${name}-top`, a[0], priority);
-						setProperty(map, `${name}-right`, a[0], priority);
-						setProperty(map, `${name}-bottom`, a[0], priority);
-						setProperty(map, `${name}-left`, a[0], priority);
+						setProperty(_map, `${name}-top`, a[0], priority, name);
+						setProperty(_map, `${name}-right`, a[0], priority, name);
+						setProperty(_map, `${name}-bottom`, a[0], priority, name);
+						setProperty(_map, `${name}-left`, a[0], priority, name);
+					}
+					if (_map.size == s) {
+						// nothing added
+						return;
 					}
 			}
-			return;
+			// return;
 		}
+		// TODO:
+		// border...
 	}
 	switch (value) {
 		case undefined:
 			break;
-		case "":
-			map.delete(name);
+		case '':
+			_map.delete(name);
 			break;
 		case null:
-			map.set(name, "");
+			_map.set(name, '');
 			break;
 		default:
-			const v = map.get(name);
+			const v = _map.get(name);
 			if (v === undefined) {
-				if (priority) {
-					const v = new CSSValue(value);
-					v.priority = priority;
-					map.set(name, v);
+				if (priority || short) {
+					const u = new CSSValue(value);
+					priority && (u.priority = priority);
+					short && (u.short = short);
+					_map.set(name, u);
 				} else {
-					map.set(name, value);
+					_map.set(name, value);
 				}
-			} else if (typeof v === "object") {
-				if (v.toString() == value) {
-					if (priority !== (v as CSSValue).priority) {
-						(v as CSSValue).priority = priority;
+			} else if (typeof v === 'object') {
+				const u = v as CSSValue;
+				delete u.short;
+				if (u.toString() == value) {
+					if (priority !== u.priority) {
+						u.priority = priority;
 					}
 				} else {
 					if (priority) {
 						const u = new CSSValue(value);
 						u.priority = priority;
-						map.set(name, u);
+						_map.set(name, u);
 					} else {
-						map.set(name, value);
+						_map.set(name, value);
 					}
 				}
 			} else if (v === value) {
 				if (priority) {
 					const u = new CSSValue(value);
 					u.priority = priority;
-					map.set(name, u);
+					// no short
+					_map.set(name, u);
 				}
 			} else {
 				if (priority) {
 					const u = new CSSValue(value);
 					u.priority = priority;
-					map.set(name, u);
+					// no short
+					_map.set(name, u);
 				} else {
-					map.set(name, value);
+					_map.set(name, value);
 				}
 			}
 	}
 }
 
-import { Element } from "./element.js";
-import { Attr } from "./attr.js";
+import { Element } from './element.js';
+import { Attr } from './attr.js';

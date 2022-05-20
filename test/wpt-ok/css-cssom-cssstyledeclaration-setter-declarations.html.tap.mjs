@@ -87,7 +87,7 @@ const document = loadDOM(html, `text/html`)
 
     block.top = "5px";
     expectedDecls[0] = longhand("top", "5px");
-    checkDeclarationsAnyOrder(block, expectedDecls, "after setting existing property");
+   checkDeclarationsAnyOrder(block, expectedDecls, "after setting existing property");
 
     block.bottom = "2px";
     checkDeclarationsAnyOrder(block, expectedDecls, "after setting existing property with identical value");
@@ -114,7 +114,8 @@ const document = loadDOM(html, `text/html`)
     for (let i = 0; i < 4; i++) {
       expectedDecls[i].value = "4px";
     }
-    checkDeclarationsAnyOrder(block, expectedDecls, "after setting an existing shorthand");
+      // console.log(block.cssText)
+   checkDeclarationsAnyOrder(block, expectedDecls, "after setting an existing shorthand");
 
     block.setProperty("margin", "4px");
     checkDeclarationsAnyOrder(block, expectedDecls, "after setting an existing shorthand with identical value");
@@ -137,12 +138,15 @@ const document = loadDOM(html, `text/html`)
       ...shorthand("padding", "3px", "important"),
     ];
     let block = generateCSSDeclBlock(expectedDecls);
+    // console.log(block._map);
     checkDeclarationsAnyOrder(block, expectedDecls, "in initial block");
 
     block.margin = "4px";
+    // console.log(block._map);
     for (let i = 0; i < 4; i++) {
       expectedDecls[i].value = "4px";
     }
+    // console.log(expectedDecls);
     checkDeclarationsAnyOrder(block, expectedDecls, "after setting an existing shorthand");
 
     block.margin = "4px";

@@ -1,5 +1,5 @@
-import { Document } from "../dist/document.js";
-import tap from "tap";
+import { Document } from '../dist/document.js';
+import tap from 'tap';
 
 // console.info(document.outerHTML);
 
@@ -21,41 +21,53 @@ function assert_array_equals(a, b, msg) {
   (current_t || tap).match(a, b, msg);
 }
 
-function setup(x) {
-}
-function done() {
-}
+function setup(x) {}
+function done() {}
 
-
-
-
-"use strict";
+('use strict');
 
 setup({ single_test: true });
 
-const button = document.createElement("button");
+const button = document.createElement('button');
 
-assert_equals(button.querySelector("*"), null, "querySelector, '*', before modification");
-assert_equals(button.querySelector("button"), null, "querySelector, 'button', before modification");
-assert_equals(button.querySelector("button, span"), null, "querySelector, 'button, span', before modification");
-assert_array_equals(button.querySelectorAll("*"), [], "querySelectorAll, '*', before modification");
-assert_array_equals(button.querySelectorAll("button"), [], "querySelectorAll, 'button', before modification");
+assert_equals(button.querySelector('*'), null, "querySelector, '*', before modification");
+assert_equals(button.querySelector('button'), null, "querySelector, 'button', before modification");
+assert_equals(
+  button.querySelector('button, span'),
+  null,
+  "querySelector, 'button, span', before modification",
+);
+assert_array_equals(button.querySelectorAll('*'), [], "querySelectorAll, '*', before modification");
 assert_array_equals(
-  button.querySelectorAll("button, span"), [],
-  "querySelectorAll, 'button, span', before modification"
+  button.querySelectorAll('button'),
+  [],
+  "querySelectorAll, 'button', before modification",
+);
+assert_array_equals(
+  button.querySelectorAll('button, span'),
+  [],
+  "querySelectorAll, 'button, span', before modification",
 );
 
+button.innerHTML = 'text';
 
-button.innerHTML = "text";
-
-assert_equals(button.querySelector("*"), null, "querySelector, '*', after modification");
-assert_equals(button.querySelector("button"), null, "querySelector, 'button', after modification");
-assert_equals(button.querySelector("button, span"), null, "querySelector, 'button, span', after modification");
-assert_array_equals(button.querySelectorAll("*"), [], "querySelectorAll, '*', after modification");
-assert_array_equals(button.querySelectorAll("button"), [], "querySelectorAll, 'button', after modification");
+assert_equals(button.querySelector('*'), null, "querySelector, '*', after modification");
+assert_equals(button.querySelector('button'), null, "querySelector, 'button', after modification");
+assert_equals(
+  button.querySelector('button, span'),
+  null,
+  "querySelector, 'button, span', after modification",
+);
+assert_array_equals(button.querySelectorAll('*'), [], "querySelectorAll, '*', after modification");
 assert_array_equals(
-  button.querySelectorAll("button, span"), [],
-  "querySelectorAll, 'button, span', after modification"
+  button.querySelectorAll('button'),
+  [],
+  "querySelectorAll, 'button', after modification",
+);
+assert_array_equals(
+  button.querySelectorAll('button, span'),
+  [],
+  "querySelectorAll, 'button, span', after modification",
 );
 
 done();

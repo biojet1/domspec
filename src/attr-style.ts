@@ -27,10 +27,42 @@ class CSSMap extends Map<string, String> {
 
 	_parse(value: string) {
 		this.clear();
-		parse(this, value);
+		for (const s of value.split(/\s*;\s*/)) {
+			if (s) {
+				const i = s.indexOf(':');
+				if (i > 0) {
+					const k = s.substring(0, i).trim();
+					const v = s.substring(i + 1).trim();
+					if (k && v) {
+						const m = v.match(/(.+)\s*!\s*(\w+)$/);
+						if (m) {
+							const u = new CSSValue(m[1]);
+							u.priority = m[2];
+							super.set(k, u);
+						} else {
+							super.set(k, v);
+						}
+					}
+				}
+			}
+		}
 	}
 	toString() {
-		return format(this);
+		const arr: string[] = [];
+		for (const [key, v] of this) {
+			if (v) {
+				if (typeof v === 'object') {
+					const u = v as CSSValue;
+					if (!u.short) {
+						const p = u.priority;
+						p && arr.push(`${key}: ${v} !${p};`);
+					}
+				} else {
+					arr.push(`${key}: ${v};`);
+				}
+			}
+		}
+		return arr.join(' ');
 	}
 }
 
@@ -43,59 +75,6 @@ class CSSValue extends String {
 interface IStyleDec {
 	_map: CSSMap;
 	_mapq: CSSMap | undefined;
-	// cssText: string;
-}
-
-function parse(_map: CSSMap, css: string) {
-	for (const s of css.split(/\s*;\s*/)) {
-		if (s) {
-			const i = s.indexOf(':');
-			if (i > 0) {
-				const k = s.substring(0, i).trim();
-				const v = s.substring(i + 1).trim();
-				if (k && v) {
-					const m = v.match(/(.+)\s*!\s*(\w+)$/);
-					if (m) {
-						const u = new CSSValue(m[1]);
-						u.priority = m[2];
-						_map.set(k, u);
-					} else {
-						_map.set(k, v);
-					}
-				}
-			}
-		}
-	}
-}
-
-function format(_map?: CSSMap) {
-	if (_map) {
-		const arr: string[] = [];
-		for (const [key, v] of _map) {
-			switch (v) {
-				case null:
-				case undefined:
-				case '':
-					break;
-				default:
-					if (typeof v === 'object') {
-						const u = v as CSSValue;
-						if (u.short) {
-							break;
-						} else {
-							const p = u.priority;
-							if (p) {
-								arr.push(`${deCamelize(key)}: ${v} !${p};`);
-								break;
-							}
-						}
-					}
-					arr.push(`${deCamelize(key)}: ${v};`);
-			}
-		}
-		return arr.join(' ');
-	}
-	return '';
 }
 
 export class CSSStyleDeclaration {
@@ -146,8 +125,21 @@ export class CSSStyleDeclaration {
 		}
 		return '';
 	}
+
 	setProperty(name: string, value?: String, priority?: string) {
 		return setProperty(this._map, name, value, priority);
+	}
+
+	removeProperty(name: string) {
+		const { _mapq: _map } = this;
+		if (_map && _map.size > 0) {
+			const v = _map.get(name);
+			if (v != undefined) {
+				_map.delete(name);
+				return v;
+			}
+		}
+		return null;
 	}
 }
 
@@ -163,16 +155,6 @@ export class StyleAttr extends Attr {
 		return this.val || undefined;
 	}
 
-	// get cssText() {
-	// 	return format(this._mapq);
-	// }
-
-	// set cssText(value: string) {
-	// 	const { _map } = this;
-	// 	_map.clear();
-	// 	parse(_map, value);
-	// }
-
 	set value(value: string) {
 		this._map._parse(value);
 	}
@@ -181,17 +163,8 @@ export class StyleAttr extends Attr {
 		return this._mapq?.toString() ?? '';
 	}
 
-	// [Symbol.iterator]() {
-	// 	const { _mapq: _map } = this;
-	// 	return _map ? _map.keys() : [].values();
-	// }
-
 	get proxy() {
 		return this._proxy || (this._proxy = new Proxy<StyleAttr>(this, handlerFor(this)));
-	}
-
-	toString() {
-		return this.value;
 	}
 
 	remove() {
@@ -200,81 +173,33 @@ export class StyleAttr extends Attr {
 		return super.remove();
 	}
 
-	// setProperty(name: string, value?: String, priority?: string) {
-	// 	return setProperty(this._map, name, value, priority);
-	// }
-
-	// getPropertyPriority(name: string) {
-	// 	const { _mapq: _map } = this;
-	// 	if (_map && _map.size > 0) {
-	// 		const v = _map.get(name);
-	// 		if (typeof v === 'object') {
-	// 			return (v as CSSValue).priority || '';
-	// 		}
-	// 	}
-	// 	return '';
-	// }
-
-	// getPropertyValue(name: string) {
-	// 	const { _mapq: _map } = this;
-	// 	return (_map && _map.size > 0 && _map.get(name)?.valueOf()) || '';
-	// }
-
-	// removeProperty(name: string) {
-	// 	const { _mapq: _map } = this;
-	// 	if (_map && _map.size > 0) {
-	// 		const v = _map.get(name);
-	// 		if (v !== undefined) {
-	// 			_map.delete(name);
-	// 			return v;
-	// 		}
-	// 	}
-	// 	return null;
-	// }
-
 	valueOf() {
 		return this._mapq?.toString() || null;
 	}
 }
 
 function handlerFor(self: IStyleDec) {
-	const _setProperty = CSSStyleDeclaration.prototype.setProperty.bind(self);
-	const _getPropertyValue = CSSStyleDeclaration.prototype.getPropertyValue.bind(self);
-	const _getPropertyPriority = CSSStyleDeclaration.prototype.getPropertyPriority.bind(self);
-
-	const _removeProperty = (name: string) => {
-		const { _mapq: _map } = self;
-		if (_map && _map.size > 0) {
-			const v = _map.get(name);
-			if (v != undefined) {
-				_map.delete(name);
-				return v;
-			}
-		}
-		return null;
-	};
-
-	const _toString = () => self._mapq?.toString() ?? '';
-
-	const _iter = () => {
-		const { _mapq: _map } = self;
-		return _map ? _map.keys() : [].values();
-	};
+	const proto = CSSStyleDeclaration.prototype;
+	const _setProperty = proto.setProperty.bind(self);
+	const _getPropertyValue = proto.getPropertyValue.bind(self);
+	const _getPropertyPriority = proto.getPropertyPriority.bind(self);
+	const _iter = proto[Symbol.iterator].bind(self);
+	const _removeProperty = proto.removeProperty.bind(self);
+	const _toString = () => self._map.toString();
 
 	return {
 		get(self: IStyleDec, key: string, receiver?: any) {
 			switch (key) {
 				case 'setProperty':
 					return _setProperty;
-
 				case 'getPropertyValue':
 					return _getPropertyValue;
-
 				case 'getPropertyPriority':
 					return _getPropertyPriority;
 				case 'removeProperty':
 					return _removeProperty;
-
+				case 'toString':
+					return _toString;
 				case 'length':
 					return self._map.size;
 				case 'constructor':
@@ -282,9 +207,7 @@ function handlerFor(self: IStyleDec) {
 				case '_map':
 					return self._map;
 				case 'cssText':
-					return _toString();
-				case 'toString':
-					return _toString;
+					return self._map.toString();
 			}
 
 			if (typeof key === 'symbol') {
@@ -319,14 +242,6 @@ function handlerFor(self: IStyleDec) {
 				case 'cssText':
 					self._map._parse(value);
 					break;
-				// case 'setProperty':
-				// case 'getPropertyValue':
-				// case 'getPropertyPriority':
-				// case 'removeProperty':
-				// case 'length':
-				// case 'constructor':
-				// case '_map':
-				// case 'toString':
 				default:
 					if ((self as any)[key]) {
 						throw new Error(`cant set "${key}"`);

@@ -89,8 +89,18 @@ tap.test('parsing', function (t) {
 	t.same(div.style.getPropertyPriority('background-color'), '');
 	div.style.setProperty('background-color', 'blue', 'important');
 	t.same(div.style.getPropertyPriority('background-color'), 'important');
+	div.style.setProperty('background-color', 'red', 'important');
+	t.same(div.style.getPropertyPriority('background-color'), 'important');
+	t.strictSame(asm.get('background-color').toString(), 'red');
+	div.style.setProperty('background-color', 'green');
+	t.same(div.style.getPropertyPriority('background-color'), '');
+	t.strictSame(asm.get('background-color').toString(), 'green');
 	div.style.setProperty('background-color', null);
 	t.same(asm.get('background-color'), null);
+	div.style.color = 'orange';
+	div.style.setProperty('color', 'orange', 'important');
+	t.same(div.style.getPropertyPriority('color'), 'important');
+	t.strictSame(asm.get('color').toString(), 'orange');
 	t.end();
 });
 tap.test('shorthand', function (t) {
@@ -134,15 +144,23 @@ tap.test('delete', function (t) {
 	t.same(div.style.getPropertyValue('background-color'), '');
 	t.end();
 });
-// /* Apply to all four sides */
-// margin: 1em;
-// margin: -3px;
-// /* vertical | horizontal */
-// margin: 5% auto;
-//  top | horizontal | bottom
-// margin: 1em auto 2em;
-// /* top | right | bottom | left */
-// margin: 2px 1em 0 auto;
+
+// tap.test('self', function (t) {
+// 	let { style } = document.createElement('div');
+// 	let { self } = style;
+// 	let s;
+// 	// div.style is a Proxy
+// 	// div.style.self is a Proxy target
+// 	style.cssText = s = 'background-color: blue !important';
+// 	t.same(self.cssText, s);
+// 	t.same(style.cssText, s);
+	
+// 	self.cssText = s = 'color: pink';
+// 	t.same(self.cssText, s);
+// 	t.same(style.cssText, s);
+// 	t.end();
+// });
+
 {
 	assert(node.className, '', 'no class name');
 	assert(node.classList.contains('tap'), false, 'no tap class');

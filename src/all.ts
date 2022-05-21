@@ -15,4 +15,5 @@ export * from "./html/element.js";
 export * from "./svg/element.js";
 export * from "./event-target.js";
 export * from "./attr-style.js";
+export * from "./css/index.js";
 export { Point, Box, Matrix, Path } from "svggeom";

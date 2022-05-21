@@ -48,15 +48,12 @@ class CSSMap extends Map<string, String> {
 		for (const [key, v] of this) {
 			if (v) {
 				if (typeof v === 'object') {
-					const u = v as CSSValue;
-					if (u.short) {
+					const { short, priority } = v as CSSValue;
+					if (short) {
 						continue;
-					} else {
-						const p = u.priority;
-						if (p) {
-							arr.push(`${key}: ${v} !${p};`);
-							continue;
-						}
+					} else if (priority) {
+						arr.push(`${key}: ${v} !${priority};`);
+						continue;
 					}
 				}
 				arr.push(`${key}: ${v};`);
@@ -67,6 +64,7 @@ class CSSMap extends Map<string, String> {
 }
 
 // CSSStyleValue
+
 class CSSValue extends String {
 	priority?: string;
 	short?: string;
@@ -85,7 +83,7 @@ export class CSSStyleDeclaration {
 	}
 
 	get _mapq() {
-		return this.val || undefined;
+		return this.val;
 	}
 
 	get cssText() {
@@ -97,8 +95,7 @@ export class CSSStyleDeclaration {
 	}
 
 	[Symbol.iterator]() {
-		const { _mapq: _map } = this;
-		return _map ? _map.keys() : [].values();
+		return this._mapq?.keys() ?? [].values();
 	}
 
 	static new() {
@@ -106,25 +103,17 @@ export class CSSStyleDeclaration {
 		return new Proxy<CSSStyleDeclaration>(self, handlerFor(self));
 	}
 
-	getPropertyValue(name: string) {
-		const { _mapq: _map } = this;
-		if (_map) {
-			const v = _map.get(name);
-			if (v != undefined) {
-				return v.valueOf();
-			}
-		}
-		return '';
+	proxify() {
+		return new Proxy<CSSStyleDeclaration>(this, handlerFor(this));
 	}
+
+	getPropertyValue(name: string) {
+		return this._mapq?.get(name)?.valueOf() ?? '';
+	}
+
 	getPropertyPriority(name: string) {
-		const { _mapq: _map } = this;
-		if (_map) {
-			let v = _map.get(name);
-			if (typeof v === 'object') {
-				return (v as CSSValue).priority || '';
-			}
-		}
-		return '';
+		let v = this._mapq?.get(name);
+		return (typeof v === 'object' && (v as CSSValue).priority) || '';
 	}
 
 	setProperty(name: string, value?: String, priority?: string) {
@@ -153,7 +142,7 @@ export class StyleAttr extends Attr {
 	}
 
 	get _mapq() {
-		return this.val || undefined;
+		return this.val;
 	}
 
 	set value(value: string) {
@@ -169,8 +158,7 @@ export class StyleAttr extends Attr {
 	}
 
 	remove() {
-		const { _mapq: _map } = this;
-		_map && _map.clear();
+		this._mapq?.clear();
 		return super.remove();
 	}
 
@@ -209,6 +197,8 @@ function handlerFor(self: IStyleDec) {
 					return self._map;
 				case 'cssText':
 					return self._map.toString();
+				case 'self':
+					return self;
 			}
 
 			if (typeof key === 'symbol') {
@@ -231,7 +221,7 @@ function handlerFor(self: IStyleDec) {
 						key = deCamelize(key);
 						const val = _map.get(key);
 						if (val != undefined) {
-							return val;
+							return val.toString();
 						}
 						return '';
 					}

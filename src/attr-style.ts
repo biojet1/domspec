@@ -8,11 +8,11 @@ class CSSMap extends Map<string, String> {
 	// append(key: string, value: String) {
 	// 	this.set(key, value);
 	// }
-	__tag?: any;
+	#tag?: any;
 	// { priority?: string; short?: string }
 
 	get _tag() {
-		return this.__tag || (this.__tag = {});
+		return this.#tag || (this.#tag = {});
 	}
 
 	set(name: string, value: String): this {
@@ -52,7 +52,7 @@ class CSSMap extends Map<string, String> {
 		const arr: string[] = [];
 		for (const [key, v] of this) {
 			if (v) {
-				const tag = this.__tag?.[key];
+				const tag = this.#tag?.[key];
 				if (tag) {
 					const { short, priority } = tag;
 					if (short) {
@@ -73,11 +73,11 @@ class CSSMap extends Map<string, String> {
 	}
 
 	getPropertyPriority(name: string) {
-		return this.__tag?.[name]?.priority ?? '';
+		return this.#tag?.[name]?.priority ?? '';
 	}
 
 	removeProperty(name: string) {
-		delete this.__tag?.[name];
+		delete this.#tag?.[name];
 		if (this.size > 0) {
 			const v = super.get(name);
 			if (v != undefined) {
@@ -116,7 +116,6 @@ class CSSMap extends Map<string, String> {
 }
 
 export class CSSStyleDeclaration {
-
 	// _sm = new CSSMap();
 
 	static new() {
@@ -253,10 +252,10 @@ function setProperty(
 				case 'revert':
 					break L1;
 				case '':
-					_map.delete(`${name}-top`);
-					_map.delete(`${name}-right`);
-					_map.delete(`${name}-bottom`);
-					_map.delete(`${name}-left`);
+					_map.removeProperty(`${name}-top`);
+					_map.removeProperty(`${name}-right`);
+					_map.removeProperty(`${name}-bottom`);
+					_map.removeProperty(`${name}-left`);
 					break;
 				default:
 					const a = value.split(/\s+/);
@@ -296,66 +295,20 @@ function setProperty(
 		case undefined:
 			break;
 		case '':
-			_map.delete(name);
+			_map.removeProperty(name);
 			break;
 		case null:
-			_map.delete(name);
+			_map.removeProperty(name);
 			break;
 		default:
 			const v = _map.get(name);
-
-			// if (v == '') {
 			if (priority || short) {
 				_map._tag[name] = { priority, short };
 			} else {
-				delete _map.__tag?.[name];
+				_map.removeProperty(name);
+				// delete _map.#tag?.[name];
 			}
 			_map.set(name, value);
-		// }
-
-		// if (v === undefined) {
-		// 	if (priority || short) {
-		// 		const u = new CSSValue(value);
-		// 		priority && (u.priority = priority);
-		// 		short && (u.short = short);
-		// 		_map.set(name, u);
-		// 	} else {
-		// 		_map.set(name, value);
-		// 	}
-		// } else if (typeof v === 'object') {
-		// 	const u = v as CSSValue;
-		// 	delete u.short;
-
-		// 	if (u.toString() == value) {
-		// 		if (priority !== u.priority) {
-		// 			u.priority = priority;
-		// 		}
-		// 	} else {
-		// 		if (priority) {
-		// 			const u = new CSSValue(value);
-		// 			u.priority = priority;
-		// 			_map.set(name, u);
-		// 		} else {
-		// 			_map.set(name, value);
-		// 		}
-		// 	}
-		// } else if (v === value) {
-		// 	if (priority) {
-		// 		const u = new CSSValue(value);
-		// 		u.priority = priority;
-		// 		// no short
-		// 		_map.set(name, u);
-		// 	}
-		// } else {
-		// 	if (priority) {
-		// 		const u = new CSSValue(value);
-		// 		u.priority = priority;
-		// 		// no short
-		// 		_map.set(name, u);
-		// 	} else {
-		// 		_map.set(name, value);
-		// 	}
-		// }
 	}
 }
 

@@ -8,6 +8,23 @@ export class CSSStyleValue {
 	}
 }
 
+export class CSSKeywordValue extends CSSStyleValue {
+	value: string;
+	constructor(value: string) {
+		super();
+		this.value = value;
+	}
+}
+
+type CSSKeywordish = String | CSSKeywordValue | string;
+type CSSNumberish = CSSNumericValue | number;
+
+// class CSSVariableReferenceValue {
+//     constructor(variable: string, fallback?: CSSUnparsedValue)
+//     variable: string;
+//     readonly fallback?: CSSUnparsedValue;
+// }
+
 export class CSSNumericValue {
 	// add(...args) {
 	// 	const Constructor = this.constructor
@@ -35,21 +52,7 @@ export class CSSNumericValue {
 	// }
 }
 
-// const _value = new WeakMap<CSSNumericValue, number>();
-// const _unit = new WeakMap<CSSNumericValue, string>();
-
 export class CSSUnitValue extends CSSNumericValue {
-	// get value() {
-	// 	return _value.get(this);
-	// }
-
-	// set value(num: number) {
-	// 	_value.set(this, num);
-	// }
-
-	// get unit() {
-	// 	return _unit.get(this);
-	// }
 	value: number;
 	unit: string;
 
@@ -63,6 +66,28 @@ export class CSSUnitValue extends CSSNumericValue {
 		this.unit = unit;
 	}
 }
+
+interface CSSTransformComponent {
+    is2D: boolean;
+    // toMatrix(): DOMMatrix;
+    toString(): string;
+}
+
+// class CSSRotate implements CSSTransformComponent {
+//     constructor(angle: CSSNumericValue);
+//     constructor(x: CSSNumberish, y: CSSNumberish, z: CSSNumberish, angle: CSSNumericValue)
+//     x: CSSNumberish;
+//     y: CSSNumberish;
+//     z: CSSNumberish;
+//     angle: CSSNumericValue;
+// 	constructor(x: CSSNumberish, y?: CSSNumberish, z?: CSSNumberish, angle?: CSSNumericValue) {
+// 		this.value = value;
+// 	}
+// 	get is2D(){
+// 		return this.z != undefined;
+// 	}
+	
+// }
 
 export class CSSMathValue extends CSSNumericValue {}
 

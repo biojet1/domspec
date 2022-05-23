@@ -50,7 +50,7 @@ let node = document.createElement('div');
 	assert(node.toString(), `<div style="display: none;"></div>`, 'display=none');
 	assert(node.style[0], `display`, '.style[0]');
 	assert(node.style[-1], undefined, '.style[-1]');
-	assert(node.style.constructor.name, 'CSSStyleDeclaration', 'style.constructor');
+	// assert(node.style.constructor.name, 'CSSStyleDeclaration', 'style.constructor');
 	node.style.display = '';
 	assert(node.toString(), '<div></div>', "setter as ''");
 }
@@ -101,6 +101,7 @@ tap.test('parsing', function (t) {
 	div.style.setProperty('color', 'orange', 'important');
 	t.same(div.style.getPropertyPriority('color'), 'important');
 	t.strictSame(asm.get('color').toString(), 'orange');
+	t.strictSame([...div.style], ['color']);
 	t.end();
 });
 tap.test('shorthand', function (t) {
@@ -118,6 +119,7 @@ tap.test('shorthand', function (t) {
 	// console.log(asm);
 	t.same(div.style.getPropertyPriority('margin-left'), 'important');
 	div.style.setProperty('padding', '1em auto 2em');
+	// t.same([...div.style], ['margin', 'padding']);
 	t.same(asm.get('padding-top') + '', '1em');
 	t.same(asm.get('padding-right') + '', 'auto');
 	t.same(asm.get('padding-bottom') + '', '2em');

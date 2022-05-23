@@ -408,30 +408,34 @@ export class Element extends ParentNode {
 			}
 	}
 
-	get style() {
+	get _styleAttr() {
 		const attr = this.getAttributeNode('style');
 		if (!attr) {
 			const node = new StyleAttr('style');
 			this.setAttributeNode(node);
-			return node.proxy;
+			return node;
 		} else if (attr instanceof StyleAttr) {
-			return attr.proxy;
+			return attr;
 		} else {
 			attr.remove();
 			const ref = attr[PREV] || this;
 			const node = new StyleAttr('style');
 			node._attach(ref, ref[NEXT] || this[END], this);
 			node.value = attr.value;
-			return node.proxy;
+			return node;
 		}
+	}
+
+	get style() {
+		return this._styleAttr.proxy;
 	}
 
 	set style(value: any) {
 		this.setAttribute('style', value.toString());
 	}
 
-	get attributeStyleMap() {
-		return this.style._map;
+	get attributeStyleMap() : any {
+		return this._styleAttr.MAP;
 	}
 
 	get classList() {
@@ -454,6 +458,7 @@ export class Element extends ParentNode {
 			return node.tokens;
 		}
 	}
+
 
 	get dataset() {
 		return this[DATASET] || (this[DATASET] = new Proxy<Element>(this, dsHandler));

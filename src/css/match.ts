@@ -1,12 +1,9 @@
-import { Node, NEXT, END } from "../node.js";
-import { ChildNode } from "../child-node.js";
-import { ParentNode } from "../parent-node.js";
-import { compile, is } from "css-select";
+import { Node, NEXT, END } from '../node.js';
+import { ChildNode } from '../child-node.js';
+import { ParentNode } from '../parent-node.js';
+import { compile } from 'css-select';
 
-function* iterAll(
-	test: (node: Element) => boolean,
-	nodes: Iterable<ChildNode>
-) {
+function* iterAll(test: (node: Element) => boolean, nodes: Iterable<ChildNode>) {
 	for (const node of nodes) {
 		if (node.nodeType === 1) {
 			if (test(node as Element)) {
@@ -40,11 +37,11 @@ const adapter = {
 	getText: function (node: ChildNode) {
 		switch (node.nodeType) {
 			case 3:
-				return node.nodeValue || "";
+				return node.nodeValue || '';
 			case 1:
-				return node.textContent || "";
+				return node.textContent || '';
 		}
-		return "";
+		return '';
 	},
 
 	getAttributeValue: function (elem: Element, name: string) {
@@ -53,9 +50,7 @@ const adapter = {
 
 	getParent: function (elem: Element) {
 		const { parentNode } = elem;
-		return parentNode && 1 === parentNode.nodeType
-			? (parentNode as Element)
-			: null;
+		return parentNode && 1 === parentNode.nodeType ? (parentNode as Element) : null;
 	},
 
 	getChildren: function (node: ChildNode) {
@@ -67,27 +62,18 @@ const adapter = {
 		return parentNode ? Array.from(parentNode.childNodes) : [elem];
 	},
 
-	findOne: function (
-		test: (node: Element) => boolean,
-		nodes: Iterable<ChildNode>
-	) {
+	findOne: function (test: (node: Element) => boolean, nodes: Iterable<ChildNode>) {
 		for (const node of iterAll(test, nodes)) {
 			return node;
 		}
 		return null;
 	},
 
-	findAll: function (
-		test: (node: Element) => boolean,
-		nodes: Iterable<ChildNode>
-	) {
+	findAll: function (test: (node: Element) => boolean, nodes: Iterable<ChildNode>) {
 		return Array.from(iterAll(test, nodes));
 	},
 
-	existsOne: function (
-		test: (node: Element) => boolean,
-		elements: Iterable<ChildNode>
-	) {
+	existsOne: function (test: (node: Element) => boolean, elements: Iterable<ChildNode>) {
 		for (const node of iterAll(test, elements)) {
 			return true;
 		}
@@ -102,11 +88,7 @@ const adapter = {
 				nodes.splice(length, 1);
 				continue;
 			}
-			for (
-				let { parentNode } = node;
-				parentNode;
-				parentNode = parentNode.parentNode
-			) {
+			for (let { parentNode } = node; parentNode; parentNode = parentNode.parentNode) {
 				if (nodes.includes(parentNode)) {
 					nodes.splice(length, 1);
 					break;
@@ -117,29 +99,17 @@ const adapter = {
 	},
 };
 
-export function prepareMatch(
-	elem: ParentNode,
-	selectors: string
-): (node: ParentNode) => boolean {
+export function prepareMatch(elem: ParentNode, selectors: string): (node: ParentNode) => boolean {
 	const opt = {
 		// xmlMode: !ignoreCase(elem),
 		xmlMode: true,
 		// context: elem,
 		adapter,
 	};
-	if(selectors.indexOf(':scope') >= 0){
+	if (selectors.indexOf(':scope') >= 0) {
 		(opt as any).context = elem;
 	}
 	return compile(selectors, opt);
 }
 
-// export const matches = (elem: ParentNode, selectors: string) => {
-// 	return is(elem, selectors, {
-// 		// strict: true,
-// 		// xmlMode: !ignoreCase(elem),
-// 		xmlMode: true,
-// 		adapter,
-// 	});
-// };
-
-import { Element } from "../element.js";
+import { Element } from '../element.js';

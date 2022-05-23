@@ -2,7 +2,7 @@ import tap from 'tap';
 import { Document } from '../dist/document.js';
 import { ParentNode } from '../dist/parent-node.js';
 import { DOMParser } from '../dist/dom-parse.js';
-import { CSSStyleDeclaration } from '../dist/attr-style.js';
+import { CSSStyleDeclaration } from '../dist/css/stylemap.js';
 const parser = new DOMParser();
 const document = parser.parseFromString('<html/>', 'text/html');
 
@@ -50,7 +50,7 @@ let node = document.createElement('div');
 	assert(node.toString(), `<div style="display: none;"></div>`, 'display=none');
 	assert(node.style[0], `display`, '.style[0]');
 	assert(node.style[-1], undefined, '.style[-1]');
-	assert(node.style.constructor.name, 'CSSStyleDeclaration', 'style.constructor');
+	// assert(node.style.constructor.name, 'CSSStyleDeclaration', 'style.constructor');
 	node.style.display = '';
 	assert(node.toString(), '<div></div>', "setter as ''");
 }
@@ -101,6 +101,7 @@ tap.test('parsing', function (t) {
 	div.style.setProperty('color', 'orange', 'important');
 	t.same(div.style.getPropertyPriority('color'), 'important');
 	t.strictSame(asm.get('color').toString(), 'orange');
+	t.strictSame([...div.style], ['color']);
 	t.end();
 });
 tap.test('shorthand', function (t) {
@@ -118,6 +119,7 @@ tap.test('shorthand', function (t) {
 	// console.log(asm);
 	t.same(div.style.getPropertyPriority('margin-left'), 'important');
 	div.style.setProperty('padding', '1em auto 2em');
+	// t.same([...div.style], ['margin', 'padding']);
 	t.same(asm.get('padding-top') + '', '1em');
 	t.same(asm.get('padding-right') + '', 'auto');
 	t.same(asm.get('padding-bottom') + '', '2em');
@@ -144,15 +146,23 @@ tap.test('delete', function (t) {
 	t.same(div.style.getPropertyValue('background-color'), '');
 	t.end();
 });
-// /* Apply to all four sides */
-// margin: 1em;
-// margin: -3px;
-// /* vertical | horizontal */
-// margin: 5% auto;
-//  top | horizontal | bottom
-// margin: 1em auto 2em;
-// /* top | right | bottom | left */
-// margin: 2px 1em 0 auto;
+
+// tap.test('self', function (t) {
+// 	let { style } = document.createElement('div');
+// 	let { self } = style;
+// 	let s;
+// 	// div.style is a Proxy
+// 	// div.style.self is a Proxy target
+// 	style.cssText = s = 'background-color: blue !important';
+// 	t.same(self.cssText, s);
+// 	t.same(style.cssText, s);
+	
+// 	self.cssText = s = 'color: pink';
+// 	t.same(self.cssText, s);
+// 	t.same(style.cssText, s);
+// 	t.end();
+// });
+
 {
 	assert(node.className, '', 'no class name');
 	assert(node.classList.contains('tap'), false, 'no tap class');

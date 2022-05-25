@@ -24,7 +24,10 @@ export class HTMLAnchorElement extends HTMLElement {
 	}
 }
 export class HTMLStyleElement extends HTMLElement {
-	// TODO:
+	get media() {
+		return this.getAttribute('media');
+	}
+	// styleSheet
 }
 
 import { Element } from '../element.js';

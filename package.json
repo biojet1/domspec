@@ -43,8 +43,8 @@
 	},
 	"files": ["dist"],
 	"c8": {
-		"reports-dir": "/tmp/.c8/rep",
-		"temp-directory": "/tmp/.c8/tmp",
+		"reports-dir": "/tmp/svgdom.c8/rep",
+		"temp-directory": "/tmp/svgdom.c8/tmp",
 		"src": "dist"
 	},
 	"tap": {

@@ -24,27 +24,6 @@ tap.test('CSS', function (t) {
 	t.end();
 });
 
-tap.test('CSS', function (t) {
-	const document = parser.parseFromString(`
-<html>
-<head>
-  <style>
-    p {
-      color: red;
-    }
-  </style>
-</head>
-<body>
-  <p>This is my paragraph.</p>
-</body>
-</html>
-		`, 'text/html');
-
-	// let div = document.createElement('div');
-	// const asm = div.attributeStyleMap;
-	console.info('styleSheets', document.styleSheets);
-	t.end();
-});
 
 tap.test('CSS', function (t) {
 	let div = document.createElement('div');

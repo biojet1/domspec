@@ -1,0 +1,41 @@
+<html lang="en"><head>
+<title>Index</title>
+
+
+
+</head><body><div id="div"></div>
+<script>
+const div = document.getElementById('div') ;
+
+console.log(div.style.length);
+function setx(prop, val, important=''){
+
+div.style.setProperty(prop, val, important);
+
+console.info(`${prop}=${val}`, div.style.length, `[${div.getAttribute("style")}]`, [...div.style].map(v=>
+    `${v}:${div.style.getPropertyValue(v)}`));
+
+}
+setx('color', 'blue');
+
+setx('padding-top', '2px');
+setx('padding', '5px');
+setx('padding-left', '3px');
+setx('padding-bottom', '1px');
+setx('padding-bottom', '');
+setx('padding', '');
+
+// console.log(div.style.length, `"${div.getAttribute("style")}"`, [...div.style]);
+// div.style.padding = '5px';
+// console.log(div.style.length, `"${div.getAttribute("style")}"`, [...div.style]);
+// div.style.paddingLeft = '1px';
+// console.log(div.style.length, `"${div.getAttribute("style")}"`, [...div.style]);
+// div.style.padding = '4px';
+// console.log(div.style.length, `"${div.getAttribute("style")}"`, [...div.style]);
+// div.style.setProperty('padding-top', '3px', 'important');
+// console.log(div.style.length, `"${div.getAttribute("style")}"`, [...div.style]);
+
+
+
+</script>
+</body></html>

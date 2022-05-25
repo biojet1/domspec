@@ -71,7 +71,8 @@ export class StylePropertyMap extends Map<string, String> {
 	getPropertyValue(name: string) {
 		// const v = this.#tag?.[name]?.value;
 		// return v ?? this.get(name)?.toString() ?? '';
-		return this.get(name)?.toString() ?? this.#tag?.[name]?.value ?? '';
+		return this.get(name)?.toString() ?? '';
+		// return this.get(name)?.toString() ?? this.#tag?.[name]?.value ?? '';
 	}
 
 	getPropertyPriority(name: string) {
@@ -253,10 +254,10 @@ function setProperty(
 						setProperty(_map, `${name}-bottom`, a[0], priority, name);
 						setProperty(_map, `${name}-left`, a[0], priority, name);
 					}
-					// if (_map.size == s) {
-					// 	// nothing added
-					// 	return;
-					// }
+					if (_map.size == s) {
+						// nothing added
+						return;
+					}
 			}
 			// return;
 		}
@@ -274,14 +275,23 @@ function setProperty(
 			break;
 		default:
 			// const v = _map.get(name);
-			_map.removeProperty(name);
-			if (short) {
-				_map._tag[name] = { priority, short, value };
-				return;
-			}
-			if (priority) {
-				_map._tag[name] = { priority };
-			}
+			// if(v == undefined){
+			// 	_map._tag[name] = { priority, short };
+			// 	_map.set(name, value);
+			// }else{
+
+			// }
+			// _map.removeProperty(name);
+			// if (short) {
+			// 	_map._tag[name] = { priority, short, value };
+			// 	return;
+			// }
+			// if (priority) {
+			// 	_map._tag[name] = { priority };
+			// }
+			// _map.set(name, value);
+
+			_map._tag[name] = { priority, short };
 			_map.set(name, value);
 	}
 }

@@ -2,7 +2,7 @@ import tap from 'tap';
 import { Document } from '../dist/document.js';
 import { ParentNode } from '../dist/parent-node.js';
 import { DOMParser } from '../dist/dom-parse.js';
-import { CSSStyleDeclaration } from '../dist/attr-style.js';
+import { CSSStyleDeclaration } from '../dist/css/stylemap.js';
 const parser = new DOMParser();
 const document = parser.parseFromString('<html/>', 'text/html');
 

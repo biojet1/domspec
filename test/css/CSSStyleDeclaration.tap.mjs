@@ -1,5 +1,5 @@
 import tap from 'tap';
-import { CSSStyleDeclaration } from '../dist/all.js';
+import { CSSStyleDeclaration } from '../../dist/css/index.js';
 
 tap.test('margin padding', function (t) {
     const style = CSSStyleDeclaration.new();

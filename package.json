@@ -8,7 +8,7 @@
 		"madge": "node test/madge.cjs",
 		"test_xml": "python test/gen.py > test/test.xml",
 		"rm-map": "find dist -name '*.js.map' -type f -delete",
-		"c8test": "c8 npx tap --no-coverage --reporter=terse 'test/*.tap.?js' 'test/wpt-o?/*.tap.?js'",
+		"c8test": "c8 npx tap --no-coverage --reporter=terse 'test/*.tap.?js' 'test/wpt-o?/*.tap.?js' 'test/css/*.tap.?js'",
 		"wpt": "c8 npx tap --no-coverage --reporter=terse 'test/wpt-o?/*.tap.?js'",
 		"wpt-run-try": "env TRY=1 tap --node-arg=--trace-warnings --node-arg=--unhandled-rejections=strict --bail test/wpt-run.tap.mjs",
 		"wpt-run-ok": "env tap -t600 --node-arg=--trace-warnings --node-arg=--unhandled-rejections=strict --bail test/wpt-run.tap.mjs",

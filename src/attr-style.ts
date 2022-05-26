@@ -12,7 +12,7 @@ export class StyleAttr extends Attr {
 	}
 
 	get proxy() {
-		return this._proxy || (this._proxy = this.MAP.proxify());
+		return this._proxy || (this._proxy = this.MAP.styleProxy());
 	}
 
 	get value() {

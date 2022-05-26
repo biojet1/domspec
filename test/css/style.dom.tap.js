@@ -30,6 +30,8 @@ tap.test('CSS', function (t) {
 		t.same(ss.cssRules[3].media.length, 1);
 		ss.cssRules[3].media.appendMedium('what');
 		t.same(ss.cssRules[3].media[1], 'what');
+		t.same(ss.cssRules[3].media.indexOf('what'), 1);
+
 		t.same(ss.cssRules[3].media[0], 'screen and (min-width: 900px)');
 		t.same(ss.cssRules[3].media.length, 2);
 		t.same(ss.cssRules[3].media.mediaText, 'screen and (min-width: 900px), what');

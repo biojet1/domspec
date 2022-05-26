@@ -210,7 +210,7 @@ export abstract class WithStyleProp extends CSSRule {
 	styleMap = new StylePropertyMap();
 	get style() {
 		const { styleMap } = this;
-		return this.#style || (this.#style = styleMap.proxify());
+		return this.#style || (this.#style = styleMap.styleProxy());
 	}
 }
 export abstract class CSSGroupingRule extends WithRuleSet {
@@ -312,7 +312,7 @@ export class CSSFontFaceRule extends WithRuleSet {
 	styleMap = new StylePropertyMap();
 	get style() {
 		const { styleMap } = this;
-		return this.#style || (this.#style = styleMap.proxify());
+		return this.#style || (this.#style = styleMap.styleProxy());
 	}
 }
 

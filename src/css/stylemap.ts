@@ -114,7 +114,7 @@ export class StylePropertyMap extends Map<string, String> {
 		return undefined;
 	}
 	// proxy CSSStyleDeclaration
-	proxify() {
+	styleProxy() {
 		return new Proxy<StylePropertyMap>(this, handlerFor(this));
 	}
 }
@@ -122,7 +122,7 @@ export class StylePropertyMap extends Map<string, String> {
 export class CSSStyleDeclaration {
 	static new() {
 		const self = new StylePropertyMap();
-		return self.proxify();
+		return self.styleProxy();
 	}
 }
 

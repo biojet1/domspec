@@ -339,7 +339,7 @@ export abstract class Document extends NonElementParentNode {
 	}
 
 	get styleSheets() {
-		return getStyleSheets(this);
+		return StyleSheetList.assign(this);
 	}
 
 	static async fetch(url: RequestInfo, init?: RequestInit) {
@@ -420,5 +420,5 @@ import { DocumentType } from './document-type.js';
 import { NEXT, PREV, END, Node } from './node.js';
 import { createEvent } from './event.js';
 import { DOMException } from './event-target.js';
-import { getStyleSheets } from './css/domstyle.js';
+import { StyleSheetList } from './css/domstyle.js';
 export { DOMImplementation };

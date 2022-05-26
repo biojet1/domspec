@@ -438,6 +438,10 @@ export class Element extends ParentNode {
 		return this._styleAttr.MAP;
 	}
 
+	get computedStyleMap() : any {
+		return getComputedStyleMap(this);
+	}
+
 	get classList() {
 		const attr = this.getAttributeNode('class');
 		if (!attr) {
@@ -653,5 +657,6 @@ import { enumXMLDump } from './dom-serialize.js';
 import { validateAndExtract, checkName, HTML_NS } from './namespace.js';
 import { prepareMatch } from './css/match.js';
 import { DOMException } from './event-target.js';
+import { getComputedStyleMap } from './css/domstyle.js';
 
 export { NamedNodeMap };

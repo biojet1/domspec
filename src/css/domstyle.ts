@@ -148,10 +148,39 @@ export class StyleSheetList extends Array<CSSStyleSheet> {
 }
 
 const wm_sheets = new WeakMap<Document, StyleSheetList>();
+
 export function getStyleSheets(document: Document) {
 	let ssa = wm_sheets.get(document);
 	if (!ssa) {
 		wm_sheets.set(document, (ssa = StyleSheetList.create(document)));
 	}
 	return ssa;
+}
+
+const wm_stylemap = new WeakMap<Element, StylePropertyMapReadOnly>();
+
+export function getComputedStyleMap(node: Element) {
+	let sm = wm_stylemap.get(node);
+	if (!sm) {
+		wm_stylemap.set(node, (sm = new StylePropertyMapReadOnly(node)));
+	}
+	return sm;
+}
+
+class StylePropertyMapReadOnly {
+	sheets: StyleSheetList;
+	element: Element;
+	constructor(node: Element) {
+		this.element = node;
+		const sheets = node?.ownerDocument?.styleSheets;
+		if (sheets) {
+			this.sheets = sheets;
+		} else {
+			throw Error();
+		}
+	}
+	get(name: string) {
+		const { sheets, element } = this;
+		return sheets.getSpecifiedValue(element, name);
+	}
 }

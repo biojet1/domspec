@@ -65,3 +65,30 @@ tap.test('getComputedStyleFromEmbeddedSheet2', function (t) {
 
     t.end();
 });
+
+
+tap.test('getComputedStyleWithMediaRules', function (t) {
+    const document =
+        parser.parseFromString(`<html><head><style>
+            @media screen,handheld { .citation { color: blue; } }
+      @media print { .citation { color: red; } }
+      </style></head>
+      <body><p class=\"citation\">Hello</p></body></html>`);
+    const window = document.defaultView;
+    let style = window.getComputedStyle(window.document.querySelector(".citation"));
+    t.equal(style.color, "blue", "computed color of p is blue");
+    t.end();
+});
+
+tap.test('getComputedStyleWithMediaRules2', function (t) {
+    const document =
+        parser.parseFromString(`<html><head><style>
+      @media print { .citation { color: red; } }
+            @media screen,handheld { .citation { color: blue; } }
+      </style></head>
+      <body><p class=\"citation\">Hello</p></body></html>`);
+    const window = document.defaultView;
+    let style = window.getComputedStyle(window.document.querySelector(".citation"));
+    t.equal(style.color, "blue", "computed color of p is blue");
+    t.end();
+});

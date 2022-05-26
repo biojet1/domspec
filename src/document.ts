@@ -337,6 +337,11 @@ export abstract class Document extends NonElementParentNode {
 	set defaultView(window: Window | null) {
 		window ? _wMapDocWin.set(this, window) : _wMapDocWin.delete(this);
 	}
+
+	get styleSheets() {
+		return StyleSheetList.assign(this);
+	}
+
 	static async fetch(url: RequestInfo, init?: RequestInit) {
 		console.info('Document.fetch');
 		return import('node-fetch').then((mod) => {
@@ -415,4 +420,5 @@ import { DocumentType } from './document-type.js';
 import { NEXT, PREV, END, Node } from './node.js';
 import { createEvent } from './event.js';
 import { DOMException } from './event-target.js';
+import { StyleSheetList } from './css/domstyle.js';
 export { DOMImplementation };

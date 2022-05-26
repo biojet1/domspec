@@ -1,9 +1,9 @@
 // import fs from "fs";
 // import vm from "vm";
-import tap from "tap";
+import tap from 'tap';
 // import fetch from "node-fetch";
 
-import { fileURLToPath, pathToFileURL, URL } from "url";
+import { fileURLToPath, pathToFileURL, URL } from 'url';
 // import * as all from "../dist/all.js";
 
 const ct = globalThis.clearTimeout;
@@ -12,11 +12,11 @@ globalThis.clearTimeout = function () {
     // console.log("::clearTimeout", arguments);
     ct(arguments);
 };
-import { Window, EventTarget, ResourceLoader } from "../dist/all.js";
+import { Window, EventTarget, ResourceLoader } from '../dist/all.js';
 
 let _FILE = process.env._FILE;
 
-const WPT_ROOT_URL = pathToFileURL(process.env.WPT_ROOT + "/");
+const WPT_ROOT_URL = pathToFileURL(process.env.WPT_ROOT + '/');
 if (_FILE) {
     const test_name = _FILE;
 
@@ -24,13 +24,13 @@ if (_FILE) {
 
     // console.info("_FILE", _FILE);
 
-    const REPORT_URL = pathToFileURL("./test/testharnessreport.js").href;
+    const REPORT_URL = pathToFileURL('./test/testharnessreport.js').href;
 
     // svg/types/scripted/SVGGraphicsElement.getBBox-01.html
     if (1) {
         const postMessage = Window.prototype.postMessage;
         Window.prototype.postMessage = function () {
-            console.error("::postMessage", arguments);
+            console.error('::postMessage', arguments);
             postMessage.apply(this, arguments);
         };
         const addEventListener = EventTarget.prototype.addEventListener;
@@ -47,9 +47,9 @@ if (_FILE) {
 
     class TestResourceLoader extends ResourceLoader {
         resolveURL(href, baseURI) {
-            if (href == "/resources/testharnessreport.js") {
+            if (href == '/resources/testharnessreport.js') {
                 href = REPORT_URL;
-            } else if (href.startsWith("/")) {
+            } else if (href.startsWith('/')) {
                 baseURI = WPT_ROOT_URL;
                 href = href.substring(1);
             }
@@ -62,6 +62,12 @@ if (_FILE) {
     const window = new Window();
 
     window.test_name = test_name;
+
+    // console.log('window.CSS', window.CSS);
+    window.CSS = Object.create(window.CSS);
+    window.CSS.supports = function () {
+        return true;
+    };
 
     // const url =
     //     "file://svg/types/scripted/SVGGeometryElement.getTotalLength-01.svg";
@@ -96,22 +102,22 @@ if (_FILE) {
         },
     });
 
-    Object.defineProperty(Window.prototype, "addEventListener", {
+    Object.defineProperty(Window.prototype, 'addEventListener', {
         value: function () {
             EventTarget.prototype.addEventListener.apply(window, arguments);
         },
     });
-    Object.defineProperty(Window.prototype, "self", {
+    Object.defineProperty(Window.prototype, 'self', {
         value: self,
     });
     globalThis.window = window;
-    process.on("beforeExit", (code) => {
+    process.on('beforeExit', (code) => {
         code && console.error(`beforeExit: ${code}`);
         // console.error(window.tests);
     });
 
     //catches uncaught exceptions
-    process.on("uncaughtException", () => {
+    process.on('uncaughtException', () => {
         console.error(`uncaughtException`);
     });
 
@@ -119,18 +125,18 @@ if (_FILE) {
     window.TypeError = TypeError;
 
     window.addEventListener(
-        "error",
+        'error',
         function (e) {
-            console.error("event error", e);
+            console.error('event error', e);
         },
-        false
+        false,
     );
     window.addEventListener(
-        "unhandledrejection",
+        'unhandledrejection',
         function (e) {
-            console.error("event unhandledrejection", e);
+            console.error('event unhandledrejection', e);
         },
-        false
+        false,
     );
 
     window
@@ -150,8 +156,8 @@ if (_FILE) {
     // console.error("This message is displayed first.");
 } else {
     // const test_file = "svg/types/scripted/SVGGeometryElement.getTotalLength-01.svg";
-    process.env._FILE = "AUX";
-    const PKG_DIR_URL = pathToFileURL(".");
+    process.env._FILE = 'AUX';
+    const PKG_DIR_URL = pathToFileURL('.');
     let tests = `
 svg/types/scripted/SVGGeometryElement.getTotalLength-01.svg
 svg/types/scripted/SVGGeometryElement.getPointAtLength-01.svg
@@ -442,7 +448,7 @@ css/css-box/parsing/margin-shorthand.html
     tests = (process.env.TRY ? tests_try : tests)
         .split(/[\r\n]+/)
         .map((v) => v.trim())
-        .filter((v) => v && !v.startsWith("#") && !v.startsWith("//"));
+        .filter((v) => v && !v.startsWith('#') && !v.startsWith('//'));
 
     // console.info(tests);
     tap.jobs = 5;
@@ -453,10 +459,10 @@ css/css-box/parsing/margin-shorthand.html
         process.env._FILE = sub;
         tap.spawn(
             // "tap",
-            "node",
-            ["test/wpt-run.tap.mjs"],
+            'node',
+            ['test/wpt-run.tap.mjs'],
             // {buffered:true},
-            `[${++i} ${sub}]`
+            `[${++i} ${sub}]`,
         );
     }
 }

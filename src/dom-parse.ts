@@ -482,7 +482,11 @@ export class DOMParser {
 		}
 		return doc;
 	}
-
+	async parseFile(path: string, type?: string) {
+		return import('fs/promises')
+			.then((mod) => mod.readFile(path, { encoding: 'utf-8' }))
+			.then((content) => this.parseFromString(content));
+	}
 	async parseString(markup: string, type?: string) {
 		let doc: Document;
 		let opt: any = {};

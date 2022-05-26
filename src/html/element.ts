@@ -24,11 +24,18 @@ export class HTMLAnchorElement extends HTMLElement {
 	}
 }
 export class HTMLStyleElement extends HTMLElement {
-	// TODO:
+	get media() {
+		return this.getAttribute('media');
+	}
+	get sheet() {
+		return parseStyleSheet(this);
+	}
+	// styleSheet
 }
 
 import { Element } from '../element.js';
 import { DocumentFragment } from '../document-fragment.js';
+import { parseStyleSheet } from '../css/domstyle.js';
 
 export class HTMLAreaElement extends HTMLElement {}
 export class HTMLAudioElement extends HTMLElement {}

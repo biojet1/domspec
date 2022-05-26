@@ -23,3 +23,28 @@ tap.test('CSS', function (t) {
 	t.same(div.style.getPropertyValue('padding-left'), '10em');
 	t.end();
 });
+
+
+tap.test('CSS', function (t) {
+	let div = document.createElement('div');
+	t.same(div.style.length, 0);
+	div.style['padding'] = "";
+	t.same(div.style.length, 0);
+	div.style['padding'] = "1px 2px 3px 4px"
+	t.end();
+});
+
+
+                // var div = document.getElementById('target') || document.createElement('div');
+                // div.style[property] = "";
+                // try {
+                //     const expectedLength = div.style.length;
+                //     div.style[property] = value;
+                //     assert_true(CSS.supports(property, value));
+                //     for (let longhand of Object.keys(longhands).sort()) {
+                //         div.style[longhand] = "";
+                //     }
+                //     assert_equals(div.style.length, expectedLength);
+                // } finally {
+                //     div.style[property] = "";
+                // }

@@ -145,6 +145,10 @@ export class Window extends EventTarget {
 	cancelAnimationFrame(id: number) {
 		globalThis.clearTimeout(id);
 	}
+	getComputedStyle(node:Element) {
+		return this.document.styleSheets.getComputedStyle(node);
+	}
+
 
 	postMessage(message: any, targetOrigin: string) {
 		// console.log("[postMessage]", arguments);
@@ -332,6 +336,8 @@ Object.defineProperties(Window.prototype, {
 import { ResourceLoader } from './resource.js';
 import { DOMImplementation } from './dom-implementation.js';
 import { pushDOMParser, htmlParser2 } from './dom-parse.js';
+import { Element } from './element.js';
+
 // import { fileURLToPath, pathToFileURL } from "url";
 // import fs from "fs";
 

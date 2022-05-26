@@ -51,7 +51,7 @@ export class StylePropertyMap extends Map<string, String> {
 	toString() {
 		const arr: string[] = [];
 		for (const [key, v] of this) {
-			if (v) {
+			if (v != undefined) {
 				const tag = this.#tag?.[key];
 				if (tag) {
 					const { short, priority } = tag;
@@ -69,7 +69,10 @@ export class StylePropertyMap extends Map<string, String> {
 	}
 	// CSSStyleDeclaration
 	getPropertyValue(name: string) {
+		// const v = this.#tag?.[name]?.value;
+		// return v ?? this.get(name)?.toString() ?? '';
 		return this.get(name)?.toString() ?? '';
+		// return this.get(name)?.toString() ?? this.#tag?.[name]?.value ?? '';
 	}
 
 	getPropertyPriority(name: string) {
@@ -108,24 +111,19 @@ export class StylePropertyMap extends Map<string, String> {
 				break;
 			}
 		}
+		return undefined;
 	}
 	// proxy CSSStyleDeclaration
-	proxify() {
+	styleProxy() {
 		return new Proxy<StylePropertyMap>(this, handlerFor(this));
 	}
 }
 
 export class CSSStyleDeclaration {
-	// _sm = new StylePropertyMap();
-
 	static new() {
 		const self = new StylePropertyMap();
-		return self.proxify();
+		return self.styleProxy();
 	}
-
-	// [Symbol.iterator](): IterableIterator<string> {
-	// 	return this.keys();
-	// }
 }
 
 function handlerFor(self: StylePropertyMap) {
@@ -158,6 +156,12 @@ function handlerFor(self: StylePropertyMap) {
 					return self.toString();
 				case 'self':
 					return self;
+				case '__starts': // for testing
+					return (self as any)[key];
+				case '_importants': // for testing
+					return Object.create(
+						Object.entries(self._tag).map((e) => [e[0], (e[1] as any).priority]),
+					);
 			}
 
 			if (typeof key === 'symbol') {
@@ -166,7 +170,7 @@ function handlerFor(self: StylePropertyMap) {
 				}
 			} else {
 				if (/^-?\d+$/.test(key)) {
-					let i = parseInt(key);
+					let i = ~~key;
 					for (const v of self.keys()) {
 						if (0 === i--) {
 							return v;
@@ -175,19 +179,18 @@ function handlerFor(self: StylePropertyMap) {
 						}
 					}
 				} else {
-					key = deCamelize(key);
-					const val = self.get(key);
-					if (val != undefined) {
-						return val.toString();
-					}
-					return '';
+					return self.getPropertyValue(deCamelize(key));
 				}
 			}
+			return undefined;
 		},
 		set(self: StylePropertyMap, key: string, value: string) {
 			switch (key) {
 				case 'cssText':
 					self._parse(value);
+					break;
+				case '__starts':
+					(self as any)[key] = value; // for testing
 					break;
 				default:
 					if ((self as any)[key]) {
@@ -271,13 +274,24 @@ function setProperty(
 			_map.removeProperty(name);
 			break;
 		default:
-			const v = _map.get(name);
-			if (priority || short) {
-				_map._tag[name] = { priority, short };
-			} else {
-				_map.removeProperty(name);
-				// delete _map.#tag?.[name];
-			}
+			// const v = _map.get(name);
+			// if(v == undefined){
+			// 	_map._tag[name] = { priority, short };
+			// 	_map.set(name, value);
+			// }else{
+
+			// }
+			// _map.removeProperty(name);
+			// if (short) {
+			// 	_map._tag[name] = { priority, short, value };
+			// 	return;
+			// }
+			// if (priority) {
+			// 	_map._tag[name] = { priority };
+			// }
+			// _map.set(name, value);
+
+			_map._tag[name] = { priority, short };
 			_map.set(name, value);
 	}
 }

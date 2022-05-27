@@ -2,80 +2,85 @@ import tap from 'tap';
 import { DOMParser } from '../../dist/dom-parse.js';
 const parser = new DOMParser();
 tap.test('css.svg', function (t) {
-	return parser.parseFile('test/res/css.svg', 'text/svg').then((document) => {
-		const data = {
-			defs2: {
-				fill: 'rgb(0, 0, 0)',
-				stroke: 'none',
-				'stroke-width': '1px',
-			},
-			style1: {
-				fill: 'rgb(0, 0, 0)',
-				stroke: 'none',
-				'stroke-width': '1px',
-			},
-			style2: {
-				fill: 'rgb(0, 0, 0)',
-				stroke: 'none',
-				'stroke-width': '1px',
-			},
-			style3: {
-				fill: 'rgb(0, 0, 0)',
-				stroke: 'none',
-				'stroke-width': '1px',
-			},
-			layer1: {
-				fill: 'rgb(0, 0, 0)',
-				stroke: 'rgb(255, 255, 0)',
-				'stroke-width': '2px',
-			},
-			rect1: {
-				fill: 'rgb(0, 0, 255)',
-				stroke: 'rgb(255, 255, 0)',
-				'stroke-width': '2px',
-			},
-			rect2: {
-				fill: 'rgb(0, 128, 0)',
-				stroke: 'rgb(255, 255, 0)',
-				'stroke-width': '2px',
-			},
-			rect3: {
-				fill: 'rgb(0, 255, 255)',
-				stroke: 'rgb(255, 255, 0)',
-				'stroke-width': '2px',
-			},
-			rect4: {
-				fill: 'rgb(128, 128, 128)',
-				stroke: 'rgb(255, 0, 0)',
-				'stroke-width': '2px',
-			},
-			circle1: {
-				fill: 'rgb(255, 0, 0)',
-				stroke: 'rgb(255, 255, 0)',
-				'stroke-width': '2px',
-			},
-			circle2: {
-				fill: 'rgb(255, 0, 0)',
-				stroke: 'rgb(255, 255, 0)',
-				'stroke-width': '2px',
-			},
-		};
-		document.getElementById('style2').textContent =
-			':root{fill:black;stroke-width:1px;stroke:none}';
-		for (const [id, style] of Object.entries(data)) {
-			const node = document.querySelector(`#${id}`);
-			const cs = node.computedStyleMap;
-			for (const [prop, value] of Object.entries(style)) {
-				let comp = cs.get(prop);
-				comp = comp.toString();
-				comp = normColor(comp);
-				//console.info(id, comp, value, normColor(), prop);
-				t.same(comp, value, `${id}.${prop}`, style);
+	return parser
+		.parseFile('test/res/css.svg', 'text/svg')
+		.catch((err) => {
+			throw err;
+		})
+		.then((document) => {
+			const data = {
+				defs2: {
+					fill: 'rgb(0, 0, 0)',
+					stroke: 'none',
+					'stroke-width': '1px',
+				},
+				style1: {
+					fill: 'rgb(0, 0, 0)',
+					stroke: 'none',
+					'stroke-width': '1px',
+				},
+				style2: {
+					fill: 'rgb(0, 0, 0)',
+					stroke: 'none',
+					'stroke-width': '1px',
+				},
+				style3: {
+					fill: 'rgb(0, 0, 0)',
+					stroke: 'none',
+					'stroke-width': '1px',
+				},
+				layer1: {
+					fill: 'rgb(0, 0, 0)',
+					stroke: 'rgb(255, 255, 0)',
+					'stroke-width': '2px',
+				},
+				rect1: {
+					fill: 'rgb(0, 0, 255)',
+					stroke: 'rgb(255, 255, 0)',
+					'stroke-width': '2px',
+				},
+				rect2: {
+					fill: 'rgb(0, 128, 0)',
+					stroke: 'rgb(255, 255, 0)',
+					'stroke-width': '2px',
+				},
+				rect3: {
+					fill: 'rgb(0, 255, 255)',
+					stroke: 'rgb(255, 255, 0)',
+					'stroke-width': '2px',
+				},
+				rect4: {
+					fill: 'rgb(128, 128, 128)',
+					stroke: 'rgb(255, 0, 0)',
+					'stroke-width': '2px',
+				},
+				circle1: {
+					fill: 'rgb(255, 0, 0)',
+					stroke: 'rgb(255, 255, 0)',
+					'stroke-width': '2px',
+				},
+				circle2: {
+					fill: 'rgb(255, 0, 0)',
+					stroke: 'rgb(255, 255, 0)',
+					'stroke-width': '2px',
+				},
+			};
+			document.getElementById('style2').textContent =
+				':root{fill:black;stroke-width:1px;stroke:none}';
+			for (const [id, style] of Object.entries(data)) {
+				const node = document.querySelector(`#${id}`);
+				const cs = node.computedStyleMap;
+				for (const [prop, value] of Object.entries(style)) {
+					let comp = cs.get(prop);
+					comp = comp.toString();
+					comp = normColor(comp);
+					//console.info(id, comp, value, normColor(), prop);
+					t.same(comp, value, `${id}.${prop}`, style);
+				}
 			}
-		}
-		t.ok(document.URL);
-		t.end();
-	});
+			// t.ok(document.URL);
+			t.end();
+		});
 });
 const colors = {
 	aliceblue: 15792383,

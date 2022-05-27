@@ -9,7 +9,7 @@ const document = parser.parseFromString('<html/>', 'text/html');
 function assert(a, b, msg) {
 	tap.strictSame(a, b, msg);
 }
-console.log(CSSStyleDeclaration.constructor);
+// console.log(CSSStyleDeclaration.constructor);
 let node = document.createElement('div');
 {
 	assert(node.style.cssText, '', 'empty style');

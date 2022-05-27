@@ -1,8 +1,20 @@
+import { Document } from './document.js';
+
+import {
+	Node,
+	PREV,
+	NEXT,
+	START,
+	END,
+	// NodeCollection,
+	NodeList,
+	Children,
+} from './node.js';
+import { ChildNode } from './child-node.js';
+import { NonElementParentNode } from './non-element-parent-node.js';
+
 export abstract class ParentNode extends ChildNode {
 	[END]: EndNode;
-	// _children?: NodeList;
-	// _children?: NodeCollection;
-	// _children?: NodeList;
 
 	//// Tree
 	constructor() {
@@ -846,22 +858,9 @@ function _insert(parent: ParentNode, node: ChildNode, child: ChildNode) {
 	}
 }
 
-import {
-	Node,
-	PREV,
-	NEXT,
-	START,
-	END,
-	// NodeCollection,
-	NodeList,
-	Children,
-} from './node.js';
-import { ChildNode } from './child-node.js';
-import { NonElementParentNode } from './non-element-parent-node.js';
 import { Element } from './element.js';
 import { prepareMatch } from './css/match.js';
 import { enumXMLDump } from './dom-serialize.js';
 import { parseDOM } from './dom-parse.js';
-import { Document } from './document.js';
 import { HTML_NS } from './namespace.js';
 import { DOMException } from './event-target.js';

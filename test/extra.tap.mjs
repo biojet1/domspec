@@ -12,7 +12,7 @@ const doc = parser.parseFromString(
 <!-- I'm a test. -->
 ]>
 <svg viewBox="-10 20 200 300"><?PI EXTRA?>
-<text><![CDATA[<![CDATA\xA0<&>]]></text>;
+<text id="text1"><![CDATA[<![CDATA\xA0<&>]]></text>;
 </svg>
 	`,
 	"text/xml"
@@ -23,6 +23,9 @@ tap.notOk(doc.isSVG);
 const c1 = doc.documentElement.firstElementChild.lastChild;
 tap.strictSame(c1.data, "<![CDATA\xA0<&>");
 tap.strictSame(c1.toString(), `<![CDATA[${c1.data}]]>`);
+tap.strictSame(doc.all.text1, doc.documentElement.firstElementChild);
+tap.notOk(doc.all.text2);
+
 doc.documentElement.append(
 	doc.documentElement.firstElementChild.lastChild.data
 );

@@ -1,5 +1,5 @@
-export const VALUE = Symbol();
-export const RE_NAME = /^[_:A-Za-z][\w:_-]*$/;
+const VALUE = Symbol();
+const RE_NAME = /^[_:A-Za-z][\w:_-]*$/;
 export abstract class Attr extends Node {
 	//// Tree
 

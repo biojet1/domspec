@@ -7,10 +7,10 @@ const document = parser.parseFromString('<html/>', 'text/html');
 tap.test('CSS', function (t) {
 	let div = document.createElement('div');
 	const asm = div.attributeStyleMap;
-	console.info('asm', asm);
-	console.info('div.style', div.style);
-	console.info('div.style', div.style.constructor);
-	console.info('div.style.asm', typeof div.style.asm);
+	// console.info('asm', asm);
+	// console.info('div.style', div.style);
+	// console.info('div.style', div.style.constructor);
+	// console.info('div.style.asm', typeof div.style.asm);
 	asm.set('padding-top', CSS.px(42));
 	t.same(`${asm.get('padding-top')}`, '42px');
 	t.same(div.style.paddingTop, '42px');

@@ -19,7 +19,7 @@
 		"html:import": "env IMPORT=html node test/elements.js",
 		"svg:switch": "env SWITCH=svg node test/elements.js",
 		"svg:import": "env IMPORT=svg node test/elements.js",
-		"compile": "tsc",
+		"compile": "tsc -d --sourcemap",
 		"prepare": "tsc -d --removeComments --sourceMap",
 		"up:devel": "python -B -m ghdevapi.up -A biojet1/svgdom-ts . -m . -r devel -a",
 		"up": "python -B -m ghdevapi up -A biojet1/svgdom-ts . -m . -r main -a"

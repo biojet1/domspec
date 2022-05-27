@@ -1,6 +1,6 @@
 import { NEXT, PREV, END, Node } from './node.js';
 import { ParentNode, EndNode } from './parent-node.js';
-export const DATASET = Symbol();
+const DATASET = Symbol();
 
 function* attributes(node: Element) {
 	let attr = node[NEXT];
@@ -595,7 +595,7 @@ function fromCamelCase(name: string) {
 	return 'data-' + name.replace(/([A-Z])/g, (_, $1) => `-${$1.toLowerCase()}`);
 }
 
-export const dsHandler = {
+const dsHandler = {
 	get(element: Element, name: string) {
 		return element.getAttribute(fromCamelCase(name)) || undefined;
 	},

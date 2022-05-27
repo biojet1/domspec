@@ -1,4 +1,4 @@
-export function deCamelize(s: string) {
+function deCamelize(s: string) {
 	return String(s).replace(/([a-z])([A-Z])/g, function (m, g1, g2) {
 		return g1 + '-' + g2.toLowerCase();
 	});

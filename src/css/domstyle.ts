@@ -1,6 +1,6 @@
 import { Element } from '../element.js';
 import { Document } from '../document.js';
-import { CSSStyleSheet, CSSRule, CSSMediaRule, CSSStyleRule, parse } from './stylesheet.js';
+import { CSSStyleSheet, CSSRule, CSSMediaRule, CSSStyleRule } from './stylesheet.js';
 import { StylePropertyMap } from './stylemap.js';
 
 const wm_sheet = new WeakMap<Element, CSSStyleSheet>();
@@ -8,7 +8,7 @@ const wm_sheet = new WeakMap<Element, CSSStyleSheet>();
 export function parseStyleSheet(node: Element) {
 	let ss = wm_sheet.get(node);
 	if (!ss) {
-		wm_sheet.set(node, (ss = parse(node.textContent ?? '')));
+		wm_sheet.set(node, (ss = CSSStyleSheet.parse(node.textContent ?? '')));
 	}
 	return ss;
 }

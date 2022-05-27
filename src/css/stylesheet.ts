@@ -11,7 +11,7 @@ export abstract class CSSRule extends CSSNode {
 	abstract get cssText(): string;
 }
 
-export abstract class WithRuleSet extends CSSRule {
+abstract class WithRuleSet extends CSSRule {
 	cssRules = new Array<CSSRule>();
 }
 
@@ -80,7 +80,7 @@ export class CSSStyleSheet extends Array<CSSRule | CSSStyleSheet> {
 		if (index < 0 || index > cssRules.length) {
 			throw new RangeError('INDEX_SIZE_ERR');
 		}
-		const cssRule = parse(rule).cssRules[0];
+		const cssRule = _parse(rule).cssRules[0];
 
 		(cssRule as CSSRule).parentRule = this;
 		cssRules.splice(index, 0, cssRule);
@@ -94,6 +94,9 @@ export class CSSStyleSheet extends Array<CSSRule | CSSStyleSheet> {
 		cssRules.splice(index, 1).forEach((v) => {
 			delete v.parentRule;
 		});
+	}
+	static parse(text: string) {
+		return _parse(text);
 	}
 }
 
@@ -205,7 +208,7 @@ export class CSSImportRule extends CSSRule {
 	}
 }
 
-export abstract class WithStyleProp extends CSSRule {
+abstract class WithStyleProp extends CSSRule {
 	#style?: any;
 	styleMap = new StylePropertyMap();
 	get style() {
@@ -218,7 +221,7 @@ export abstract class CSSGroupingRule extends WithRuleSet {
 		if (index < 0 || index > this.cssRules.length) {
 			throw new RangeError('INDEX_SIZE_ERR');
 		}
-		const cssRule = parse(rule).cssRules[0];
+		const cssRule = _parse(rule).cssRules[0];
 
 		(cssRule as CSSRule).parentRule = this;
 		this.cssRules.splice(index, 0, cssRule);
@@ -251,7 +254,7 @@ export class CSSHostRule extends CSSGroupingRule {
 // 			if (index < 0 || index > cssRules.length) {
 // 				throw new RangeError('INDEX_SIZE_ERR');
 // 			}
-// 			const cssRule = parse(rule).cssRules[0];
+// 			const cssRule = _parse(rule).cssRules[0];
 
 // 			(cssRule as CSSRule).parentRule = this;
 // 			cssRules.splice(index, 0, cssRule);
@@ -268,7 +271,6 @@ export class CSSHostRule extends CSSGroupingRule {
 // 		}
 // 	};
 // }
-
 
 export abstract class CSSConditionRule extends CSSGroupingRule {
 	abstract get conditionText();
@@ -302,7 +304,6 @@ export class CSSMediaRule extends CSSConditionRule {
 		return `@supports ${conditionText} {${cssRules.map((r) => r.cssText).join('')}}`;
 	}
 }
-
 
 export class CSSFontFaceRule extends WithRuleSet {
 	get cssText() {
@@ -495,10 +496,7 @@ export class CSSStyleRule extends WithStyleProp {
 
 import { StylePropertyMap, CSSStyleDeclaration } from './stylemap.js';
 
-
-// import { CSSRule } from './rule.js';
-// import { parse } from './parse.js';
-export function parse(token: string) {
+function _parse(token: string) {
 	let i = 0;
 
 	let state:

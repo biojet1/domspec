@@ -8,6 +8,7 @@ export abstract class Document extends NonElementParentNode {
 	_domImpl?: DOMImplementation;
 	_location?: URL | string;
 	// documentURI?: string;
+	#all?: any;
 
 	protected constructor(contentType?: string) {
 		super();
@@ -340,6 +341,19 @@ export abstract class Document extends NonElementParentNode {
 
 	get styleSheets() {
 		return StyleSheetList.assign(this);
+	}
+
+	get all() {
+		return (
+			this.#all ??
+			(this.#all = new Proxy(this, {
+				get(target, id: string | symbol) {
+					if (typeof id === 'string') {
+						return target.getElementById(id);
+					}
+				},
+			}))
+		);
 	}
 
 	static async fetch(url: RequestInfo, init?: RequestInit) {

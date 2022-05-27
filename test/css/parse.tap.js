@@ -1,30 +1,30 @@
 import tap from 'tap';
-import * as CSSOM from '../../dist/css/index.js';
+import {CSSStyleSheet} from '../../dist/css/index.js';
 
 tap.test('a{content:"\\""}', function (t) {
-	const ss = CSSOM.parse(t.name);
+	const ss = CSSStyleSheet.parse(t.name);
 	t.strictSame(ss.cssRules[0].style.content, '"\\""');
 	t.end();
 });
 tap.test("a{content:'\\''}", function (t) {
-	const ss = CSSOM.parse(t.name);
+	const ss = CSSStyleSheet.parse(t.name);
 	t.strictSame(ss.cssRules[0].style.content, "'\\''");
 	t.end();
 });
 tap.test('a{content:"abc\\"\\"d\\"ef"}', function (t) {
-	const ss = CSSOM.parse(t.name);
+	const ss = CSSStyleSheet.parse(t.name);
 	t.strictSame(ss.cssRules[0].style.content, '"abc\\"\\"d\\"ef"');
 	t.end();
 });
 
 tap.test("a{content:'abc\\'\\'d\\'ef'}", function (t) {
-	const ss = CSSOM.parse(t.name);
+	const ss = CSSStyleSheet.parse(t.name);
 	t.strictSame(ss.cssRules[0].style.content, "'abc\\'\\'d\\'ef'");
 	t.end();
 });
 
 function empty(t) {
-	const ss = CSSOM.parse(t.name);
+	const ss = CSSStyleSheet.parse(t.name);
 	t.match(ss, {
 		parentStyleSheet: null,
 	});
@@ -88,12 +88,12 @@ tap.Test.prototype.addAssert('looks', 3, function (A, B, opt, message, extra) {
 
 function fn1(pattern, css) {
 	return function (t) {
-		t.looks(CSSOM.parse(css), pattern);
+		t.looks(CSSStyleSheet.parse(css), pattern);
 		t.end();
 	};
 }
 tap.test('a {color: red}', function (t) {
-	t.looks(CSSOM.parse(t.name), {
+	t.looks(CSSStyleSheet.parse(t.name), {
 		cssRules: [
 			{
 				selectorText: 'a',

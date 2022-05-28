@@ -12,7 +12,8 @@ globalThis.clearTimeout = function () {
     // console.log("::clearTimeout", arguments);
     ct(arguments);
 };
-import { Window, EventTarget, ResourceLoader } from '../dist/all.js';
+import { Window, EventTarget } from '../dist/all.js';
+import { ResourceLoader } from '../dist/resource.js';
 
 let _FILE = process.env._FILE;
 

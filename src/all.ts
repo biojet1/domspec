@@ -1,7 +1,7 @@
 export * from "./document.js";
-export {Node} from "./node.js";
+export {Node, NodeList} from "./node.js";
 export * from "./child-node.js";
-export {ParentNode} from "./parent-node.js";
+export {ParentNode, HTMLCollection} from "./parent-node.js";
 export * from "./character-data.js";
 export {Attr} from "./attr.js";
 export * from "./element.js";

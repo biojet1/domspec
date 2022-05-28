@@ -15,8 +15,7 @@ function time() {
 
 export const params = class {
     static aspect_ratio = [16, 9];
-     static _inc = 0;
-   
+    static _inc = 0;
 
     static get what() {
         console.log('what', this);
@@ -32,7 +31,6 @@ export const params = class {
     static get inc() {
         return ++this._inc;
     }
-
 };
 
 // export default { play, ['in']: time, ClassName, f: MyConstants.foo };

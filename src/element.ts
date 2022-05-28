@@ -438,7 +438,7 @@ export class Element extends ParentNode {
 		return this._styleAttr.MAP;
 	}
 
-	get computedStyleMap() : any {
+	computedStyleMap() : any {
 		return getComputedStyleMap(this);
 	}
 

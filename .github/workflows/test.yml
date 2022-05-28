@@ -70,6 +70,10 @@ jobs:
           npm run c8report
           # cat coverage/lcov.info
 
+      - name: tsc strict
+        if: always()
+        run: tsc -d --sourceMap --strict
+
       - name: Codecov
         uses: codecov/codecov-action@v2
         with:

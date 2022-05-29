@@ -2,7 +2,7 @@ export class DocumentType extends ChildNode {
 	publicId: string;
 	systemId: string;
 	name: string;
-	constructor(name: string, publicId: string = "", systemId: string = "") {
+	constructor(name: string, publicId: string = '', systemId: string = '') {
 		super();
 		checkQName(name);
 		this.name = name;
@@ -21,9 +21,9 @@ export class DocumentType extends ChildNode {
 	}
 	toString() {
 		const { name, publicId, systemId } = this;
-		return `<!DOCTYPE ${name}${
-			publicId  ? ` PUBLIC "${publicId}"` : ""
-		}${systemId  ? ` "${systemId}"` : ""}>`;
+		return `<!DOCTYPE ${name}${publicId ? ` PUBLIC "${publicId}"` : ''}${
+			systemId ? (publicId ? ` "${systemId}"` : ` SYSTEM "${systemId}"`) : ''
+		}>`;
 	}
 	isEqualNode(node: Node) {
 		if (this === node) {
@@ -32,11 +32,7 @@ export class DocumentType extends ChildNode {
 			return false;
 		}
 		const { name: nameA, publicId: publicIdA, systemId: systemIdA } = this;
-		const {
-			name: nameB,
-			publicId: publicIdB,
-			systemId: systemIdB,
-		} = node as DocumentType;
+		const { name: nameB, publicId: publicIdB, systemId: systemIdB } = node as DocumentType;
 		return (
 			((!nameA && !nameB) || nameA === nameB) &&
 			((!publicIdA && !publicIdB) || publicIdA === publicIdB) &&
@@ -44,6 +40,6 @@ export class DocumentType extends ChildNode {
 		);
 	}
 }
-import { Node } from "./node.js";
-import { ChildNode } from "./child-node.js";
-import { checkQName } from "./namespace.js";
+import { Node } from './node.js';
+import { ChildNode } from './child-node.js';
+import { checkQName } from './namespace.js';

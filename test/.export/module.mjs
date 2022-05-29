@@ -13,6 +13,12 @@ function time() {
     return 'oras';
 }
 
+export const option = {
+    aspect_ratio = [16, 9];
+    _inc = 0;
+    
+};
+
 export const params = class {
     static aspect_ratio = [16, 9];
     static _inc = 0;

@@ -69,7 +69,7 @@ tap.test('css.svg', function (t) {
 				':root{fill:black;stroke-width:1px;stroke:none}';
 			for (const [id, style] of Object.entries(data)) {
 				const node = document.querySelector(`#${id}`);
-				const cs = node.computedStyleMap;
+				const cs = node.computedStyleMap();
 				for (const [prop, value] of Object.entries(style)) {
 					let comp = cs.get(prop);
 					comp = comp.toString();

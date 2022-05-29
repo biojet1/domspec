@@ -5,8 +5,8 @@ const parser = new DOMParser();
 tap.test('CSS', function (t) {
 	parser.parseFile(`test/css/style.dom.html`, 'text/html').then((document) => {
 		// let div = document.createElement('div');
-		// const asm = div.attributeStyleMap;
-		// console.info('styleSheets', document.styleSheets);
+		// const asm = div.attributestylemap;
+		// console.info('stylesheets', document.styleSheets);
 		const ss = document.styleSheets['0'];
 		t.same(ss.cssRules[1].constructor.name, 'CSSSupportsRule');
 		t.match(

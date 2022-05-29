@@ -64,13 +64,27 @@ export class CSSUnitValue extends CSSNumericValue {
 		super();
 		this.value = value;
 		this.unit = unit;
+		if (!isFinite(value)) throw new Error(`Invalid value: "${value}"`);
+	}
+	static parse(text: string) {
+		const m = String(text).match(
+			/^([-+]?[0-9]*\.?[0-9]+)(|%|em|ex|ch|rem|vw|vh|vmin|vmax|cm|mm|in|pt|pc|px|Q|deg|grad|rad|turn|s|ms|Hz|kHz|dpi|dpcm|dppx|fr)?$/,
+		);
+		if (m) {
+			const [, value, unit] = m;
+
+			return new CSSUnitValue(
+				parseFloat(value),
+				unit ? (unit == '%' ? 'percent' : unit) : 'number',
+			);
+		}
 	}
 }
 
 interface CSSTransformComponent {
-    is2D: boolean;
-    // toMatrix(): DOMMatrix;
-    toString(): string;
+	is2D: boolean;
+	// toMatrix(): DOMMatrix;
+	toString(): string;
 }
 
 // class CSSRotate implements CSSTransformComponent {
@@ -86,66 +100,35 @@ interface CSSTransformComponent {
 // 	get is2D(){
 // 		return this.z != undefined;
 // 	}
-	
+
 // }
 
 export class CSSMathValue extends CSSNumericValue {}
 
-/** /
-const units = {
-	ch: 'ch',
-	rem: 'rem',
-	vw: 'vw',
-	vh: 'vh',
-	vmin: 'vmin',
-	vmax: 'vmax',
-	cm: 'cm',
-	mm: 'mm',
-	in: 'in',
-	pt: 'pt',
-	pc: 'pc',
-	px: 'px',
-	Q: 'Q',
-	deg: 'deg',
-	grad: 'grad',
-	rad: 'rad',
-	turn: 'turn',
-	s: 's',
-	ms: 'ms',
-	Hz: 'Hz',
-	kHz: 'kHz',
-	dpi: 'dpi',
-	dpcm: 'dpcm',
-	dppx: 'dppx',
-	fr: 'fr'
+export class CSS {
+	static ch = (value: number) => new CSSUnitValue(value, 'ch');
+	static rem = (value: number) => new CSSUnitValue(value, 'rem');
+	static vw = (value: number) => new CSSUnitValue(value, 'vw');
+	static vh = (value: number) => new CSSUnitValue(value, 'vh');
+	static vmin = (value: number) => new CSSUnitValue(value, 'vmin');
+	static vmax = (value: number) => new CSSUnitValue(value, 'vmax');
+	static cm = (value: number) => new CSSUnitValue(value, 'cm');
+	static mm = (value: number) => new CSSUnitValue(value, 'mm');
+	static in = (value: number) => new CSSUnitValue(value, 'in');
+	static pt = (value: number) => new CSSUnitValue(value, 'pt');
+	static pc = (value: number) => new CSSUnitValue(value, 'pc');
+	static px = (value: number) => new CSSUnitValue(value, 'px');
+	static Q = (value: number) => new CSSUnitValue(value, 'Q');
+	static deg = (value: number) => new CSSUnitValue(value, 'deg');
+	static grad = (value: number) => new CSSUnitValue(value, 'grad');
+	static rad = (value: number) => new CSSUnitValue(value, 'rad');
+	static turn = (value: number) => new CSSUnitValue(value, 'turn');
+	static s = (value: number) => new CSSUnitValue(value, 's');
+	static ms = (value: number) => new CSSUnitValue(value, 'ms');
+	static Hz = (value: number) => new CSSUnitValue(value, 'Hz');
+	static kHz = (value: number) => new CSSUnitValue(value, 'kHz');
+	static dpi = (value: number) => new CSSUnitValue(value, 'dpi');
+	static dpcm = (value: number) => new CSSUnitValue(value, 'dpcm');
+	static dppx = (value: number) => new CSSUnitValue(value, 'dppx');
+	static fr = (value: number) => new CSSUnitValue(value, 'fr');
 }
-for(const [k, v] of Object.entries(units)){
-	console.info(`export const ${k} = (value: number) => new CSSUnitValue(value, '${v}');`)
-}
-*/
-
-export const ch = (value: number) => new CSSUnitValue(value, 'ch');
-export const rem = (value: number) => new CSSUnitValue(value, 'rem');
-export const vw = (value: number) => new CSSUnitValue(value, 'vw');
-export const vh = (value: number) => new CSSUnitValue(value, 'vh');
-export const vmin = (value: number) => new CSSUnitValue(value, 'vmin');
-export const vmax = (value: number) => new CSSUnitValue(value, 'vmax');
-export const cm = (value: number) => new CSSUnitValue(value, 'cm');
-export const mm = (value: number) => new CSSUnitValue(value, 'mm');
-// export const 'in' = (value: number) => new CSSUnitValue(value, 'in');
-export const pt = (value: number) => new CSSUnitValue(value, 'pt');
-export const pc = (value: number) => new CSSUnitValue(value, 'pc');
-export const px = (value: number) => new CSSUnitValue(value, 'px');
-export const Q = (value: number) => new CSSUnitValue(value, 'Q');
-export const deg = (value: number) => new CSSUnitValue(value, 'deg');
-export const grad = (value: number) => new CSSUnitValue(value, 'grad');
-export const rad = (value: number) => new CSSUnitValue(value, 'rad');
-export const turn = (value: number) => new CSSUnitValue(value, 'turn');
-export const s = (value: number) => new CSSUnitValue(value, 's');
-export const ms = (value: number) => new CSSUnitValue(value, 'ms');
-export const Hz = (value: number) => new CSSUnitValue(value, 'Hz');
-export const kHz = (value: number) => new CSSUnitValue(value, 'kHz');
-export const dpi = (value: number) => new CSSUnitValue(value, 'dpi');
-export const dpcm = (value: number) => new CSSUnitValue(value, 'dpcm');
-export const dppx = (value: number) => new CSSUnitValue(value, 'dppx');
-export const fr = (value: number) => new CSSUnitValue(value, 'fr');

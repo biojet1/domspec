@@ -20,7 +20,7 @@
 		"svg:switch": "env SWITCH=svg node test/elements.js",
 		"svg:import": "env IMPORT=svg node test/elements.js",
 		"compile": "tsc -d --sourcemap",
-		"prepare": "tsc -d --removeComments --sourceMap",
+		"prepare": "tsc -d --removeComments",
 		"up:devel": "python -B -m ghdevapi.up -A biojet1/svgdom-ts . -m . -r devel -a",
 		"up": "python -B -m ghdevapi up -A biojet1/svgdom-ts . -m . -r main -a"
 	},
@@ -29,7 +29,7 @@
 	"exports": {
 		".": "./dist/all.js"
 	},
-	"license": "ISC",
+	"license": "MPL-2.0",
 	"dependencies": {
 		"@types/sax": "^1.2.3",
 		"css-select": "^4.1.3",
@@ -39,7 +39,7 @@
 	},
 	"peerDependencies": {
 		"node-fetch": "*",
-		"svggeom": "https://github.com/biojet1/svggeom/tarball/main"
+		"svggeom": "https://github.com/biojet1/svggeom/tarball/release"
 	},
 	"files": ["dist"],
 	"c8": {
@@ -58,6 +58,8 @@
 		"source-map-support": "^0.5.19",
 		"tap": "^15.0.9"
 	},
+	"workspaces": ["../svggeom"],
+
 	"prettier": {
 		"useTabs": true
 	}

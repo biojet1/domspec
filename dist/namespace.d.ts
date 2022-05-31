@@ -1,0 +1,11 @@
+export declare const XMLNS = "http://www.w3.org/2000/xmlns/";
+export declare const HTML_NS = "http://www.w3.org/1999/xhtml";
+export declare const XML_NS = "http://www.w3.org/XML/1998/namespace";
+export declare const MATHML_NS = "http://www.w3.org/1998/Math/MathML";
+export declare const SVG_NS = "http://www.w3.org/2000/svg";
+export declare const XLINK_NS = "http://www.w3.org/1999/xlink";
+export declare const NCNameRE: RegExp;
+export declare const NameRE: RegExp;
+export declare function checkName(name: string): void;
+export declare function checkQName(name: string): void;
+export declare function validateAndExtract(ns: string | null, qualifiedName: string): [string | null, string | null, string];

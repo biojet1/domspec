@@ -15,7 +15,7 @@ export class StylePropertyMap extends Map<string, String> {
 		return this.#tag || (this.#tag = {});
 	}
 
-	set(name: string, value: String): this {
+	override set(name: string, value: String): this {
 		switch (value) {
 			case undefined:
 			case null:
@@ -48,7 +48,7 @@ export class StylePropertyMap extends Map<string, String> {
 			}
 		}
 	}
-	toString() {
+	override toString() {
 		const arr: string[] = [];
 		for (const [key, v] of this) {
 			if (v != undefined) {
@@ -136,7 +136,7 @@ function handlerFor(self: StylePropertyMap) {
 	const _toString = () => self.toString();
 
 	return {
-		get(self: StylePropertyMap, key: string, receiver?: any) {
+		get(self: StylePropertyMap, key: string/*, receiver?: any*/) {
 			switch (key) {
 				case 'setProperty':
 					return _setProperty;

@@ -1,6 +1,6 @@
 import { Element } from '../element.js';
 import { Document } from '../document.js';
-import { CSSStyleSheet, CSSRule, CSSMediaRule, CSSStyleRule } from './stylesheet.js';
+import { CSSStyleSheet, CSSMediaRule, CSSStyleRule/*, CSSRule*/ } from './stylesheet.js';
 import { StylePropertyMap } from './stylemap.js';
 
 const wm_sheet = new WeakMap<Element, CSSStyleSheet>();

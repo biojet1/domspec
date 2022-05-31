@@ -1,5 +1,5 @@
 import { NEXT, PREV, END, Node } from './node.js';
-import { ParentNode, EndNode } from './parent-node.js';
+import { ParentNode } from './parent-node.js';
 const DATASET = Symbol();
 
 function* attributes(node: Element) {
@@ -434,11 +434,11 @@ export class Element extends ParentNode {
 		this.setAttribute('style', value.toString());
 	}
 
-	get attributeStyleMap() : any {
+	get attributeStyleMap(): any {
 		return this._styleAttr.MAP;
 	}
 
-	computedStyleMap() : any {
+	computedStyleMap(): any {
 		return getComputedStyleMap(this);
 	}
 
@@ -462,7 +462,6 @@ export class Element extends ParentNode {
 			return node.tokens;
 		}
 	}
-
 
 	get dataset() {
 		return this[DATASET] || (this[DATASET] = new Proxy<Element>(this, dsHandler));

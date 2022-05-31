@@ -56,7 +56,7 @@ export class CSSUnitValue extends CSSNumericValue {
 	value: number;
 	unit: string;
 
-	toString() {
+	override toString() {
 		return `${this.value}${this.unit}`;
 	}
 

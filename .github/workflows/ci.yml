@@ -85,7 +85,7 @@ jobs:
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@github.com"
           git rm -rf .
-          tar -xvzf ../*-*.*.tgz --strip=1 package
+          tar -xzf ../*-*.*.tgz --strip=1 package
           git add -A
           if [[ -z $(git status -s) ]]
           then

@@ -39,7 +39,7 @@
 	},
 	"peerDependencies": {
 		"node-fetch": "*",
-		"svggeom": "git://github.com/biojet1/svggeom#main"
+		"svggeom": "https://github.com/biojet1/svggeom/tarball/main"
 	},
 	"files": ["dist"],
 	"c8": {

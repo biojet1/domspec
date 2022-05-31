@@ -62,7 +62,9 @@ const adapter = {
     },
     existsOne: function (test, elements) {
         for (const node of iterAll(test, elements)) {
-            return true;
+            if (node) {
+                return true;
+            }
         }
         return false;
     },

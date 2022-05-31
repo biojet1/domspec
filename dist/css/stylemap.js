@@ -117,7 +117,7 @@ function handlerFor(self) {
     const _removeProperty = proto.removeProperty.bind(self);
     const _toString = () => self.toString();
     return {
-        get(self, key, receiver) {
+        get(self, key) {
             switch (key) {
                 case 'setProperty':
                     return _setProperty;

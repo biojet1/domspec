@@ -1,8 +1,13 @@
 {
 	"name": "svgdom-ts",
 	"version": "1.0.0",
+	"author": "https://www.npmjs.com/~biojet1",
+	"type": "module",
 	"description": "SVG DOM Implementation",
 	"main": "dist/all.js",
+	"homepage": "https://github.com/biojet1/svgdom-ts",
+	"repository": "https://github.com/biojet1/svgdom-ts",
+	"bugs": "https://github.com/biojet1/svgdom-ts/issues",
 	"scripts": {
 		"test": "tap test/parse.mjs",
 		"madge": "node test/madge.cjs",
@@ -24,18 +29,21 @@
 		"up:devel": "python -B -m ghdevapi.up -A biojet1/svgdom-ts . -m . -r devel -a",
 		"up": "python -B -m ghdevapi up -A biojet1/svgdom-ts . -m . -r main -a"
 	},
-	"author": "",
-	"type": "module",
 	"exports": {
 		".": "./dist/all.js"
 	},
-	"license": "MPL-2.0",
+	"license": "GPL-3.0",
 	"dependencies": {
 		"@types/sax": "^1.2.3",
+		"c8": "^7.11.3",
+		"codecov": "^3.8.3",
 		"css-select": "^4.1.3",
+		"eslint": "^8.16.0",
 		"htmlparser2": "^7.1.1",
 		"image-size": "",
-		"saxes": "^5.0.1"
+		"prettier": "^2.6.2",
+		"saxes": "^5.0.1",
+		"typescript": "^4.7.2"
 	},
 	"peerDependencies": {
 		"node-fetch": "*",
@@ -54,18 +62,12 @@
 		"coverage": false
 	},
 	"devDependencies": {
-		"c8": "^7.11.3",
 		"chai": "^4.3.4",
-		"codecov": "^3.8.3",
 		"jsdom": "^16.6.0",
 		"mocha-sugar-free": "^1.4.0",
 		"source-map-support": "^0.5.19",
-		"tap": "^15.0.9",
-		"typescript": "^4.7.2"
+		"tap": "^15.0.9"
 	},
-	"workspaces": [
-		"../svggeom"
-	],
 	"prettier": {
 		"useTabs": true
 	}

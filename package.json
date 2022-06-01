@@ -1,34 +1,13 @@
 {
-	"name": "svgdom-ts",
+	"name": "domspec",
 	"version": "1.0.0",
 	"author": "https://www.npmjs.com/~biojet1",
 	"type": "module",
 	"description": "SVG DOM Implementation",
 	"main": "dist/all.js",
-	"homepage": "https://github.com/biojet1/svgdom-ts",
-	"repository": "https://github.com/biojet1/svgdom-ts",
-	"bugs": "https://github.com/biojet1/svgdom-ts/issues",
-	"scripts": {
-		"test": "tap test/parse.mjs",
-		"madge": "node test/madge.cjs",
-		"test_xml": "python test/gen.py > test/test.xml",
-		"rm-map": "find dist -name '*.js.map' -type f -delete",
-		"c8test": "c8 npx tap -t600 --no-coverage --reporter=terse 'test/**/*.tap.*js'",
-		"wpt": "c8 npx tap --no-coverage --reporter=terse 'test/wpt-o?/*.tap.?js'",
-		"wpt-run-try": "env TRY=1 tap --node-arg=--trace-warnings --node-arg=--unhandled-rejections=strict --bail test/wpt-run.tap.mjs",
-		"wpt-run-ok": "env tap -t600 --node-arg=--trace-warnings --node-arg=--unhandled-rejections=strict --bail test/wpt-run.tap.mjs",
-		"c8report": "c8 report -r text-lcov > coverage/lcov.info",
-		"c8rephtml": "c8 report -r html",
-		"html:switch": "env SWITCH=html node test/elements.js",
-		"html:class": "env CLASS=html node test/elements.js",
-		"html:import": "env IMPORT=html node test/elements.js",
-		"svg:switch": "env SWITCH=svg node test/elements.js",
-		"svg:import": "env IMPORT=svg node test/elements.js",
-		"compile": "tsc -d --sourcemap",
-		"prepare": "tsc -d --removeComments",
-		"up:devel": "python -B -m ghdevapi.up -A biojet1/svgdom-ts . -m . -r devel -a",
-		"up": "python -B -m ghdevapi up -A biojet1/svgdom-ts . -m . -r main -a"
-	},
+	"homepage": "https://github.com/biojet1/domspec",
+	"repository": "https://github.com/biojet1/domspec",
+	"bugs": "https://github.com/biojet1/domspec/issues",
 	"exports": {
 		".": "./dist/all.js"
 	},
@@ -48,14 +27,6 @@
 	"peerDependencies": {
 		"node-fetch": "*",
 		"svggeom": "https://github.com/biojet1/svggeom/tarball/release"
-	},
-	"files": [
-		"dist"
-	],
-	"c8": {
-		"reports-dir": "/tmp/svgdom.c8/rep",
-		"temp-directory": "/tmp/svgdom.c8/tmp",
-		"src": "dist"
 	},
 	"tap": {
 		"timeout": 90,

@@ -1,7 +1,7 @@
 // import tap from "tap";
 // console.error(
 //     "testharnessreport",
-//     "/mnt/META/wrx/ts/svgdom-ts/test/testharnessreport.js"
+//     "test/testharnessreport.js"
 // );
 // console.error("DEBUG", add_completion_callback);
 setup(null, { explicit_timeout: true, debug:false });

@@ -442,9 +442,10 @@ svg/types/scripted/SVGLength.html
 // // dom/nodes/ParentNode-querySelector-All.html
 // // dom/nodes/Document-createEvent.https.html
 // svg/types/scripted/SVGGeometryElement.getPointAtLength-03.svg
-svg/types/scripted/SVGLengthList-basics.html
-css/css-box/parsing/padding-shorthand.html
-css/css-box/parsing/margin-shorthand.html
+// svg/types/scripted/SVGLengthList-basics.html
+// css/css-box/parsing/padding-shorthand.html
+// css/css-box/parsing/margin-shorthand.html
+domparsing/xml-serialization.xhtml 
 `;
     tests = (process.env.TRY ? tests_try : tests)
         .split(/[\r\n]+/)

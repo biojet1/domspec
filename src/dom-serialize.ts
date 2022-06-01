@@ -1,16 +1,13 @@
 export class XMLSerializer {
 	serializeToString(node: Node): string {
-		const { endNode, startNode } = node;
-		switch (node.nodeType) {
+		const { endNode, startNode, nodeType } = node;
+		switch (nodeType) {
 			default:
-				return Array.from(enumXMLDump(startNode, endNode)).join("");
+				return Array.from(enumXMLDump(startNode, endNode)).join('');
 			case 9: // DOCUMENT_NODE
-				return Array.from(
-					enumXMLDump(
-						startNode[NEXT] || startNode,
-						endNode[PREV] || endNode
-					)
-				).join("");
+				return Array.from(enumXMLDump(startNode[NEXT] || startNode, endNode[PREV] || endNode)).join(
+					'',
+				);
 		}
 	}
 }
@@ -32,11 +29,7 @@ export function* enumXMLDump(start: Node, end: Node) {
 					if (v != null) {
 						// same !(v === undefined || v === null)
 						const { name } = cur as Attr;
-						if (name)
-							yield ` ${name}="${(v as string).replace(
-								/[<>&"\xA0\t\n\r]/g,
-								rep
-							)}"`;
+						if (name) yield ` ${name}="${(v as string).replace(/[<>&"\xA0\t\n\r]/g, rep)}"`;
 					}
 				}
 				break;
@@ -46,7 +39,7 @@ export function* enumXMLDump(start: Node, end: Node) {
 			case 8: // COMMENT_NODE
 			case 10: // DOCUMENT_TYPE_NODE
 				if (isOpened) {
-					yield ">";
+					yield '>';
 					isOpened = false;
 				}
 				yield cur.toString();
@@ -55,25 +48,16 @@ export function* enumXMLDump(start: Node, end: Node) {
 				const { [PREV]: prev, parentNode: start } = cur as EndNode;
 				switch (start.nodeType) {
 					default:
-						throw new Error(
-							`Unexpected nodeType ${start.nodeType}`
-						);
+						throw new Error(`Unexpected nodeType ${start.nodeType}`);
 					case 11: // DOCUMENT_FRAGMENT_NODE
 					case 1: // ELEMENT_NODE
 					case 9: {
 						// DOCUMENT_NODE
 						if (prev === start || prev instanceof Attr) {
-							if (
-								!voidElements ||
-								voidElements.test(
-									(start as ParentNode).qualifiedName
-								)
-							) {
+							if (!voidElements || voidElements.test((start as ParentNode).qualifiedName)) {
 								yield `/>`;
 							} else {
-								yield `></${
-									(start as ParentNode).qualifiedName
-								}>`;
+								yield `></${(start as ParentNode).qualifiedName}>`;
 							}
 						} else if (isOpened) {
 							yield `></${(start as ParentNode).qualifiedName}>`;
@@ -134,29 +118,21 @@ const rep = function (m: string) {
 	switch (m) {
 		// case "\xA0":
 		// 	return "&nbsp;";
-		case "&":
-			return "&amp;";
-		case "<":
-			return "&lt;";
-		case ">":
-			return "&gt;";
+		case '&':
+			return '&amp;';
+		case '<':
+			return '&lt;';
+		case '>':
+			return '&gt;';
 		case '"':
-			return "&quot;";
-		// case "\t":
-		// 	return "&#x9;";
-		// case "\n":
-		// 	return "&#x9;";
-		// case '\r':
-		// 	return "&#x9;";
+			return '&quot;';
 	}
 	return `&#${m.charCodeAt(0)};`;
-
-	// return m;
 };
 
-import { NEXT, PREV, END, Node } from "./node.js";
-import { ChildNode } from "./child-node.js";
-import { ParentNode, EndNode } from "./parent-node.js";
-import { Element } from "./element.js";
-import { Attr } from "./attr.js";
+import { NEXT, PREV, END, Node } from './node.js';
+import { ChildNode } from './child-node.js';
+import { ParentNode, EndNode } from './parent-node.js';
+import { Element } from './element.js';
+import { Attr } from './attr.js';
 // import { Document } from "./document.js";

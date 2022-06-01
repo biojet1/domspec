@@ -1,4 +1,4 @@
-name: Test
+name: CI
 
 on:
   push:
@@ -15,7 +15,7 @@ jobs:
       # WPT_HASH: 1
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Use Node.js 16.x
         uses: actions/setup-node@v2
@@ -31,15 +31,10 @@ jobs:
           path: ~/.npm
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('package.json') }}
 
-      - run: npm i "git://github.com/biojet1/svggeom#main"
+      - run: npm i codecov c8 typescript eslint prettier
+      - run: npm i "https://github.com/biojet1/svggeom/tarball/release"
       - run: npm i
-
-      - run: npm i codecov c8 typescript --save-dev
-
-      # - run: cat package-lock.json
-
       - run: npm run build --if-present
-
       - run: npm run compile
 
       - name: Cache WPT
@@ -57,12 +52,6 @@ jobs:
             curl -L "$WPT_URL" | tar xvzf - -C "$WPT_ROOT" --strip-components 1
             . test/wpt-patch.sh
           fi
-      # - name: Archive production artifacts
-      #   uses: actions/upload-artifact@v2
-      #   with:
-      #     name: dist
-      #     path: |
-      #       dist
 
       - run: npm run c8test
       - run: |
@@ -71,8 +60,41 @@ jobs:
           # cat coverage/lcov.info
 
       - name: tsc strict
-        if: always()
-        run: tsc -d --sourceMap --strict
+        run: |
+          tsc -d --sourceMap --strict --noUnusedLocals --noUnusedParameters --noImplicitOverride || true
+
+
+      - name: Pack
+        if: github.ref == 'refs/heads/main'
+        run: |
+          mkdir .pkg
+          npm pack .
+
+      - uses: actions/checkout@v3
+        if: github.ref == 'refs/heads/main'
+        with:
+          ref: release
+          path: release
+
+      - name: Push Release
+        if: github.ref == 'refs/heads/main'
+        env:
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          cd release
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@github.com"
+          git rm -rf .
+          tar -xzf ../*-*.*.tgz --strip=1 package
+          bash ../.github/workflows/sanitize.sh || true
+          git add -A
+          if [[ -z $(git status -s) ]]
+          then
+            echo "No changes"
+          else
+            git commit -m 'R '"$COMMIT_MESSAGE"
+            git push
+          fi
 
       - name: Codecov
         uses: codecov/codecov-action@v2

@@ -284,7 +284,7 @@ export class ProcessingInstruction extends CharacterData {
 	// Extra
 	toString() {
 		const { target, _data } = this;
-		return `<? ${target} ${_data} ?>`;
+		return `<?${target} ${_data}?>`;
 	}
 
 	cloneNode() {

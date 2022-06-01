@@ -494,7 +494,7 @@ export class CSSStyleRule extends WithStyleProp {
 	}
 }
 
-import { StylePropertyMap, CSSStyleDeclaration } from './stylemap.js';
+import { StylePropertyMap/*, CSSStyleDeclaration*/ } from './stylemap.js';
 
 function _parse(token: string) {
 	let i = 0;

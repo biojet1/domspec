@@ -3,11 +3,21 @@
 	"version": "1.0.0",
 	"author": "https://www.npmjs.com/~biojet1",
 	"type": "module",
-	"description": "SVG DOM Implementation",
+	"description": "DOM Implementation",
 	"main": "dist/all.js",
 	"homepage": "https://github.com/biojet1/domspec",
 	"repository": "https://github.com/biojet1/domspec",
 	"bugs": "https://github.com/biojet1/domspec/issues",
+	"keywords": [
+		"DOM",
+		"HTML",
+		"XML",
+		"SVG",
+		"CSS",
+		"document",
+		"window",
+		"parser"
+	],
 	"exports": {
 		".": "./dist/all.js"
 	},

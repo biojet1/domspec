@@ -16,7 +16,7 @@ export class ClassAttr extends Attr {
         return this.value;
     }
     valueOf() {
-        let { tokensQ: tokens } = this;
+        const { tokensQ: tokens } = this;
         return tokens && tokens.size > 0 ? tokens.format() : null;
     }
 }

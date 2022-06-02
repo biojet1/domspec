@@ -17,16 +17,15 @@ export class ClassAttr extends Attr {
 		return this.tokensQ?.format() || "";
 	}
 
-	toString() {
+	override toString() {
 		return this.value;
 	}
 
-	valueOf() {
-		let { tokensQ: tokens } = this;
+	override valueOf() {
+		const { tokensQ: tokens } = this;
 		return tokens && tokens.size > 0 ? tokens.format() : null;
 	}
 }
 
-import { Element } from "./element.js";
 import { Attr } from "./attr.js";
 import { DOMTokenList } from "./token-list.js";

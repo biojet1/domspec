@@ -23,13 +23,13 @@ jobs:
           path: ~/.npm
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('package.json') }}
 
-      - run: npm i "git://github.com/biojet1/svggeom#main"
+      - run: npm i tplant typescript tsuml2
       - run: npm i
-      - run: npm i tplant typescript --save-dev
 
       # - run: cat package-lock.json
 
-      - run: npx tplant --input 'src/**/*.ts' -p tsconfig.json -A --output uml.svg
+      # - run: npx tplant --input 'src/**/*.ts' -p tsconfig.json -A --output uml.svg
+      - run: npx tsuml2 --glob "./src/**/*.ts"  -o uml.svg
 
       - name: upload_uml
         uses: actions/upload-artifact@v2

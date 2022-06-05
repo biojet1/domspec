@@ -1,13 +1,14 @@
 {
-	"name": "svgdom-ts",
+	"name": "domspec",
 	"version": "1.0.0",
 	"author": "https://www.npmjs.com/~biojet1",
 	"type": "module",
-	"description": "SVG DOM Implementation",
+	"description": "DOM Implementation",
 	"main": "dist/all.js",
-    "homepage": "https://github.com/biojet1/svgdom-ts",
-    "repository": "https://github.com/biojet1/svgdom-ts",
-    "bugs": "https://github.com/biojet1/svgdom-ts/issues",
+	"homepage": "https://github.com/biojet1/domspec",
+	"repository": "https://github.com/biojet1/domspec",
+	"bugs": "https://github.com/biojet1/domspec/issues",
+	"keywords": ["DOM", "HTML", "XML", "SVG", "CSS", "document", "window", "parser"],
 	"scripts": {
 		"test": "tap test/parse.mjs",
 		"madge": "node test/madge.cjs",
@@ -26,8 +27,8 @@
 		"svg:import": "env IMPORT=svg node test/elements.js",
 		"compile": "tsc -d --sourcemap",
 		"prepare": "tsc -d --removeComments",
-		"up:devel": "python -B -m ghdevapi.up -A biojet1/svgdom-ts . -m . -r devel -a",
-		"up": "python -B -m ghdevapi up -A biojet1/svgdom-ts . -m . -r main -a"
+		"up:devel": "python -B -m ghdevapi.up -A biojet1/domspec . -m . -r devel -a",
+		"up": "python -B -m ghdevapi up -A biojet1/domspec . -m . -r main -a"
 	},
 	"exports": {
 		".": "./dist/all.js"
@@ -44,10 +45,10 @@
 		"node-fetch": "*",
 		"svggeom": "https://github.com/biojet1/svggeom/tarball/release"
 	},
-	"files": ["dist"],
+	"files": ["dist", "*.d.ts"],
 	"c8": {
-		"reports-dir": "/tmp/svgdom.c8/rep",
-		"temp-directory": "/tmp/svgdom.c8/tmp",
+		"reports-dir": "/tmp/domspec.c8/rep",
+		"temp-directory": "/tmp/domspec.c8/tmp",
 		"src": "dist"
 	},
 	"tap": {

@@ -8,7 +8,7 @@ from json import load, dump, dumps
 
 CI = environ.get('CI') == 'true' and path.isdir(environ.get('RUNNER_TEMP'))
 
-drop_m = re.compile(r'^(?:scripts|files|c8|_.*|\..*)$')
+drop_m = re.compile(r'^(?:scripts|files|tap|prettier|c8|_.*|\..*)$')
 
 with open('package.json') as r:
 	data = load(r)

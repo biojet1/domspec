@@ -24,23 +24,14 @@
 	"license": "GPL-3.0",
 	"dependencies": {
 		"@types/sax": "^1.2.3",
-		"c8": "^7.11.3",
-		"codecov": "^3.8.3",
 		"css-select": "^4.1.3",
-		"eslint": "^8.16.0",
 		"htmlparser2": "^7.1.1",
 		"image-size": "",
-		"prettier": "^2.6.2",
-		"saxes": "^5.0.1",
-		"typescript": "^4.7.2"
+		"saxes": "^5.0.1"
 	},
 	"peerDependencies": {
 		"node-fetch": "*",
 		"svggeom": "https://github.com/biojet1/svggeom/tarball/release"
-	},
-	"tap": {
-		"timeout": 90,
-		"coverage": false
 	},
 	"devDependencies": {
 		"chai": "^4.3.4",
@@ -48,8 +39,5 @@
 		"mocha-sugar-free": "^1.4.0",
 		"source-map-support": "^0.5.19",
 		"tap": "^15.0.9"
-	},
-	"prettier": {
-		"useTabs": true
 	}
 }

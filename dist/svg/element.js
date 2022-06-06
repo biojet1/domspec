@@ -42,7 +42,7 @@ export class SVGGeometryElement extends SVGGraphicsElement {
     toPathElement() {
         const { ownerDocument } = this;
         if (ownerDocument) {
-            const p = ownerDocument.createElement('path');
+            const p = ownerDocument.createElementNS(this.namespaceURI, 'path');
             let s;
             (s = this.describe()) && p.setAttribute('d', s);
             (s = this.getAttribute('style')) && p.setAttribute('style', s);

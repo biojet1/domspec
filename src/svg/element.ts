@@ -306,7 +306,20 @@ export class SVGUseElement extends SVGGraphicsElement {
 	_shapeBox(tm?: Matrix) {
 		const ref = this.hrefElement;
 		if (ref) {
-			const m = tm ? tm.multiply(this.ownTM) : this.rootTM;
+			const m = (() => {
+				let [p, o] = this.pairTM();
+				const x = this.x.baseVal.value;
+				const y = this.y.baseVal.value;
+				if (x || y) {
+					o = Matrix.translate(x, y).multiply(o);
+				}
+				if (tm) {
+					return tm.multiply(o);
+				} else {
+					return p.multiply(o);
+				}
+			})();
+
 			if (ref instanceof SVGSymbolElement) {
 				return (ref as SVGGraphicsElement)._shapeBox(m);
 			} else {

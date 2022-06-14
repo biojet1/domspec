@@ -1,9 +1,9 @@
 import tap from 'tap';
-import { Document, SVGDocument } from '../dist/document.js';
-import { ParentNode } from '../dist/parent-node.js';
+// import { Document, SVGDocument } from '../dist/document.js';
+// import { ParentNode } from '../dist/parent-node.js';
 import { DOMParser } from '../dist/dom-parse.js';
-import { SVGLength } from '../dist/svg/element.js';
-import { Path, Matrix, Box, MatrixInterpolate } from 'svggeom';
+// import { SVGLength } from '../dist/svg/element.js';
+// import { Path, Matrix, Box, MatrixInterpolate } from 'svggeom';
 const parser = new DOMParser();
 tap.test('transform', function (t) {
     const document = parser.parseFromString(`
@@ -31,11 +31,19 @@ tap.test('transform', function (t) {
     const G2 = document.getElementById('G2');
     const G3 = document.getElementById('G3');
     const G4 = document.getElementById('G4');
-    R4.insertAdjacentHTML('afterbegin' ,'<g>svg</g>');
-
+    R4.insertAdjacentHTML('afterbegin' ,'<g xmlns="http://www.w3.org/2000/svg">svg</g>');
         // t.same(o.describe(), Matrix.translate(100).describe());
-        // console.log(R4.outerHTML)
-        // console.log(R4.firstChild.constructor.name)
-
+    console.log(R4.namespaceURI)
+    t.same(R4.firstChild.constructor.name, 'SVGGElement')
     t.end();
 });
+
+// tap.test('use transform', async function (t) {
+//     const document = await parser.parseFile(new URL('res/symbol.svg', import.meta.url));
+//     const {U2, U1} = document.all;
+
+//     t.match(U2.boundingBox(), {x: 20, y: 5, width: 10, height: 10})
+//     console.log(U2._shapeBox());
+//     U2.setAttribute("transform", "scale(2)translate(10,5)");
+//     t.end();
+// });

@@ -136,7 +136,9 @@ export class SVGRectElement extends SVGGeometryElement {
 			this.height.baseVal.value = abs(h * scale_y);
 			this.removeAttribute('transform');
 		} else {
-			throw new Error(`fuseTransform of ${this.constructor.name} with skew_x == ${skew_x}, skew_y == ${skew_y}`);
+			throw new Error(
+				`fuseTransform of ${this.constructor.name} with skew_x == ${skew_x}, skew_y == ${skew_y}`,
+			);
 		}
 	}
 }
@@ -276,16 +278,26 @@ export class SVGSwitchElement extends SVGGraphicsElement {
 export class SVGUseElement extends SVGGraphicsElement {
 	static TAGS = ['use'];
 
-	get ownTM() {
-		// const m = Matrix.parse(this.getAttribute('transform') || '');
-		const m = Matrix.parse(this.getAttribute('transform') || '');
-		const x = this.x.baseVal.value;
-		const y = this.y.baseVal.value;
-		if (x || y) {
-			return Matrix.translate(x, y).multiply(m);
-		}
-		return m;
-	}
+	// get ownTM() {
+	// 	// const m = Matrix.parse(this.getAttribute('transform') || '');
+	// 	const m = Matrix.parse(this.getAttribute('transform') || '');
+	// 	const x = this.x.baseVal.value;
+	// 	const y = this.y.baseVal.value;
+	// 	if (x || y) {
+	// 		return Matrix.translate(x, y).multiply(m);
+	// 	}
+	// 	return m;
+	// }
+	// set ownTM(m: Matrix) {
+	// 	const x = this.x.baseVal.value;
+	// 	const y = this.y.baseVal.value;
+	// 	if (x || y) {
+	// 		const m0 = Matrix.parse(this.getAttribute('transform') || '');
+
+	// 		m = Matrix.translate(x, y).inverse().multiply(m);
+	// 	}
+	// 	this.setAttribute('transform', m.toString());
+	// }
 
 	shapeBox(T?: Matrix) {
 		return this._shapeBox(T);

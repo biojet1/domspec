@@ -235,22 +235,26 @@ export class SVGSwitchElement extends SVGGraphicsElement {
 }
 export class SVGUseElement extends SVGGraphicsElement {
     static TAGS = ['use'];
-    get ownTM() {
-        const m = Matrix.parse(this.getAttribute('transform') || '');
-        const x = this.x.baseVal.value;
-        const y = this.y.baseVal.value;
-        if (x || y) {
-            return Matrix.translate(x, y).multiply(m);
-        }
-        return m;
-    }
     shapeBox(T) {
         return this._shapeBox(T);
     }
     _shapeBox(tm) {
         const ref = this.hrefElement;
         if (ref) {
-            const m = tm ? tm.multiply(this.ownTM) : this.rootTM;
+            const m = (() => {
+                let [p, o] = this.pairTM();
+                const x = this.x.baseVal.value;
+                const y = this.y.baseVal.value;
+                if (x || y) {
+                    o = Matrix.translate(x, y).multiply(o);
+                }
+                if (tm) {
+                    return tm.multiply(o);
+                }
+                else {
+                    return p.multiply(o);
+                }
+            })();
             if (ref instanceof SVGSymbolElement) {
                 return ref._shapeBox(m);
             }
@@ -263,13 +267,21 @@ export class SVGUseElement extends SVGGraphicsElement {
     objectBBox(T) {
         const ref = this.hrefElement;
         if (ref) {
-            if (ref instanceof SVGSymbolElement) {
-                return ref.objectBBox(T);
-            }
-            if (T) {
-                return ref.objectBBox(T);
-            }
-            return ref.objectBBox(this.ownTM);
+            const m = (() => {
+                let [p, o] = this.pairTM();
+                const x = this.x.baseVal.value;
+                const y = this.y.baseVal.value;
+                if (x || y) {
+                    o = Matrix.translate(x, y).multiply(o);
+                }
+                if (T) {
+                    return T.multiply(o);
+                }
+                else {
+                    return o;
+                }
+            })();
+            return ref.objectBBox(m);
         }
         return Box.not();
     }

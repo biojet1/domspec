@@ -71,7 +71,6 @@ export declare class SVGSwitchElement extends SVGGraphicsElement {
 }
 export declare class SVGUseElement extends SVGGraphicsElement {
     static TAGS: string[];
-    get ownTM(): Matrix;
     shapeBox(T?: Matrix): Box;
     _shapeBox(tm?: Matrix): Box;
     objectBBox(T?: Matrix): Box;

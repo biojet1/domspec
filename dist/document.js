@@ -297,11 +297,8 @@ export class Document extends NonElementParentNode {
             })));
     }
     static async fetch(url, init) {
-        console.info('Document.fetch');
         return import('node-fetch').then((mod) => {
-            console.info('node-fetch imported');
-            Document.fetch = mod.default;
-            return mod.default(url, init);
+            return (Document.fetch = mod.default)(url, init);
         });
     }
     static new(mimeType) {

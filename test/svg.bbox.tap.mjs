@@ -1,13 +1,12 @@
 'uses strict';
 import test from 'tap';
-import { Document, SVGGraphicsElement, DOMParser, Box } from '../dist/all.js';
-// import { DOMParser } from "../dist/dom-parse.js";
+import { DOMParser } from '../dist/all.js';
 
 const CI = true;
 const parser = new DOMParser();
 
 test.test(`ParentNode`, { bail: !CI }, function (t) {
-    const doc = parser.parseFromString(
+    const { all } = parser.parseFromString(
         `<svg xmlns="http://www.w3.org/2000/svg">
 
   <title>Bounding Box Calculation</title>
@@ -25,27 +24,16 @@ test.test(`ParentNode`, { bail: !CI }, function (t) {
     </g>
   </g>
 </svg>`,
-        `application/xml`
+        `application/xml`,
     );
 
-    const top = doc.documentElement;
-    const use = doc.getElementById('use-1');
-    t.same(doc.getElementById('rect-1').x.baseVal.value, 20, '.x.baseVal.value');
-    t.same(doc.getElementById('rect-1').getBBox().toArray(), [20, 20, 40, 40], 'rect-1');
-    t.same(doc.getElementById('rect-2').getBBox().toArray(), [10, 10, 100, 100], 'rect-2');
-    t.same(doc.getElementById('group-2').getBBox().toArray(), [10, 10, 100, 100], 'group-2');
-    t.same(doc.getElementById('defs-1').getBBox().toArray(), [0, 0, 0, 0], 'defs-1');
-    t.same(doc.getElementById('use-1').getBBox().toArray(), [30, 30, 40, 40], 'use-1');
-    t.same(doc.getElementById('group-1').getBBox().toArray(), [30, 30, 40, 40], 'group-1');
-    t.same(doc.getElementById('use-1').hrefElement.id, 'rect-1', 'use-1 <- rect-1');
+    t.same(all['rect-1'].x.baseVal.value, 20, '.x.baseVal.value');
+    t.same(all['rect-1'].getBBox().toArray(), [20, 20, 40, 40], 'rect-1');
+    t.same(all['rect-2'].getBBox().toArray(), [10, 10, 100, 100], 'rect-2');
+    t.same(all['group-2'].getBBox().toArray(), [10, 10, 100, 100], 'group-2');
+    t.same(all['defs-1'].getBBox().toArray(), [0, 0, 0, 0], 'defs-1');
+    t.same(all['use-1'].getBBox().toArray(), [30, 30, 40, 40], 'use-1');
+    t.same(all['group-1'].getBBox().toArray(), [30, 30, 40, 40], 'group-1');
+    t.same(all['use-1'].hrefElement.id, 'rect-1', 'use-1 <- rect-1');
     t.end();
-
-    // [
-    //     ['defs-1', 0, 0, 0, 0],
-    //     ['rect-1', 0, 0, 0, 0],
-    //     ['group-1', 30, 30, 40, 40],
-    //     ['use-1', 30, 30, 40, 40],
-    //     ['group-2', 0, 0, 0, 0],
-    //     ['rect-2', 0, 0, 0, 0],
-    // ];
 });

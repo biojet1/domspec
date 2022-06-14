@@ -136,7 +136,9 @@ export class SVGRectElement extends SVGGeometryElement {
 			this.height.baseVal.value = abs(h * scale_y);
 			this.removeAttribute('transform');
 		} else {
-			throw new Error(`fuseTransform of ${this.constructor.name} with skew_x == ${skew_x}, skew_y == ${skew_y}`);
+			throw new Error(
+				`fuseTransform of ${this.constructor.name} with skew_x == ${skew_x}, skew_y == ${skew_y}`,
+			);
 		}
 	}
 }
@@ -276,16 +278,26 @@ export class SVGSwitchElement extends SVGGraphicsElement {
 export class SVGUseElement extends SVGGraphicsElement {
 	static TAGS = ['use'];
 
-	get ownTM() {
-		// const m = Matrix.parse(this.getAttribute('transform') || '');
-		const m = Matrix.parse(this.getAttribute('transform') || '');
-		const x = this.x.baseVal.value;
-		const y = this.y.baseVal.value;
-		if (x || y) {
-			return Matrix.translate(x, y).multiply(m);
-		}
-		return m;
-	}
+	// get ownTM() {
+	// 	// const m = Matrix.parse(this.getAttribute('transform') || '');
+	// 	const m = Matrix.parse(this.getAttribute('transform') || '');
+	// 	const x = this.x.baseVal.value;
+	// 	const y = this.y.baseVal.value;
+	// 	if (x || y) {
+	// 		return Matrix.translate(x, y).multiply(m);
+	// 	}
+	// 	return m;
+	// }
+	// set ownTM(m: Matrix) {
+	// 	const x = this.x.baseVal.value;
+	// 	const y = this.y.baseVal.value;
+	// 	if (x || y) {
+	// 		const m0 = Matrix.parse(this.getAttribute('transform') || '');
+
+	// 		m = Matrix.translate(x, y).inverse().multiply(m);
+	// 	}
+	// 	this.setAttribute('transform', m.toString());
+	// }
 
 	shapeBox(T?: Matrix) {
 		return this._shapeBox(T);
@@ -294,7 +306,20 @@ export class SVGUseElement extends SVGGraphicsElement {
 	_shapeBox(tm?: Matrix) {
 		const ref = this.hrefElement;
 		if (ref) {
-			const m = tm ? tm.multiply(this.ownTM) : this.rootTM;
+			const m = (() => {
+				let [p, o] = this.pairTM();
+				const x = this.x.baseVal.value;
+				const y = this.y.baseVal.value;
+				if (x || y) {
+					o = Matrix.translate(x, y).multiply(o);
+				}
+				if (tm) {
+					return tm.multiply(o);
+				} else {
+					return p.multiply(o);
+				}
+			})();
+
 			if (ref instanceof SVGSymbolElement) {
 				return (ref as SVGGraphicsElement)._shapeBox(m);
 			} else {
@@ -308,13 +333,29 @@ export class SVGUseElement extends SVGGraphicsElement {
 		// const E = T ? T.multiply(this.ownTM) : this.ownTM;
 		const ref = this.hrefElement;
 		if (ref) {
-			if (ref instanceof SVGSymbolElement) {
-				return (ref as SVGGraphicsElement).objectBBox(T);
-			}
-			if (T) {
-				return (ref as SVGGraphicsElement).objectBBox(T);
-			}
-			return (ref as SVGGraphicsElement).objectBBox(this.ownTM);
+			const m = (() => {
+				let [p, o] = this.pairTM();
+				const x = this.x.baseVal.value;
+				const y = this.y.baseVal.value;
+				if (x || y) {
+					o = Matrix.translate(x, y).multiply(o);
+				}
+				if (T) {
+					return T.multiply(o);
+				} else {
+					return o;
+				}
+			})();
+
+			// if (ref instanceof SVGSymbolElement) {
+			// 	return (ref as SVGGraphicsElement).objectBBox(m);
+			// }
+
+			// if (T) {
+			// 	return (ref as SVGGraphicsElement).objectBBox(m);
+			// }
+
+			return (ref as SVGGraphicsElement).objectBBox(m);
 		}
 		return Box.not();
 	}

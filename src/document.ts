@@ -3,16 +3,13 @@ import { NonElementParentNode } from './non-element-parent-node.js';
 export abstract class Document extends NonElementParentNode {
 	//// Dom
 	contentType: string;
-	// defaultView?: Window;
 	currentScript?: Element;
 	_domImpl?: DOMImplementation;
 	_location?: URL | string;
-	// documentURI?: string;
 	#all?: any;
 
 	protected constructor(contentType?: string) {
 		super();
-		// this.documentURI = "about:blank";
 		this.contentType = contentType || 'application/xml';
 	}
 	get documentURI() {
@@ -54,10 +51,6 @@ export abstract class Document extends NonElementParentNode {
 				return cur as DocumentType;
 			}
 		}
-		// return this.insertBefore(
-		// 	new DocumentType("html"),
-		// 	firstChild
-		// ) as DocumentType;
 		return null;
 	}
 	get body() {
@@ -357,11 +350,10 @@ export abstract class Document extends NonElementParentNode {
 	}
 
 	static async fetch(url: RequestInfo, init?: RequestInit) {
-		console.info('Document.fetch');
+		// console.info('Document.fetch');
 		return import('node-fetch').then((mod) => {
-			console.info('node-fetch imported');
-			Document.fetch = mod.default;
-			return mod.default(url, init);
+			// console.info('node-fetch imported');
+			return (Document.fetch = mod.default)(url, init);
 		});
 	}
 
@@ -381,8 +373,8 @@ export abstract class Document extends NonElementParentNode {
 	}
 	//  html: "text/html",
 	// xhtml: "application/xhtml+xml",
-	// xml: "application/xml",
-	// svg: "image/svg+xml",
+	//   xml: "application/xml",
+	//   svg: "image/svg+xml",
 	static setWindow(document: Document, window: Window) {
 		_wMapDocWin.set(document, window);
 	}

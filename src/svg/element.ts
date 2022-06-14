@@ -333,13 +333,29 @@ export class SVGUseElement extends SVGGraphicsElement {
 		// const E = T ? T.multiply(this.ownTM) : this.ownTM;
 		const ref = this.hrefElement;
 		if (ref) {
-			if (ref instanceof SVGSymbolElement) {
-				return (ref as SVGGraphicsElement).objectBBox(T);
-			}
-			if (T) {
-				return (ref as SVGGraphicsElement).objectBBox(T);
-			}
-			return (ref as SVGGraphicsElement).objectBBox(this.ownTM);
+			const m = (() => {
+				let [p, o] = this.pairTM();
+				const x = this.x.baseVal.value;
+				const y = this.y.baseVal.value;
+				if (x || y) {
+					o = Matrix.translate(x, y).multiply(o);
+				}
+				if (T) {
+					return T.multiply(o);
+				} else {
+					return o;
+				}
+			})();
+
+			// if (ref instanceof SVGSymbolElement) {
+			// 	return (ref as SVGGraphicsElement).objectBBox(m);
+			// }
+
+			// if (T) {
+			// 	return (ref as SVGGraphicsElement).objectBBox(m);
+			// }
+
+			return (ref as SVGGraphicsElement).objectBBox(m);
 		}
 		return Box.not();
 	}

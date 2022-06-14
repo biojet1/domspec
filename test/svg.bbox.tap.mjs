@@ -1,7 +1,6 @@
 'uses strict';
 import test from 'tap';
-import { Document, SVGGraphicsElement, DOMParser, Box } from '../dist/all.js';
-// import { DOMParser } from "../dist/dom-parse.js";
+import {  DOMParser } from '../dist/all.js';
 
 const CI = true;
 const parser = new DOMParser();
@@ -28,8 +27,6 @@ test.test(`ParentNode`, { bail: !CI }, function (t) {
         `application/xml`
     );
 
-    const top = doc.documentElement;
-    const use = doc.getElementById('use-1');
     t.same(doc.getElementById('rect-1').x.baseVal.value, 20, '.x.baseVal.value');
     t.same(doc.getElementById('rect-1').getBBox().toArray(), [20, 20, 40, 40], 'rect-1');
     t.same(doc.getElementById('rect-2').getBBox().toArray(), [10, 10, 100, 100], 'rect-2');

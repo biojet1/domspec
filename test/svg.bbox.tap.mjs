@@ -5,7 +5,7 @@ import { DOMParser } from '../dist/all.js';
 const CI = true;
 const parser = new DOMParser();
 
-test.test(`ParentNode`, { bail: !CI }, function (t) {
+test.test(`getBBox`, { bail: !CI }, function (t) {
     const { all } = parser.parseFromString(
         `<svg xmlns="http://www.w3.org/2000/svg">
 

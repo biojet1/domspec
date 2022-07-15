@@ -124,7 +124,7 @@ tap.test('viewportTM', function (t) {
         t.ok(v.farthestViewportElement === top);
         t.ok(u.farthestViewportElement === top);
         t.ok(u.nearestViewportElement === v);
-        const x = r.multiply(v.viewportTM());
+        const x = r.cat(v.viewportTM());
         t.ok(x.equals(m, 1e-4), `${id} ${r} ${m}`);
         // console.log();
     });

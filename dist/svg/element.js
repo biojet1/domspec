@@ -30,7 +30,7 @@ export class SVGGeometryElement extends SVGGraphicsElement {
         let { path } = this;
         if (path.firstPoint) {
             if (tm) {
-                path = path.transform(tm.multiply(this.ownTM));
+                path = path.transform(tm.cat(this.ownTM));
             }
             else {
                 path = path.transform(this.rootTM);
@@ -246,13 +246,13 @@ export class SVGUseElement extends SVGGraphicsElement {
                 const x = this.x.baseVal.value;
                 const y = this.y.baseVal.value;
                 if (x || y) {
-                    o = Matrix.translate(x, y).multiply(o);
+                    o = Matrix.translate(x, y).cat(o);
                 }
                 if (tm) {
-                    return tm.multiply(o);
+                    return tm.cat(o);
                 }
                 else {
-                    return p.multiply(o);
+                    return p.cat(o);
                 }
             })();
             if (ref instanceof SVGSymbolElement) {
@@ -272,10 +272,10 @@ export class SVGUseElement extends SVGGraphicsElement {
                 const x = this.x.baseVal.value;
                 const y = this.y.baseVal.value;
                 if (x || y) {
-                    o = Matrix.translate(x, y).multiply(o);
+                    o = Matrix.translate(x, y).cat(o);
                 }
                 if (T) {
-                    return T.multiply(o);
+                    return T.cat(o);
                 }
                 else {
                     return o;
@@ -304,7 +304,7 @@ export class SVGTextElement extends SVGTextContentElement {
         return this._shapeBox(T);
     }
     _shapeBox(tm) {
-        const m = tm ? tm.multiply(this.ownTM) : this.ownTM;
+        const m = tm ? tm.cat(this.ownTM) : this.ownTM;
         const { x: { baseVal: { value: x }, }, y: { baseVal: { value: y }, }, } = this;
         let box = Box.new();
         box = box.merge(Box.new(Vec.at(x, y).transform(m).toArray().concat([0, 0])));
@@ -322,7 +322,7 @@ export class SVGTSpanElement extends SVGTextContentElement {
         return this._shapeBox(T);
     }
     _shapeBox(tm) {
-        const m = tm ? tm.multiply(this.ownTM) : this.ownTM;
+        const m = tm ? tm.cat(this.ownTM) : this.ownTM;
         let box = Box.new();
         let s;
         const x1 = this.x.baseVal.value;

@@ -46,11 +46,12 @@ export declare class SVGGraphicsElement extends SVGElement {
     fuseTransform(parentT?: Matrix): void;
     _descendantTM(node: SVGGraphicsElement): Matrix;
     objectBBox(T?: Matrix): Box;
+    _objectBBox(T?: Matrix): Box;
     _boundingBox(tm?: Matrix): Box;
     _shapeBox(tm?: Matrix): Box;
     _viewportBox(tm?: Matrix): Box;
     calcWidth(): void;
-    placeTo(that: SVGGraphicsElement): void;
+    _placeTo(that: SVGGraphicsElement, ref?: Element): SVGGraphicsElement;
     layout(): SVGLayout;
     popTM(name?: string): string | undefined;
 }

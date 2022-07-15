@@ -48,7 +48,7 @@ export class SVGTransformList extends Array {
             m.setMatrix(first);
             let i = 1;
             while (i < n) {
-                m.multiplySelf(this[i++]);
+                m.catSelf(this[i++]);
             }
         }
         return this.initialize(m);
@@ -60,7 +60,7 @@ export class SVGTransformList extends Array {
             m.setMatrix(first);
             let i = 1;
             while (i < n) {
-                m.multiplySelf(this[i++]);
+                m.catSelf(this[i++]);
             }
         }
         return m.toString();
@@ -352,14 +352,14 @@ export class SVGTransformListAttr extends Attr {
     apply(m) {
         const { _var } = this;
         if (_var instanceof SVGTransformList) {
-            const { a, b, c, d, e, f } = _var.consolidate().multiply(m);
+            const { a, b, c, d, e, f } = _var.consolidate().cat(m);
             return _var.initialize(new SVGTransform([a, b, c, d, e, f]));
         }
         else if (_var instanceof Matrix) {
-            return (this._var = _var.multiply(m));
+            return (this._var = _var.cat(m));
         }
         else if (_var) {
-            return (this._var = Matrix.parse(_var).multiply(m));
+            return (this._var = Matrix.parse(_var).cat(m));
         }
         else {
             return (this._var = Matrix.new(m));

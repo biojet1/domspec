@@ -56,28 +56,28 @@ export class SVGLayout {
         }
         else if (parent === _root) {
             if (node instanceof SVGSVGElement) {
-                return ownTM.multiply(node.viewportTM());
+                return ownTM.cat(node.viewportTM());
             }
         }
         else if (parent instanceof SVGGraphicsElement) {
             if (node instanceof SVGSVGElement) {
-                return this.localTM(parent).multiply(ownTM.multiply(node.viewportTM()));
+                return this.localTM(parent).cat(ownTM.cat(node.viewportTM()));
             }
-            return this.localTM(parent).multiply(ownTM);
+            return this.localTM(parent).cat(ownTM);
         }
         return ownTM;
     }
     transform(m, ...nodes) {
         nodes.forEach((node) => {
             const [P, M] = this.pairTM(node);
-            node.ownTM = P.inverse().multiply(m).multiply(P).multiply(M);
+            node.ownTM = P.inverse().cat(m).cat(P).cat(M);
         });
     }
     toParent(parent, node) {
         const childTM = this.rootTM(node);
         const parentTM = this.rootTM(parent);
         parent.appendChild(node);
-        node.ownTM = parentTM.inverse().multiply(childTM);
+        node.ownTM = parentTM.inverse().cat(childTM);
     }
 }
 //# sourceMappingURL=layout.js.map

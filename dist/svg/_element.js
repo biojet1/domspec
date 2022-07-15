@@ -177,7 +177,7 @@ export class SVGGraphicsElement extends SVGElement {
             if (parent instanceof SVGGraphicsElement) {
                 if (parent.parentNode) {
                     if (parent instanceof SVGSVGElement) {
-                        return [parent.rootTM.multiply(parent.viewportTM()), this.ownTM];
+                        return [parent.rootTM.cat(parent.viewportTM()), this.ownTM];
                     }
                     return [parent.rootTM, this.ownTM];
                 }
@@ -194,9 +194,9 @@ export class SVGGraphicsElement extends SVGElement {
         }
         else if (parent instanceof SVGGraphicsElement) {
             if (this instanceof SVGSVGElement) {
-                return parent.localTM().multiply(ownTM.multiply(this.viewportTM()));
+                return parent.localTM().cat(ownTM.cat(this.viewportTM()));
             }
-            return parent.localTM().multiply(ownTM);
+            return parent.localTM().cat(ownTM);
         }
         return ownTM;
     }
@@ -208,7 +208,7 @@ export class SVGGraphicsElement extends SVGElement {
             }
         }
         else if (parent instanceof SVGGraphicsElement) {
-            return parent.localTM().multiply(ownTM);
+            return parent.localTM().cat(ownTM);
         }
         return ownTM;
     }
@@ -261,7 +261,18 @@ export class SVGGraphicsElement extends SVGElement {
         for (const sub of this.children) {
             if (sub instanceof SVGGraphicsElement && sub.canRender()) {
                 const M = sub.ownTM;
-                const E = T ? T.multiply(M) : M;
+                const E = T ? T.cat(M) : M;
+                box = box.merge(sub.objectBBox(E));
+            }
+        }
+        return box;
+    }
+    _objectBBox(T) {
+        let box = Box.new();
+        for (const sub of this.children) {
+            if (sub instanceof SVGGraphicsElement && sub.canRender()) {
+                const M = sub.ownTM;
+                const E = T ? T.cat(M) : M;
                 box = box.merge(sub.objectBBox(E));
             }
         }
@@ -282,7 +293,7 @@ export class SVGGraphicsElement extends SVGElement {
         }
     }
     _shapeBox(tm) {
-        const m = tm ? tm.multiply(this.ownTM) : this.rootTM;
+        const m = tm ? tm.cat(this.ownTM) : this.rootTM;
         let box = Box.new();
         for (const sub of this.children) {
             if (sub instanceof SVGGraphicsElement && sub.canRender()) {
@@ -313,10 +324,20 @@ export class SVGGraphicsElement extends SVGElement {
         if (w) {
         }
     }
-    placeTo(that) {
-        const m1 = that.rootTM;
-        const m2 = this.rootTM;
+    _placeTo(that, ref) {
         that.appendChild(this);
+        if (that === this)
+            return that;
+        const ctm = that.composeTM();
+        const pCtm = this.composeTM().inverse();
+        if (ref) {
+            this.insertBefore(that, ref);
+        }
+        else {
+            this.appendChild(that);
+        }
+        that.ownTM = pCtm.cat(ctm);
+        return that;
     }
     layout() {
         return new SVGLayout(this);
@@ -351,7 +372,7 @@ export class SVGSVGElement extends SVGGraphicsElement {
         return 1;
     }
     get innerTM() {
-        return this.ownTM.multiply(this.viewportTM());
+        return this.ownTM.cat(this.viewportTM());
     }
     viewportTM() {
         const w = this.width.baseVal.value;
@@ -399,7 +420,21 @@ export class SVGSVGElement extends SVGGraphicsElement {
     geom2UU() {
         this.width.baseVal.convertToSpecifiedUnits(1);
         this.height.baseVal.convertToSpecifiedUnits(1);
-        for (const x in ['r', 'x', 'y', 'cx', 'cy', 'rx', 'ry', 'x1', 'x2', 'y1', 'y2', 'width', 'height']) {
+        for (const x in [
+            'r',
+            'x',
+            'y',
+            'cx',
+            'cy',
+            'rx',
+            'ry',
+            'x1',
+            'x2',
+            'y1',
+            'y2',
+            'width',
+            'height',
+        ]) {
             this.getAttributeNode(x);
         }
     }

@@ -228,7 +228,7 @@ export class SVGGraphicsElement extends SVGElement {
                 throw new Error(`root not reached`);
             }
             else if (parent instanceof SVGGraphicsElement) {
-                tm = tm.postMultiply(parent.innerTM);
+                tm = tm.postCat(parent.innerTM);
             }
             parent = parent.parentNode;
         }
@@ -245,7 +245,7 @@ export class SVGGraphicsElement extends SVGElement {
         return box.isValid() ? box : Box.empty();
     }
     fuseTransform(parentT) {
-        let tm = parentT ? this.ownTM.postMultiply(parentT) : this.ownTM;
+        let tm = parentT ? this.ownTM.postCat(parentT) : this.ownTM;
         for (const sub of this.children) {
             if (sub instanceof SVGGraphicsElement) {
                 sub.fuseTransform(tm);

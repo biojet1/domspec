@@ -10,9 +10,9 @@ import { SVGLayout } from '../dist/svg/layout.js';
 function apply(m, node) {
 	const P = node.parentNode.localTM();
 	const M = node.ownTM;
-	const L = P.inverse().multiply(m).multiply(P);
+	const L = P.inverse().cat(m).cat(P);
 	let T;
-	T = L.multiply(M); // R1,R2,R3,R4 OK
+	T = L.cat(M); // R1,R2,R3,R4 OK
 	node.ownTM = T;
 	// console.log('trans', node.id, `[${T.describe()}]\n\tL[${L.describe()}]\n\t-> ${T.describe()}`);
 }
@@ -21,7 +21,7 @@ function toParent(parent, i) {
 	const childTM = i.rootTM;
 	const parentTM = parent.rootTM;
 	parent.appendChild(i);
-	i.ownTM = parentTM.inverse().multiply(childTM);
+	i.ownTM = parentTM.inverse().cat(childTM);
 }
 
 const parser = new DOMParser();

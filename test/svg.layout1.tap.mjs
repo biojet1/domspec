@@ -11,22 +11,22 @@ import { SVGLayout } from '../dist/svg/layout.js';
 
 function apply(m, node) {
 	const [P, M] = node.pairTM();
-	const L = P.inverse().multiply(m).multiply(P);
-	const R = P.multiply(M);
+	const L = P.inverse().cat(m).cat(P);
+	const R = P.cat(M);
 
 	const I = L.inverse();
 
-	// const T = M.multiply(R.inverse().multiply(m)).inverse();
-	// const T = P.inverse().multiply(m).inverse().multiply(M).inverse();
+	// const T = M.cat(R.inverse().cat(m)).inverse();
+	// const T = P.inverse().cat(m).inverse().cat(M).inverse();
 	let S, T;
-	T = S = R.inverse().multiply(m).multiply(P);
+	T = S = R.inverse().cat(m).cat(P);
 	if (M.isIdentity == false) {
-		T = M.multiply(T).inverse(); // R1,R2 OK
-		// T = T.multiply(M).inverse() // R1,R2 OK
+		T = M.cat(T).inverse(); // R1,R2 OK
+		// T = T.cat(M).inverse() // R1,R2 OK
 		// T = T.inverse()
 	}
-	// T = R.inverse().multiply(m).multiply(P)
-	T = L.multiply(M); // R1,R2,R3,R4 OK
+	// T = R.inverse().cat(m).cat(P)
+	T = L.cat(M); // R1,R2,R3,R4 OK
 	node.ownTM = T;
 
 	console.log('trans', node.id, `[${T.describe()}]\n\tL[${L.describe()}]\n\tS[${S.describe()}]\n\t-> ${T.describe()}`);
@@ -36,7 +36,7 @@ function toParent(parent, i) {
 	const childTM = i.rootTM;
 	const parentTM = parent.rootTM;
 	parent.appendChild(i);
-	i.ownTM = parentTM.inverse().multiply(childTM);
+	i.ownTM = parentTM.inverse().cat(childTM);
 }
 
 const parser = new DOMParser();
@@ -76,7 +76,7 @@ tap.test('layout1', { bail: 0 }, function (t) {
 			);
 
 			t.ok(r.equals(m, 1e-3), `${id} ${r.describe()} ${m.describe()}`);
-			const n = metrix.tag_name == 'svg' ? l.multiply(v.viewportTM().inverse()) : l;
+			const n = metrix.tag_name == 'svg' ? l.cat(v.viewportTM().inverse()) : l;
 
 			t.ok(r.equals(n, 1e-3), `localTM ${id} ${l.describe()} ${o.describe()}`);
 			t.ok(r.equals(v.docTM(), 1e-3), `docTM ${id} ${r.describe()} ${v.docTM().describe()}`);

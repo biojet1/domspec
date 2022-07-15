@@ -51,7 +51,7 @@ tap.test('transform2', function (t) {
 		const w = top.innerTM;
 		const u = v.rootTM;
 
-		t.same(w.multiply(u).toString(), m, `rootTM ${id} ${w} ${u}`);
+		t.same(w.cat(u).toString(), m, `rootTM ${id} ${w} ${u}`);
 	});
 
 	t.same(R0.composeTM(R0.farthestViewportElement).toString(), Matrix.identity().toString());

@@ -44,12 +44,12 @@ export class SVGGeometryElement extends SVGGraphicsElement {
 		if (path.firstPoint) {
 			// NOTE: bbox error
 			// if (tm) {
-			// 	return path.bbox().transform(tm.multiply(this.ownTM));
+			// 	return path.bbox().transform(tm.cat(this.ownTM));
 			// } else {
 			// 	return path.bbox().transform(this.rootTM);
 			// }
 			if (tm) {
-				path = path.transform(tm.multiply(this.ownTM));
+				path = path.transform(tm.cat(this.ownTM));
 			} else {
 				path = path.transform(this.rootTM);
 			}
@@ -284,7 +284,7 @@ export class SVGUseElement extends SVGGraphicsElement {
 	// 	const x = this.x.baseVal.value;
 	// 	const y = this.y.baseVal.value;
 	// 	if (x || y) {
-	// 		return Matrix.translate(x, y).multiply(m);
+	// 		return Matrix.translate(x, y).cat(m);
 	// 	}
 	// 	return m;
 	// }
@@ -294,7 +294,7 @@ export class SVGUseElement extends SVGGraphicsElement {
 	// 	if (x || y) {
 	// 		const m0 = Matrix.parse(this.getAttribute('transform') || '');
 
-	// 		m = Matrix.translate(x, y).inverse().multiply(m);
+	// 		m = Matrix.translate(x, y).inverse().cat(m);
 	// 	}
 	// 	this.setAttribute('transform', m.toString());
 	// }
@@ -311,12 +311,12 @@ export class SVGUseElement extends SVGGraphicsElement {
 				const x = this.x.baseVal.value;
 				const y = this.y.baseVal.value;
 				if (x || y) {
-					o = Matrix.translate(x, y).multiply(o);
+					o = Matrix.translate(x, y).cat(o);
 				}
 				if (tm) {
-					return tm.multiply(o);
+					return tm.cat(o);
 				} else {
-					return p.multiply(o);
+					return p.cat(o);
 				}
 			})();
 
@@ -330,7 +330,7 @@ export class SVGUseElement extends SVGGraphicsElement {
 	}
 
 	objectBBox(T?: Matrix) {
-		// const E = T ? T.multiply(this.ownTM) : this.ownTM;
+		// const E = T ? T.cat(this.ownTM) : this.ownTM;
 		const ref = this.hrefElement;
 		if (ref) {
 			const m = (() => {
@@ -338,10 +338,10 @@ export class SVGUseElement extends SVGGraphicsElement {
 				const x = this.x.baseVal.value;
 				const y = this.y.baseVal.value;
 				if (x || y) {
-					o = Matrix.translate(x, y).multiply(o);
+					o = Matrix.translate(x, y).cat(o);
 				}
 				if (T) {
-					return T.multiply(o);
+					return T.cat(o);
 				} else {
 					return o;
 				}
@@ -383,7 +383,7 @@ export class SVGTextElement extends SVGTextContentElement {
 		return this._shapeBox(T);
 	}
 	_shapeBox(tm?: Matrix): Box {
-		const m = tm ? tm.multiply(this.ownTM) : this.ownTM;
+		const m = tm ? tm.cat(this.ownTM) : this.ownTM;
 		const {
 			x: {
 				baseVal: { value: x },
@@ -410,7 +410,7 @@ export class SVGTSpanElement extends SVGTextContentElement {
 	}
 
 	_shapeBox(tm?: Matrix): Box {
-		const m = tm ? tm.multiply(this.ownTM) : this.ownTM;
+		const m = tm ? tm.cat(this.ownTM) : this.ownTM;
 		let box = Box.new();
 		// Returns a horrible bounding box that just contains the coord points
 		// of the text without width or height (which is impossible to calculate)

@@ -11,21 +11,21 @@ class Lay extends SVGLayout {
 	trans(m, node) {
 		const [P, M] = this.splitTM(node);
 		if (M.isIdentity) {
-			node.ownTM = P.inverse().multiply(m);
+			node.ownTM = P.inverse().cat(m);
 		} else {
-			const T = P.multiply(M);
-			const R = P.multiply(M);
-			// node.ownTM =P.inverse().multiply(m).multiply(M)
-			// node.ownTM = R.inverse().multiply(m).multiply(P).inverse();
+			const T = P.cat(M);
+			const R = P.cat(M);
+			// node.ownTM =P.inverse().cat(m).cat(M)
+			// node.ownTM = R.inverse().cat(m).cat(P).inverse();
 			if (P.isIdentity) {
-				// node.ownTM = M.multiply(P.inverse().multiply(m));
-				// 	// node.ownTM = m.multiply(M);
-				node.ownTM = M.multiply(m);
+				// node.ownTM = M.cat(P.inverse().cat(m));
+				// 	// node.ownTM = m.cat(M);
+				node.ownTM = M.cat(m);
 			} else {
-				// 	node.ownTM = P.multiply(M).inverse().multiply(m).multiply(P.inverse());
-				node.ownTM = P.multiply(M).inverse().multiply(m).multiply(P).inverse();
+				// 	node.ownTM = P.cat(M).inverse().cat(m).cat(P.inverse());
+				node.ownTM = P.cat(M).inverse().cat(m).cat(P).inverse();
 			}
-			// node.ownTM = P.inverse().multiply(m).multiply(M); // OK
+			// node.ownTM = P.inverse().cat(m).cat(M); // OK
 		}
 		// console.log('trans', node.id, `[${P.describe()}] ${m.describe()} [${M.describe()}] -> ${node.ownTM.describe()}`);
 	}

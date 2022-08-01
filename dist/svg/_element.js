@@ -324,20 +324,34 @@ export class SVGGraphicsElement extends SVGElement {
         if (w) {
         }
     }
-    _placeTo(that, ref) {
-        that.appendChild(this);
-        if (that === this)
-            return that;
-        const ctm = that.composeTM();
+    _placeChild(ref, nodes) {
         const pCtm = this.composeTM().inverse();
-        if (ref) {
-            this.insertBefore(that, ref);
+        for (const that of nodes) {
+            if (that !== this) {
+                const ctm = that.composeTM();
+                if (ref) {
+                    this.insertBefore(that, ref);
+                }
+                else {
+                    this.appendChild(that);
+                }
+                that.ownTM = pCtm.cat(ctm);
+            }
         }
-        else {
-            this.appendChild(that);
-        }
-        that.ownTM = pCtm.cat(ctm);
-        return that;
+    }
+    _placePriorTo(ref, ...nodes) {
+        return this._placeChild(ref, nodes);
+    }
+    _placeAppend(...nodes) {
+        return this._placeChild(null, nodes);
+    }
+    _placeBefore(...nodes) {
+        const { parentNode } = this;
+        return parentNode instanceof SVGGraphicsElement && parentNode._placeChild(this, nodes);
+    }
+    _placeAfter(...nodes) {
+        const { parentNode } = this;
+        return (parentNode instanceof SVGGraphicsElement && parentNode._placeChild(this.nextSibling, nodes));
     }
     layout() {
         return new SVGLayout(this);

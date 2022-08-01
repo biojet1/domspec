@@ -36,6 +36,9 @@ export class CSSUnitValue extends CSSNumericValue {
             return new CSSUnitValue(parseFloat(value), unit ? (unit == '%' ? 'percent' : unit) : 'number');
         }
     }
+    to(target_unit) {
+        const { value, unit } = this;
+    }
 }
 export class CSSMathValue extends CSSNumericValue {
 }
@@ -66,4 +69,12 @@ export class CSS {
     static dppx = (value) => new CSSUnitValue(value, 'dppx');
     static fr = (value) => new CSSUnitValue(value, 'fr');
 }
+const category = {
+    number: 'number',
+    percent: 'percent',
+    length: 'px',
+    time: 's',
+    angle: 'deg',
+    frequency: 'Hz',
+};
 //# sourceMappingURL=typeom.js.map

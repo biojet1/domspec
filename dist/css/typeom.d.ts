@@ -15,6 +15,7 @@ export declare class CSSUnitValue extends CSSNumericValue {
     toString(): string;
     constructor(value: number, unit: string);
     static parse(text: string): CSSUnitValue | undefined;
+    to(target_unit: string): void;
 }
 export declare class CSSMathValue extends CSSNumericValue {
 }

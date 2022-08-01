@@ -51,7 +51,11 @@ export declare class SVGGraphicsElement extends SVGElement {
     _shapeBox(tm?: Matrix): Box;
     _viewportBox(tm?: Matrix): Box;
     calcWidth(): void;
-    _placeTo(that: SVGGraphicsElement, ref?: Element): SVGGraphicsElement;
+    _placeChild(ref: ChildNode | null | undefined, nodes: SVGGraphicsElement[]): void;
+    _placePriorTo(ref: ChildNode | null | undefined, ...nodes: SVGGraphicsElement[]): void;
+    _placeAppend(...nodes: SVGGraphicsElement[]): void;
+    _placeBefore(...nodes: SVGGraphicsElement[]): false | void;
+    _placeAfter(...nodes: SVGGraphicsElement[]): false | void;
     layout(): SVGLayout;
     popTM(name?: string): string | undefined;
 }
@@ -66,6 +70,7 @@ export declare class SVGSVGElement extends SVGGraphicsElement {
     geom2UU(): void;
 }
 import { Element } from '../element.js';
+import { ChildNode } from '../child-node.js';
 import { SVGLength, SVGLengthAttr } from './length.js';
 import { SVGRectAttr } from './rect.js';
 import { SVGLayout } from './layout.js';

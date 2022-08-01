@@ -358,19 +358,35 @@ export class SVGGraphicsElement extends SVGElement {
 		if (w) {
 		}
 	}
-	_placeTo(that: SVGGraphicsElement, ref?: Element) {
-		that.appendChild(this);
-
-		if (that === this) return that;
-		const ctm = that.composeTM();
+	_placeChild(ref: ChildNode | null | undefined, nodes: SVGGraphicsElement[]) {
 		const pCtm = this.composeTM().inverse();
-		if (ref) {
-			this.insertBefore(that, ref);
-		} else {
-			this.appendChild(that);
+		for (const that of nodes) {
+			if (that !== this) {
+				const ctm = that.composeTM();
+				if (ref) {
+					this.insertBefore(that, ref);
+				} else {
+					this.appendChild(that);
+				}
+				that.ownTM = pCtm.cat(ctm);
+			}
 		}
-		that.ownTM = pCtm.cat(ctm);
-		return that;
+	}
+	_placePriorTo(ref: ChildNode | null | undefined, ...nodes: SVGGraphicsElement[]) {
+		return this._placeChild(ref, nodes);
+	}
+	_placeAppend(...nodes: SVGGraphicsElement[]) {
+		return this._placeChild(null, nodes);
+	}
+	_placeBefore(...nodes: SVGGraphicsElement[]) {
+		const { parentNode } = this;
+		return parentNode instanceof SVGGraphicsElement && parentNode._placeChild(this, nodes);
+	}
+	_placeAfter(...nodes: SVGGraphicsElement[]) {
+		const { parentNode } = this;
+		return (
+			parentNode instanceof SVGGraphicsElement && parentNode._placeChild(this.nextSibling, nodes)
+		);
 	}
 	layout() {
 		return new SVGLayout(this);
@@ -487,6 +503,8 @@ export class SVGSVGElement extends SVGGraphicsElement {
 }
 
 import { Element } from '../element.js';
+import { ChildNode } from '../child-node.js';
+
 import {
 	userUnit,
 	SVGLength,

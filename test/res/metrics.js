@@ -5,10 +5,15 @@ root.id || (root.id = 'V0');
     window.geom_lines = a;
 })(
     Array.from(root.querySelectorAll(`line[id]`)).map((v) => {
-        const [x1, y1, x2, y2] = [v.x1.baseVal.value, v.y1.baseVal.value, v.x2.baseVal.value, v.y2.baseVal.value];
+        const [x1, y1, x2, y2] = [
+            v.x1.baseVal.value,
+            v.y1.baseVal.value,
+            v.x2.baseVal.value,
+            v.y2.baseVal.value,
+        ];
         v.setAttribute('geom', `${x1},${y1} ${x2},${y2}`);
         return [v.id, x1, y1, x2, y2];
-    })
+    }),
 );
 
 window.geom_rects = Array.from(root.querySelectorAll(`rect[id], svg[id]`))
@@ -52,7 +57,9 @@ const transformRect = (rect, matrix) => {
     return DOMRect.fromRect({ x: _left, y: _top, width: _right - _left, height: _bottom - _top }); // or just
     // return {x: _left, y: _top, width: _right - _left, height: _bottom - _top}
 };
-const graphics = Array.from(root.querySelectorAll(`*`)).filter((v) => v instanceof SVGGraphicsElement);
+const graphics = Array.from(root.querySelectorAll(`*`)).filter(
+    (v) => v instanceof SVGGraphicsElement,
+);
 
 window.boxes = Array.from(root.querySelectorAll(`*[id]`)).map((v) => {
     const r = v.getBoundingClientRect();
@@ -164,7 +171,12 @@ function transformBox(r, m) {
         yMin = Math.min(yMin, y);
         maxY = Math.max(maxY, y);
     });
-    return DOMRect.fromRect({ x: xMin, y: yMin, width: Math.abs(xMax - xMin), height: Math.abs(maxY - yMin) });
+    return DOMRect.fromRect({
+        x: xMin,
+        y: yMin,
+        width: Math.abs(xMax - xMin),
+        height: Math.abs(maxY - yMin),
+    });
 }
 
 {
@@ -176,7 +188,6 @@ function transformBox(r, m) {
         const r = v.getBoundingClientRect();
         const rb = v.getBBox();
         const root_box = transformBox(r, root.getScreenCTM().inverse());
-  
 
         // v.setAttribute('bb', `${r.x},${r.y} ${r.width}x${r.height}`);
         metrix[letId(v)] = {
@@ -194,3 +205,33 @@ function transformBox(r, m) {
     });
     metrix['-'] = root.outerHTML;
 }
+
+function getScreenCTM(n) {
+    if (n instanceof SVGSVGElement) {
+        n.insertAdjacentHTML('afterbegin', '<g data-dummy="1"/>');
+        const d = n.querySelector("g[data-dummy]");
+        const m = d.getScreenCTM();
+        d.remove();
+        return m;
+    }
+    return n.getScreenCTM();
+}
+
+window.trsubs = [...graphics, root]
+    .filter((root) => ['g', 'svg'].indexOf(root.localName) > -1)
+    .map((root) => {
+        const trs = Array.from(root.querySelectorAll(`*`))
+            .filter((sub) => sub instanceof SVGGraphicsElement)
+            .map((sub) => {
+                // const m = sub.getTransformToElement(root);
+                const m = getScreenCTM(root).inverse().multiply(sub.getScreenCTM());
+                // if (sub.parentNode === root) {
+                //     const M = sub.transform.baseVal.consolidate();
+                //     const { a = 1, b = 0, c = 0, d = 1, e = 0, f = 0 } = M?.matrix ?? {};
+                //     return [sub.id, a, b, c, d, e, f];
+                // }
+                const { a, b, c, d, e, f } = m;
+                return [sub.id, a, b, c, d, e, f];
+            });
+        return [root.id, ...trs];
+    });

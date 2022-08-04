@@ -72,12 +72,29 @@ export class CSSUnitValue extends CSSNumericValue {
 		);
 		if (m) {
 			const [, value, unit] = m;
-
 			return new CSSUnitValue(
 				parseFloat(value),
 				unit ? (unit == '%' ? 'percent' : unit) : 'number',
 			);
 		}
+	}
+	to(target_unit: string) {
+		const { value, unit } = this;
+
+		// if (unit == target_unit) return new this(value, unit);
+		/*
+  const canonical_unit = canonicalUnit(this.unit);
+  if (canonical_unit != canonicalUnit(target_unit) ||
+      !canonical_unit )
+    return null;
+
+  const scale_factor =
+      toCanonicalUnitsScaleFactor(this.unit) /
+      toCanonicalUnitsScaleFactor(target_unit);
+
+  return CSSUnitValue::Create(this.value * scale_factor, target_unit);
+
+*/
 	}
 }
 
@@ -132,3 +149,11 @@ export class CSS {
 	static dppx = (value: number) => new CSSUnitValue(value, 'dppx');
 	static fr = (value: number) => new CSSUnitValue(value, 'fr');
 }
+const category = {
+	number: 'number',
+	percent: 'percent',
+	length: 'px',
+	time: 's',
+	angle: 'deg',
+	frequency: 'Hz',
+};

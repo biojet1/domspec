@@ -3,16 +3,8 @@ export class SVGElement extends Element {
 	get _isViewportElement() {
 		return 0;
 	}
-	// get _nearestVP(): SVGElement | null {
-	// 	let cur: SVGElement = this;
-	// 	do {
-	// 		if (1 === cur._isViewportElement) {
-	// 			return cur;
-	// 		}
-	// 	} while ((cur = cur.parentElement as SVGElement));
-	// 	return null;
-	// }
 	get viewportElement(): SVGElement | null {
+		// The returned element is often the nearest ancestor svg element.
 		let parent: SVGElement = this;
 		while ((parent = parent.parentElement as SVGElement)) {
 			if (1 === parent._isViewportElement) {
@@ -22,6 +14,7 @@ export class SVGElement extends Element {
 		return null;
 	}
 	get ownerSVGElement(): SVGSVGElement | null {
+		// https://svgwg.org/svg-next/types.html#__svg__SVGElement__ownerSVGElement
 		let parent: SVGElement = this;
 		while ((parent = parent.parentElement as SVGElement)) {
 			if (parent instanceof SVGSVGElement) {
@@ -256,14 +249,52 @@ export class SVGGraphicsElement extends SVGElement {
 			if (!parent) {
 				throw new Error(`root not reached`);
 			} else if (parent instanceof SVGGraphicsElement) {
-				tm = tm.postMultiply(parent.innerTM);
+				tm = tm.postCat(parent.innerTM);
 			}
 			parent = parent.parentNode;
 		}
 		return tm;
 	}
+	_composeTM(root?: SVGElement | null): Matrix {
+		let { parentNode: parent, ownTM: tm } = this;
+		if (parent) {
+			while (parent != root) {
+				if (parent instanceof SVGGraphicsElement) {
+					const grand: Element | null = parent.parentElement;
+					if (grand) {
+						if (grand instanceof SVGGraphicsElement) {
+							tm = tm.postCat(parent.innerTM);
+							parent = grand;
+							continue;
+						} else {
+							throw new Error(`root not reached`);
+						}
+					} else {
+						if (root) {
+							// TODO: convert to inside tm
+							// root._composeTM()
+							throw new Error(`root not same`);
+						}
+					}
+				}
+				break;
+			}
+		} else if (root) {
+			throw new Error(`root not reached`);
+		} else if (this instanceof SVGSVGElement) {
+			return Matrix.identity(); // root?
+		}
+		return tm;
+	}
+	_pairTM(root?: SVGElement | null): Matrix[] {
+		const { parentNode: parent, ownTM } = this;
+		if (parent instanceof SVGGraphicsElement) {
+			return [parent._composeTM(root), ownTM];
+		} else {
+			return [Matrix.identity(), ownTM];
+		}
+	}
 
-	//
 	shapeBox(T?: Matrix): Box {
 		return this._shapeBox(T);
 	}
@@ -276,7 +307,7 @@ export class SVGGraphicsElement extends SVGElement {
 		return box.isValid() ? box : Box.empty();
 	}
 	fuseTransform(parentT?: Matrix) {
-		let tm = parentT ? this.ownTM.postMultiply(parentT) : this.ownTM;
+		let tm = parentT ? this.ownTM.postCat(parentT) : this.ownTM;
 		for (const sub of this.children) {
 			if (sub instanceof SVGGraphicsElement) {
 				sub.fuseTransform(tm);
@@ -358,19 +389,35 @@ export class SVGGraphicsElement extends SVGElement {
 		if (w) {
 		}
 	}
-	_placeTo(that: SVGGraphicsElement, ref?: Element) {
-		that.appendChild(this);
-
-		if (that === this) return that;
-		const ctm = that.composeTM();
+	_placeChild(ref: ChildNode | null | undefined, nodes: SVGGraphicsElement[]) {
 		const pCtm = this.composeTM().inverse();
-		if (ref) {
-			this.insertBefore(that, ref);
-		} else {
-			this.appendChild(that);
+		for (const that of nodes) {
+			if (that !== this) {
+				const ctm = that.composeTM();
+				if (ref) {
+					this.insertBefore(that, ref);
+				} else {
+					this.appendChild(that);
+				}
+				that.ownTM = pCtm.cat(ctm);
+			}
 		}
-		that.ownTM = pCtm.cat(ctm);
-		return that;
+	}
+	_placePriorTo(ref: ChildNode | null | undefined, ...nodes: SVGGraphicsElement[]) {
+		return this._placeChild(ref, nodes);
+	}
+	_placeAppend(...nodes: SVGGraphicsElement[]) {
+		return this._placeChild(null, nodes);
+	}
+	_placeBefore(...nodes: SVGGraphicsElement[]) {
+		const { parentNode } = this;
+		return parentNode instanceof SVGGraphicsElement && parentNode._placeChild(this, nodes);
+	}
+	_placeAfter(...nodes: SVGGraphicsElement[]) {
+		const { parentNode } = this;
+		return (
+			parentNode instanceof SVGGraphicsElement && parentNode._placeChild(this.nextSibling, nodes)
+		);
 	}
 	layout() {
 		return new SVGLayout(this);
@@ -487,6 +534,8 @@ export class SVGSVGElement extends SVGGraphicsElement {
 }
 
 import { Element } from '../element.js';
+import { ChildNode } from '../child-node.js';
+
 import {
 	userUnit,
 	SVGLength,

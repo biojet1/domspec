@@ -1,12 +1,13 @@
-import { Point, Ray, Box, Matrix } from 'svggeom';
+import { Ray, Box, Matrix, Vec } from 'svggeom';
 import { SVGGraphicsElement } from './_element.js';
 export declare class SVGLayout {
     _root: SVGGraphicsElement;
     constructor(node: SVGGraphicsElement);
-    boundingBox(...args: Array<SVGGraphicsElement | Box | Point | Ray | Array<SVGGraphicsElement | Box | Point | Ray>>): Box;
-    rootTM(node: SVGGraphicsElement): Matrix;
+    getTM(node: SVGGraphicsElement): Matrix;
+    setTM(node: SVGGraphicsElement, m: Matrix): this;
+    innerTM(node: SVGGraphicsElement): Matrix;
+    relTM(parent: SVGGraphicsElement, tm: Matrix, root?: SVGGraphicsElement | null): Matrix;
     pairTM(node: SVGGraphicsElement): Matrix[];
     localTM(node: SVGGraphicsElement): Matrix;
-    transform(m: Matrix, ...nodes: Array<SVGGraphicsElement>): void;
-    toParent(parent: SVGGraphicsElement, node: SVGGraphicsElement): void;
+    boundingBox(...args: Array<SVGGraphicsElement | Box | Vec | Ray | Array<SVGGraphicsElement | Box | Vec | Ray>>): Box;
 }

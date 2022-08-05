@@ -38,9 +38,9 @@ export declare class SVGGraphicsElement extends SVGElement {
     localTM(): Matrix;
     docTM(): Matrix;
     pairTM(): Matrix[];
+    getScreenCTM(): Matrix;
     composeTM(root?: SVGElement | null): Matrix;
     _composeTM(root?: SVGElement | null): Matrix | null;
-    _getTM(root?: SVGElement | null, m?: Matrix): Matrix;
     _pairTM(root?: SVGElement | null): Matrix[];
     shapeBox(T?: Matrix): Box;
     boundingBox(T?: Matrix): Box;
@@ -57,7 +57,8 @@ export declare class SVGGraphicsElement extends SVGElement {
     _placeAppend(...nodes: SVGGraphicsElement[]): void;
     _placeBefore(...nodes: SVGGraphicsElement[]): false | void;
     _placeAfter(...nodes: SVGGraphicsElement[]): false | void;
-    layout(): SVGLayout;
+    _layout(): SVGLayout;
+    _relTM(tm: Matrix, root?: SVGElement | null): Matrix;
 }
 export declare class SVGSVGElement extends SVGGraphicsElement {
     static TAGS: string[];

@@ -3,16 +3,8 @@ export class SVGElement extends Element {
 	get _isViewportElement() {
 		return 0;
 	}
-	// get _nearestVP(): SVGElement | null {
-	// 	let cur: SVGElement = this;
-	// 	do {
-	// 		if (1 === cur._isViewportElement) {
-	// 			return cur;
-	// 		}
-	// 	} while ((cur = cur.parentElement as SVGElement));
-	// 	return null;
-	// }
 	get viewportElement(): SVGElement | null {
+		// The returned element is often the nearest ancestor svg element.
 		let parent: SVGElement = this;
 		while ((parent = parent.parentElement as SVGElement)) {
 			if (1 === parent._isViewportElement) {
@@ -22,6 +14,7 @@ export class SVGElement extends Element {
 		return null;
 	}
 	get ownerSVGElement(): SVGSVGElement | null {
+		// https://svgwg.org/svg-next/types.html#__svg__SVGElement__ownerSVGElement
 		let parent: SVGElement = this;
 		while ((parent = parent.parentElement as SVGElement)) {
 			if (parent instanceof SVGSVGElement) {
@@ -193,7 +186,8 @@ export class SVGGraphicsElement extends SVGElement {
 		return this.ownTM;
 	}
 	get rootTM(): Matrix {
-		return this.composeTM(this.farthestViewportElement);
+		// return this.composeTM(this.farthestViewportElement);
+		return this._composeTM();
 	}
 	splitTM(): Matrix[] {
 		const { parentNode: parent } = this;
@@ -226,16 +220,17 @@ export class SVGGraphicsElement extends SVGElement {
 		return ownTM;
 	}
 	docTM(): Matrix {
-		// transform applied to itself relative to document root
-		const { parentNode: parent, ownTM } = this;
-		if (!parent) {
-			if (this instanceof SVGSVGElement) {
-				return Matrix.identity();
-			}
-		} else if (parent instanceof SVGGraphicsElement) {
-			return parent.localTM().cat(ownTM);
-		}
-		return ownTM;
+		// // transform applied to itself relative to document root
+		// const { parentNode: parent, ownTM } = this;
+		// if (!parent) {
+		// 	if (this instanceof SVGSVGElement) {
+		// 		return Matrix.identity();
+		// 	}
+		// } else if (parent instanceof SVGGraphicsElement) {
+		// 	return parent.localTM().cat(ownTM);
+		// }
+		// return ownTM;
+		return this._composeTM();
 	}
 	pairTM(): Matrix[] {
 		const { parentNode: parent, ownTM } = this;
@@ -245,6 +240,7 @@ export class SVGGraphicsElement extends SVGElement {
 		}
 
 		return [Matrix.identity(), ownTM];
+		// return this._pairTM();
 	}
 
 	composeTM(root?: SVGElement | null): Matrix {
@@ -262,8 +258,46 @@ export class SVGGraphicsElement extends SVGElement {
 		}
 		return tm;
 	}
+	_composeTM(root?: SVGElement | null): Matrix {
+		let { parentNode: parent, ownTM: tm } = this;
+		if (parent) {
+			while (parent != root) {
+				if (parent instanceof SVGGraphicsElement) {
+					const grand: Element | null = parent.parentElement;
+					if (grand) {
+						if (grand instanceof SVGGraphicsElement) {
+							tm = tm.postCat(parent.innerTM);
+							parent = grand;
+							continue;
+						} else {
+							throw new Error(`root not reached`);
+						}
+					} else {
+						if (root) {
+							// TODO: convert to inside tm
+							// root._composeTM()
+							throw new Error(`root not same`);
+						}
+					}
+				}
+				break;
+			}
+		} else if (root) {
+			throw new Error(`root not reached`);
+		} else if (this instanceof SVGSVGElement) {
+			return Matrix.identity(); // root?
+		}
+		return tm;
+	}
+	_pairTM(root?: SVGElement | null): Matrix[] {
+		const { parentNode: parent, ownTM } = this;
+		if (parent instanceof SVGGraphicsElement) {
+			return [parent._composeTM(root), ownTM];
+		} else {
+			return [Matrix.identity(), ownTM];
+		}
+	}
 
-	//
 	shapeBox(T?: Matrix): Box {
 		return this._shapeBox(T);
 	}

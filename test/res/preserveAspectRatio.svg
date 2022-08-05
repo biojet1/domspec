@@ -11,10 +11,18 @@
       <path d="M 10 24 A 8 8 0 0 0 20 24" stroke="black" stroke-width="2"/>
     </g>
   </defs>
+    <g id="smile2">
+      <rect x=".5" y=".5" width="29" height="39" style="fill:black;stroke:red"/>
+      <circle cx="15" cy="20" r="10" fill="yellow"/>
+      <circle cx="12" cy="17" r="1.5" fill="black"/>
+      <circle cx="17" cy="17" r="1.5" fill="black"/>
+      <path d="M 10 24 A 8 8 0 0 0 20 24" stroke="black" stroke-width="2"/>
+    </g>
+
   <rect x="1" y="1" width="448" height="298"/>
   <text x="10" y="30">SVG to fit</text>
   <g transform="translate(20,40)" id="G_B">
-    <use href="#smile"/>
+    <use href="#smile" id="UA"/>
   </g>
   <text x="10" y="110">Viewport 1</text>
   <g transform="translate(10,120)" id="G_C">
@@ -30,14 +38,14 @@
       <text y="-10">xMin*</text>
       <rect x=".5" y=".5" width="49" height="29"/>
       <svg preserveAspectRatio="xMinYMin meet" viewBox="0 0 30 40" width="50" height="30" id="V_A">
-        <use href="#smile"/>
+        <use href="#smile" id="UB"/>
       </svg>
     </g>
     <g transform="translate(70,0)" id="G_G">
       <text y="-10">xMid*</text>
       <rect x=".5" y=".5" width="49" height="29"/>
       <svg preserveAspectRatio="xMidYMid meet" viewBox="0 0 30 40" width="50" height="30" id="V_B">
-        <use href="#smile"/>
+        <use href="#smile"  id="UC"/>
         <!-- <rect  x=".5" y=".5" width="29" height="39" style="fill:green;stroke:pink"/>-->
       </svg>
     </g>
@@ -45,7 +53,7 @@
       <text y="-10">xMax*</text>
       <rect x=".5" y=".5" width="49" height="29"/>
       <svg preserveAspectRatio="xMaxYMax meet" viewBox="0 0 30 40" width="50" height="30" id="V_C">
-        <use href="#smile"/>
+        <use href="#smile"  id="UD"/>
       </svg>
     </g>
   </g>
@@ -55,21 +63,21 @@
       <text y="-10">*YMin</text>
       <rect x=".5" y=".5" width="29" height="59"/>
       <svg preserveAspectRatio="xMinYMin meet" viewBox="0 0 30 40" width="30" height="60" id="V_D">
-        <use href="#smile"/>
+        <use href="#smile"  id="UE"/>
       </svg>
     </g>
     <g transform="translate(50, 0)" id="G_K">
       <text y="-10">*YMid</text>
       <rect x=".5" y=".5" width="29" height="59"/>
       <svg preserveAspectRatio="xMidYMid meet" viewBox="0 0 30 40" width="30" height="60" id="V_E">
-        <use href="#smile"/>
+        <use href="#smile"  id="UF"/>
       </svg>
     </g>
     <g transform="translate(100, 0)" id="G_L">
       <text y="-10">*YMax</text>
       <rect x=".5" y=".5" width="29" height="59"/>
       <svg preserveAspectRatio="xMaxYMax meet" viewBox="0 0 30 40" width="30" height="60" id="V_F">
-        <use href="#smile"/>
+        <use href="#smile"  id="UG"/>
       </svg>
     </g>
   </g>
@@ -79,21 +87,21 @@
       <text y="-10">xMin*</text>
       <rect x=".5" y=".5" width="29" height="59"/>
       <svg preserveAspectRatio="xMinYMin slice" viewBox="0 0 30 40" width="30" height="60" id="V_G">
-        <use href="#smile"/>
+        <use href="#smile"  id="UH"/>
       </svg>
     </g>
     <g transform="translate(50,0)" id="G_O">
       <text y="-10">xMid*</text>
       <rect x=".5" y=".5" width="29" height="59"/>
       <svg preserveAspectRatio="xMidYMid slice" viewBox="0 0 30 40" width="30" height="60" id="V_H">
-        <use href="#smile"/>
+        <use href="#smile"  id="UI"/>
       </svg>
     </g>
     <g transform="translate(100,0)" id="G_P">
       <text y="-10">xMax*</text>
       <rect x=".5" y=".5" width="29" height="59"/>
       <svg preserveAspectRatio="xMaxYMax slice" viewBox="0 0 30 40" width="30" height="60" id="V_I">
-        <use href="#smile"/>
+        <use href="#smile"  id="UJ"/>
       </svg>
     </g>
   </g>
@@ -103,14 +111,14 @@
       <text y="-10">*YMin</text>
       <rect x=".5" y=".5" width="49" height="29"/>
       <svg preserveAspectRatio="xMinYMin slice" viewBox="0 0 30 40" width="50" height="30" id="V_J">
-        <use href="#smile"/>
+        <use href="#smile"  id="UK"/>
       </svg>
     </g>
     <g transform="translate(70,0)" id="G_12">
       <text y="-10">*YMid</text>
       <rect x=".5" y=".5" width="49" height="29"/>
       <svg preserveAspectRatio="xMidYMid slice" viewBox="0 0 30 40" width="50" height="30" id="V_K">
-        <use href="#smile"/>
+        <use href="#smile"  id="UL"/>
       </svg>
     </g>
     <g transform="translate(140,0)" id="G_13">

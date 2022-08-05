@@ -276,35 +276,35 @@ tap.test('viewportTM', function (t) {
 });
 import { createWriteStream, writeFileSync, WriteStream } from 'fs';
 if (0) {
-    Array.from(documentument.documentElement.querySelectorAll(`svg[preserveAspectRatio]`)).map((v, i) => {
+    Array.from(document.documentElement.querySelectorAll(`svg[preserveAspectRatio]`)).map((v, i) => {
         v.id = `V_${(i + 10).toString(26).toUpperCase()}`;
         return (i + 10).toString(26);
     });
-    Array.from(documentument.documentElement.querySelectorAll(`g`)).map((v, i) => {
+    Array.from(document.documentElement.querySelectorAll(`g`)).map((v, i) => {
         if (!v.id) {
             v.id = `G_${(i + 10).toString(26).toUpperCase()}`;
         }
     });
-    Array.from(documentument.documentElement.querySelectorAll(`svg[preserveAspectRatio]`)).map((v) => {
+    Array.from(document.documentElement.querySelectorAll(`svg[preserveAspectRatio]`)).map((v) => {
         const p = v.getAttribute('preserveAspectRatio');
         const b = v.getBoundingClientRect();
         const m = v.getCTM();
         return [v.id, p, m.a, m.b, m.c, m.d, m.e, m.f];
     });
-    Array.from(documentument.documentElement.querySelectorAll(`svg[preserveAspectRatio]`)).map((v) => {
+    Array.from(document.documentElement.querySelectorAll(`svg[preserveAspectRatio]`)).map((v) => {
         const b = v.querySelector('use').getBBox();
         return [v.id, [b.x, b.y, b.width, b.height]];
     });
-    Array.from(documentument.documentElement.querySelectorAll(`svg[preserveAspectRatio]`)).map((v) => {
+    Array.from(document.documentElement.querySelectorAll(`svg[preserveAspectRatio]`)).map((v) => {
         const u = v.querySelector('use');
         const m = u.getScreenCTM();
         return [v.id, m.a, m.b, m.c, m.d, m.e, m.f];
     });
-    Array.from(documentument.documentElement.querySelectorAll(`svg[preserveAspectRatio]`)).map((v) => {
+    Array.from(document.documentElement.querySelectorAll(`svg[preserveAspectRatio]`)).map((v) => {
         const b = v.getBoundingClientRect();
         return [v.id, [b.x, b.y, b.width, b.height]];
     });
-    Array.from(documentument.documentElement.querySelectorAll(`svg[preserveAspectRatio]`)).map((v) => {
+    Array.from(document.documentElement.querySelectorAll(`svg[preserveAspectRatio]`)).map((v) => {
         const u = v.querySelector('use');
         const m = u.getScreenCTM();
         const r = u.getBBox();
@@ -318,7 +318,7 @@ if (0) {
         }).matrixTransform(m);
         return [v.id, a.x, a.y, b.x - a.x, b.y - a.y];
     });
-    Array.from(documentument.documentElement.querySelectorAll(`g[id]`))
+    Array.from(document.documentElement.querySelectorAll(`g[id]`))
         .filter((v) => v.id.startsWith('G_'))
         .map((v) => {
             const m = v.getScreenCTM();
@@ -334,32 +334,32 @@ if (0) {
             v.setAttribute('bbox', `${r.x},${r.y} ${r.width}x${r.height}`);
             return [v.id, a.x, a.y, b.x - a.x, b.y - a.y];
         });
-    Array.from(documentument.documentElement.querySelectorAll(`g[id]`))
+    Array.from(document.documentElement.querySelectorAll(`g[id]`))
         .filter((v) => v.id.startsWith('G_'))
         .map((v) => {
             const r = v.getBoundingClientRect();
             return [v.id, r.x, r.y, r.width, r.height];
         });
-    Array.from(documentument.documentElement.querySelectorAll(`*`)).map((v) => {
+    Array.from(document.documentElement.querySelectorAll(`*`)).map((v) => {
         const r = v.getBoundingClientRect();
         v.setAttribute('bcr', `${r.x},${r.y} ${r.width}x${r.height}`);
         return [v.id, r.x, r.y, r.width, r.height];
     });
-    Array.from(documentument.documentElement.querySelectorAll(`svg`)).map((v) => {
+    Array.from(document.documentElement.querySelectorAll(`svg`)).map((v) => {
         const r = v.getBBox();
         v.setAttribute('bbox', `${r.x},${r.y} ${r.width}x${r.height}`);
     });
     for (const tag of ['svg', 'rect', 'g', 'use']) {
-        documentument.documentElement.querySelectorAll(tag).forEach((v) => {
+        document.documentElement.querySelectorAll(tag).forEach((v) => {
             const r = v.getBBox();
             const m = v.getCTM();
             v.setAttribute('bbox', `${r.x},${r.y} ${r.width}x${r.height}`);
             v.setAttribute('ctm', `${[m.a, m.b, m.c, m.d, m.e, m.f]}`);
         });
     }
-    documentument.querySelectorAll(`text`).forEach((x) => x.remove());
+    document.querySelectorAll(`text`).forEach((x) => x.remove());
     ['path', 'rect', 'circle'].forEach((tag) => {
-        documentument.documentElement.querySelectorAll(tag).forEach((v) => {
+        document.documentElement.querySelectorAll(tag).forEach((v) => {
             v.style.stroke = 'none';
             v.removeAttribute('stroke-width');
             v.removeAttribute('stroke');

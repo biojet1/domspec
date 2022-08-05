@@ -29,7 +29,11 @@ function apply(m, node) {
 	T = L.cat(M); // R1,R2,R3,R4 OK
 	node.ownTM = T;
 
-	console.log('trans', node.id, `[${T.describe()}]\n\tL[${L.describe()}]\n\tS[${S.describe()}]\n\t-> ${T.describe()}`);
+	console.log(
+		'trans',
+		node.id,
+		`[${T.describe()}]\n\tL[${L.describe()}]\n\tS[${S.describe()}]\n\t-> ${T.describe()}`,
+	);
 }
 
 function toParent(parent, i) {
@@ -59,7 +63,9 @@ tap.test('layout1', { bail: 0 }, function (t) {
 		Array.from(document.querySelectorAll('path[id]'))
 			.filter((v) => v.id.match(/^P_/))
 			.forEach((v) => v.remove());
-		for (const [id, metrix] of Object.entries(data).filter(([k, v]) => k != '-' && document.getElementById(k))) {
+		for (const [id, metrix] of Object.entries(data).filter(
+			([k, v]) => k != '-' && document.getElementById(k),
+		)) {
 			// console.log(id, metrix);
 			const [a, b, c, d, e, f] = metrix.root_tm;
 			const [x, y, w, h] = metrix.root_box;
@@ -72,7 +78,7 @@ tap.test('layout1', { bail: 0 }, function (t) {
 			const b1 = v.boundingBox();
 			root.insertAdjacentHTML(
 				'beforeend',
-				`<rect x="${b1.x}" y="${b1.y}" width="${b1.width}" height="${b1.height}" style="fill:none;stroke:red;opacity:50%;">`
+				`<rect x="${b1.x}" y="${b1.y}" width="${b1.width}" height="${b1.height}" style="fill:none;stroke:red;opacity:50%;">`,
 			);
 
 			t.ok(r.equals(m, 1e-3), `${id} ${r.describe()} ${m.describe()}`);
@@ -124,6 +130,7 @@ tap.test('localTM()', { bail: 0 }, function (t) {
 	const R1 = document.getElementById('R1');
 	const R8 = document.getElementById('R8');
 	const R9 = document.getElementById('R9');
+	const { documentElement: rootSVG } = document;
 
 	t.same(document.getElementById('G1').localTM().describe(), Matrix.translate(100, 0).describe());
 	t.same(document.getElementById('G2').localTM().describe(), Matrix.translate(100, 100).describe());
@@ -151,7 +158,14 @@ tap.test('localTM()', { bail: 0 }, function (t) {
 		const v = document.getElementById(id);
 		t.same(v.localTM().describe(), m.describe(), `localTM ${id}`);
 		t.same(v.docTM().describe(), n.describe(), `docTM ${id}`);
+		t.same(v._composeTM().describe(), n.describe(), `_composeTM ${id}`);
+		t.same(v._composeTM(rootSVG).describe(), n.describe(), `_composeTM rootSVG ${id}`);
 	});
+	t.same(
+		rootSVG._composeTM().describe(),
+		Matrix.identity().describe(),
+		`_composeTM documentElement`,
+	);
 
 	t.end();
 });

@@ -6,8 +6,9 @@ export declare class SVGLayout {
     getTM(node: SVGGraphicsElement): Matrix;
     setTM(node: SVGGraphicsElement, m: Matrix): this;
     innerTM(node: SVGGraphicsElement): Matrix;
-    relTM(parent: SVGGraphicsElement, tm: Matrix, root?: SVGGraphicsElement | null): Matrix;
+    protected relTM(parent: SVGGraphicsElement, tm: Matrix, root?: SVGGraphicsElement | null): Matrix;
     pairTM(node: SVGGraphicsElement): Matrix[];
     localTM(node: SVGGraphicsElement): Matrix;
+    rootTM(node: SVGGraphicsElement): Matrix;
     boundingBox(...args: Array<SVGGraphicsElement | Box | Vec | Ray | Array<SVGGraphicsElement | Box | Vec | Ray>>): Box;
 }

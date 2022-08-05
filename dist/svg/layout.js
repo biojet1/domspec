@@ -38,35 +38,35 @@ export class SVGLayout {
     pairTM(node) {
         const { parentNode: parent } = node;
         const { _root } = this;
-        if (!parent) {
-            throw new Error(`root not reached`);
+        if (parent instanceof SVGGraphicsElement) {
+            return [this.relTM(parent, Matrix.identity(), _root), this.getTM(node)];
         }
-        else if (parent === _root) {
+        else {
+            return [Matrix.identity(), this.getTM(node)];
         }
-        else if (parent instanceof SVGGraphicsElement) {
-            return [this.localTM(parent), this.getTM(node)];
-        }
-        return [Matrix.identity(), this.getTM(node)];
     }
     localTM(node) {
         const { _root } = this;
         const { parentNode: parent } = node;
-        if (!parent) {
-            throw new Error(`root not reached`);
+        if (parent instanceof SVGGraphicsElement) {
+            return this.relTM(parent, this.innerTM(node), _root);
         }
-        const m = this.getTM(node);
-        if (parent === _root) {
-            if (node instanceof SVGSVGElement) {
-                return m.cat(node.viewportTM());
-            }
+        else if (this instanceof SVGSVGElement) {
+            return Matrix.identity();
         }
-        else if (parent instanceof SVGGraphicsElement) {
-            if (node instanceof SVGSVGElement) {
-                return this.localTM(parent).cat(m.cat(node.viewportTM()));
-            }
-            return this.localTM(parent).cat(m);
+        else {
+            return this.innerTM(node);
         }
-        return m;
+    }
+    rootTM(node) {
+        const { _root } = this;
+        const { parentNode: parent } = node;
+        if (parent instanceof SVGGraphicsElement) {
+            return this.relTM(parent, this.getTM(node), _root);
+        }
+        else {
+            return this.getTM(node);
+        }
     }
     boundingBox(...args) {
         let bbox = Box.new();

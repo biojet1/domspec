@@ -169,7 +169,7 @@ export class SVGGraphicsElement extends SVGElement {
         return this.ownTM;
     }
     get rootTM() {
-        return this.composeTM(this.farthestViewportElement);
+        return this._composeTM();
     }
     splitTM() {
         const { parentNode: parent } = this;
@@ -201,16 +201,7 @@ export class SVGGraphicsElement extends SVGElement {
         return ownTM;
     }
     docTM() {
-        const { parentNode: parent, ownTM } = this;
-        if (!parent) {
-            if (this instanceof SVGSVGElement) {
-                return Matrix.identity();
-            }
-        }
-        else if (parent instanceof SVGGraphicsElement) {
-            return parent.localTM().cat(ownTM);
-        }
-        return ownTM;
+        return this._composeTM();
     }
     pairTM() {
         const { parentNode: parent, ownTM } = this;
@@ -233,6 +224,48 @@ export class SVGGraphicsElement extends SVGElement {
             parent = parent.parentNode;
         }
         return tm;
+    }
+    _composeTM(root) {
+        let { parentNode: parent, ownTM: tm } = this;
+        if (parent) {
+            while (parent != root) {
+                if (parent instanceof SVGGraphicsElement) {
+                    const grand = parent.parentElement;
+                    if (grand) {
+                        if (grand instanceof SVGGraphicsElement) {
+                            tm = tm.postCat(parent.innerTM);
+                            parent = grand;
+                            continue;
+                        }
+                        else {
+                            throw new Error(`root not reached`);
+                        }
+                    }
+                    else {
+                        if (root) {
+                            throw new Error(`root not same`);
+                        }
+                    }
+                }
+                break;
+            }
+        }
+        else if (root) {
+            throw new Error(`root not reached`);
+        }
+        else if (this instanceof SVGSVGElement) {
+            return Matrix.identity();
+        }
+        return tm;
+    }
+    _pairTM(root) {
+        const { parentNode: parent, ownTM } = this;
+        if (parent instanceof SVGGraphicsElement) {
+            return [parent._composeTM(root), ownTM];
+        }
+        else {
+            return [Matrix.identity(), ownTM];
+        }
     }
     shapeBox(T) {
         return this._shapeBox(T);

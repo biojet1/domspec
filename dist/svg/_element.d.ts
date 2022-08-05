@@ -40,6 +40,8 @@ export declare class SVGGraphicsElement extends SVGElement {
     docTM(): Matrix;
     pairTM(): Matrix[];
     composeTM(root?: SVGElement | null): Matrix;
+    _composeTM(root?: SVGElement | null): Matrix;
+    _pairTM(root?: SVGElement | null): Matrix[];
     shapeBox(T?: Matrix): Box;
     boundingBox(T?: Matrix): Box;
     getBBox(): Box;

@@ -35,18 +35,17 @@ export declare class SVGGraphicsElement extends SVGElement {
     canRender(): boolean;
     get innerTM(): Matrix;
     get rootTM(): Matrix;
-    splitTM(): Matrix[];
     localTM(): Matrix;
     docTM(): Matrix;
     pairTM(): Matrix[];
     composeTM(root?: SVGElement | null): Matrix;
-    _composeTM(root?: SVGElement | null): Matrix;
+    _composeTM(root?: SVGElement | null): Matrix | null;
+    _getTM(root?: SVGElement | null, m?: Matrix): Matrix;
     _pairTM(root?: SVGElement | null): Matrix[];
     shapeBox(T?: Matrix): Box;
     boundingBox(T?: Matrix): Box;
     getBBox(): Box;
     fuseTransform(parentT?: Matrix): void;
-    _descendantTM(node: SVGGraphicsElement): Matrix;
     objectBBox(T?: Matrix): Box;
     _objectBBox(T?: Matrix): Box;
     _boundingBox(tm?: Matrix): Box;
@@ -59,7 +58,6 @@ export declare class SVGGraphicsElement extends SVGElement {
     _placeBefore(...nodes: SVGGraphicsElement[]): false | void;
     _placeAfter(...nodes: SVGGraphicsElement[]): false | void;
     layout(): SVGLayout;
-    popTM(name?: string): string | undefined;
 }
 export declare class SVGSVGElement extends SVGGraphicsElement {
     static TAGS: string[];

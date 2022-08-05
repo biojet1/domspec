@@ -48,10 +48,6 @@ export declare class SVGTransformListAttr extends Attr {
     get baseVal(): SVGTransformList;
     get specified(): boolean;
     valueOf(): string | undefined;
-    saveAs(name: string, m?: Matrix): this | undefined;
-    restore(name: string): this;
-    getSaved(name: string): Matrix | undefined;
-    removeSaved(name?: string): void;
     apply(m: Matrix): Matrix | this;
 }
 import { Matrix, MatrixMut } from 'svggeom';

@@ -287,68 +287,6 @@ export class SVGTransformListAttr extends Attr {
             return _var?.toString();
         }
     }
-    saveAs(name, m) {
-        const o = this.ownerElement;
-        if (o) {
-            const t = m == undefined ? o.getAttribute('transform') ?? '' : m.toString();
-            for (const c of o.children) {
-                if (c.localName == 'desc' && c.getAttribute('name') == name) {
-                    c.setAttribute('tm', t);
-                    return;
-                }
-            }
-            const c = o.ownerDocument?.createElement('desc');
-            if (c) {
-                c.setAttribute('tm', t);
-                c.setAttribute('name', name);
-                o.appendChild(c);
-            }
-        }
-        return this;
-    }
-    restore(name) {
-        const o = this.ownerElement;
-        if (o) {
-            for (const c of o.children) {
-                if (c.localName == 'desc' && c.getAttribute('name') == name) {
-                    const tm = c.getAttribute('tm');
-                    if (tm != null) {
-                        o.setAttribute('transform', tm);
-                        break;
-                    }
-                }
-            }
-        }
-        return this;
-    }
-    getSaved(name) {
-        const o = this.ownerElement;
-        if (o) {
-            for (const c of o.children) {
-                if (c.localName == 'desc' && c.getAttribute('name') == name) {
-                    const tm = c.getAttribute('tm');
-                    if (tm != null) {
-                        return Matrix.parse(tm);
-                    }
-                }
-            }
-        }
-    }
-    removeSaved(name) {
-        const o = this.ownerElement;
-        if (o) {
-            for (const c of o.children) {
-                if (c.localName == 'desc') {
-                    const tm = c.getAttribute('tm');
-                    if (tm != null) {
-                        if (name == null || c.getAttribute('name') == name) {
-                            c.remove();
-                        }
-                    }
-                }
-            }
-        }
-    }
     apply(m) {
         const { _var } = this;
         if (_var instanceof SVGTransformList) {

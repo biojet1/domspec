@@ -48,6 +48,7 @@ tap.test('transform2', function (t) {
 		// const r = v.shapeBox(true);
 		const m = Matrix.new([a, b, c, d, e, f]).toString();
 		// t.same(v.composeTM().toString(), m, `composeTM ${id}`);
+		t.same(v.getScreenCTM().toString(), m, `getScreenCTM ${id}`);
 		// t.same(v._composeTM().toString(), m, `_composeTM ${id}`);
 		const w = top.innerTM;
 		const u = v.rootTM;
@@ -212,12 +213,15 @@ tap.test('transform2', function (t) {
 		],
 	].forEach(([rootId, ...subs]) => {
 		const root = doc.getElementById(rootId);
+		const lay = root._layout();
 		subs.forEach(([subId, a, b, c, d, e, f]) => {
 			const m = Matrix.new([a, b, c, d, e, f]);
 			const sub = doc.getElementById(subId);
 			// t.same(v.composeTM(top).describe(), m.describe(), `composeTM(top) ${id}`);
 			// t.same(v._composeTM().describe(), m.describe(), `_composeTM() ${id}`);
+			const [p, o] = lay.pairTM(sub);
 			t.same(sub._composeTM(root).describe(), m.describe(), `${subId}._composeTM(${rootId})`);
+			t.same(p.cat(o).describe(), m.describe(), `${subId}.p.cat(o) <-- ${rootId}`);
 		});
 	});
 	t.end();

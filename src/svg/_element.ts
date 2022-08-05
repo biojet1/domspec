@@ -186,58 +186,63 @@ export class SVGGraphicsElement extends SVGElement {
 		return this.ownTM;
 	}
 	get rootTM(): Matrix {
-		return this.composeTM(this.farthestViewportElement);
+		// return this.composeTM(this.farthestViewportElement);
+		return this._composeTM();
 	}
-	splitTM(): Matrix[] {
-		const { parentNode: parent } = this;
-		if (parent) {
-			if (parent instanceof SVGGraphicsElement) {
-				if (parent.parentNode) {
-					if (parent instanceof SVGSVGElement) {
-						return [parent.rootTM.cat(parent.viewportTM()), this.ownTM];
-					}
-					return [parent.rootTM, this.ownTM];
-				}
-			}
-		}
-		return [Matrix.identity(), this.ownTM];
-	}
+	// splitTM(): Matrix[] {
+	// 	const { parentNode: parent } = this;
+	// 	if (parent) {
+	// 		if (parent instanceof SVGGraphicsElement) {
+	// 			if (parent.parentNode) {
+	// 				if (parent instanceof SVGSVGElement) {
+	// 					return [parent.rootTM.cat(parent.viewportTM()), this.ownTM];
+	// 				}
+	// 				return [parent.rootTM, this.ownTM];
+	// 			}
+	// 		}
+	// 	}
+	// 	return [Matrix.identity(), this.ownTM];
+	// }
 
 	localTM(): Matrix {
-		// transform applied to decendants
-		const { parentNode: parent, ownTM } = this;
-		if (!parent) {
-			if (this instanceof SVGSVGElement) {
-				return Matrix.identity();
-			}
-		} else if (parent instanceof SVGGraphicsElement) {
-			if (this instanceof SVGSVGElement) {
-				return parent.localTM().cat(ownTM.cat(this.viewportTM()));
-			}
-			return parent.localTM().cat(ownTM);
-		}
-		return ownTM;
+		// // transform applied to decendants
+		// const { parentNode: parent, ownTM } = this;
+		// if (!parent) {
+		// 	if (this instanceof SVGSVGElement) {
+		// 		return Matrix.identity();
+		// 	}
+		// } else if (parent instanceof SVGGraphicsElement) {
+		// 	if (this instanceof SVGSVGElement) {
+		// 		return parent.localTM().cat(ownTM.cat(this.viewportTM()));
+		// 	}
+		// 	return parent.localTM().cat(ownTM);
+		// }
+		// return ownTM;
+		return this._getTM(null, this.innerTM);
 	}
 	docTM(): Matrix {
-		// transform applied to itself relative to document root
-		const { parentNode: parent, ownTM } = this;
-		if (!parent) {
-			if (this instanceof SVGSVGElement) {
-				return Matrix.identity();
-			}
-		} else if (parent instanceof SVGGraphicsElement) {
-			return parent.localTM().cat(ownTM);
-		}
-		return ownTM;
+		// // transform applied to itself relative to document root
+		// const { parentNode: parent, ownTM } = this;
+		// if (!parent) {
+		// 	if (this instanceof SVGSVGElement) {
+		// 		return Matrix.identity();
+		// 	}
+		// } else if (parent instanceof SVGGraphicsElement) {
+		// 	return parent.localTM().cat(ownTM);
+		// }
+		// return ownTM;
+		return this._composeTM();
 	}
 	pairTM(): Matrix[] {
 		const { parentNode: parent, ownTM } = this;
 
 		if (parent instanceof SVGGraphicsElement) {
-			return [parent.localTM(), ownTM];
+			// return [parent.localTM(), ownTM];
+			return [this._getTM(null, Matrix.identity()), ownTM];
 		}
 
 		return [Matrix.identity(), ownTM];
+		// return this._pairTM();
 	}
 
 	composeTM(root?: SVGElement | null): Matrix {
@@ -271,8 +276,6 @@ export class SVGGraphicsElement extends SVGElement {
 						}
 					} else {
 						if (root) {
-							// TODO: convert to inside tm
-							// root._composeTM()
 							throw new Error(`root not same`);
 						}
 					}
@@ -286,6 +289,38 @@ export class SVGGraphicsElement extends SVGElement {
 		}
 		return tm;
 	}
+	_getTM(root?: SVGElement | null, m?: Matrix): Matrix {
+		let { parentNode: parent } = this;
+		if (parent) {
+			let tm = m ?? this.ownTM;
+			while (parent != root) {
+				if (parent instanceof SVGGraphicsElement) {
+					const grand: Element | null = parent.parentElement;
+					if (grand) {
+						if (grand instanceof SVGGraphicsElement) {
+							tm = tm.postCat(parent.innerTM);
+							parent = grand;
+							continue;
+						} else {
+							throw new Error(`root not reached`);
+						}
+					} else {
+						if (root) {
+							throw new Error(`root not same`);
+						}
+					}
+				}
+				break;
+			}
+			return tm;
+		} else if (root) {
+			throw new Error(`root not reached`);
+		} else if (this instanceof SVGSVGElement) {
+			// return Matrix.identity(); // root?
+		}
+		return Matrix.identity();
+	}
+
 	_pairTM(root?: SVGElement | null): Matrix[] {
 		const { parentNode: parent, ownTM } = this;
 		if (parent instanceof SVGGraphicsElement) {

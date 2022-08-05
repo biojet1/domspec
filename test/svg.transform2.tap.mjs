@@ -6,7 +6,67 @@ import { SVGLength } from '../dist/svg/element.js';
 import { Path, Box, Matrix, MatrixInterpolate } from 'svggeom';
 import { createWriteStream, writeFileSync, WriteStream } from 'fs';
 import fs from 'fs';
-
+const trsubs = [
+	[
+		'G1',
+		['G2', 1, 0, 0, 1, 0, 80],
+		['G3', 1, 0, 0, 1, 0, 80],
+		['G4', 1, 0, 0, 1, -50, 30],
+		['R1', 1, 0, 0, 1, -50, 30],
+		['R2', 1, 0, 0, 1, -60, 20],
+		['R3', 1, 0, 0, 1, 0, 80],
+		['R4', 1, 0, 0, 1, -10, 70],
+	],
+	[
+		'G2',
+		['G3', 1, 0, 0, 1, 0, 0],
+		['G4', 1, 0, 0, 1, -50, -50],
+		['R1', 1, 0, 0, 1, -50, -50],
+		['R2', 1, 0, 0, 1, -60, -60],
+		['R3', 1, 0, 0, 1, 0, 0],
+		['R4', 1, 0, 0, 1, -10, -10],
+	],
+	[
+		'G3',
+		['G4', 1, 0, 0, 1, -50, -50],
+		['R1', 1, 0, 0, 1, -50, -50],
+		['R2', 1, 0, 0, 1, -60, -60],
+		['R3', 1, 0, 0, 1, 0, 0],
+		['R4', 1, 0, 0, 1, -10, -10],
+	],
+	['G4', ['R1', 1, 0, 0, 1, 0, 0], ['R2', 1, 0, 0, 1, -10, -10]],
+	[
+		'V1',
+		['RA', 1, 0, 0, 1, 0, 0],
+		['RX', 1, 0, 0, 1, 0, 0],
+		['G5', 1, 0, 0, 1, 0, 0],
+		['RY', 1, 0, 0, 1, 0, 0],
+		['V2', 1, 0, 0, 1, 0, 100],
+		['RB', 1, 0, 0, 1, 0, 100],
+	],
+	['G5', ['RY', 1, 0, 0, 1, 0, 0]],
+	['V2', ['RB', 1, 0, 0, 1, 0, 0]],
+	[
+		'VPA',
+		['defs19', 1, 0, 0, 1, 0, 0],
+		['R0', 1, 0, 0, 1, 0, 0],
+		['G1', 1, 0, 0, 1, 100, 0],
+		['G2', 1, 0, 0, 1, 100, 80],
+		['G3', 1, 0, 0, 1, 100, 80],
+		['G4', 1, 0, 0, 1, 50, 30],
+		['R1', 1, 0, 0, 1, 50, 30],
+		['R2', 1, 0, 0, 1, 40, 20],
+		['R3', 1, 0, 0, 1, 100, 80],
+		['R4', 1, 0, 0, 1, 90, 70],
+		['V1', 1, 0, 0, 1, 100, 0],
+		['RA', 0.5, 0, 0, 0.5, 125, 0],
+		['RX', 0.5, 0, 0, 0.5, 125, 0],
+		['G5', 0.5, 0, 0, 0.5, 125, 0],
+		['RY', 0.5, 0, 0, 0.5, 125, 0],
+		['V2', 0.5, 0, 0, 0.5, 125, 50],
+		['RB', 0.5, 0, 0, 0.5, 125, 50],
+	],
+];
 const parser = new DOMParser();
 
 tap.test('transform2', function (t) {
@@ -22,11 +82,9 @@ tap.test('transform2', function (t) {
 	const R0 = doc.getElementById('R0');
 	const R1 = doc.getElementById('R1');
 	const R2 = doc.getElementById('R2');
-	const R3 = doc.getElementById('R3');
-	const G1 = doc.getElementById('G1');
 	const G2 = doc.getElementById('G2');
 	const G4 = doc.getElementById('G4');
-	const V1 = doc.getElementById('V1');
+	const TL = top._layout();
 
 	[
 		['R0', 1, 0, 0, 1, -50, -10],
@@ -151,67 +209,7 @@ tap.test('transform2', function (t) {
 		t.same(v._composeTM().describe(), m.describe(), `_composeTM() ${id}`);
 		t.same(v._composeTM(top).describe(), m.describe(), `_composeTM(top) ${id}`);
 	});
-	[
-		[
-			'G1',
-			['G2', 1, 0, 0, 1, 0, 80],
-			['G3', 1, 0, 0, 1, 0, 80],
-			['G4', 1, 0, 0, 1, -50, 30],
-			['R1', 1, 0, 0, 1, -50, 30],
-			['R2', 1, 0, 0, 1, -60, 20],
-			['R3', 1, 0, 0, 1, 0, 80],
-			['R4', 1, 0, 0, 1, -10, 70],
-		],
-		[
-			'G2',
-			['G3', 1, 0, 0, 1, 0, 0],
-			['G4', 1, 0, 0, 1, -50, -50],
-			['R1', 1, 0, 0, 1, -50, -50],
-			['R2', 1, 0, 0, 1, -60, -60],
-			['R3', 1, 0, 0, 1, 0, 0],
-			['R4', 1, 0, 0, 1, -10, -10],
-		],
-		[
-			'G3',
-			['G4', 1, 0, 0, 1, -50, -50],
-			['R1', 1, 0, 0, 1, -50, -50],
-			['R2', 1, 0, 0, 1, -60, -60],
-			['R3', 1, 0, 0, 1, 0, 0],
-			['R4', 1, 0, 0, 1, -10, -10],
-		],
-		['G4', ['R1', 1, 0, 0, 1, 0, 0], ['R2', 1, 0, 0, 1, -10, -10]],
-		[
-			'V1',
-			['RA', 1, 0, 0, 1, 0, 0],
-			['RX', 1, 0, 0, 1, 0, 0],
-			['G5', 1, 0, 0, 1, 0, 0],
-			['RY', 1, 0, 0, 1, 0, 0],
-			['V2', 1, 0, 0, 1, 0, 100],
-			['RB', 1, 0, 0, 1, 0, 100],
-		],
-		['G5', ['RY', 1, 0, 0, 1, 0, 0]],
-		['V2', ['RB', 1, 0, 0, 1, 0, 0]],
-		[
-			'VPA',
-			['defs19', 1, 0, 0, 1, 0, 0],
-			['R0', 1, 0, 0, 1, 0, 0],
-			['G1', 1, 0, 0, 1, 100, 0],
-			['G2', 1, 0, 0, 1, 100, 80],
-			['G3', 1, 0, 0, 1, 100, 80],
-			['G4', 1, 0, 0, 1, 50, 30],
-			['R1', 1, 0, 0, 1, 50, 30],
-			['R2', 1, 0, 0, 1, 40, 20],
-			['R3', 1, 0, 0, 1, 100, 80],
-			['R4', 1, 0, 0, 1, 90, 70],
-			['V1', 1, 0, 0, 1, 100, 0],
-			['RA', 0.5, 0, 0, 0.5, 125, 0],
-			['RX', 0.5, 0, 0, 0.5, 125, 0],
-			['G5', 0.5, 0, 0, 0.5, 125, 0],
-			['RY', 0.5, 0, 0, 0.5, 125, 0],
-			['V2', 0.5, 0, 0, 0.5, 125, 50],
-			['RB', 0.5, 0, 0, 0.5, 125, 50],
-		],
-	].forEach(([rootId, ...subs]) => {
+	trsubs.forEach(([rootId, ...subs]) => {
 		const root = doc.getElementById(rootId);
 		const lay = root._layout();
 		subs.forEach(([subId, a, b, c, d, e, f]) => {
@@ -220,8 +218,10 @@ tap.test('transform2', function (t) {
 			// t.same(v.composeTM(top).describe(), m.describe(), `composeTM(top) ${id}`);
 			// t.same(v._composeTM().describe(), m.describe(), `_composeTM() ${id}`);
 			const [p, o] = lay.pairTM(sub);
+			const r = lay.rootTM(sub);
 			t.same(sub._composeTM(root).describe(), m.describe(), `${subId}._composeTM(${rootId})`);
 			t.same(p.cat(o).describe(), m.describe(), `${subId}.p.cat(o) <-- ${rootId}`);
+			t.same(r.describe(), m.describe(), `${subId}.rootTM(o) <-- ${rootId}`);
 		});
 	});
 	t.end();

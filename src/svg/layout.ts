@@ -1,6 +1,6 @@
 import { Point, Ray, Box, Matrix, Vec } from 'svggeom';
 import { SVGGraphicsElement, SVGSVGElement } from './_element.js';
-import { Element } from "../element.js";
+import { Element } from '../element.js';
 
 export class SVGLayout {
 	_root: SVGGraphicsElement;
@@ -22,7 +22,11 @@ export class SVGLayout {
 		}
 		return m;
 	}
-	relTM(parent: SVGGraphicsElement, tm: Matrix, root?: SVGGraphicsElement | null): Matrix {
+	protected relTM(
+		parent: SVGGraphicsElement,
+		tm: Matrix,
+		root?: SVGGraphicsElement | null,
+	): Matrix {
 		while (parent != root) {
 			const grand: Element | null = parent.parentElement;
 			if (grand instanceof SVGGraphicsElement) {
@@ -40,37 +44,57 @@ export class SVGLayout {
 	pairTM(node: SVGGraphicsElement): Matrix[] {
 		const { parentNode: parent } = node;
 		const { _root } = this;
-		if (!parent) {
-			throw new Error(`root not reached`);
-		} else if (parent === _root) {
-			// fall
-		} else if (parent instanceof SVGGraphicsElement) {
-			return [this.localTM(parent), this.getTM(node)];
+		// if (!parent) {
+		// 	throw new Error(`root not reached`);
+		// } else if (parent === _root) {
+		// 	// fall
+		// } else if (parent instanceof SVGGraphicsElement) {
+		// 	return [this.localTM(parent), this.getTM(node)];
+		// }
+		// return [Matrix.identity(), this.getTM(node)];
+		if (parent instanceof SVGGraphicsElement) {
+			return [this.relTM(parent, Matrix.identity(), _root), this.getTM(node)];
+		} else {
+			return [Matrix.identity(), this.getTM(node)];
 		}
-		return [Matrix.identity(), this.getTM(node)];
 	}
 	localTM(node: SVGGraphicsElement): Matrix {
 		// transform applied to decendants
 		const { _root } = this;
 		const { parentNode: parent } = node;
-		if (!parent) {
-			throw new Error(`root not reached`);
+		// if (!parent) {
+		// 	throw new Error(`root not reached`);
+		// }
+		// const m = this.getTM(node);
+		// if (parent === _root) {
+		// 	if (node instanceof SVGSVGElement) {
+		// 		return m.cat(node.viewportTM());
+		// 	}
+		// 	// fall
+		// } else if (parent instanceof SVGGraphicsElement) {
+		// 	if (node instanceof SVGSVGElement) {
+		// 		return this.localTM(parent).cat(m.cat(node.viewportTM()));
+		// 	}
+		// 	return this.localTM(parent).cat(m);
+		// }
+		// return m;
+		if (parent instanceof SVGGraphicsElement) {
+			return this.relTM(parent, this.innerTM(node), _root);
+		} else if (this instanceof SVGSVGElement) {
+			return Matrix.identity();
+		} else {
+			return this.innerTM(node);
 		}
-		const m = this.getTM(node);
-		if (parent === _root) {
-			if (node instanceof SVGSVGElement) {
-				return m.cat(node.viewportTM());
-			}
-			// fall
-		} else if (parent instanceof SVGGraphicsElement) {
-			if (node instanceof SVGSVGElement) {
-				return this.localTM(parent).cat(m.cat(node.viewportTM()));
-			}
-			return this.localTM(parent).cat(m);
-		}
-		return m;
 	}
-
+	rootTM(node: SVGGraphicsElement): Matrix {
+		const { _root } = this;
+		const { parentNode: parent } = node;
+		if (parent instanceof SVGGraphicsElement) {
+			return this.relTM(parent, this.getTM(node), _root);
+		} else {
+			return this.getTM(node);
+		}
+	}
 	boundingBox(
 		...args: Array<
 			SVGGraphicsElement | Box | Vec | Ray | Array<SVGGraphicsElement | Box | Vec | Ray>

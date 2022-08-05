@@ -47,7 +47,7 @@ tap.test('transform2', function (t) {
 		const v = doc.getElementById(id);
 		// const r = v.shapeBox(true);
 		const m = Matrix.new([a, b, c, d, e, f]).toString();
-		t.same(v.composeTM().toString(), m, `composeTM ${id}`);
+		// t.same(v.composeTM().toString(), m, `composeTM ${id}`);
 		// t.same(v._composeTM().toString(), m, `_composeTM ${id}`);
 		const w = top.innerTM;
 		const u = v.rootTM;
@@ -57,7 +57,7 @@ tap.test('transform2', function (t) {
 
 	t.same(R0.composeTM(R0.farthestViewportElement).toString(), Matrix.identity().toString());
 	t.same(R1.composeTM(G4).toString(), Matrix.identity().toString());
-	t.same(R2.composeTM(G4).toString(), Matrix.parse(`translate(-10 -10)`).toString());
+	t.same(R2.composeTM(G4).describe(), Matrix.parse(`translate(-10 -10)`).describe());
 	t.same(
 		R1.composeTM(G2).toString(),
 		Matrix.parse(`translate(-50 -50)`).toString(),

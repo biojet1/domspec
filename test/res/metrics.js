@@ -223,13 +223,7 @@ window.trsubs = [...graphics, root]
         const trs = Array.from(root.querySelectorAll(`*`))
             .filter((sub) => sub instanceof SVGGraphicsElement)
             .map((sub) => {
-                // const m = sub.getTransformToElement(root);
                 const m = getScreenCTM(root).inverse().multiply(sub.getScreenCTM());
-                // if (sub.parentNode === root) {
-                //     const M = sub.transform.baseVal.consolidate();
-                //     const { a = 1, b = 0, c = 0, d = 1, e = 0, f = 0 } = M?.matrix ?? {};
-                //     return [sub.id, a, b, c, d, e, f];
-                // }
                 const { a, b, c, d, e, f } = m;
                 return [sub.id, a, b, c, d, e, f];
             });

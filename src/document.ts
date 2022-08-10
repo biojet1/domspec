@@ -134,7 +134,7 @@ export abstract class Document extends NonElementParentNode {
 		return node;
 	}
 	createAttribute(name: string) {
-		// console.log("createAttribute:", name, this.contentType);
+		// console.warn("createAttribute:", name, this.contentType);
 		// const node = Attr.create(name + "", this.contentType);
 		if (!name) {
 			name += '';
@@ -159,7 +159,7 @@ export abstract class Document extends NonElementParentNode {
 		const node = new StringAttr(qualifiedName, localName);
 		node._ns = ns;
 		node._prefix = prefix;
-		// console.log("createAttributeNS:", ns, qualifiedName, this.contentType);
+		// console.warn("createAttributeNS:", ns, qualifiedName, this.contentType);
 		// const node = Attr.createNS(qualifiedName + "", ns, this.contentType);
 		node.ownerDocument = this;
 		return node;

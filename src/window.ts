@@ -151,7 +151,7 @@ export class Window extends EventTarget {
 
 
 	postMessage(message: any, targetOrigin: string) {
-		// console.log("[postMessage]", arguments);
+		// console.warn("[postMessage]", arguments);
 		if (arguments.length < 2) {
 			// "'postMessage' requires 2 arguments: 'message' and 'targetOrigin'"
 			throw new TypeError();
@@ -197,7 +197,7 @@ export class Window extends EventTarget {
 
 	async loadURL1(url: string, params?: any) {
 		let doc;
-		// console.log("loadURL: ", params);
+		// console.warn("loadURL: ", params);
 		function mimeTypeFor(s: string) {
 			if (/\.svg$/.test(s)) {
 				return 'image/svg+xml';
@@ -280,7 +280,7 @@ export class Window extends EventTarget {
 		// return p.then(function ([mt, it]) {
 		const doc = this.setDocument(Document.new(mt || mimeTypeFor(url)));
 		doc._location = url;
-		// console.log("loadURL", doc.isHTML, url);
+		// console.warn("loadURL", doc.isHTML, url);
 		// const sax = pushDOMParser(doc, params);
 		// for await (const chunk of it) {
 		// 	sax.write(chunk.toString());
@@ -292,7 +292,7 @@ export class Window extends EventTarget {
 		}
 		// const { _promises } = parser as any;
 		// if (_promises) {
-		// 	console.log("await", "_promises", _promises.length);
+		// 	console.warn("await", "_promises", _promises.length);
 
 		// 	await Promise.all(_promises);
 		// }

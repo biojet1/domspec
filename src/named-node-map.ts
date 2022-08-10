@@ -192,7 +192,7 @@ export const AttributesHandler = {
 				};
 			}
 			// return self[Symbol.iterator];
-			// console.log(`handler: symbol ${key}`);
+			// console.warn(`handler: symbol ${key}`);
 		} else {
 			let i = parseInt(key);
 			if (i >= 0) {

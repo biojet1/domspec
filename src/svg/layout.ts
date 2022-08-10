@@ -44,14 +44,6 @@ export class SVGLayout {
 	pairTM(node: SVGGraphicsElement): Matrix[] {
 		const { parentNode: parent } = node;
 		const { _root } = this;
-		// if (!parent) {
-		// 	throw new Error(`root not reached`);
-		// } else if (parent === _root) {
-		// 	// fall
-		// } else if (parent instanceof SVGGraphicsElement) {
-		// 	return [this.localTM(parent), this.getTM(node)];
-		// }
-		// return [Matrix.identity(), this.getTM(node)];
 		if (parent instanceof SVGGraphicsElement) {
 			return [this.relTM(parent, Matrix.identity(), _root), this.getTM(node)];
 		} else {
@@ -62,25 +54,9 @@ export class SVGLayout {
 		// transform applied to decendants
 		const { _root } = this;
 		const { parentNode: parent } = node;
-		// if (!parent) {
-		// 	throw new Error(`root not reached`);
-		// }
-		// const m = this.getTM(node);
-		// if (parent === _root) {
-		// 	if (node instanceof SVGSVGElement) {
-		// 		return m.cat(node.viewportTM());
-		// 	}
-		// 	// fall
-		// } else if (parent instanceof SVGGraphicsElement) {
-		// 	if (node instanceof SVGSVGElement) {
-		// 		return this.localTM(parent).cat(m.cat(node.viewportTM()));
-		// 	}
-		// 	return this.localTM(parent).cat(m);
-		// }
-		// return m;
 		if (parent instanceof SVGGraphicsElement) {
 			return this.relTM(parent, this.innerTM(node), _root);
-		} else if (this instanceof SVGSVGElement) {
+		} else if (node instanceof SVGSVGElement) {
 			return Matrix.identity();
 		} else {
 			return this.innerTM(node);
@@ -94,6 +70,12 @@ export class SVGLayout {
 		} else {
 			return this.getTM(node);
 		}
+	}
+	catTM(m: Matrix, ...nodes: Array<SVGGraphicsElement>) {
+		nodes.forEach((node) => {
+			const [P, M] = this.pairTM(node);
+			this.setTM(node, P.inverse().cat(m).cat(P).cat(M));
+		});
 	}
 	boundingBox(
 		...args: Array<

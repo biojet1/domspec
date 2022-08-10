@@ -228,10 +228,10 @@ export function htmlParser2(doc: Document, top: ParentNode, options?: any) {
 				}
 
 				if (tag.localName == 'script') {
-					// console.log("script", "pause");
+					// console.warn("script", "pause");
 					// parser.pause();
 					// const P = runScript(tag, opt.resourceLoader).then(() => {
-					// 	console.log("script", "resume");
+					// 	console.warn("script", "resume");
 					// 	parser.resume();
 					// });
 					// let PS = (parser as any)._promises;
@@ -275,10 +275,10 @@ export function htmlParser2(doc: Document, top: ParentNode, options?: any) {
 			// },
 			ontext(text: string) {
 				if (cdata) {
-					// console.log(`ontext cdata (${text})`);
+					// console.warn(`ontext cdata (${text})`);
 					cdata.data += text;
 				} else if (top.nodeType !== 9) {
-					// console.log(`ontext (${text})`);
+					// console.warn(`ontext (${text})`);
 					// top.appendChild(doc.createTextNode(text));
 					_appendChild(top, doc.createTextNode(text));
 				}
@@ -288,7 +288,7 @@ export function htmlParser2(doc: Document, top: ParentNode, options?: any) {
 				_appendChild(top, doc.createComment(data));
 			},
 			onprocessinginstruction(name: string, data: string) {
-				// console.log(`onprocessinginstruction (${name}) (${data})`);
+				// console.warn(`onprocessinginstruction (${name}) (${data})`);
 				switch (name) {
 					case '!DOCTYPE':
 					case '!doctype':
@@ -305,7 +305,7 @@ export function htmlParser2(doc: Document, top: ParentNode, options?: any) {
 						}
 					default:
 						const m = data.match(/^\?\s*([^\s]+)\s+(.*)\s*\?$/);
-						// console.log(
+						// console.warn(
 						// 	`onpi`,
 						// 	JSON.stringify(data),
 						// 	JSON.stringify(m)
@@ -353,7 +353,7 @@ export function htmlParser2(doc: Document, top: ParentNode, options?: any) {
 						if (html.localName === 'html') {
 							let head, body;
 							for (const child of Array.from(html.children)) {
-								// console.log("child", child.localName)
+								// console.warn("child", child.localName)
 								switch (child.localName) {
 									case 'head':
 										if (head) {

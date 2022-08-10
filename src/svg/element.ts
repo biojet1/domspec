@@ -1,4 +1,4 @@
-import { Vec, Box, Matrix, Path } from 'svggeom';
+import { Vec, Box, Matrix, Path, Draw } from 'svggeom';
 /// Base Elements //////////
 
 interface IBBoxParam {
@@ -80,11 +80,28 @@ export class SVGGeometryElement extends SVGGraphicsElement {
 }
 
 /// SVGGeometryElement //////////
+class _PathD extends Draw {
+	_node: SVGPathElement;
+	constructor(node: SVGPathElement) {
+		super();
+		this._node = node;
+	}
+	assign() {
+		this._node.setAttribute('d', this.toString());
+		return this;
+	}
+}
+
 export class SVGPathElement extends SVGGeometryElement {
 	static TAGS = ['path'];
 	describe() {
 		return this.getAttribute('d') || '';
 	}
+	_pathD() {
+		// ._beginPath().withFont().text()
+		return new _PathD(this);
+	}
+
 	fuseTransform(parentT?: Matrix) {
 		let tm = parentT ? this.ownTM.postCat(parentT) : this.ownTM;
 		this.setAttribute('d', Path.parse(this.describe()).transform(tm).describe());

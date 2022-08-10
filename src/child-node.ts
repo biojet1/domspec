@@ -12,7 +12,7 @@ export abstract class ChildNode extends Node {
 		if (node instanceof EndNode) {
 			/* c8 ignore start */
 			if (node.parentNode !== this.parentNode) {
-				// console.log([node.parentNode, this.parentNode]);
+				// console.warn([node.parentNode, this.parentNode]);
 				throw new Error("Unexpected following EndNode");
 			}
 			/* c8 ignore stop */

@@ -58,18 +58,18 @@ export class SVGLengthList extends Array<SVGLength> {
 
 	public static parse(d: string): SVGLengthList {
 		const tl = new SVGLengthList();
-		// console.log("parse:static", d);
+		// console.warn("parse:static", d);
 		for (const str of d.split(/[\s,]+/)) {
-			// console.log("str", str);
+			// console.warn("str", str);
 			tl.appendItem(new SVGLength(str.trim()));
 		}
 		return tl;
 	}
 	parse(d: string): SVGLengthList {
 		this.clear();
-		// console.log("parse", d);
+		// console.warn("parse", d);
 		for (const str of d.split(/[\s,]+/)) {
-			// console.log("str", str);
+			// console.warn("str", str);
 			this.appendItem(new SVGLength(str.trim()));
 		}
 		return this;

@@ -38,7 +38,7 @@ export class SVGElement extends Element {
 }
 export class SVGGraphicsElement extends SVGElement {
 	newAttributeNode(name: string) {
-		// console.log("newAttributeNode", name);
+		// console.warn("newAttributeNode", name);
 		switch (name) {
 			case 'r':
 				return new SVGLengthAttr(name);
@@ -468,7 +468,12 @@ export class SVGGraphicsElement extends SVGElement {
 				tm = tm.postCat(parent.innerTM);
 				parent = grand;
 			} else if (root) {
-				throw new Error(`root not reached`);
+				if (grand) {
+					throw new Error(`root not reached`);
+				} else {
+					const p = (root as SVGGraphicsElement).rootTM.inverse();
+					return p.cat(tm);
+				}
 			} else {
 				break;
 			}

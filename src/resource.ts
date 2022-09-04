@@ -48,7 +48,7 @@ export class ResourceLoader {
 	//   { encoding: 'utf8', highWaterMark: 1024 });
 
 	// for await (const chunk of readStream) {
-	//   console.log('>>> '+chunk);
+	//   console.warn('>>> '+chunk);
 	// }
 }
 
@@ -97,7 +97,7 @@ async function _eval(script: Element, res: ResourceLoader): Promise<Element> {
 				return res.readURL(url).then((code: string) => {
 					try {
 						document.currentScript = script;
-						// console.log(`eval: ${url} [${src}]`);
+						// console.warn(`eval: ${url} [${src}]`);
 						vm.runInContext(code, window, src);
 					} finally {
 						delete document.currentScript;
@@ -107,7 +107,7 @@ async function _eval(script: Element, res: ResourceLoader): Promise<Element> {
 			} else if (text) {
 				try {
 					document.currentScript = script;
-					// console.log(`eval: ${text.trim().substring(0, 32)}`);
+					// console.warn(`eval: ${text.trim().substring(0, 32)}`);
 					vm.runInContext(text, window, "script");
 				} finally {
 					delete document.currentScript;

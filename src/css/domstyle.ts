@@ -118,7 +118,7 @@ export class StyleSheetList extends Array<CSSStyleSheet> {
 		const declaration = new StylePropertyMap();
 
 		this.forEachMatchingSheetRuleOfElement(element, ({ style }) => {
-			// console.log(style)
+			// console.warn(style)
 			for (const prop of style) {
 				declaration.setProperty(
 					prop,

@@ -1,13 +1,13 @@
-import fs from 'fs';
-import tap from 'tap';
-import glob from 'glob';
+import fs from "fs";
+import tap from "tap";
+import glob from "glob";
 
-import { Document, SVGDocument } from '../dist/document.js';
-import { ParentNode } from '../dist/parent-node.js';
-import { DOMParser } from '../dist/dom-parse.js';
-import { SVGLength } from '../dist/svg/element.js';
-import { Path, Box, Matrix } from 'svggeom';
-import { SVGLayout } from '../dist/svg/layout.js';
+import { Document, SVGDocument } from "../dist/document.js";
+import { ParentNode } from "../dist/parent-node.js";
+import { DOMParser } from "../dist/dom-parse.js";
+import { SVGLength } from "../dist/svg/element.js";
+import { Box, Matrix } from "svggeom";
+import { SVGLayout } from "../dist/svg/layout.js";
 
 function apply(m, node) {
 	const [P, M] = node.pairTM();
@@ -30,9 +30,9 @@ function apply(m, node) {
 	node.ownTM = T;
 
 	console.log(
-		'trans',
+		"trans",
 		node.id,
-		`[${T.describe()}]\n\tL[${L.describe()}]\n\tS[${S.describe()}]\n\t-> ${T.describe()}`,
+		`[${T.describe()}]\n\tL[${L.describe()}]\n\tS[${S.describe()}]\n\t-> ${T.describe()}`
 	);
 }
 
@@ -53,18 +53,18 @@ function eqBox(t, a, b, epsilon = 0, tag) {
 	t.ok(a.equals(b, epsilon), `${tag} [${a}] vs [${b}]`);
 }
 
-import { createWriteStream, writeFileSync, WriteStream } from 'fs';
+import { createWriteStream, writeFileSync, WriteStream } from "fs";
 
-tap.test('layout1', { bail: 0 }, function (t) {
-	for (const f of glob.sync('test/res/*.metrix.json')) {
-		const data = JSON.parse(fs.readFileSync(f, 'utf8'));
-		const document = parser.parseFromString(data['-']);
+tap.test("layout1", { bail: 0 }, function (t) {
+	for (const f of glob.sync("test/res/*.metrix.json")) {
+		const data = JSON.parse(fs.readFileSync(f, "utf8"));
+		const document = parser.parseFromString(data["-"]);
 		const root = document.documentElement;
-		Array.from(document.querySelectorAll('path[id]'))
+		Array.from(document.querySelectorAll("path[id]"))
 			.filter((v) => v.id.match(/^P_/))
 			.forEach((v) => v.remove());
 		for (const [id, metrix] of Object.entries(data).filter(
-			([k, v]) => k != '-' && document.getElementById(k),
+			([k, v]) => k != "-" && document.getElementById(k)
 		)) {
 			// console.log(id, metrix);
 			const [a, b, c, d, e, f] = metrix.root_tm;
@@ -77,16 +77,19 @@ tap.test('layout1', { bail: 0 }, function (t) {
 			const b0 = Box.forRect(x, y, w, h);
 			const b1 = v.boundingBox();
 			root.insertAdjacentHTML(
-				'beforeend',
-				`<rect x="${b1.x}" y="${b1.y}" width="${b1.width}" height="${b1.height}" style="fill:none;stroke:red;opacity:50%;">`,
+				"beforeend",
+				`<rect x="${b1.x}" y="${b1.y}" width="${b1.width}" height="${b1.height}" style="fill:none;stroke:red;opacity:50%;">`
 			);
 
 			t.ok(r.equals(m, 1e-3), `${id} ${r.describe()} ${m.describe()}`);
-			const n = metrix.tag_name == 'svg' ? l.cat(v.viewportTM().inverse()) : l;
+			const n = metrix.tag_name == "svg" ? l.cat(v.viewportTM().inverse()) : l;
 
 			t.ok(r.equals(n, 1e-3), `localTM ${id} ${l.describe()} ${o.describe()}`);
-			t.ok(r.equals(v.docTM(), 1e-3), `docTM ${id} ${r.describe()} ${v.docTM().describe()}`);
-			if ((metrix.tag_name != 'defs', !b0.isEmpty())) {
+			t.ok(
+				r.equals(v.docTM(), 1e-3),
+				`docTM ${id} ${r.describe()} ${v.docTM().describe()}`
+			);
+			if ((metrix.tag_name != "defs", !b0.isEmpty())) {
 				eqBox(t, b0, b1, 1e-1, id);
 			}
 		}
@@ -96,7 +99,7 @@ tap.test('layout1', { bail: 0 }, function (t) {
 
 	t.end();
 });
-tap.test('localTM()', { bail: 0 }, function (t) {
+tap.test("localTM()", { bail: 0 }, function (t) {
 	const document = parser.parseFromString(`
 <svg xmlns="http://www.w3.org/2000/svg" id="VPA" viewBox="0 0 200 100">
 	<g id="G1" transform="translate(100,0)">
@@ -127,31 +130,58 @@ tap.test('localTM()', { bail: 0 }, function (t) {
 	</svg>
 </svg>
 		`);
-	const R1 = document.getElementById('R1');
-	const R8 = document.getElementById('R8');
-	const R9 = document.getElementById('R9');
+	const R1 = document.getElementById("R1");
+	const R8 = document.getElementById("R8");
+	const R9 = document.getElementById("R9");
 	const { documentElement: rootSVG } = document;
 
-	t.same(document.getElementById('G1').localTM().describe(), Matrix.translate(100, 0).describe());
-	t.same(document.getElementById('G2').localTM().describe(), Matrix.translate(100, 100).describe());
-	t.same(document.getElementById('G3').localTM().describe(), Matrix.translate(100, 100).describe());
-	t.same(document.getElementById('G4').localTM().describe(), Matrix.translate(50, 50).describe());
-	t.same(document.getElementById('R1').localTM().describe(), Matrix.translate(50, 50).describe());
-	t.same(document.getElementById('R2').localTM().describe(), Matrix.translate(40, 40).describe());
-	t.same(document.getElementById('R3').localTM().describe(), Matrix.translate(100, 100).describe());
-	t.same(document.getElementById('R4').localTM().describe(), Matrix.translate(90, 90).describe());
-	t.same(document.documentElement.localTM().describe(), Matrix.identity().describe());
+	t.same(
+		document.getElementById("G1").localTM().describe(),
+		Matrix.translate(100, 0).describe()
+	);
+	t.same(
+		document.getElementById("G2").localTM().describe(),
+		Matrix.translate(100, 100).describe()
+	);
+	t.same(
+		document.getElementById("G3").localTM().describe(),
+		Matrix.translate(100, 100).describe()
+	);
+	t.same(
+		document.getElementById("G4").localTM().describe(),
+		Matrix.translate(50, 50).describe()
+	);
+	t.same(
+		document.getElementById("R1").localTM().describe(),
+		Matrix.translate(50, 50).describe()
+	);
+	t.same(
+		document.getElementById("R2").localTM().describe(),
+		Matrix.translate(40, 40).describe()
+	);
+	t.same(
+		document.getElementById("R3").localTM().describe(),
+		Matrix.translate(100, 100).describe()
+	);
+	t.same(
+		document.getElementById("R4").localTM().describe(),
+		Matrix.translate(90, 90).describe()
+	);
+	t.same(
+		document.documentElement.localTM().describe(),
+		Matrix.identity().describe()
+	);
 	[
-		['R9', '', ''],
-		['R8', 'translate(-10, -10)', 'translate(-10, -10)'],
-		['V2', '', ''],
-		['V1', 'translate(20, -30)', 'translate(20,-30)'],
-		['C1', '', ''],
-		['C2', 'translate(20, -30)', 'translate(20,-30)'],
-		['V3', '', ''],
-		['C3', '', ''],
-		['C4', 'translate(50, 40)', 'translate(50, 40)'],
-		['V4', 'translate(50, 40)', ''],
+		["R9", "", ""],
+		["R8", "translate(-10, -10)", "translate(-10, -10)"],
+		["V2", "", ""],
+		["V1", "translate(20, -30)", "translate(20,-30)"],
+		["C1", "", ""],
+		["C2", "translate(20, -30)", "translate(20,-30)"],
+		["V3", "", ""],
+		["C3", "", ""],
+		["C4", "translate(50, 40)", "translate(50, 40)"],
+		["V4", "translate(50, 40)", ""],
 	].forEach(([id, s, d]) => {
 		const m = Matrix.parse(s);
 		const n = Matrix.parse(d);
@@ -159,12 +189,16 @@ tap.test('localTM()', { bail: 0 }, function (t) {
 		t.same(v.localTM().describe(), m.describe(), `localTM ${id}`);
 		t.same(v.docTM().describe(), n.describe(), `docTM ${id}`);
 		t.same(v._composeTM().describe(), n.describe(), `_composeTM ${id}`);
-		t.same(v._composeTM(rootSVG).describe(), n.describe(), `_composeTM rootSVG ${id}`);
+		t.same(
+			v._composeTM(rootSVG).describe(),
+			n.describe(),
+			`_composeTM rootSVG ${id}`
+		);
 	});
 	t.same(
 		rootSVG._composeTM().describe(),
 		Matrix.identity().describe(),
-		`_composeTM documentElement`,
+		`_composeTM documentElement`
 	);
 
 	t.end();

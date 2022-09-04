@@ -77,7 +77,7 @@ export class SVGTransformList extends Array<SVGTransform> {
 			const kv = str.trim().split('(');
 			const name = kv[0].trim();
 			const args = kv[1].split(/[\s,]+/).map((str) => parseFloat(str));
-			// console.log(name, args);
+			// console.warn(name, args);
 			tl.appendItem((SVGTransform as any)[name](...args) as any as SVGTransform);
 		}
 		return tl;

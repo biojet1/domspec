@@ -445,15 +445,15 @@ export class Element extends ParentNode {
 	get classList() {
 		const attr = this.getAttributeNode('class');
 		if (!attr) {
-			// console.log("StyleAttr:NEW");
+			// console.warn("StyleAttr:NEW");
 			const node = new ClassAttr('class');
 			this.setAttributeNode(node);
 			return node.tokens;
 		} else if (attr instanceof ClassAttr) {
-			// console.log("StyleAttr:GET");
+			// console.warn("StyleAttr:GET");
 			return attr.tokens;
 		} else {
-			// console.log("StyleAttr:REP");
+			// console.warn("StyleAttr:REP");
 			attr.remove();
 			const ref = attr[PREV] || this;
 			const node = new ClassAttr('class');
@@ -515,7 +515,7 @@ export class Element extends ParentNode {
 	}
 
 	isEqualNode(node: Node) {
-		// console.log("isEqualNode", this.nodeName, node.nodeName);
+		// console.warn("isEqualNode", this.nodeName, node.nodeName);
 		if (this === node) {
 			return true;
 		} else if (!node || this.nodeType !== node.nodeType) {
@@ -621,7 +621,7 @@ const dsHandler = {
 				for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
 					const { namespaceURI, name } = attr;
 					if ((!namespaceURI || namespaceURI === '') && name.startsWith('data-')) {
-						// console.log("ownKeys", name, toCamelCase(name));
+						// console.warn("ownKeys", name, toCamelCase(name));
 						yield toCamelCase(name);
 					}
 				}

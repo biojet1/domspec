@@ -445,7 +445,7 @@ export abstract class NodeList {
 // 	}
 
 // 	get length() {
-// 		// console.log("LEN", Array.from(this.list()));
+// 		// console.warn("LEN", Array.from(this.list()));
 // 		let i = 0;
 // 		for (const cur of this.list()) {
 // 			super[i++] = cur;

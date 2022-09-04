@@ -40,7 +40,7 @@ export class EventTarget {
 		callback: EventListener | CallBack,
 		options: EventEntry | boolean
 	) {
-		// console.log("[addEventListener]", type);
+		// console.warn("[addEventListener]", type);
 		let { _listeners } = this;
 		let entry: EventEntry;
 		if (typeof options === "boolean") {
@@ -81,7 +81,7 @@ export class EventTarget {
 	*_enumAncestorTargets(): Generator<EventTarget, void, unknown> {}
 
 	dispatchEvent(event: Event, trusted?: boolean) {
-		// console.log("[dispatchEvent]", event);
+		// console.warn("[dispatchEvent]", event);
 		if (typeof trusted !== "boolean") trusted = false;
 		function invoke(target: EventTarget, event: Event) {
 			const { _listeners } = target;

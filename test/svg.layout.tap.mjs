@@ -4,7 +4,7 @@ import { Document, SVGDocument } from '../dist/document.js';
 import { ParentNode } from '../dist/parent-node.js';
 import { DOMParser } from '../dist/dom-parse.js';
 import { SVGLength } from '../dist/svg/element.js';
-import { Path, Box, Matrix } from 'svggeom';
+import { Box, Matrix } from 'svggeom';
 import { SVGLayout } from '../dist/svg/layout.js';
 
 class Lay extends SVGLayout {
@@ -83,9 +83,9 @@ tap.test('Geoms 1', function (t) {
 		const r = lay.boundingBox(v);
 		eqBox(t, b, r.isValid() ? r : Box.empty(), x - ~~x === 0 ? 1e-9 : 1, id);
 	});
-	lay.transform(Matrix.translate(0, -40), R5);
+	// lay.transform(Matrix.translate(0, -40), R5);
 	// console.log(Matrix.translate(50).describe())
-	lay.transform(Matrix.translate(-50), R6);
+	// lay.transform(Matrix.translate(-50), R6);
 	// console.log(Matrix.translate(-50));
 	// t.same(R5.ownTM.describe(), 'translate(0 -40)');
 	// t.same(R6.ownTM.describe(), 'translate(0 40)');

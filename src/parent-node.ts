@@ -91,7 +91,7 @@ export abstract class ParentNode extends ChildNode {
 		let { ownerDocument, nodeType } = this;
 		if (child.parentNode != this) {
 			for (const node of nodes) {
-				// console.log((node as ParentNode).outerHTML, this.outerHTML, node.contains(this));
+				// console.warn((node as ParentNode).outerHTML, this.outerHTML, node.contains(this));
 				if (!node || !(node instanceof Node)) {
 					throw new TypeError('wIAXm1');
 				} else if (node.contains(this)) {

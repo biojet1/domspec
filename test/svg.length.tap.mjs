@@ -3,7 +3,6 @@ import { Document, SVGDocument } from "../dist/document.js";
 import { ParentNode } from "../dist/parent-node.js";
 import { DOMParser } from "../dist/dom-parse.js";
 import { SVGLength } from "../dist/svg/element.js";
-import { Path } from "svggeom";
 
 const parser = new DOMParser();
 tap.test("SVGLength", function (t) {

@@ -3,7 +3,7 @@ import { Document, SVGDocument } from '../dist/document.js';
 import { ParentNode } from '../dist/parent-node.js';
 import { DOMParser } from '../dist/dom-parse.js';
 import { SVGLength } from '../dist/svg/element.js';
-import { Path, Matrix, Vec } from 'svggeom';
+import { PathLS, Matrix, Vec } from 'svggeom';
 
 const parser = new DOMParser();
 
@@ -81,8 +81,8 @@ tap.test('SVG getPointAtLength getTotalLength', function (t) {
 	svg.fuseTransform();
 	// console.log(svg.outerHTML);
 	t.same(PL1.getAttribute('points'), '-300,400 -400,400');
-	t.same(Path.parse(PL1.toPathElement().getAttribute('d')).toString(), Path.parse('M-300,400L-400,400').toString());
-	t.same(Path.parse(PG1.toPathElement().getAttribute('d')).toString(), Path.parse('M400,300L300,300Z').toString());
+	t.same(PathLS.parse(PL1.toPathElement().getAttribute('d')).toString(), PathLS.parse('M-300,400L-400,400').toString());
+	t.same(PathLS.parse(PG1.toPathElement().getAttribute('d')).toString(), PathLS.parse('M400,300L300,300Z').toString());
 
 	// const q = ;
 	// t.same(q.end, );

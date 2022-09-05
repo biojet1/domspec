@@ -80,7 +80,7 @@ export class SVGGeometryElement extends SVGGraphicsElement {
 		return this.path.length;
 	}
 	getPointAtLength(L: number) {
-		return this.path.pointAtLength(L);
+		return this.path.pointAtLength(L, true);
 	}
 }
 

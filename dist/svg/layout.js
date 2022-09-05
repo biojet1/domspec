@@ -1,5 +1,5 @@
-import { Ray, Box, Matrix, Vec } from 'svggeom';
-import { SVGGraphicsElement, SVGSVGElement } from './_element.js';
+import { Ray, Box, Matrix, Vec } from "svggeom";
+import { SVGGraphicsElement, SVGSVGElement } from "./_element.js";
 export class SVGLayout {
     _root;
     constructor(node) {
@@ -51,7 +51,7 @@ export class SVGLayout {
         if (parent instanceof SVGGraphicsElement) {
             return this.relTM(parent, this.innerTM(node), _root);
         }
-        else if (this instanceof SVGSVGElement) {
+        else if (node instanceof SVGSVGElement) {
             return Matrix.identity();
         }
         else {
@@ -67,6 +67,12 @@ export class SVGLayout {
         else {
             return this.getTM(node);
         }
+    }
+    catTM(m, ...nodes) {
+        nodes.forEach((node) => {
+            const [P, M] = this.pairTM(node);
+            this.setTM(node, P.inverse().cat(m).cat(P).cat(M));
+        });
     }
     boundingBox(...args) {
         let bbox = Box.new();

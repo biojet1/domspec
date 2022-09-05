@@ -5,12 +5,12 @@ export declare class SVGRectAttr extends Attr {
     get baseVal(): BoxMut | null | undefined;
     get specified(): boolean;
     valueOf(): string | undefined;
-    contain(...args: Array<SVGGraphicsElement | Box | Point | Ray | Array<SVGGraphicsElement | Box | Point | Ray>>): this;
-    contain2(...args: Array<SVGGraphicsElement | Box | Point | Ray | Array<SVGGraphicsElement | Box | Point | Ray>>): this;
+    contain(...args: Array<SVGGraphicsElement | Box | Vec | Ray | Array<SVGGraphicsElement | Box | Vec | Ray>>): this;
+    contain2(...args: Array<SVGGraphicsElement | Box | Vec | Ray | Array<SVGGraphicsElement | Box | Vec | Ray>>): this;
     calcWidth(): number;
     calcHeight(): number;
     calcBox(): Box;
 }
-import { BoxMut, Box, Point, Ray } from 'svggeom';
+import { BoxMut, Box, Vec, Ray } from 'svggeom';
 import { Attr } from '../attr.js';
 import { SVGGraphicsElement } from './element.js';

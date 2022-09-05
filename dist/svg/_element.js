@@ -169,42 +169,36 @@ export class SVGGraphicsElement extends SVGElement {
         return this.ownTM;
     }
     get rootTM() {
-        {
-            const { parentNode: parent, ownTM } = this;
-            if (parent instanceof SVGGraphicsElement) {
-                return parent._relTM(ownTM);
-            }
-            else {
-                return ownTM;
-            }
+        const { parentNode: parent, ownTM } = this;
+        if (parent instanceof SVGGraphicsElement) {
+            return parent._relTM(ownTM);
+        }
+        else {
+            return ownTM;
         }
     }
     localTM() {
-        {
-            const { parentNode: parent, ownTM } = this;
-            if (parent instanceof SVGGraphicsElement) {
-                return parent._relTM(this.innerTM);
-            }
-            else if (this instanceof SVGSVGElement) {
-                return Matrix.identity();
-            }
-            else {
-                return this.innerTM;
-            }
+        const { parentNode: parent, ownTM } = this;
+        if (parent instanceof SVGGraphicsElement) {
+            return parent._relTM(this.innerTM);
+        }
+        else if (this instanceof SVGSVGElement) {
+            return Matrix.identity();
+        }
+        else {
+            return this.innerTM;
         }
     }
     docTM() {
         return this.rootTM;
     }
     pairTM() {
-        {
-            const { parentNode: parent, ownTM } = this;
-            if (parent instanceof SVGGraphicsElement) {
-                return [parent._relTM(Matrix.identity()), ownTM];
-            }
-            else {
-                return [Matrix.identity(), ownTM];
-            }
+        const { parentNode: parent, ownTM } = this;
+        if (parent instanceof SVGGraphicsElement) {
+            return [parent._relTM(Matrix.identity()), ownTM];
+        }
+        else {
+            return [Matrix.identity(), ownTM];
         }
     }
     getScreenCTM() {
@@ -385,7 +379,13 @@ export class SVGGraphicsElement extends SVGElement {
                 parent = grand;
             }
             else if (root) {
-                throw new Error(`root not reached`);
+                if (grand) {
+                    throw new Error(`root not reached`);
+                }
+                else {
+                    const p = root.rootTM.inverse();
+                    return p.cat(tm);
+                }
             }
             else {
                 break;

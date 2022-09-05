@@ -181,7 +181,7 @@ function contain(args) {
         else if (v instanceof Box) {
             bbox.mergeSelf(v);
         }
-        else if (v instanceof Point || v instanceof Ray) {
+        else if (v instanceof Vec || v instanceof Ray) {
             const { x, y } = v;
             bbox.mergeSelf(Box.new(x, y, 0, 0));
         }
@@ -197,7 +197,7 @@ function contain(args) {
     }
     return bbox;
 }
-import { BoxMut, Box, Point, Ray } from 'svggeom';
+import { BoxMut, Box, Vec, Ray } from 'svggeom';
 import { Attr } from '../attr.js';
 import { SVGGraphicsElement } from './element.js';
 //# sourceMappingURL=rect.js.map

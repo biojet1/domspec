@@ -55,7 +55,7 @@ export class SVGRectAttr extends Attr {
 		}
 	}
 
-	contain(...args: Array<SVGGraphicsElement | Box | Point | Ray | Array<SVGGraphicsElement | Box | Point | Ray>>) {
+	contain(...args: Array<SVGGraphicsElement | Box | Vec | Ray | Array<SVGGraphicsElement | Box | Vec | Ray>>) {
 		let bbox = contain(args);
 		const o = this.ownerElement;
 		if (o instanceof SVGGraphicsElement) {
@@ -70,7 +70,7 @@ export class SVGRectAttr extends Attr {
 		return this;
 	}
 
-	contain2(...args: Array<SVGGraphicsElement | Box | Point | Ray | Array<SVGGraphicsElement | Box | Point | Ray>>) {
+	contain2(...args: Array<SVGGraphicsElement | Box | Vec | Ray | Array<SVGGraphicsElement | Box | Vec | Ray>>) {
 		return this.contain(...args);
 	}
 	// https://svgwg.org/svg-next/coords.html#Units
@@ -181,7 +181,7 @@ export class SVGRectAttr extends Attr {
 }
 
 function contain(
-	args: Array<SVGGraphicsElement | Box | Point | Ray | Array<SVGGraphicsElement | Box | Point | Ray>>
+	args: Array<SVGGraphicsElement | Box | Vec | Ray | Array<SVGGraphicsElement | Box | Vec | Ray>>
 ): Box {
 	let bbox = BoxMut.new() as BoxMut;
 	for (const v of args) {
@@ -189,7 +189,7 @@ function contain(
 			bbox.mergeSelf(contain(v));
 		} else if (v instanceof Box) {
 			bbox.mergeSelf(v);
-		} else if (v instanceof Point || v instanceof Ray) {
+		} else if (v instanceof Vec || v instanceof Ray) {
 			const { x, y } = v;
 			bbox.mergeSelf(Box.new(x, y, 0, 0));
 		} else {
@@ -204,6 +204,6 @@ function contain(
 	return bbox;
 }
 
-import { BoxMut, Box, Point, Ray } from 'svggeom';
+import { BoxMut, Box, Vec, Ray } from 'svggeom';
 import { Attr } from '../attr.js';
 import { SVGGraphicsElement, SVGSVGElement } from './element.js';

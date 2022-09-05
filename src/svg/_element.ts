@@ -1,4 +1,4 @@
-import { Vec, Box, Matrix, Path } from 'svggeom';
+import { Vec, Box, Matrix } from 'svggeom';
 
 export class SVGElement extends Element {
 	get _isViewportElement() {
@@ -187,91 +187,33 @@ export class SVGGraphicsElement extends SVGElement {
 		return this.ownTM;
 	}
 	get rootTM(): Matrix {
-		// return this.composeTM(this.farthestViewportElement);
-		// return this._composeTM();
-		// return this._getTM(null, this.ownTM);
-		{
-			const { parentNode: parent, ownTM } = this;
-			if (parent instanceof SVGGraphicsElement) {
-				return parent._relTM(ownTM);
-			} else {
-				return ownTM;
-			}
+		const { parentNode: parent, ownTM } = this;
+		if (parent instanceof SVGGraphicsElement) {
+			return parent._relTM(ownTM);
+		} else {
+			return ownTM;
 		}
 	}
-	// splitTM(): Matrix[] {
-	// 	const { parentNode: parent } = this;
-	// 	if (parent) {
-	// 		if (parent instanceof SVGGraphicsElement) {
-	// 			if (parent.parentNode) {
-	// 				if (parent instanceof SVGSVGElement) {
-	// 					return [parent.rootTM.cat(parent.viewportTM()), this.ownTM];
-	// 				}
-	// 				return [parent.rootTM, this.ownTM];
-	// 			}
-	// 		}
-	// 	}
-	// 	return [Matrix.identity(), this.ownTM];
-	// }
 
 	localTM(): Matrix {
-		// // transform applied to decendants
-		// const { parentNode: parent, ownTM } = this;
-		// if (!parent) {
-		// 	if (this instanceof SVGSVGElement) {
-		// 		return Matrix.identity();
-		// 	}
-		// } else if (parent instanceof SVGGraphicsElement) {
-		// 	if (this instanceof SVGSVGElement) {
-		// 		return parent.localTM().cat(ownTM.cat(this.viewportTM()));
-		// 	}
-		// 	return parent.localTM().cat(ownTM);
-		// }
-		// return ownTM;
-		// return this._getTM(null, this.innerTM);
-		{
-			const { parentNode: parent, ownTM } = this;
-			if (parent instanceof SVGGraphicsElement) {
-				return parent._relTM(this.innerTM);
-			} else if (this instanceof SVGSVGElement) {
-				return Matrix.identity();
-			} else {
-				return this.innerTM;
-			}
+		const { parentNode: parent, ownTM } = this;
+		if (parent instanceof SVGGraphicsElement) {
+			return parent._relTM(this.innerTM);
+		} else if (this instanceof SVGSVGElement) {
+			return Matrix.identity();
+		} else {
+			return this.innerTM;
 		}
 	}
 	docTM(): Matrix {
-		// // transform applied to itself relative to document root
-		// const { parentNode: parent, ownTM } = this;
-		// if (!parent) {
-		// 	if (this instanceof SVGSVGElement) {
-		// 		return Matrix.identity();
-		// 	}
-		// } else if (parent instanceof SVGGraphicsElement) {
-		// 	return parent.localTM().cat(ownTM);
-		// }
-		// return ownTM;
-		// return this._composeTM();
-		// return this._getTM(null, this.ownTM);
 		return this.rootTM;
 	}
 	pairTM(): Matrix[] {
-		// {
-		// 	const { parentNode: parent, ownTM } = this;
-		// 	if (parent instanceof SVGGraphicsElement) {
-		// 		// return [parent.localTM(), ownTM];
-		// 		return [this._getTM(null, Matrix.identity()), ownTM];
-		// 	}
-		// 	return [Matrix.identity(), ownTM];
-		// }
-		// return this._pairTM();
-		{
-			const { parentNode: parent, ownTM } = this;
-			if (parent instanceof SVGGraphicsElement) {
-				return [parent._relTM(Matrix.identity()), ownTM];
-			} else {
-				return [Matrix.identity(), ownTM];
-			}
+		const { parentNode: parent, ownTM } = this;
+		if (parent instanceof SVGGraphicsElement) {
+			return [parent._relTM(Matrix.identity()), ownTM];
+		} else {
+			return [Matrix.identity(), ownTM];
 		}
 	}
 	getScreenCTM(): Matrix {
@@ -287,21 +229,6 @@ export class SVGGraphicsElement extends SVGElement {
 	}
 
 	composeTM(root?: SVGElement | null): Matrix {
-		// {
-		// 	const { parentNode, ownTM } = this;
-		// 	let tm = Matrix.new(ownTM);
-		// 	let parent = parentNode;
-		// 	while (parent != root) {
-		// 		// null == undefined
-		// 		if (!parent) {
-		// 			throw new Error(`root not reached`);
-		// 		} else if (parent instanceof SVGGraphicsElement) {
-		// 			tm = tm.postCat(parent.innerTM);
-		// 		}
-		// 		parent = parent.parentNode;
-		// 	}
-		// 	return tm;
-		// }
 		{
 			const { parentNode: parent, ownTM } = this;
 			if (parent instanceof SVGGraphicsElement) {

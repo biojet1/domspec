@@ -1,6 +1,6 @@
-import { Point, Ray, Box, Matrix, Vec } from 'svggeom';
-import { SVGGraphicsElement, SVGSVGElement } from './_element.js';
-import { Element } from '../element.js';
+import { Ray, Box, Matrix, Vec } from "svggeom";
+import { SVGGraphicsElement, SVGSVGElement } from "./_element.js";
+import { Element } from "../element.js";
 
 export class SVGLayout {
 	_root: SVGGraphicsElement;
@@ -25,7 +25,7 @@ export class SVGLayout {
 	protected relTM(
 		parent: SVGGraphicsElement,
 		tm: Matrix,
-		root?: SVGGraphicsElement | null,
+		root?: SVGGraphicsElement | null
 	): Matrix {
 		while (parent != root) {
 			const grand: Element | null = parent.parentElement;
@@ -79,7 +79,11 @@ export class SVGLayout {
 	}
 	boundingBox(
 		...args: Array<
-			SVGGraphicsElement | Box | Vec | Ray | Array<SVGGraphicsElement | Box | Vec | Ray>
+			| SVGGraphicsElement
+			| Box
+			| Vec
+			| Ray
+			| Array<SVGGraphicsElement | Box | Vec | Ray>
 		>
 	) {
 		let bbox = Box.new();

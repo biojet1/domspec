@@ -3,7 +3,7 @@ import { Document, SVGDocument } from '../dist/document.js';
 import { ParentNode } from '../dist/parent-node.js';
 import { DOMParser } from '../dist/dom-parse.js';
 import { SVGLength } from '../dist/svg/element.js';
-import { Path, Box } from 'svggeom';
+import { PathLS, Box } from 'svggeom';
 
 const parser = new DOMParser();
 
@@ -100,21 +100,25 @@ tap.test('fuseTranform', function (t) {
 	t.same([x, y], [130, 140]);
 
 	t.same(
-		[...P2.path].map((s) => s.start).map((p) => [p.x - 100, p.y - 100]),
+		[...P2.path].reverse().map((s) => s.to).map((p) => [p.x - 100, p.y - 100]),
 		[
 			[50, 80],
 			[140, 110],
 			[120, 170],
 			[30, 140],
+			[50, 80],
 		]
 	);
+	
 	t.same(
-		[...P3.path].map((s) => s.start).map((p) => [p.x, p.y]),
+		[...P3.path].reverse().map((s) => s.to).map((p) => [p.x, p.y]),
 		[
+
 			[50, 80],
 			[140, 110],
 			[120, 170],
 			[30, 140],
+			[50, 80],
 		]
 	);
 
@@ -129,7 +133,7 @@ tap.test('polygon', function (t) {
 		`);
 	const top = doc.documentElement;
 	const PG1 = doc.getElementById('PG1');
-	t.same(Path.parse(PG1.describe()).describe(), 'M 10 10 L 50 50 L 10 15 L 15 10 Z');
+	t.same(PathLS.parse(PG1.describe()).describe(), 'M10,10L50,50L10,15L15,10Z');
 	t.end();
 });
 
@@ -160,7 +164,7 @@ tap.test('rect', function (t) {
 	t.same(R1.width.baseVal.value, 100);
 	t.same(R1.height.baseVal.value, 200);
 
-	// t.same(Path.parse(PG1.describe()).describe(), 'M 2 3 L 4 5 Z');
+	// t.same(PathLS.parse(PG1.describe()).describe(), 'M 2 3 L 4 5 Z');
 	t.end();
 });
 

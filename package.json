@@ -28,7 +28,7 @@
 		"htmlparser2": "^7.1.1",
 		"image-size": "",
 		"svggeom": "https://github.com/biojet1/svggeom/tarball/release",
-		"saxes": "^5.0.1"
+		"saxes": "^6.0.0"
 	},
 	"peerDependencies": {
 		"node-fetch": "*"

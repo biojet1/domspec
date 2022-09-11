@@ -38,9 +38,9 @@
 		"@types/sax": "^1.2.3",
 		"css-select": "^4.1.3",
 		"htmlparser2": "^7.1.1",
-		"image-size": "",
+		"image-size": "^1.0.2",
 		"svggeom": "https://github.com/biojet1/svggeom/tarball/release",
-		"saxes": "^6.0.0"
+		"saxes": "https://github.com/biojet1/saxes/tarball/master"
 	},
 	"peerDependencies": {
 		"node-fetch": "*"

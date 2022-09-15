@@ -33,14 +33,14 @@ jobs:
 
       - run: npm i
       - run: npm i -g --no-save codecov c8 typescript eslint prettier
-      - run: |
-          wget https://github.com/biojet1/saxes/archive/refs/heads/master.tar.gz
-          tar xvzf master.tar.gz
-          cd saxes-master
-          npm i typescript
-          npm run build
+      # - run: |
+      #     wget https://github.com/biojet1/saxes/archive/refs/heads/master.tar.gz
+      #     tar xvzf master.tar.gz
+      #     cd saxes-master
+      #     npm i typescript
+      #     npm run build
 
-      - run: npm i saxes-master/build/dist
+      # - run: npm i saxes-master/build/dist
       - run: npm run build --if-present
       - run: npm run compile
 

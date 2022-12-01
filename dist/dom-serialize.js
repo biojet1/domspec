@@ -3,11 +3,34 @@ export class XMLSerializer {
         const { endNode, startNode, nodeType } = node;
         switch (nodeType) {
             default:
-                return Array.from(enumXMLDump(startNode, endNode)).join('');
+                return Array.from(enumXMLDump(startNode, endNode)).join("");
             case 9:
-                return Array.from(enumXMLDump(startNode[NEXT] || startNode, endNode[PREV] || endNode)).join('');
+                return Array.from(enumXMLDump(startNode[NEXT] || startNode, endNode[PREV] || endNode)).join("");
         }
     }
+}
+function _lookupNamespaceURI(cur, prefix, map) {
+    const { namespaceURI, prefix: this_prefix } = cur;
+    if (namespaceURI && this_prefix ? this_prefix === prefix : !prefix)
+        return namespaceURI || null;
+    const am = map.get(cur);
+    if (am) {
+        const ns = am[prefix];
+        if (ns)
+            return ns;
+    }
+    let attr = cur[NEXT];
+    for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
+        if (attr.namespaceURI === XMLNS) {
+            const { prefix: prefixA, localName: localNameA } = attr;
+            if ((prefixA === "xmlns" && localNameA === prefix) ||
+                (!prefix && !prefixA && localNameA === "xmlns")) {
+                return attr.value || null;
+            }
+        }
+    }
+    const { parentElement: parent } = cur;
+    return parent ? _lookupNamespaceURI(parent, prefix, map) : null;
 }
 export function* enumXMLDump(start, end) {
     let isOpened = false;
@@ -16,15 +39,33 @@ export function* enumXMLDump(start, end) {
     let voidElements = ownerDocument &&
         ownerDocument.isHTML &&
         /^(?:\w+:)?(?:area|base|br|col|embed|hr|img|input|keygen|link|menuitem|meta|param|source|track|wbr)$/i;
+    let em = new WeakMap();
     do {
-        switch (cur.nodeType) {
+        const { nodeType } = cur;
+        switch (nodeType) {
             case 2:
                 {
                     const v = cur.valueOf();
                     if (v != null) {
                         const { name } = cur;
-                        if (name)
+                        if (name) {
+                            if (name.indexOf(":") > 0) {
+                                const { namespaceURI, parentElement } = cur;
+                                const [prefix, local] = name.split(":");
+                                if (namespaceURI && parentElement && prefix != "xmlns") {
+                                    const ns = _lookupNamespaceURI(parentElement, prefix, em);
+                                    if (!ns) {
+                                        let am = em.get(parentElement);
+                                        if (!am) {
+                                            em.set(parentElement, (am = {}));
+                                        }
+                                        am[prefix] = namespaceURI;
+                                        yield ` xmlns:${prefix}="${namespaceURI}"`;
+                                    }
+                                }
+                            }
                             yield ` ${name}="${v.replace(/[<>&"\xA0\t\n\r]/g, rep)}"`;
+                        }
                     }
                 }
                 break;
@@ -34,7 +75,7 @@ export function* enumXMLDump(start, end) {
             case 8:
             case 10:
                 if (isOpened) {
-                    yield '>';
+                    yield ">";
                     isOpened = false;
                 }
                 yield cur.toString();
@@ -44,11 +85,12 @@ export function* enumXMLDump(start, end) {
                 switch (start.nodeType) {
                     default:
                         throw new Error(`Unexpected nodeType ${start.nodeType}`);
-                    case 11:
                     case 1:
+                    case 11:
                     case 9: {
                         if (prev === start || prev instanceof Attr) {
-                            if (!voidElements || voidElements.test(start.qualifiedName)) {
+                            if (!voidElements ||
+                                voidElements.test(start.qualifiedName)) {
                                 yield `/>`;
                             }
                             else {
@@ -65,8 +107,8 @@ export function* enumXMLDump(start, end) {
                     }
                 }
                 break;
-            case 11:
             case 1:
+            case 11:
             case 9:
                 if (isOpened) {
                     yield `><${cur.qualifiedName}`;
@@ -75,6 +117,23 @@ export function* enumXMLDump(start, end) {
                     yield `<${cur.qualifiedName}`;
                 }
                 isOpened = true;
+                if (nodeType === 1) {
+                    const { _prefix } = cur;
+                    if (_prefix) {
+                        const { namespaceURI } = cur;
+                        if (namespaceURI && _prefix != "xmlns") {
+                            const ns = _lookupNamespaceURI(cur, _prefix, em);
+                            if (!ns) {
+                                let am = em.get(cur);
+                                if (!am) {
+                                    em.set(cur, (am = {}));
+                                }
+                                am[_prefix] = namespaceURI;
+                                yield ` xmlns:${_prefix}="${namespaceURI}"`;
+                            }
+                        }
+                    }
+                }
                 break;
             default:
                 throw new Error(`Unexpected nodeType ${cur.nodeType}`);
@@ -111,19 +170,20 @@ export function* enumFlatDOM(node) {
 }
 const rep = function (m) {
     switch (m) {
-        case '&':
-            return '&amp;';
-        case '<':
-            return '&lt;';
-        case '>':
-            return '&gt;';
+        case "&":
+            return "&amp;";
+        case "<":
+            return "&lt;";
+        case ">":
+            return "&gt;";
         case '"':
-            return '&quot;';
+            return "&quot;";
     }
     return `&#${m.charCodeAt(0)};`;
 };
-import { NEXT, PREV } from './node.js';
-import { ChildNode } from './child-node.js';
-import { ParentNode, EndNode } from './parent-node.js';
-import { Attr } from './attr.js';
+import { NEXT, PREV } from "./node.js";
+import { ChildNode } from "./child-node.js";
+import { ParentNode, EndNode } from "./parent-node.js";
+import { Attr } from "./attr.js";
+import { XMLNS } from "./namespace.js";
 //# sourceMappingURL=dom-serialize.js.map

@@ -8,30 +8,30 @@ function domParse(doc, top, options) {
     });
     const scripts = opt.runScripts !== false ? [] : undefined;
     const { isHTML } = doc;
-    parser.on('error', (err) => {
+    parser.on("error", (err) => {
         throw new Error(`SaxesParser ${err.message}`);
     });
-    parser.on('doctype', (dt) => {
+    parser.on("doctype", (dt) => {
         if (top !== doc) {
-            throw new Error('Doctype can only be appended to document');
+            throw new Error("Doctype can only be appended to document");
         }
         top.appendChild(createDocumentType(doc, dt));
     });
-    parser.on('text', (str) => {
+    parser.on("text", (str) => {
         if (top.nodeType !== 9)
             top.appendChild(doc.createTextNode(str));
     });
-    parser.on('comment', (str) => {
+    parser.on("comment", (str) => {
         top.appendChild(doc.createComment(str));
     });
-    parser.on('cdata', (data) => {
+    parser.on("cdata", (data) => {
         if (isHTML) {
             top.appendChild(doc.createTextNode(data));
         }
         else
             top.appendChild(doc.createCDATASection(data));
     });
-    parser.on('opentag', (node) => {
+    parser.on("opentag", (node) => {
         const { local, attributes, uri, prefix, name } = node;
         let ns = uri || null;
         if (!ns && prefix) {
@@ -41,7 +41,7 @@ function domParse(doc, top, options) {
             ns = parent?.namespaceURI;
         }
         if (!ns && doc.isSVG) {
-            ns = 'http://www.w3.org/2000/svg';
+            ns = "http://www.w3.org/2000/svg";
         }
         let tag;
         if (ns) {
@@ -62,12 +62,12 @@ function domParse(doc, top, options) {
         top.appendChild(tag);
         top = tag;
     });
-    parser.on('closetag', (node) => {
+    parser.on("closetag", (node) => {
         const { parentNode } = top;
         if (node.isSelfClosing) {
             top._parsed_closed = true;
         }
-        if (scripts && top.localName == 'script') {
+        if (scripts && top.localName == "script") {
             scripts.push(top);
         }
         if (parentNode) {
@@ -77,7 +77,7 @@ function domParse(doc, top, options) {
             throw new Error(`unexpected null parentNode of ${top}`);
         }
     });
-    parser.on('end', function () {
+    parser.on("end", function () {
         if (scripts) {
             runScripts(scripts, opt.resourceLoader)
                 .then(() => {
@@ -86,7 +86,7 @@ function domParse(doc, top, options) {
                 }
                 const { defaultView: window } = doc;
                 if (window) {
-                    window.dispatchEvent(new Event('load'));
+                    window.dispatchEvent(new Event("load"));
                 }
             });
         }
@@ -96,13 +96,14 @@ function domParse(doc, top, options) {
 export function getNamespace(prefix, cur, attribs) {
     if (attribs) {
         for (const [key, value] of Object.entries(attribs)) {
-            const i = key.indexOf(':');
+            const i = key.indexOf(":");
             if (i < 0) {
-                if (!prefix && key === 'xmlns') {
+                if (!prefix && key === "xmlns") {
                     return value;
                 }
             }
-            else if (key.substring(0, i) === 'xmlns' && key.substring(i + 1) === prefix) {
+            else if (key.substring(0, i) === "xmlns" &&
+                key.substring(i + 1) === prefix) {
                 return value;
             }
         }
@@ -110,7 +111,7 @@ export function getNamespace(prefix, cur, attribs) {
     if (!prefix) {
         return cur.namespaceURI;
     }
-    return cur.lookupNamespaceURI(prefix) || '';
+    return cur.lookupNamespaceURI(prefix) || "";
 }
 function _appendChild(parent, node) {
     const ref = parent.endNode;
@@ -121,18 +122,18 @@ export function htmlParser2(doc, top, options) {
     const TOP = top;
     opt.recognizeSelfClosing = true;
     if (opt.xmlMode === undefined) {
-        opt.xmlMode = doc.contentType.indexOf('xml') >= 0;
+        opt.xmlMode = doc.contentType.indexOf("xml") >= 0;
     }
-    return import('htmlparser2').then((mod) => {
+    return import("htmlparser2").then((mod) => {
         let cdata;
         const handler = {
             onopentag(name, attribs) {
                 let tag;
-                const i = name.indexOf(':');
+                const i = name.indexOf(":");
                 if (i < 0) {
-                    const ns = getNamespace('', top, attribs);
+                    const ns = getNamespace("", top, attribs);
                     L1: {
-                        if (name === 'svg') {
+                        if (name === "svg") {
                             if (HTML_NS == ns) {
                                 tag = doc.createElementNS(SVG_NS, name);
                                 break L1;
@@ -158,7 +159,7 @@ export function htmlParser2(doc, top, options) {
                     }
                 }
                 for (const [key, value] of Object.entries(attribs)) {
-                    const i = key.indexOf(':');
+                    const i = key.indexOf(":");
                     if (i < 0) {
                         tag.letAttributeNode(key).value = value;
                     }
@@ -166,7 +167,7 @@ export function htmlParser2(doc, top, options) {
                         const prefix = key.substring(0, i);
                         let ns;
                         switch (prefix) {
-                            case 'xmlns':
+                            case "xmlns":
                                 ns = XMLNS;
                                 break;
                             default:
@@ -187,7 +188,7 @@ export function htmlParser2(doc, top, options) {
                 else {
                     throw new Error(`unexpected null parentNode of ${top}`);
                 }
-                if (tag.localName == 'script') {
+                if (tag.localName == "script") {
                     let ss = parser.scripts;
                     if (ss) {
                         ss.push(tag);
@@ -210,14 +211,14 @@ export function htmlParser2(doc, top, options) {
             },
             onprocessinginstruction(name, data) {
                 switch (name) {
-                    case '!DOCTYPE':
-                    case '!doctype':
+                    case "!DOCTYPE":
+                    case "!doctype":
                         if (top !== doc) {
-                            throw new Error('Doctype can only be appended to document');
+                            throw new Error("Doctype can only be appended to document");
                         }
                         _appendChild(top, createDocumentType(doc, data));
                         break;
-                    case '?xml':
+                    case "?xml":
                         if (!top.firstChild) {
                             break;
                         }
@@ -227,7 +228,7 @@ export function htmlParser2(doc, top, options) {
                 }
             },
             oncdatastart() {
-                cdata = doc.createCDATASection('');
+                cdata = doc.createCDATASection("");
             },
             oncdataend() {
                 if (cdata) {
@@ -239,7 +240,7 @@ export function htmlParser2(doc, top, options) {
                 if (TOP === doc && doc.isHTML) {
                     let first;
                     for (const e of doc.children) {
-                        if (e.localName !== 'html') {
+                        if (e.localName !== "html") {
                             const ref = e.startNode[PREV] || doc;
                             const kids = Array.from(doc.childNodes).filter((e) => {
                                 switch (e.nodeType) {
@@ -248,7 +249,7 @@ export function htmlParser2(doc, top, options) {
                                         return true;
                                 }
                             });
-                            const html = doc.createElement('html');
+                            const html = doc.createElement("html");
                             html._attach(ref, ref.endNode[NEXT] || doc[END], doc);
                             for (const c of kids) {
                                 c._detach();
@@ -258,11 +259,11 @@ export function htmlParser2(doc, top, options) {
                         }
                     }
                     for (const html of doc.children) {
-                        if (html.localName === 'html') {
+                        if (html.localName === "html") {
                             let head, body;
                             for (const child of Array.from(html.children)) {
                                 switch (child.localName) {
-                                    case 'head':
+                                    case "head":
                                         if (head) {
                                             for (const c of Array.from(child.childNodes)) {
                                                 c._detach();
@@ -273,7 +274,7 @@ export function htmlParser2(doc, top, options) {
                                             head = child;
                                         }
                                         break;
-                                    case 'body':
+                                    case "body":
                                         if (body) {
                                             for (const c of Array.from(child.childNodes)) {
                                                 c._detach();
@@ -284,16 +285,16 @@ export function htmlParser2(doc, top, options) {
                                             body = child;
                                         }
                                         break;
-                                    case 'meta':
-                                    case 'style':
-                                    case 'script':
-                                    case 'noscript':
-                                    case 'base':
-                                    case 'link':
-                                    case 'title':
+                                    case "meta":
+                                    case "style":
+                                    case "script":
+                                    case "noscript":
+                                    case "base":
+                                    case "link":
+                                    case "title":
                                         if (!body) {
                                             if (!head) {
-                                                head = doc.createElement('head');
+                                                head = doc.createElement("head");
                                                 head._attach(child[PREV] || html, child, html);
                                             }
                                             child._detach();
@@ -302,7 +303,7 @@ export function htmlParser2(doc, top, options) {
                                         }
                                     default:
                                         if (!body) {
-                                            body = doc.createElement('body');
+                                            body = doc.createElement("body");
                                             body._attach(child[PREV] || html, child, html);
                                         }
                                         child._detach();
@@ -323,11 +324,11 @@ export function htmlParser2(doc, top, options) {
                             }
                             const { defaultView: window } = doc;
                             if (window) {
-                                window.dispatchEvent(new Event('load'));
+                                window.dispatchEvent(new Event("load"));
                             }
                         })
                             .catch((err) => {
-                            console.error('Error running scripts', err);
+                            console.error("Error running scripts", err);
                         });
                     });
                 }
@@ -358,14 +359,14 @@ export const parseDOM = function (str, parent, opt = {}) {
     pushDOMParser(parent, opt).write(str);
 };
 export class DOMParser {
-    parseFromString(markup, type) {
+    static parseString(markup, type) {
         let doc;
         switch (type) {
-            case 'application/xhtml+xml':
-            case 'text/html':
+            case "application/xhtml+xml":
+            case "text/html":
                 doc = new HTMLDocument(type);
                 break;
-            case 'image/svg+xml':
+            case "image/svg+xml":
                 doc = new SVGDocument();
                 break;
             default:
@@ -373,45 +374,48 @@ export class DOMParser {
         }
         domParse(doc, doc).write(markup);
         switch (type) {
-            case 'text/html':
+            case "text/html":
                 if (!doc.doctype) {
-                    doc.insertBefore(new DocumentType('html'), doc.firstChild);
+                    doc.insertBefore(new DocumentType("html"), doc.firstChild);
                 }
         }
         return doc;
     }
+    parseFromString(markup, type) {
+        return DOMParser.parseString(markup, type);
+    }
     async parseFile(path, type) {
-        return import('fs/promises')
-            .then((mod) => mod.readFile(path, { encoding: 'utf-8' }))
+        return import("fs/promises")
+            .then((mod) => mod.readFile(path, { encoding: "utf-8" }))
             .then((content) => this.parseFromString(content));
     }
-    async parseString(markup, type) {
-        let doc;
-        let opt = {};
-        switch (type) {
-            case 'application/xhtml+xml':
-                opt.xmlMode = true;
-                doc = new HTMLDocument(type);
-                break;
-            case 'text/html':
-                doc = new HTMLDocument(type);
-                break;
-            case 'image/svg+xml':
-                opt.xmlMode = true;
-                doc = new SVGDocument();
-                break;
-            default:
-                opt.xmlMode = true;
-                doc = new XMLDocument(type);
-        }
-        return htmlParser2(doc, doc, opt).then((parser) => {
-            parser.write(markup);
-            parser.end();
-            const { _promises } = parser;
-            if (_promises) {
-                return Promise.all(_promises).then((v) => doc);
+    static async loadXML(src, opt = {}) {
+        const { xinclude, select, type } = opt;
+        return (() => {
+            if (xinclude || select) {
+                const cmd = Array.from((function* () {
+                    if (src instanceof URL) {
+                        yield `curl -L "${src}" | xmllint --xinclude -`;
+                    }
+                    else {
+                        yield `xmllint --xinclude "${src}"`;
+                    }
+                    if (select) {
+                        yield `--xpath '${select}'`;
+                    }
+                })()).join(" ");
+                return Promise.all([import("util"), import("child_process")])
+                    .then(([{ promisify }, { exec }]) => promisify(exec)(cmd))
+                    .then(({ stdout: data }) => data);
             }
-            return doc;
+            else {
+                return import("fs").then((fs) => fs.promises.readFile(src, { encoding: "utf8", flag: "r" }));
+            }
+        })()
+            .then((data) => DOMParser.parseString(data, type))
+            .catch((err) => {
+            console.error(`Failed to load "${src}"`);
+            throw err;
         });
     }
 }
@@ -420,7 +424,7 @@ const PUBLIC_DOCTYPE = /^<?!doctype\s+([^\s]+)\s+public\s+"([^"]+)"\s+"([^"]+)"/
 const SYSTEM_DOCTYPE = /^<?!doctype\s+([^\s]+)\s+system\s+"([^"]+)"/i;
 const CUSTOM_NAME_DOCTYPE = /^<?!doctype\s+([^\s>]+)/i;
 function createDocumentType(doc, dt) {
-    let [name, pub, sys] = ['html', '', ''];
+    let [name, pub, sys] = ["html", "", ""];
     if (!HTML5_DOCTYPE.test(dt)) {
         let m;
         if ((m = PUBLIC_DOCTYPE.exec(dt))) {
@@ -435,12 +439,12 @@ function createDocumentType(doc, dt) {
     }
     return doc.implementation.createDocumentType(name, pub, sys);
 }
-import { SaxesParser } from 'saxes';
-import { runScripts } from './resource.js';
-import { Document, HTMLDocument, SVGDocument, XMLDocument } from './document.js';
-import { DocumentType } from './document-type.js';
-import { Event } from './event-target.js';
-import { XMLNS } from './namespace.js';
-import { PREV, NEXT, END } from './node.js';
-import { HTML_NS, SVG_NS } from './namespace.js';
+import { SaxesParser } from "saxes";
+import { runScripts } from "./resource.js";
+import { Document, HTMLDocument, SVGDocument, XMLDocument, } from "./document.js";
+import { DocumentType } from "./document-type.js";
+import { Event } from "./event-target.js";
+import { XMLNS } from "./namespace.js";
+import { PREV, NEXT, END } from "./node.js";
+import { HTML_NS, SVG_NS } from "./namespace.js";
 //# sourceMappingURL=dom-parse.js.map

@@ -16,7 +16,7 @@ export interface MessageEventInit extends EventInit {
 export interface EventListener {
     handleEvent(event: Event): undefined;
 }
-declare type CallBack = (event: Event) => undefined;
+type CallBack = (event: Event) => undefined;
 interface EventEntry {
     capture?: boolean;
     once?: boolean;

@@ -8,7 +8,16 @@
 	"homepage": "https://github.com/biojet1/domspec",
 	"repository": "https://github.com/biojet1/domspec",
 	"bugs": "https://github.com/biojet1/domspec/issues",
-	"keywords": ["DOM", "HTML", "XML", "SVG", "CSS", "document", "window", "parser"],
+	"keywords": [
+		"DOM",
+		"HTML",
+		"XML",
+		"SVG",
+		"CSS",
+		"document",
+		"window",
+		"parser"
+	],
 	"scripts": {
 		"test": "tap test/parse.mjs",
 		"madge": "node test/madge.cjs",
@@ -38,14 +47,17 @@
 		"@types/sax": "^1.2.3",
 		"css-select": "^4.1.3",
 		"htmlparser2": "^7.1.1",
-		"image-size": "",
-		"svggeom": "https://github.com/biojet1/svggeom/tarball/release",
-		"saxes": "^6.0.0"
+		"image-size": "^1.0.2",
+		"saxes": "https://github.com/biojet1/saxes/tarball/release",
+		"svggeom": "https://github.com/biojet1/svggeom/tarball/release"
 	},
 	"peerDependencies": {
 		"node-fetch": "*"
 	},
-	"files": ["dist", "*.d.ts"],
+	"files": [
+		"dist",
+		"*.d.ts"
+	],
 	"c8": {
 		"reports-dir": "/tmp/domspec.c8/rep",
 		"temp-directory": "/tmp/domspec.c8/tmp",

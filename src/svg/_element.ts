@@ -1,4 +1,4 @@
-import { Vec, Box, Matrix } from 'svggeom';
+import { Vec, Box, Matrix, SVGTransform } from 'svggeom';
 
 export class SVGElement extends Element {
 	get _isViewportElement() {
@@ -528,4 +528,4 @@ import {
 import { SVGRectAttr } from './rect.js';
 import { SVGLayout } from './layout.js';
 import { SVGLengthListAttr, SVGLengthList } from './length-list.js';
-import { SVGTransformListAttr, SVGTransform, viewbox_transform } from './attr-transform.js';
+import { SVGTransformListAttr, viewbox_transform } from './attr-transform.js';

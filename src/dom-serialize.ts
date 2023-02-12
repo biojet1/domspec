@@ -127,8 +127,8 @@ export function* enumXMLDump(start: Node, end: Node) {
 				break;
 
 			case 1: // ELEMENT_NODE
-			case 11: // DOCUMENT_FRAGMENT_NODE
 			case 9: // DOCUMENT_NODE
+			case 11: // DOCUMENT_FRAGMENT_NODE
 				if (isOpened) {
 					yield `><${(cur as ParentNode).qualifiedName}`;
 				} else {
@@ -138,18 +138,16 @@ export function* enumXMLDump(start: Node, end: Node) {
 				if (nodeType === 1) {
 					// ELEMENT_NODE
 					const { _prefix } = cur as Element;
-					if (_prefix) {
+					if (_prefix && _prefix != "xmlns") {
 						const { namespaceURI } = cur as Element;
-						if (namespaceURI && _prefix != "xmlns") {
-							const ns = _lookupNamespaceURI(cur as Element, _prefix, em);
-							if (!ns) {
-								let am = em.get(cur as Element);
-								if (!am) {
-									em.set(cur as Element, (am = {}));
-								}
-								am[_prefix] = namespaceURI;
-								yield ` xmlns:${_prefix}="${namespaceURI}"`;
-							}
+						if (
+							namespaceURI &&
+							!_lookupNamespaceURI(cur as Element, _prefix, em)
+						) {
+							let am = em.get(cur as Element);
+							am || em.set(cur as Element, (am = {}));
+							am[_prefix] = namespaceURI;
+							yield ` xmlns:${_prefix}="${namespaceURI}"`;
 						}
 					}
 				}

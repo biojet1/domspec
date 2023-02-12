@@ -44,7 +44,8 @@ tap.test("viewBox", function (t) {
 
 tap.test("createSVGTransformFromMatrix", function (t) {
 	const document = parser.parseFromString(`<?xml version="1.0" standalone="no"?>
-<svg width="300px" height="100px" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="-10 20 200 300"><g id='g' transform='scale(5)'/></svg>`);
+<svg width="300px" height="100px" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="-10 20 200 300">
+<g id='g' transform='scale(5)'/></svg>`);
 	let svg = document.documentElement,
 		g = document.getElementById("g"),
 		m1 = svg.createSVGMatrix(),
@@ -83,6 +84,7 @@ tap.test("createSVGTransformFromMatrix", function (t) {
 	t.strictSame(m.matrix.a, 3);
 
 	m = g.transform.baseVal.getItem(0);
+
 	m.setMatrix(m3);
 	m3.a = 2;
 	t.strictNotSame(m.matrix, m3);

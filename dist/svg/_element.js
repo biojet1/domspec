@@ -1,4 +1,4 @@
-import { Box, Matrix } from 'svggeom';
+import { Box, Matrix, SVGTransform } from 'svggeom';
 export class SVGElement extends Element {
     get _isViewportElement() {
         return 0;
@@ -131,7 +131,7 @@ export class SVGGraphicsElement extends SVGElement {
         return farthest;
     }
     get ownTM() {
-        return this.transform.baseVal.consolidate();
+        return this.transform.baseVal.combine();
     }
     set ownTM(T) {
         this.setAttribute('transform', T.toString());
@@ -487,5 +487,5 @@ import { Element } from '../element.js';
 import { SVGLength, SVGLengthAttr, SVGLengthHAttr, SVGLengthWAttr, SVGLengthXAttr, SVGLengthYAttr, } from './length.js';
 import { SVGRectAttr } from './rect.js';
 import { SVGLayout } from './layout.js';
-import { SVGTransformListAttr, SVGTransform, viewbox_transform } from './attr-transform.js';
+import { SVGTransformListAttr, viewbox_transform } from './attr-transform.js';
 //# sourceMappingURL=_element.js.map

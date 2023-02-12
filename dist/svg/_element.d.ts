@@ -1,4 +1,4 @@
-import { Box, Matrix } from 'svggeom';
+import { Box, Matrix, SVGTransform } from 'svggeom';
 export declare class SVGElement extends Element {
     get _isViewportElement(): number;
     get viewportElement(): SVGElement | null;
@@ -75,4 +75,4 @@ import { ChildNode } from '../child-node.js';
 import { SVGLength, SVGLengthAttr } from './length.js';
 import { SVGRectAttr } from './rect.js';
 import { SVGLayout } from './layout.js';
-import { SVGTransformListAttr, SVGTransform } from './attr-transform.js';
+import { SVGTransformListAttr } from './attr-transform.js';

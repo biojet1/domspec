@@ -108,8 +108,8 @@ export function* enumXMLDump(start, end) {
                 }
                 break;
             case 1:
-            case 11:
             case 9:
+            case 11:
                 if (isOpened) {
                     yield `><${cur.qualifiedName}`;
                 }
@@ -119,18 +119,14 @@ export function* enumXMLDump(start, end) {
                 isOpened = true;
                 if (nodeType === 1) {
                     const { _prefix } = cur;
-                    if (_prefix) {
+                    if (_prefix && _prefix != "xmlns") {
                         const { namespaceURI } = cur;
-                        if (namespaceURI && _prefix != "xmlns") {
-                            const ns = _lookupNamespaceURI(cur, _prefix, em);
-                            if (!ns) {
-                                let am = em.get(cur);
-                                if (!am) {
-                                    em.set(cur, (am = {}));
-                                }
-                                am[_prefix] = namespaceURI;
-                                yield ` xmlns:${_prefix}="${namespaceURI}"`;
-                            }
+                        if (namespaceURI &&
+                            !_lookupNamespaceURI(cur, _prefix, em)) {
+                            let am = em.get(cur);
+                            am || em.set(cur, (am = {}));
+                            am[_prefix] = namespaceURI;
+                            yield ` xmlns:${_prefix}="${namespaceURI}"`;
                         }
                     }
                 }

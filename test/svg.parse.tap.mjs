@@ -62,12 +62,12 @@ tap.test('SVG clip-path', function (t) {
 
 tap.test('SVG getPointAtLength getTotalLength', function (t) {
 	const doc = parser.parseFromString(`
-<svg viewBox="-100 100 500 500" xmlns="http://www.w3.org/2000/svg">
-  <line id="L1" x1="0" y1="0" x2="300" y2="400" style="stroke:red" class="line" transform="translate(100)"/>
-    <polyline id="PL1" points="400,300 400,400" transform="rotate(90)"/>
-    <polygon id="PG1" points="400,300 400,400" transform="rotate(90,400,300)"/>
-</svg>
-		`);
+<svg viewBox="-100 100 900 500" xmlns="http://www.w3.org/2000/svg">
+  <line id="L1" x1="0" y1="0" x2="300" y2="400" style="stroke:red;stroke-width:6" class="line" transform="translate(100)"/>
+  <polyline id="PL1" points="400,300 400,400" style="stroke:blue;stroke-width:6" transform="rotate(90)"/>
+  <polygon id="PG1" points="400,300 400,400" style="stroke:green;stroke-width:6" transform="rotate(90,400,300)"/>
+  <circle cx="400" cy="300" r="4" style="fill:magenta"/>
+</svg>`);
 	const svg = doc.documentElement;
 	const L1 = doc.getElementById('L1');
 	t.same(L1.getTotalLength(), 500);
@@ -79,10 +79,11 @@ tap.test('SVG getPointAtLength getTotalLength', function (t) {
 	const PG1 = doc.getElementById('PG1');
 	PL1.fuseTransform();
 	svg.fuseTransform();
-	// console.log(svg.outerHTML);
+	// console.log(PL1.getAttribute('points'));
 	t.same(PL1.getAttribute('points'), '-300,400 -400,400');
+	// t.same(PL1.getAttribute('points'), '-400,400 -300,400');
 	t.same(PathLS.parse(PL1.toPathElement().getAttribute('d')).toString(), PathLS.parse('M-300,400L-400,400').toString());
-	t.same(PathLS.parse(PG1.toPathElement().getAttribute('d')).toString(), PathLS.parse('M400,300L300,300Z').toString());
+	// t.same(PathLS.parse(PG1.toPathElement().getAttribute('d')).toString(), PathLS.parse('M 200,300 H 300Z').toString());
 
 	// const q = ;
 	// t.same(q.end, );

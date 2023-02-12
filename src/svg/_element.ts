@@ -142,7 +142,7 @@ export class SVGGraphicsElement extends SVGElement {
 
 	get ownTM() {
 		// return Matrix.parse(this.getAttribute("transform") || "");
-		return this.transform.baseVal.consolidate();
+		return this.transform.baseVal.combine();
 	}
 
 	set ownTM(T: Matrix) {

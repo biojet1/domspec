@@ -1,4 +1,4 @@
-import { Box, Matrix, SVGTransform } from 'svggeom';
+import { Box, Matrix, SVGTransform } from "svggeom";
 export class SVGElement extends Element {
     get _isViewportElement() {
         return 0;
@@ -28,88 +28,91 @@ export class SVGElement extends Element {
         return new Matrix();
     }
     createSVGTransformFromMatrix(M) {
-        const m = new SVGTransform();
+        const m = this.createSVGTransform();
         m.setMatrix(M);
         return m;
+    }
+    createSVGTransform() {
+        return new SVGTransform();
     }
 }
 export class SVGGraphicsElement extends SVGElement {
     newAttributeNode(name) {
         switch (name) {
-            case 'r':
+            case "r":
                 return new SVGLengthAttr(name);
-            case 'width':
+            case "width":
                 if (this instanceof SVGSVGElement) {
                     return new SVGLengthWAttr(name);
                 }
-            case 'x':
-            case 'cx':
-            case 'x1':
-            case 'x2':
+            case "x":
+            case "cx":
+            case "x1":
+            case "x2":
                 return new SVGLengthXAttr(name);
-            case 'height':
+            case "height":
                 if (this instanceof SVGSVGElement) {
                     return new SVGLengthHAttr(name);
                 }
-            case 'y':
-            case 'cy':
-            case 'y1':
-            case 'y2':
+            case "y":
+            case "cy":
+            case "y1":
+            case "y2":
                 return new SVGLengthYAttr(name);
-            case 'rx':
-            case 'ry':
+            case "rx":
+            case "ry":
                 return new SVGLengthAttr(name);
-            case 'viewBox':
+            case "viewBox":
                 return new SVGRectAttr(name);
-            case 'transform':
+            case "transform":
                 return new SVGTransformListAttr(name);
         }
         return super.newAttributeNode(name);
     }
     get r() {
-        return this.letAttributeNode('r');
+        return this.letAttributeNode("r");
     }
     get x() {
-        return this.letAttributeNode('x');
+        return this.letAttributeNode("x");
     }
     get y() {
-        return this.letAttributeNode('y');
+        return this.letAttributeNode("y");
     }
     get cx() {
-        return this.letAttributeNode('cx');
+        return this.letAttributeNode("cx");
     }
     get cy() {
-        return this.letAttributeNode('cy');
+        return this.letAttributeNode("cy");
     }
     get rx() {
-        return this.letAttributeNode('rx');
+        return this.letAttributeNode("rx");
     }
     get ry() {
-        return this.letAttributeNode('ry');
+        return this.letAttributeNode("ry");
     }
     get x1() {
-        return this.letAttributeNode('x1');
+        return this.letAttributeNode("x1");
     }
     get x2() {
-        return this.letAttributeNode('x2');
+        return this.letAttributeNode("x2");
     }
     get y1() {
-        return this.letAttributeNode('y1');
+        return this.letAttributeNode("y1");
     }
     get y2() {
-        return this.letAttributeNode('y2');
+        return this.letAttributeNode("y2");
     }
     get width() {
-        return this.letAttributeNode('width');
+        return this.letAttributeNode("width");
     }
     get height() {
-        return this.letAttributeNode('height');
+        return this.letAttributeNode("height");
     }
     get viewBox() {
-        return this.letAttributeNode('viewBox');
+        return this.letAttributeNode("viewBox");
     }
     get transform() {
-        return this.letAttributeNode('transform');
+        return this.letAttributeNode("transform");
     }
     get nearestViewportElement() {
         let parent = this;
@@ -134,33 +137,37 @@ export class SVGGraphicsElement extends SVGElement {
         return this.transform.baseVal.combine();
     }
     set ownTM(T) {
-        this.setAttribute('transform', T.toString());
+        this.setAttribute("transform", T.toString());
     }
     get clipElement() {
-        const v = this.getAttribute('clip-path');
+        const v = this.getAttribute("clip-path");
         const a = v && /#([^#\(\)\s]+)/.exec(v);
-        return a ? this.ownerDocument?.getElementById(a[1]) : null;
+        return a
+            ? this.ownerDocument?.getElementById(a[1])
+            : null;
     }
     set clipElement(target) {
         if (target) {
-            this.setAttribute('clip-path', `url(#${target.letId()})`);
+            this.setAttribute("clip-path", `url(#${target.letId()})`);
         }
         else {
-            this.removeAttribute('clip-path');
+            this.removeAttribute("clip-path");
         }
     }
     get hrefElement() {
-        const id = this.getAttributeNS('http://www.w3.org/1999/xlink', 'href') || this.getAttribute('href');
+        const id = this.getAttributeNS("http://www.w3.org/1999/xlink", "href") ||
+            this.getAttribute("href");
         if (id) {
-            return this.ownerDocument?.getElementById(id.substr(id.indexOf('#') + 1));
+            return this.ownerDocument?.getElementById(id.substr(id.indexOf("#") + 1));
         }
         return null;
     }
     set hrefElement(target) {
-        target && this.setAttributeNS('http://www.w3.org/1999/xlink', 'href', `#${target.letId()}`);
+        target &&
+            this.setAttributeNS("http://www.w3.org/1999/xlink", "href", `#${target.letId()}`);
     }
     canRender() {
-        if (this.getAttribute('display') === 'none') {
+        if (this.getAttribute("display") === "none") {
             return false;
         }
         return true;
@@ -228,7 +235,8 @@ export class SVGGraphicsElement extends SVGElement {
         }
     }
     _composeTM(root) {
-        let parent = this.parentElement;
+        let parent = this
+            .parentElement;
         if (parent instanceof SVGGraphicsElement) {
             return parent._relTM(this.ownTM, root);
         }
@@ -268,7 +276,7 @@ export class SVGGraphicsElement extends SVGElement {
                 sub.fuseTransform(tm);
             }
         }
-        this.removeAttribute('transform');
+        this.removeAttribute("transform");
     }
     objectBBox(T) {
         let box = Box.new();
@@ -334,7 +342,7 @@ export class SVGGraphicsElement extends SVGElement {
         return Box.not();
     }
     calcWidth() {
-        const w = this.getAttribute('width');
+        const w = this.getAttribute("width");
         if (w) {
         }
     }
@@ -361,11 +369,13 @@ export class SVGGraphicsElement extends SVGElement {
     }
     _placeBefore(...nodes) {
         const { parentNode } = this;
-        return parentNode instanceof SVGGraphicsElement && parentNode._placeChild(this, nodes);
+        return (parentNode instanceof SVGGraphicsElement &&
+            parentNode._placeChild(this, nodes));
     }
     _placeAfter(...nodes) {
         const { parentNode } = this;
-        return (parentNode instanceof SVGGraphicsElement && parentNode._placeChild(this.nextSibling, nodes));
+        return (parentNode instanceof SVGGraphicsElement &&
+            parentNode._placeChild(this.nextSibling, nodes));
     }
     _layout() {
         return new SVGLayout(this);
@@ -395,7 +405,7 @@ export class SVGGraphicsElement extends SVGElement {
     }
 }
 export class SVGSVGElement extends SVGGraphicsElement {
-    static TAGS = ['svg'];
+    static TAGS = ["svg"];
     get _isViewportElement() {
         return 1;
     }
@@ -410,7 +420,7 @@ export class SVGSVGElement extends SVGGraphicsElement {
         if (!(w && h)) {
             return Matrix.identity();
         }
-        const a = this.getAttribute('viewBox');
+        const a = this.getAttribute("viewBox");
         let vx, vy, vw, vh;
         if (a) {
             const { x: _x, y: _y, width: _width, height: _height } = Box.parse(a);
@@ -422,7 +432,7 @@ export class SVGSVGElement extends SVGGraphicsElement {
         else {
             return Matrix.identity();
         }
-        const [tx, ty, sx, sy] = viewbox_transform(x, y, w, h, vx, vy, vw, vh, this.getAttribute('preserveAspectRatio'));
+        const [tx, ty, sx, sy] = viewbox_transform(x, y, w, h, vx, vy, vw, vh, this.getAttribute("preserveAspectRatio"));
         return Matrix.translate(tx, ty).scale(sx, sy);
     }
     shapeBox(T) {
@@ -435,12 +445,12 @@ export class SVGSVGElement extends SVGGraphicsElement {
         let { ownerDocument, children } = this;
         if (ownerDocument) {
             for (const sub of this.children) {
-                if (sub.localName == 'defs') {
+                if (sub.localName == "defs") {
                     return sub;
                 }
             }
-            const defs = ownerDocument.createElement('defs');
-            this.insertAdjacentElement('afterbegin', defs);
+            const defs = ownerDocument.createElement("defs");
+            this.insertAdjacentElement("afterbegin", defs);
             return defs;
         }
         throw new Error(`No ownerDocument`);
@@ -449,19 +459,19 @@ export class SVGSVGElement extends SVGGraphicsElement {
         this.width.baseVal.convertToSpecifiedUnits(1);
         this.height.baseVal.convertToSpecifiedUnits(1);
         for (const x in [
-            'r',
-            'x',
-            'y',
-            'cx',
-            'cy',
-            'rx',
-            'ry',
-            'x1',
-            'x2',
-            'y1',
-            'y2',
-            'width',
-            'height',
+            "r",
+            "x",
+            "y",
+            "cx",
+            "cy",
+            "rx",
+            "ry",
+            "x1",
+            "x2",
+            "y1",
+            "y2",
+            "width",
+            "height",
         ]) {
             this.getAttributeNode(x);
         }
@@ -483,9 +493,9 @@ function composeTransforms(parent, tm, root) {
     }
     return tm;
 }
-import { Element } from '../element.js';
-import { SVGLength, SVGLengthAttr, SVGLengthHAttr, SVGLengthWAttr, SVGLengthXAttr, SVGLengthYAttr, } from './length.js';
-import { SVGRectAttr } from './rect.js';
-import { SVGLayout } from './layout.js';
-import { SVGTransformListAttr, viewbox_transform } from './attr-transform.js';
+import { Element } from "../element.js";
+import { SVGLength, SVGLengthAttr, SVGLengthHAttr, SVGLengthWAttr, SVGLengthXAttr, SVGLengthYAttr, } from "./length.js";
+import { SVGRectAttr } from "./rect.js";
+import { SVGLayout } from "./layout.js";
+import { SVGTransformListAttr, viewbox_transform } from "./attr-transform.js";
 //# sourceMappingURL=_element.js.map

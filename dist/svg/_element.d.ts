@@ -1,4 +1,4 @@
-import { Box, Matrix, SVGTransform } from 'svggeom';
+import { Box, Matrix, SVGTransform } from "svggeom";
 export declare class SVGElement extends Element {
     get _isViewportElement(): number;
     get viewportElement(): SVGElement | null;
@@ -6,6 +6,7 @@ export declare class SVGElement extends Element {
     createSVGLength(): SVGLength;
     createSVGMatrix(): Matrix;
     createSVGTransformFromMatrix(M: Matrix): SVGTransform;
+    createSVGTransform(): SVGTransform;
 }
 export declare class SVGGraphicsElement extends SVGElement {
     newAttributeNode(name: string): import("../attr.js").Attr;
@@ -70,9 +71,9 @@ export declare class SVGSVGElement extends SVGGraphicsElement {
     defs(): Element;
     geom2UU(): void;
 }
-import { Element } from '../element.js';
-import { ChildNode } from '../child-node.js';
-import { SVGLength, SVGLengthAttr } from './length.js';
-import { SVGRectAttr } from './rect.js';
-import { SVGLayout } from './layout.js';
-import { SVGTransformListAttr } from './attr-transform.js';
+import { Element } from "../element.js";
+import { ChildNode } from "../child-node.js";
+import { SVGLength, SVGLengthAttr } from "./length.js";
+import { SVGRectAttr } from "./rect.js";
+import { SVGLayout } from "./layout.js";
+import { SVGTransformListAttr } from "./attr-transform.js";

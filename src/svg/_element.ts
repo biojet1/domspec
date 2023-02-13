@@ -1,4 +1,4 @@
-import { Vec, Box, Matrix, SVGTransform } from 'svggeom';
+import { Vec, Box, Matrix, SVGTransform } from "svggeom";
 
 export class SVGElement extends Element {
 	get _isViewportElement() {
@@ -31,44 +31,47 @@ export class SVGElement extends Element {
 		return new Matrix();
 	}
 	createSVGTransformFromMatrix(M: Matrix) {
-		const m = new SVGTransform();
+		const m = this.createSVGTransform();
 		m.setMatrix(M);
 		return m;
+	}
+	createSVGTransform() {
+		return new SVGTransform();
 	}
 }
 export class SVGGraphicsElement extends SVGElement {
 	newAttributeNode(name: string) {
 		// console.warn("newAttributeNode", name);
 		switch (name) {
-			case 'r':
+			case "r":
 				return new SVGLengthAttr(name);
-			case 'width':
+			case "width":
 				if (this instanceof SVGSVGElement) {
 					return new SVGLengthWAttr(name);
 				} // fall
 
-			case 'x':
-			case 'cx':
-			case 'x1':
-			case 'x2':
+			case "x":
+			case "cx":
+			case "x1":
+			case "x2":
 				return new SVGLengthXAttr(name);
-			case 'height':
+			case "height":
 				if (this instanceof SVGSVGElement) {
 					return new SVGLengthHAttr(name);
 				} // fall
-			case 'y':
-			case 'cy':
-			case 'y1':
-			case 'y2':
+			case "y":
+			case "cy":
+			case "y1":
+			case "y2":
 				return new SVGLengthYAttr(name);
-			case 'rx':
-			case 'ry':
+			case "rx":
+			case "ry":
 				// TODO
 				return new SVGLengthAttr(name);
-			case 'viewBox':
+			case "viewBox":
 				return new SVGRectAttr(name);
 			// return new SVGLengthListAttr(name);
-			case 'transform':
+			case "transform":
 				return new SVGTransformListAttr(name);
 			// case "points":
 			// 	return new SVGNumberListAttr(name);
@@ -76,49 +79,49 @@ export class SVGGraphicsElement extends SVGElement {
 		return super.newAttributeNode(name);
 	}
 	get r(): SVGLengthAttr {
-		return this.letAttributeNode('r') as SVGLengthAttr; // for now
+		return this.letAttributeNode("r") as SVGLengthAttr; // for now
 	}
 	get x(): SVGLengthAttr {
-		return this.letAttributeNode('x') as SVGLengthAttr; // for now
+		return this.letAttributeNode("x") as SVGLengthAttr; // for now
 	}
 	get y(): SVGLengthAttr {
-		return this.letAttributeNode('y') as SVGLengthAttr; // for now
+		return this.letAttributeNode("y") as SVGLengthAttr; // for now
 	}
 	get cx(): SVGLengthAttr {
-		return this.letAttributeNode('cx') as SVGLengthAttr; // for now
+		return this.letAttributeNode("cx") as SVGLengthAttr; // for now
 	}
 	get cy(): SVGLengthAttr {
-		return this.letAttributeNode('cy') as SVGLengthAttr; // for now
+		return this.letAttributeNode("cy") as SVGLengthAttr; // for now
 	}
 	get rx(): SVGLengthAttr {
-		return this.letAttributeNode('rx') as SVGLengthAttr; // for now
+		return this.letAttributeNode("rx") as SVGLengthAttr; // for now
 	}
 	get ry(): SVGLengthAttr {
-		return this.letAttributeNode('ry') as SVGLengthAttr; // for now
+		return this.letAttributeNode("ry") as SVGLengthAttr; // for now
 	}
 	get x1(): SVGLengthAttr {
-		return this.letAttributeNode('x1') as SVGLengthAttr; // for now
+		return this.letAttributeNode("x1") as SVGLengthAttr; // for now
 	}
 	get x2(): SVGLengthAttr {
-		return this.letAttributeNode('x2') as SVGLengthAttr; // for now
+		return this.letAttributeNode("x2") as SVGLengthAttr; // for now
 	}
 	get y1(): SVGLengthAttr {
-		return this.letAttributeNode('y1') as SVGLengthAttr; // for now
+		return this.letAttributeNode("y1") as SVGLengthAttr; // for now
 	}
 	get y2(): SVGLengthAttr {
-		return this.letAttributeNode('y2') as SVGLengthAttr; // for now
+		return this.letAttributeNode("y2") as SVGLengthAttr; // for now
 	}
 	get width(): SVGLengthAttr {
-		return this.letAttributeNode('width') as SVGLengthAttr; // for now
+		return this.letAttributeNode("width") as SVGLengthAttr; // for now
 	}
 	get height(): SVGLengthAttr {
-		return this.letAttributeNode('height') as SVGLengthAttr; // for now
+		return this.letAttributeNode("height") as SVGLengthAttr; // for now
 	}
 	get viewBox(): SVGRectAttr {
-		return this.letAttributeNode('viewBox') as SVGRectAttr; // for now
+		return this.letAttributeNode("viewBox") as SVGRectAttr; // for now
 	}
 	get transform(): SVGTransformListAttr {
-		return this.letAttributeNode('transform') as SVGTransformListAttr; // for now
+		return this.letAttributeNode("transform") as SVGTransformListAttr; // for now
 	}
 	get nearestViewportElement(): SVGElement | null {
 		let parent: SVGElement = this;
@@ -146,38 +149,48 @@ export class SVGGraphicsElement extends SVGElement {
 	}
 
 	set ownTM(T: Matrix) {
-		this.setAttribute('transform', T.toString());
+		this.setAttribute("transform", T.toString());
 	}
 
 	get clipElement(): SVGGraphicsElement | null {
-		const v = this.getAttribute('clip-path');
+		const v = this.getAttribute("clip-path");
 		const a = v && /#([^#\(\)\s]+)/.exec(v);
-		return a ? (this.ownerDocument?.getElementById(a[1]) as SVGGraphicsElement) : null;
+		return a
+			? (this.ownerDocument?.getElementById(a[1]) as SVGGraphicsElement)
+			: null;
 	}
 
 	set clipElement(target: SVGElement | null) {
 		if (target) {
-			this.setAttribute('clip-path', `url(#${target.letId()})`);
+			this.setAttribute("clip-path", `url(#${target.letId()})`);
 		} else {
-			this.removeAttribute('clip-path');
+			this.removeAttribute("clip-path");
 		}
 	}
 
 	get hrefElement() {
 		const id =
-			this.getAttributeNS('http://www.w3.org/1999/xlink', 'href') || this.getAttribute('href');
+			this.getAttributeNS("http://www.w3.org/1999/xlink", "href") ||
+			this.getAttribute("href");
 		if (id) {
-			return this.ownerDocument?.getElementById(id.substr(id.indexOf('#') + 1)) as SVGElement;
+			return this.ownerDocument?.getElementById(
+				id.substr(id.indexOf("#") + 1)
+			) as SVGElement;
 		}
 		return null;
 	}
 
 	set hrefElement(target: SVGElement | null) {
-		target && this.setAttributeNS('http://www.w3.org/1999/xlink', 'href', `#${target.letId()}`);
+		target &&
+			this.setAttributeNS(
+				"http://www.w3.org/1999/xlink",
+				"href",
+				`#${target.letId()}`
+			);
 	}
 
 	canRender() {
-		if (this.getAttribute('display') === 'none') {
+		if (this.getAttribute("display") === "none") {
 			return false;
 		}
 		return true;
@@ -241,7 +254,8 @@ export class SVGGraphicsElement extends SVGElement {
 		}
 	}
 	_composeTM(root?: SVGElement | null): Matrix | null {
-		let parent: SVGGraphicsElement | null = this.parentElement as SVGGraphicsElement;
+		let parent: SVGGraphicsElement | null = this
+			.parentElement as SVGGraphicsElement;
 		if (parent instanceof SVGGraphicsElement) {
 			return parent._relTM(this.ownTM, root);
 		} else if (root) {
@@ -281,7 +295,7 @@ export class SVGGraphicsElement extends SVGElement {
 				sub.fuseTransform(tm);
 			}
 		}
-		this.removeAttribute('transform');
+		this.removeAttribute("transform");
 	}
 
 	objectBBox(T?: Matrix) {
@@ -349,7 +363,7 @@ export class SVGGraphicsElement extends SVGElement {
 		return Box.not();
 	}
 	calcWidth() {
-		const w = this.getAttribute('width');
+		const w = this.getAttribute("width");
 		if (w) {
 		}
 	}
@@ -367,7 +381,10 @@ export class SVGGraphicsElement extends SVGElement {
 			}
 		}
 	}
-	_placePriorTo(ref: ChildNode | null | undefined, ...nodes: SVGGraphicsElement[]) {
+	_placePriorTo(
+		ref: ChildNode | null | undefined,
+		...nodes: SVGGraphicsElement[]
+	) {
 		return this._placeChild(ref, nodes);
 	}
 	_placeAppend(...nodes: SVGGraphicsElement[]) {
@@ -375,12 +392,16 @@ export class SVGGraphicsElement extends SVGElement {
 	}
 	_placeBefore(...nodes: SVGGraphicsElement[]) {
 		const { parentNode } = this;
-		return parentNode instanceof SVGGraphicsElement && parentNode._placeChild(this, nodes);
+		return (
+			parentNode instanceof SVGGraphicsElement &&
+			parentNode._placeChild(this, nodes)
+		);
 	}
 	_placeAfter(...nodes: SVGGraphicsElement[]) {
 		const { parentNode } = this;
 		return (
-			parentNode instanceof SVGGraphicsElement && parentNode._placeChild(this.nextSibling, nodes)
+			parentNode instanceof SVGGraphicsElement &&
+			parentNode._placeChild(this.nextSibling, nodes)
 		);
 	}
 	_layout() {
@@ -409,7 +430,7 @@ export class SVGGraphicsElement extends SVGElement {
 	}
 }
 export class SVGSVGElement extends SVGGraphicsElement {
-	static TAGS = ['svg'];
+	static TAGS = ["svg"];
 	get _isViewportElement() {
 		return 1;
 	}
@@ -427,7 +448,7 @@ export class SVGSVGElement extends SVGGraphicsElement {
 		if (!(w && h)) {
 			return Matrix.identity();
 		}
-		const a = this.getAttribute('viewBox');
+		const a = this.getAttribute("viewBox");
 		let vx, vy, vw, vh;
 		if (a) {
 			const { x: _x, y: _y, width: _width, height: _height } = Box.parse(a);
@@ -447,7 +468,7 @@ export class SVGSVGElement extends SVGGraphicsElement {
 			vy,
 			vw,
 			vh,
-			this.getAttribute('preserveAspectRatio'),
+			this.getAttribute("preserveAspectRatio")
 		);
 		return Matrix.translate(tx, ty).scale(sx, sy);
 	}
@@ -462,12 +483,12 @@ export class SVGSVGElement extends SVGGraphicsElement {
 		let { ownerDocument, children } = this;
 		if (ownerDocument) {
 			for (const sub of this.children) {
-				if (sub.localName == 'defs') {
+				if (sub.localName == "defs") {
 					return sub;
 				}
 			}
-			const defs = ownerDocument.createElement('defs');
-			this.insertAdjacentElement('afterbegin', defs);
+			const defs = ownerDocument.createElement("defs");
+			this.insertAdjacentElement("afterbegin", defs);
 			return defs; // avoids error "Object is possibly 'null'"
 		}
 		throw new Error(`No ownerDocument`);
@@ -476,19 +497,19 @@ export class SVGSVGElement extends SVGGraphicsElement {
 		this.width.baseVal.convertToSpecifiedUnits(1);
 		this.height.baseVal.convertToSpecifiedUnits(1);
 		for (const x in [
-			'r',
-			'x',
-			'y',
-			'cx',
-			'cy',
-			'rx',
-			'ry',
-			'x1',
-			'x2',
-			'y1',
-			'y2',
-			'width',
-			'height',
+			"r",
+			"x",
+			"y",
+			"cx",
+			"cy",
+			"rx",
+			"ry",
+			"x1",
+			"x2",
+			"y1",
+			"y2",
+			"width",
+			"height",
 		]) {
 			this.getAttributeNode(x);
 		}
@@ -498,7 +519,7 @@ export class SVGSVGElement extends SVGGraphicsElement {
 function composeTransforms(
 	parent: SVGGraphicsElement,
 	tm: Matrix,
-	root?: SVGElement | null,
+	root?: SVGElement | null
 ): Matrix {
 	while (parent != root) {
 		const grand: Element | null = parent.parentElement;
@@ -513,8 +534,8 @@ function composeTransforms(
 	}
 	return tm;
 }
-import { Element } from '../element.js';
-import { ChildNode } from '../child-node.js';
+import { Element } from "../element.js";
+import { ChildNode } from "../child-node.js";
 
 import {
 	userUnit,
@@ -524,8 +545,8 @@ import {
 	SVGLengthWAttr,
 	SVGLengthXAttr,
 	SVGLengthYAttr,
-} from './length.js';
-import { SVGRectAttr } from './rect.js';
-import { SVGLayout } from './layout.js';
-import { SVGLengthListAttr, SVGLengthList } from './length-list.js';
-import { SVGTransformListAttr, viewbox_transform } from './attr-transform.js';
+} from "./length.js";
+import { SVGRectAttr } from "./rect.js";
+import { SVGLayout } from "./layout.js";
+import { SVGLengthListAttr, SVGLengthList } from "./length-list.js";
+import { SVGTransformListAttr, viewbox_transform } from "./attr-transform.js";

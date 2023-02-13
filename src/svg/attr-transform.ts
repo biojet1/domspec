@@ -7,7 +7,7 @@ export class SVGTransformListAttr extends Attr {
 		const { _var } = this;
 		if (_var instanceof SVGTransformList) {
 			_var.clear();
-			_var.parse(value);
+			_var._parse(value);
 		} else if (_var instanceof Matrix) {
 			this._var = Matrix.parse(value);
 		} else {
@@ -29,7 +29,7 @@ export class SVGTransformListAttr extends Attr {
 				new SVGTransform([a, b, c, d, e, f])
 			));
 		} else if (_var) {
-			return (this._var = SVGTransformList.parse(_var));
+			return (this._var = SVGTransformList._parse(_var));
 		} else {
 			return (this._var = new SVGTransformList());
 		}

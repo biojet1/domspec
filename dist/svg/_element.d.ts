@@ -5,8 +5,8 @@ export declare class SVGElement extends Element {
     get ownerSVGElement(): SVGSVGElement | null;
     createSVGLength(): SVGLength;
     createSVGMatrix(): Matrix;
-    createSVGTransformFromMatrix(M: Matrix): SVGTransform;
     createSVGTransform(): SVGTransform;
+    createSVGTransformFromMatrix(M: Matrix): SVGTransform;
 }
 export declare class SVGGraphicsElement extends SVGElement {
     newAttributeNode(name: string): import("../attr.js").Attr;

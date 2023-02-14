@@ -24,7 +24,7 @@ export class SVGRectAttr extends Attr {
             const { x, y, width, height } = _var;
             return `${x} ${y} ${width} ${height}`;
         }
-        return _var || '';
+        return _var || "";
     }
     get baseVal() {
         const { _var } = this;
@@ -197,7 +197,7 @@ function contain(args) {
     }
     return bbox;
 }
-import { BoxMut, Box, Vec, Ray } from 'svggeom';
-import { Attr } from '../attr.js';
-import { SVGGraphicsElement } from './element.js';
+import { BoxMut, Box, Vec, Ray } from "svggeom";
+import { Attr } from "../attr.js";
+import { SVGGraphicsElement } from "./element.js";
 //# sourceMappingURL=rect.js.map

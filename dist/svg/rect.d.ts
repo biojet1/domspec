@@ -11,6 +11,6 @@ export declare class SVGRectAttr extends Attr {
     calcHeight(): number;
     calcBox(): Box;
 }
-import { BoxMut, Box, Vec, Ray } from 'svggeom';
-import { Attr } from '../attr.js';
-import { SVGGraphicsElement } from './element.js';
+import { BoxMut, Box, Vec, Ray } from "svggeom";
+import { Attr } from "../attr.js";
+import { SVGGraphicsElement } from "./element.js";

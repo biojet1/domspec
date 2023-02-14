@@ -38,7 +38,7 @@ export declare class SVGLengthAttr extends Attr {
     set value(value: string);
     get value(): string;
     get baseVal(): SVGLength;
-    parse(s?: string): SVGLength;
+    _parse(s?: string): SVGLength;
     valueOf(): string | null | undefined;
     get specified(): boolean;
     toUU(): void;
@@ -50,16 +50,16 @@ export declare class SVGLengthH extends SVGLength {
     getRelativeLength(): number;
 }
 export declare class SVGLengthWAttr extends SVGLengthAttr {
-    parse(s?: string): SVGLengthW;
+    _parse(s?: string): SVGLengthW;
     toUU(): void;
 }
 export declare class SVGLengthHAttr extends SVGLengthAttr {
-    parse(s?: string): SVGLengthH;
+    _parse(s?: string): SVGLengthH;
 }
 export declare class SVGLengthXAttr extends SVGLengthAttr {
-    parse(s?: string): SVGLengthW;
+    _parse(s?: string): SVGLengthW;
 }
 export declare class SVGLengthYAttr extends SVGLengthAttr {
-    parse(s?: string): SVGLengthH;
+    _parse(s?: string): SVGLengthH;
 }
-import { Attr } from '../attr.js';
+import { Attr } from "../attr.js";

@@ -20,6 +20,7 @@
   </svg>
   <rect id="R5" x="200" y="160" width="50" height="40" style="fill:#81b4fe;stroke:none;opacity:0.5"/>
   <rect id="R6" transform="translate(50, 40)" x="200" y="160" width="50" height="40" style="fill:#81b4fe;stroke:none;opacity:0.5"/>
+  <rect id="R7" style="stroke:pink;opacity:0.5"/>
   <script>const svg = document.documentElement;
 
          svg.setAttribute("width",'300px');

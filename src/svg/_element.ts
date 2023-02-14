@@ -30,13 +30,13 @@ export class SVGElement extends Element {
 	createSVGMatrix() {
 		return new Matrix();
 	}
+	createSVGTransform() {
+		return new SVGTransform();
+	}
 	createSVGTransformFromMatrix(M: Matrix) {
 		const m = this.createSVGTransform();
 		m.setMatrix(M);
 		return m;
-	}
-	createSVGTransform() {
-		return new SVGTransform();
 	}
 }
 export class SVGGraphicsElement extends SVGElement {

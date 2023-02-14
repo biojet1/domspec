@@ -31,14 +31,7 @@ tap.test("Geoms 1", function (t) {
     })
   );
   const svg = document.documentElement;
-  const V1 = document.getElementById("V1");
-  const C1 = document.getElementById("C1");
-  const C2 = document.getElementById("C2");
-  const C3 = document.getElementById("C3");
-  const C4 = document.getElementById("C4");
-  const R1 = document.getElementById("R1");
-  const R2 = document.getElementById("R2");
-  const R3 = document.getElementById("R3");
+  const { V1, V3, C1, C2, C3, C4, R1, R2, R3 } = document.all;
   t.same(V1.x.baseVal.value, 200, `V1.x`);
   t.same(V1.y.baseVal.value, 0, `V1.y`);
   t.same(V1.width.baseVal.value, 100, `V1.width`);
@@ -136,6 +129,7 @@ tap.test("Geoms 1", function (t) {
       [x1, y1, x2, y2]
     );
   });
+  t.same(V3.viewBox.baseVal, null);
 
   t.end();
 });

@@ -187,7 +187,6 @@ tap.test("VP translate", function (t) {
 
 	const m = Matrix.translate(50, 40);
 	apply(m, R1);
-	// console.log(svg.querySelector('svg>g>g>g>g>g>rect:nth-of-type(1)').outerHTML);
 	t.same(R1.ownTM.describe(), Matrix.translate(5, 4).describe(), "R1");
 	// apply(m, R2);
 	// t.same(R2.ownTM.describe(), Matrix.translate(-15, -10).describe(), 'R2');

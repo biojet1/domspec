@@ -1,3 +1,65 @@
+// export class VBox extends BoxMut {
+// 	owner: SVGSVGElement;
+
+// 	override get x() {
+// 		return this._x ?? 0;
+// 	}
+
+// 	override set x(value: number) {
+// 		this._x = value;
+// 	}
+
+// 	override get y() {
+// 		return this._y ?? 0;
+// 	}
+
+// 	override set y(value: number) {
+// 		this._y = value;
+// 	}
+
+// 	override get width() {
+// 		const { owner: o, _w = 100 } = this;
+// 		if (_w == null) {
+// 			a = o.width;
+// 			if (a.specified) {
+// 				_w = a.baseVal.value;
+// 			} else {
+// 				const v = o.nearestViewportElement as SVGSVGElement;
+// 				if (v) {
+// 					_w = v.viewBox.baseVal.width;
+// 				}
+// 			}
+// 		}
+// 		return _w;
+// 	}
+
+// 	override set width(value: number) {
+// 		this._w = value;
+// 	}
+
+// 	override get height() {
+// 		const { owner: o, _h = 100 } = this;
+// 		if (_h == null) {
+// 			let a;
+// 			x = o.x.baseVal.value;
+// 			a = o.height;
+// 			if (a.specified) {
+// 				_h = a.baseVal.value;
+// 			} else {
+// 				const v = o.nearestViewportElement as SVGSVGElement;
+// 				if (v) {
+// 					_h = v.viewBox.baseVal.height;
+// 				}
+// 			}
+// 		}
+// 		return _h;
+// 	}
+
+// 	override set height(value: number) {
+// 		this._h = value;
+// 	}
+// }
+
 export class SVGRectAttr extends Attr {
 	// _var?: { x: number; y: number; width: number; height: number } | string;
 	_var?: BoxMut | string;
@@ -25,7 +87,7 @@ export class SVGRectAttr extends Attr {
 			const { x, y, width, height } = _var;
 			return `${x} ${y} ${width} ${height}`;
 		}
-		return _var || '';
+		return _var || "";
 	}
 
 	get baseVal() {
@@ -55,7 +117,15 @@ export class SVGRectAttr extends Attr {
 		}
 	}
 
-	contain(...args: Array<SVGGraphicsElement | Box | Vec | Ray | Array<SVGGraphicsElement | Box | Vec | Ray>>) {
+	contain(
+		...args: Array<
+			| SVGGraphicsElement
+			| Box
+			| Vec
+			| Ray
+			| Array<SVGGraphicsElement | Box | Vec | Ray>
+		>
+	) {
 		let bbox = contain(args);
 		const o = this.ownerElement;
 		if (o instanceof SVGGraphicsElement) {
@@ -70,7 +140,15 @@ export class SVGRectAttr extends Attr {
 		return this;
 	}
 
-	contain2(...args: Array<SVGGraphicsElement | Box | Vec | Ray | Array<SVGGraphicsElement | Box | Vec | Ray>>) {
+	contain2(
+		...args: Array<
+			| SVGGraphicsElement
+			| Box
+			| Vec
+			| Ray
+			| Array<SVGGraphicsElement | Box | Vec | Ray>
+		>
+	) {
 		return this.contain(...args);
 	}
 	// https://svgwg.org/svg-next/coords.html#Units
@@ -83,7 +161,7 @@ export class SVGRectAttr extends Attr {
 				this._var = BoxMut.parse(_var) as BoxMut;
 				return this._var.width;
 			} catch (err) {
-				console.error(`Failed to parse as Box "${_var}"`)
+				console.error(`Failed to parse as Box "${_var}"`);
 			}
 		}
 		const o = this.ownerElement as SVGGraphicsElement;
@@ -113,7 +191,7 @@ export class SVGRectAttr extends Attr {
 				this._var = BoxMut.parse(_var) as BoxMut;
 				return this._var.height;
 			} catch (err) {
-				console.error(`Failed to parse as Box "${_var}"`)
+				console.error(`Failed to parse as Box "${_var}"`);
 			}
 		}
 		const o = this.ownerElement as SVGGraphicsElement;
@@ -130,7 +208,6 @@ export class SVGRectAttr extends Attr {
 				// const scale = v.innerTM.inverse().d;
 				// return n * scale;
 			} else if (o as SVGSVGElement) {
-
 			}
 		}
 
@@ -145,7 +222,7 @@ export class SVGRectAttr extends Attr {
 			try {
 				return (this._var = BoxMut.parse(_var) as BoxMut);
 			} catch (err) {
-				console.error(`Failed to parse as Box "${_var}"`)
+				console.error(`Failed to parse as Box "${_var}"`);
 			}
 		}
 		let x = 0,
@@ -181,7 +258,13 @@ export class SVGRectAttr extends Attr {
 }
 
 function contain(
-	args: Array<SVGGraphicsElement | Box | Vec | Ray | Array<SVGGraphicsElement | Box | Vec | Ray>>
+	args: Array<
+		| SVGGraphicsElement
+		| Box
+		| Vec
+		| Ray
+		| Array<SVGGraphicsElement | Box | Vec | Ray>
+	>
 ): Box {
 	let bbox = BoxMut.new() as BoxMut;
 	for (const v of args) {
@@ -196,7 +279,9 @@ function contain(
 			try {
 				bbox.mergeSelf(v._boundingBox());
 			} catch (err) {
-				console.error(`Failed to merge ${v.constructor.name} ${bbox.constructor.name}(${bbox})`);
+				console.error(
+					`Failed to merge ${v.constructor.name} ${bbox.constructor.name}(${bbox})`
+				);
 				throw err;
 			}
 		}
@@ -204,6 +289,6 @@ function contain(
 	return bbox;
 }
 
-import { BoxMut, Box, Vec, Ray } from 'svggeom';
-import { Attr } from '../attr.js';
-import { SVGGraphicsElement, SVGSVGElement } from './element.js';
+import { BoxMut, Box, Vec, Ray } from "svggeom";
+import { Attr } from "../attr.js";
+import { SVGGraphicsElement, SVGSVGElement } from "./element.js";

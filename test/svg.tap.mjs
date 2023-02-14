@@ -1,3 +1,4 @@
+import fs from "fs";
 import tap from "tap";
 import { Document, SVGDocument } from "../dist/document.js";
 import { ParentNode } from "../dist/parent-node.js";
@@ -146,6 +147,23 @@ tap.test("createSVGTransformFromMatrix", function (t) {
 
 	// document.getElementById("status").setAttributeNS(null, "fill", passed ? "lime" : "red");
 	// document.getElementById("scriptstatus").textContent = "Scripting enabled";
+
+	t.end();
+});
+
+tap.test("toParent", function (t) {
+	const document = parser.parseFromString(
+		fs.readFileSync("test/res/transform.svg", {
+			encoding: "utf-8",
+		})
+	);
+	const { RO } = document.all;
+	const v = RO.width.baseVal;
+	t.ok(v, v);
+	t.strictSame(RO.width.baseVal, v);
+	RO.width.baseVal.value = 7;
+	t.strictSame(RO.width.baseVal, v);
+	t.same(RO.width.baseVal.value, 7, v);
 
 	t.end();
 });

@@ -1,6 +1,6 @@
 import { Matrix, MatrixMut, SVGTransform, SVGTransformList } from "svggeom";
 
-export class SVGTransformListAttr extends Attr {
+export class SVGAnimatedTransformList extends Attr {
 	_var?: SVGTransformList | Matrix | string;
 
 	set value(value: string) {

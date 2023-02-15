@@ -73,7 +73,7 @@ export class SVGGraphicsElement extends SVGElement {
 				return new SVGAnimatedRect(name);
 			// return new SVGLengthListAttr(name);
 			case "transform":
-				return new SVGTransformListAttr(name);
+				return new SVGAnimatedTransformList(name);
 			// case "points":
 			// 	return new SVGNumberListAttr(name);
 		}
@@ -121,8 +121,8 @@ export class SVGGraphicsElement extends SVGElement {
 	get viewBox(): SVGAnimatedRect {
 		return this.letAttributeNode("viewBox") as SVGAnimatedRect; // for now
 	}
-	get transform(): SVGTransformListAttr {
-		return this.letAttributeNode("transform") as SVGTransformListAttr; // for now
+	get transform(): SVGAnimatedTransformList {
+		return this.letAttributeNode("transform") as SVGAnimatedTransformList; // for now
 	}
 	get nearestViewportElement(): SVGElement | null {
 		let parent: SVGElement = this;
@@ -550,4 +550,4 @@ import {
 import { SVGAnimatedRect } from "./rect.js";
 import { SVGLayout } from "./layout.js";
 import { SVGLengthListAttr, SVGLengthList } from "./length-list.js";
-import { SVGTransformListAttr, viewbox_transform } from "./attr-transform.js";
+import { SVGAnimatedTransformList, viewbox_transform } from "./attr-transform.js";

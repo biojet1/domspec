@@ -129,7 +129,7 @@ tap.test("Geoms 1", function (t) {
       [x1, y1, x2, y2]
     );
   });
-  t.same(V3.viewBox.baseVal, null);
+  t.ok(Box.forRect(0, 0, 0, 0).equals(V3.viewBox.baseVal), V3.viewBox.baseVal);
 
   t.end();
 });

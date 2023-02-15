@@ -1,74 +1,78 @@
-// export class VBox extends BoxMut {
-// 	owner: SVGSVGElement;
+export class SVGRect extends BoxMut {
+	owner?: SVGSVGElement;
 
-// 	override get x() {
-// 		return this._x ?? 0;
-// 	}
+	override get x() {
+		return this._x ?? 0;
+	}
 
-// 	override set x(value: number) {
-// 		this._x = value;
-// 	}
+	override set x(value: number) {
+		this._x = value;
+	}
 
-// 	override get y() {
-// 		return this._y ?? 0;
-// 	}
+	override get y() {
+		return this._y ?? 0;
+	}
 
-// 	override set y(value: number) {
-// 		this._y = value;
-// 	}
+	override set y(value: number) {
+		this._y = value;
+	}
 
-// 	override get width() {
-// 		const { owner: o, _w = 100 } = this;
-// 		if (_w == null) {
-// 			a = o.width;
-// 			if (a.specified) {
-// 				_w = a.baseVal.value;
-// 			} else {
-// 				const v = o.nearestViewportElement as SVGSVGElement;
-// 				if (v) {
-// 					_w = v.viewBox.baseVal.width;
-// 				}
-// 			}
-// 		}
-// 		return _w;
-// 	}
+	override get width() {
+		let { _w = 100 } = this;
+		if (_w == null) {
+			const { owner: o } = this;
+			if (o) {
+				const a = o.width;
+				if (a.specified) {
+					_w = a.baseVal.value;
+				} else {
+					const v = o.nearestViewportElement as SVGSVGElement;
+					if (v) {
+						_w = v.viewBox.baseVal.width;
+					}
+				}
+			}
+		}
+		return _w;
+	}
 
-// 	override set width(value: number) {
-// 		this._w = value;
-// 	}
+	override set width(value: number) {
+		this._w = value;
+	}
 
-// 	override get height() {
-// 		const { owner: o, _h = 100 } = this;
-// 		if (_h == null) {
-// 			let a;
-// 			x = o.x.baseVal.value;
-// 			a = o.height;
-// 			if (a.specified) {
-// 				_h = a.baseVal.value;
-// 			} else {
-// 				const v = o.nearestViewportElement as SVGSVGElement;
-// 				if (v) {
-// 					_h = v.viewBox.baseVal.height;
-// 				}
-// 			}
-// 		}
-// 		return _h;
-// 	}
+	override get height() {
+		let { _h = 100 } = this;
+		if (_h == null) {
+			const { owner: o } = this;
+			if (o) {
+				const a = o.height;
+				if (a.specified) {
+					_h = a.baseVal.value;
+				} else {
+					const v = o.nearestViewportElement as SVGSVGElement;
+					if (v) {
+						_h = v.viewBox.baseVal.height;
+					}
+				}
+			}
+		}
+		return _h;
+	}
 
-// 	override set height(value: number) {
-// 		this._h = value;
-// 	}
-// }
+	override set height(value: number) {
+		this._h = value;
+	}
+}
 
-export class SVGRectAttr extends Attr {
+export class SVGAnimatedRect extends Attr {
 	// _var?: { x: number; y: number; width: number; height: number } | string;
-	_var?: BoxMut | string;
+	_var?: SVGRect | string;
 
 	set value(value: string) {
 		const { _var } = this;
 		if (_var instanceof BoxMut) {
 			try {
-				const { x, y, width, height } = BoxMut.parse(value);
+				const { x, y, width, height } = SVGRect.parse(value);
 				_var.x = x;
 				_var.y = y;
 				_var.width = width;
@@ -96,11 +100,16 @@ export class SVGRectAttr extends Attr {
 			return _var;
 		} else if (_var) {
 			try {
-				return (this._var = BoxMut.parse(_var) as BoxMut);
+				return (this._var = SVGRect.parse(_var) as BoxMut);
 			} catch (err) {
-				return null;
+				// return null;
 			}
 		}
+		return (this._var = SVGRect.forRect(0, 0, 0, 0));
+	}
+
+	get animVal() {
+		return this.baseVal;
 	}
 
 	get specified() {

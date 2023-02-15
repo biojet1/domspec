@@ -43,6 +43,7 @@ export class SVGGraphicsElement extends SVGElement {
 	newAttributeNode(name: string) {
 		// console.warn("newAttributeNode", name);
 		switch (name) {
+			// https://svgwg.org/svg2-draft/geometry.html#Sizing
 			case "r":
 				return new SVGLengthAttr(name);
 			case "width":
@@ -69,7 +70,7 @@ export class SVGGraphicsElement extends SVGElement {
 				// TODO
 				return new SVGLengthAttr(name);
 			case "viewBox":
-				return new SVGRectAttr(name);
+				return new SVGAnimatedRect(name);
 			// return new SVGLengthListAttr(name);
 			case "transform":
 				return new SVGTransformListAttr(name);
@@ -117,8 +118,8 @@ export class SVGGraphicsElement extends SVGElement {
 	get height(): SVGLengthAttr {
 		return this.letAttributeNode("height") as SVGLengthAttr; // for now
 	}
-	get viewBox(): SVGRectAttr {
-		return this.letAttributeNode("viewBox") as SVGRectAttr; // for now
+	get viewBox(): SVGAnimatedRect {
+		return this.letAttributeNode("viewBox") as SVGAnimatedRect; // for now
 	}
 	get transform(): SVGTransformListAttr {
 		return this.letAttributeNode("transform") as SVGTransformListAttr; // for now
@@ -546,7 +547,7 @@ import {
 	SVGLengthXAttr,
 	SVGLengthYAttr,
 } from "./length.js";
-import { SVGRectAttr } from "./rect.js";
+import { SVGAnimatedRect } from "./rect.js";
 import { SVGLayout } from "./layout.js";
 import { SVGLengthListAttr, SVGLengthList } from "./length-list.js";
 import { SVGTransformListAttr, viewbox_transform } from "./attr-transform.js";

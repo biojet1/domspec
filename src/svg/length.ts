@@ -94,8 +94,8 @@ export class SVGLength {
 			//
 		} else if (_unit >= 0) {
 			return `${_num}${UNITS[_unit] || ""}`;
-		} else {
-			//
+		} else if (_num != undefined) {
+			return `${_num}`;
 		}
 		return "";
 	}
@@ -152,6 +152,8 @@ export class SVGLength {
 				return ((_num as number) * 4) / 3;
 			case 10:
 				return (_num as number) * 16;
+			case -1:
+				return 0;
 			default:
 				throw new TypeError(`Invalid unit: '${_unit}'`);
 		}
@@ -186,6 +188,10 @@ export class SVGLength {
 					return;
 				case 10:
 					this._num = 16 / value;
+					return;
+				case -1:
+					this._unit = 1;
+					this._num = 0;
 					return;
 				default:
 					throw new TypeError(`invalid ${_unit}`);

@@ -567,6 +567,6 @@ import { SVGElement, SVGSVGElement, SVGGraphicsElement } from "./_element.js";
 import { SVGTransformListAttr } from "./attr-transform.js";
 import { DOMException } from "../event-target.js";
 export { SVGLength, SVGLengthAttr } from "./length.js";
+export { SVGRect, SVGAnimatedRect } from "./rect.js";
 export { SVGLayout } from "./layout.js";
 export { SVGElement, SVGGraphicsElement, SVGSVGElement };
-

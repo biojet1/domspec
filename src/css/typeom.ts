@@ -6,6 +6,22 @@ export class CSSStyleValue {
 	parseAll(property: string, cssText: string): CSSStyleValue[] {
 		throw new Error(`Not implemented`);
 	}
+
+	_parse_css_style_value(property_name: string, css_text: string) {
+		if (property_name.startsWith("--")) {
+			property_name = property_name.toLowerCase();
+		}
+		switch (css_text.toLowerCase()) {
+			case "currentcolor":
+			case "transparent":
+			case "default":
+			case "inherit":
+			case "initial":
+			case "revert":
+			case "unset":
+				css_text = css_text.toLowerCase()
+		}
+	}
 }
 
 export class CSSKeywordValue extends CSSStyleValue {
@@ -68,13 +84,13 @@ export class CSSUnitValue extends CSSNumericValue {
 	}
 	static parse(text: string) {
 		const m = String(text).match(
-			/^([-+]?[0-9]*\.?[0-9]+)(|%|em|ex|ch|rem|vw|vh|vmin|vmax|cm|mm|in|pt|pc|px|Q|deg|grad|rad|turn|s|ms|Hz|kHz|dpi|dpcm|dppx|fr)?$/,
+			/^([-+]?[0-9]*\.?[0-9]+)(|%|em|ex|ch|rem|vw|vh|vmin|vmax|cm|mm|in|pt|pc|px|Q|deg|grad|rad|turn|s|ms|Hz|kHz|dpi|dpcm|dppx|fr)?$/
 		);
 		if (m) {
 			const [, value, unit] = m;
 			return new CSSUnitValue(
 				parseFloat(value),
-				unit ? (unit == '%' ? 'percent' : unit) : 'number',
+				unit ? (unit == "%" ? "percent" : unit) : "number"
 			);
 		}
 	}
@@ -123,37 +139,37 @@ interface CSSTransformComponent {
 export class CSSMathValue extends CSSNumericValue {}
 
 export class CSS {
-	static ch = (value: number) => new CSSUnitValue(value, 'ch');
-	static rem = (value: number) => new CSSUnitValue(value, 'rem');
-	static vw = (value: number) => new CSSUnitValue(value, 'vw');
-	static vh = (value: number) => new CSSUnitValue(value, 'vh');
-	static vmin = (value: number) => new CSSUnitValue(value, 'vmin');
-	static vmax = (value: number) => new CSSUnitValue(value, 'vmax');
-	static cm = (value: number) => new CSSUnitValue(value, 'cm');
-	static mm = (value: number) => new CSSUnitValue(value, 'mm');
-	static in = (value: number) => new CSSUnitValue(value, 'in');
-	static pt = (value: number) => new CSSUnitValue(value, 'pt');
-	static pc = (value: number) => new CSSUnitValue(value, 'pc');
-	static px = (value: number) => new CSSUnitValue(value, 'px');
-	static Q = (value: number) => new CSSUnitValue(value, 'Q');
-	static deg = (value: number) => new CSSUnitValue(value, 'deg');
-	static grad = (value: number) => new CSSUnitValue(value, 'grad');
-	static rad = (value: number) => new CSSUnitValue(value, 'rad');
-	static turn = (value: number) => new CSSUnitValue(value, 'turn');
-	static s = (value: number) => new CSSUnitValue(value, 's');
-	static ms = (value: number) => new CSSUnitValue(value, 'ms');
-	static Hz = (value: number) => new CSSUnitValue(value, 'Hz');
-	static kHz = (value: number) => new CSSUnitValue(value, 'kHz');
-	static dpi = (value: number) => new CSSUnitValue(value, 'dpi');
-	static dpcm = (value: number) => new CSSUnitValue(value, 'dpcm');
-	static dppx = (value: number) => new CSSUnitValue(value, 'dppx');
-	static fr = (value: number) => new CSSUnitValue(value, 'fr');
+	static ch = (value: number) => new CSSUnitValue(value, "ch");
+	static rem = (value: number) => new CSSUnitValue(value, "rem");
+	static vw = (value: number) => new CSSUnitValue(value, "vw");
+	static vh = (value: number) => new CSSUnitValue(value, "vh");
+	static vmin = (value: number) => new CSSUnitValue(value, "vmin");
+	static vmax = (value: number) => new CSSUnitValue(value, "vmax");
+	static cm = (value: number) => new CSSUnitValue(value, "cm");
+	static mm = (value: number) => new CSSUnitValue(value, "mm");
+	static in = (value: number) => new CSSUnitValue(value, "in");
+	static pt = (value: number) => new CSSUnitValue(value, "pt");
+	static pc = (value: number) => new CSSUnitValue(value, "pc");
+	static px = (value: number) => new CSSUnitValue(value, "px");
+	static Q = (value: number) => new CSSUnitValue(value, "q");
+	static deg = (value: number) => new CSSUnitValue(value, "deg");
+	static grad = (value: number) => new CSSUnitValue(value, "grad");
+	static rad = (value: number) => new CSSUnitValue(value, "rad");
+	static turn = (value: number) => new CSSUnitValue(value, "turn");
+	static s = (value: number) => new CSSUnitValue(value, "s");
+	static ms = (value: number) => new CSSUnitValue(value, "ms");
+	static Hz = (value: number) => new CSSUnitValue(value, "hz");
+	static kHz = (value: number) => new CSSUnitValue(value, "khz");
+	static dpi = (value: number) => new CSSUnitValue(value, "dpi");
+	static dpcm = (value: number) => new CSSUnitValue(value, "dpcm");
+	static dppx = (value: number) => new CSSUnitValue(value, "dppx");
+	static fr = (value: number) => new CSSUnitValue(value, "fr");
 }
 const category = {
-	number: 'number',
-	percent: 'percent',
-	length: 'px',
-	time: 's',
-	angle: 'deg',
-	frequency: 'Hz',
+	number: "number",
+	percent: "percent",
+	length: "px",
+	time: "s",
+	angle: "deg",
+	frequency: "Hz",
 };

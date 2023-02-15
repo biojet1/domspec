@@ -13,7 +13,7 @@ tap.test("viewBox", function (t) {
 	// console.log(top.constructor.name);
 	// console.log(top.width.constructor.name);
 	// console.log(top.viewBox.constructor.name);
-	t.strictSame(top.viewBox.constructor.name, "SVGRectAttr");
+	t.strictSame(top.viewBox.constructor.name, "SVGAnimatedRect");
 
 	t.strictSame(top.viewBox.baseVal.x, -10);
 	t.strictSame(top.viewBox.baseVal.width, 200);
@@ -151,7 +151,7 @@ tap.test("createSVGTransformFromMatrix", function (t) {
 	t.end();
 });
 
-tap.test("toParent", function (t) {
+tap.test("width.baseVal", function (t) {
 	const document = parser.parseFromString(
 		fs.readFileSync("test/res/transform.svg", {
 			encoding: "utf-8",
@@ -164,6 +164,25 @@ tap.test("toParent", function (t) {
 	RO.width.baseVal.value = 7;
 	t.strictSame(RO.width.baseVal, v);
 	t.same(RO.width.baseVal.value, 7, v);
+
+	t.end();
+});
+tap.test("width.baseVal", function (t) {
+	const document = parser.parseFromString(
+		fs.readFileSync("test/res/transform.svg", {
+			encoding: "utf-8",
+		})
+	);
+	var svgElement = document.createElementNS(
+		"http://www.w3.org/2000/svg",
+		"svg"
+	);
+
+	// Check initial viewBox value.
+	t.match(svgElement.viewBox.constructor.name, /SVGAnimatedRect/);
+	t.match(svgElement.viewBox.baseVal.constructor.name, /SVGRect/);
+	t.match(svgElement.viewBox.animVal.constructor.name, /SVGRect/);
+	// assert_equals(svgElement.viewBox.baseVal.x, 0);
 
 	t.end();
 });

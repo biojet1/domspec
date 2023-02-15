@@ -344,7 +344,10 @@ dom/events/EventTarget-dispatchEvent-returnvalue.html
 dom/nodes/Node-childNodes.html
 dom/nodes/getElementsByClassName-whitespace-class-names.html
 svg/types/scripted/SVGLength.html
-
+ css/css-typed-om/factory-frequency.html
+ css/css-typed-om/factory-duration.html
+ css/css-typed-om/factory-absolute-length.html
+     svg/types/scripted/SVGAnimatedRect.html
 //     `;
     //     tests = `
     // dom/nodes/node-appendchild-crash.html
@@ -445,7 +448,9 @@ svg/types/scripted/SVGLength.html
 // svg/types/scripted/SVGLengthList-basics.html
 // css/css-box/parsing/padding-shorthand.html
 // css/css-box/parsing/margin-shorthand.html
-domparsing/xml-serialization.xhtml 
+// domparsing/xml-serialization.xhtml
+
+    // css/css-typed-om/declared-styleMap-accepts-inherit.html
 `;
     tests = (process.env.TRY ? tests_try : tests)
         .split(/[\r\n]+/)

@@ -242,6 +242,7 @@ tap.test("SVGLength", function (t) {
 	// t.same(R1.x.baseVal.unitType, 1);
 	t.match(VPA.outerHTML, /x="31\.75cm"/);
 	R1.setAttribute("y", "invalidpx");
+	t.match(R1.y.baseVal.valueAsString, "0");
 
 // console.log(VPA.outerHTML);
 // console.log(R1.y.baseVal.valueAsString);

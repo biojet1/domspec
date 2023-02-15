@@ -45,7 +45,7 @@ export class SVGGraphicsElement extends SVGElement {
 		switch (name) {
 			// https://svgwg.org/svg2-draft/geometry.html#Sizing
 			case "r":
-				return new SVGLengthAttr(name);
+				return new SVGAnimatedLength(name);
 			case "width":
 				if (this instanceof SVGSVGElement) {
 					return new SVGLengthWAttr(name);
@@ -68,7 +68,7 @@ export class SVGGraphicsElement extends SVGElement {
 			case "rx":
 			case "ry":
 				// TODO
-				return new SVGLengthAttr(name);
+				return new SVGAnimatedLength(name);
 			case "viewBox":
 				return new SVGAnimatedRect(name);
 			// return new SVGLengthListAttr(name);
@@ -79,44 +79,44 @@ export class SVGGraphicsElement extends SVGElement {
 		}
 		return super.newAttributeNode(name);
 	}
-	get r(): SVGLengthAttr {
-		return this.letAttributeNode("r") as SVGLengthAttr; // for now
+	get r(): SVGAnimatedLength {
+		return this.letAttributeNode("r") as SVGAnimatedLength; // for now
 	}
-	get x(): SVGLengthAttr {
-		return this.letAttributeNode("x") as SVGLengthAttr; // for now
+	get x(): SVGAnimatedLength {
+		return this.letAttributeNode("x") as SVGAnimatedLength; // for now
 	}
-	get y(): SVGLengthAttr {
-		return this.letAttributeNode("y") as SVGLengthAttr; // for now
+	get y(): SVGAnimatedLength {
+		return this.letAttributeNode("y") as SVGAnimatedLength; // for now
 	}
-	get cx(): SVGLengthAttr {
-		return this.letAttributeNode("cx") as SVGLengthAttr; // for now
+	get cx(): SVGAnimatedLength {
+		return this.letAttributeNode("cx") as SVGAnimatedLength; // for now
 	}
-	get cy(): SVGLengthAttr {
-		return this.letAttributeNode("cy") as SVGLengthAttr; // for now
+	get cy(): SVGAnimatedLength {
+		return this.letAttributeNode("cy") as SVGAnimatedLength; // for now
 	}
-	get rx(): SVGLengthAttr {
-		return this.letAttributeNode("rx") as SVGLengthAttr; // for now
+	get rx(): SVGAnimatedLength {
+		return this.letAttributeNode("rx") as SVGAnimatedLength; // for now
 	}
-	get ry(): SVGLengthAttr {
-		return this.letAttributeNode("ry") as SVGLengthAttr; // for now
+	get ry(): SVGAnimatedLength {
+		return this.letAttributeNode("ry") as SVGAnimatedLength; // for now
 	}
-	get x1(): SVGLengthAttr {
-		return this.letAttributeNode("x1") as SVGLengthAttr; // for now
+	get x1(): SVGAnimatedLength {
+		return this.letAttributeNode("x1") as SVGAnimatedLength; // for now
 	}
-	get x2(): SVGLengthAttr {
-		return this.letAttributeNode("x2") as SVGLengthAttr; // for now
+	get x2(): SVGAnimatedLength {
+		return this.letAttributeNode("x2") as SVGAnimatedLength; // for now
 	}
-	get y1(): SVGLengthAttr {
-		return this.letAttributeNode("y1") as SVGLengthAttr; // for now
+	get y1(): SVGAnimatedLength {
+		return this.letAttributeNode("y1") as SVGAnimatedLength; // for now
 	}
-	get y2(): SVGLengthAttr {
-		return this.letAttributeNode("y2") as SVGLengthAttr; // for now
+	get y2(): SVGAnimatedLength {
+		return this.letAttributeNode("y2") as SVGAnimatedLength; // for now
 	}
-	get width(): SVGLengthAttr {
-		return this.letAttributeNode("width") as SVGLengthAttr; // for now
+	get width(): SVGAnimatedLength {
+		return this.letAttributeNode("width") as SVGAnimatedLength; // for now
 	}
-	get height(): SVGLengthAttr {
-		return this.letAttributeNode("height") as SVGLengthAttr; // for now
+	get height(): SVGAnimatedLength {
+		return this.letAttributeNode("height") as SVGAnimatedLength; // for now
 	}
 	get viewBox(): SVGAnimatedRect {
 		return this.letAttributeNode("viewBox") as SVGAnimatedRect; // for now
@@ -541,7 +541,7 @@ import { ChildNode } from "../child-node.js";
 import {
 	userUnit,
 	SVGLength,
-	SVGLengthAttr,
+	SVGAnimatedLength,
 	SVGLengthHAttr,
 	SVGLengthWAttr,
 	SVGLengthXAttr,

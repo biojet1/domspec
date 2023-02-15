@@ -286,7 +286,7 @@ export class SVGLength {
 	static SVG_LENGTHTYPE_PC = 10;
 }
 
-export class SVGLengthAttr extends Attr {
+export class SVGAnimatedLength extends Attr {
 	_var?: SVGLength | string;
 
 	set value(value: string) {
@@ -398,7 +398,7 @@ export class SVGLengthH extends SVGLength {
 	}
 }
 
-export class SVGLengthWAttr extends SVGLengthAttr {
+export class SVGLengthWAttr extends SVGAnimatedLength {
 	_parse(s?: string) {
 		if (s) {
 			let v = new SVGLengthW();
@@ -418,7 +418,7 @@ export class SVGLengthWAttr extends SVGLengthAttr {
 	}
 }
 
-export class SVGLengthHAttr extends SVGLengthAttr {
+export class SVGLengthHAttr extends SVGAnimatedLength {
 	_parse(s?: string) {
 		if (s) {
 			let v = new SVGLengthH();
@@ -430,7 +430,7 @@ export class SVGLengthHAttr extends SVGLengthAttr {
 	}
 }
 
-export class SVGLengthXAttr extends SVGLengthAttr {
+export class SVGLengthXAttr extends SVGAnimatedLength {
 	_parse(s?: string) {
 		if (s) {
 			let v = new SVGLengthW();
@@ -442,7 +442,7 @@ export class SVGLengthXAttr extends SVGLengthAttr {
 	}
 }
 
-export class SVGLengthYAttr extends SVGLengthAttr {
+export class SVGLengthYAttr extends SVGAnimatedLength {
 	_parse(s?: string) {
 		if (s) {
 			let v = new SVGLengthH();

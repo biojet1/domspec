@@ -40,7 +40,7 @@ export class SVGGraphicsElement extends SVGElement {
     newAttributeNode(name) {
         switch (name) {
             case "r":
-                return new SVGLengthAttr(name);
+                return new SVGAnimatedLength(name);
             case "width":
                 if (this instanceof SVGSVGElement) {
                     return new SVGLengthWAttr(name);
@@ -61,11 +61,11 @@ export class SVGGraphicsElement extends SVGElement {
                 return new SVGLengthYAttr(name);
             case "rx":
             case "ry":
-                return new SVGLengthAttr(name);
+                return new SVGAnimatedLength(name);
             case "viewBox":
-                return new SVGRectAttr(name);
+                return new SVGAnimatedRect(name);
             case "transform":
-                return new SVGTransformListAttr(name);
+                return new SVGAnimatedTransformList(name);
         }
         return super.newAttributeNode(name);
     }
@@ -494,8 +494,8 @@ function composeTransforms(parent, tm, root) {
     return tm;
 }
 import { Element } from "../element.js";
-import { SVGLength, SVGLengthAttr, SVGLengthHAttr, SVGLengthWAttr, SVGLengthXAttr, SVGLengthYAttr, } from "./length.js";
-import { SVGRectAttr } from "./rect.js";
+import { SVGLength, SVGAnimatedLength, SVGLengthHAttr, SVGLengthWAttr, SVGLengthXAttr, SVGLengthYAttr, } from "./length.js";
+import { SVGAnimatedRect } from "./rect.js";
 import { SVGLayout } from "./layout.js";
-import { SVGTransformListAttr, viewbox_transform } from "./attr-transform.js";
+import { SVGAnimatedTransformList, viewbox_transform } from "./attr-transform.js";
 //# sourceMappingURL=_element.js.map

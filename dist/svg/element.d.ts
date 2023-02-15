@@ -124,6 +124,7 @@ export declare class SVGScriptElement extends SVGElement {
     _alreadyStarted?: boolean;
 }
 import { SVGElement, SVGSVGElement, SVGGraphicsElement } from "./_element.js";
-export { SVGLength, SVGLengthAttr } from "./length.js";
+export { SVGLength, SVGAnimatedLength } from "./length.js";
+export { SVGRect, SVGAnimatedRect } from "./rect.js";
 export { SVGLayout } from "./layout.js";
 export { SVGElement, SVGGraphicsElement, SVGSVGElement };

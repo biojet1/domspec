@@ -1,5 +1,5 @@
 import { Matrix, SVGTransform, SVGTransformList } from "svggeom";
-export class SVGTransformListAttr extends Attr {
+export class SVGAnimatedTransformList extends Attr {
     _var;
     set value(value) {
         const { _var } = this;

@@ -2,6 +2,7 @@ export declare class CSSStyleValue {
     _associatedProperty?: string;
     parse(property: string, cssText: string): CSSStyleValue;
     parseAll(property: string, cssText: string): CSSStyleValue[];
+    _parse_css_style_value(property_name: string, css_text: string): void;
 }
 export declare class CSSKeywordValue extends CSSStyleValue {
     value: string;

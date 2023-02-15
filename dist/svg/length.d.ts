@@ -33,7 +33,7 @@ export declare class SVGLength {
     static SVG_LENGTHTYPE_PT: number;
     static SVG_LENGTHTYPE_PC: number;
 }
-export declare class SVGLengthAttr extends Attr {
+export declare class SVGAnimatedLength extends Attr {
     _var?: SVGLength | string;
     set value(value: string);
     get value(): string;
@@ -49,17 +49,17 @@ export declare class SVGLengthW extends SVGLength {
 export declare class SVGLengthH extends SVGLength {
     getRelativeLength(): number;
 }
-export declare class SVGLengthWAttr extends SVGLengthAttr {
+export declare class SVGLengthWAttr extends SVGAnimatedLength {
     _parse(s?: string): SVGLengthW;
     toUU(): void;
 }
-export declare class SVGLengthHAttr extends SVGLengthAttr {
+export declare class SVGLengthHAttr extends SVGAnimatedLength {
     _parse(s?: string): SVGLengthH;
 }
-export declare class SVGLengthXAttr extends SVGLengthAttr {
+export declare class SVGLengthXAttr extends SVGAnimatedLength {
     _parse(s?: string): SVGLengthW;
 }
-export declare class SVGLengthYAttr extends SVGLengthAttr {
+export declare class SVGLengthYAttr extends SVGAnimatedLength {
     _parse(s?: string): SVGLengthH;
 }
 import { Attr } from "../attr.js";

@@ -87,7 +87,8 @@ export class SVGLength {
         else if (_unit >= 0) {
             return `${_num}${UNITS[_unit] || ""}`;
         }
-        else {
+        else if (_num != undefined) {
+            return `${_num}`;
         }
         return "";
     }
@@ -143,6 +144,8 @@ export class SVGLength {
                 return (_num * 4) / 3;
             case 10:
                 return _num * 16;
+            case -1:
+                return 0;
             default:
                 throw new TypeError(`Invalid unit: '${_unit}'`);
         }
@@ -176,6 +179,10 @@ export class SVGLength {
                     return;
                 case 10:
                     this._num = 16 / value;
+                    return;
+                case -1:
+                    this._unit = 1;
+                    this._num = 0;
                     return;
                 default:
                     throw new TypeError(`invalid ${_unit}`);
@@ -266,7 +273,7 @@ export class SVGLength {
     static SVG_LENGTHTYPE_PT = 9;
     static SVG_LENGTHTYPE_PC = 10;
 }
-export class SVGLengthAttr extends Attr {
+export class SVGAnimatedLength extends Attr {
     _var;
     set value(value) {
         const { _var } = this;
@@ -366,7 +373,7 @@ export class SVGLengthH extends SVGLength {
         return 0;
     }
 }
-export class SVGLengthWAttr extends SVGLengthAttr {
+export class SVGLengthWAttr extends SVGAnimatedLength {
     _parse(s) {
         if (s) {
             let v = new SVGLengthW();
@@ -385,7 +392,7 @@ export class SVGLengthWAttr extends SVGLengthAttr {
         }
     }
 }
-export class SVGLengthHAttr extends SVGLengthAttr {
+export class SVGLengthHAttr extends SVGAnimatedLength {
     _parse(s) {
         if (s) {
             let v = new SVGLengthH();
@@ -396,7 +403,7 @@ export class SVGLengthHAttr extends SVGLengthAttr {
         return new SVGLengthH("100%");
     }
 }
-export class SVGLengthXAttr extends SVGLengthAttr {
+export class SVGLengthXAttr extends SVGAnimatedLength {
     _parse(s) {
         if (s) {
             let v = new SVGLengthW();
@@ -407,7 +414,7 @@ export class SVGLengthXAttr extends SVGLengthAttr {
         return new SVGLengthW();
     }
 }
-export class SVGLengthYAttr extends SVGLengthAttr {
+export class SVGLengthYAttr extends SVGAnimatedLength {
     _parse(s) {
         if (s) {
             let v = new SVGLengthH();

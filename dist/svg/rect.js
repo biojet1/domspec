@@ -1,10 +1,69 @@
-export class SVGRectAttr extends Attr {
+export class SVGRect extends BoxMut {
+    owner;
+    get x() {
+        return this._x ?? 0;
+    }
+    set x(value) {
+        this._x = value;
+    }
+    get y() {
+        return this._y ?? 0;
+    }
+    set y(value) {
+        this._y = value;
+    }
+    get width() {
+        let { _w = 100 } = this;
+        if (_w == null) {
+            const { owner: o } = this;
+            if (o) {
+                const a = o.width;
+                if (a.specified) {
+                    _w = a.baseVal.value;
+                }
+                else {
+                    const v = o.nearestViewportElement;
+                    if (v) {
+                        _w = v.viewBox.baseVal.width;
+                    }
+                }
+            }
+        }
+        return _w;
+    }
+    set width(value) {
+        this._w = value;
+    }
+    get height() {
+        let { _h = 100 } = this;
+        if (_h == null) {
+            const { owner: o } = this;
+            if (o) {
+                const a = o.height;
+                if (a.specified) {
+                    _h = a.baseVal.value;
+                }
+                else {
+                    const v = o.nearestViewportElement;
+                    if (v) {
+                        _h = v.viewBox.baseVal.height;
+                    }
+                }
+            }
+        }
+        return _h;
+    }
+    set height(value) {
+        this._h = value;
+    }
+}
+export class SVGAnimatedRect extends Attr {
     _var;
     set value(value) {
         const { _var } = this;
         if (_var instanceof BoxMut) {
             try {
-                const { x, y, width, height } = BoxMut.parse(value);
+                const { x, y, width, height } = SVGRect.parse(value);
                 _var.x = x;
                 _var.y = y;
                 _var.width = width;
@@ -33,12 +92,15 @@ export class SVGRectAttr extends Attr {
         }
         else if (_var) {
             try {
-                return (this._var = BoxMut.parse(_var));
+                return (this._var = SVGRect.parse(_var));
             }
             catch (err) {
-                return null;
             }
         }
+        return (this._var = SVGRect.forRect(0, 0, 0, 0));
+    }
+    get animVal() {
+        return this.baseVal;
     }
     get specified() {
         return this._var != undefined;

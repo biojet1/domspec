@@ -10,21 +10,21 @@ export declare class SVGElement extends Element {
 }
 export declare class SVGGraphicsElement extends SVGElement {
     newAttributeNode(name: string): import("../attr.js").Attr;
-    get r(): SVGLengthAttr;
-    get x(): SVGLengthAttr;
-    get y(): SVGLengthAttr;
-    get cx(): SVGLengthAttr;
-    get cy(): SVGLengthAttr;
-    get rx(): SVGLengthAttr;
-    get ry(): SVGLengthAttr;
-    get x1(): SVGLengthAttr;
-    get x2(): SVGLengthAttr;
-    get y1(): SVGLengthAttr;
-    get y2(): SVGLengthAttr;
-    get width(): SVGLengthAttr;
-    get height(): SVGLengthAttr;
-    get viewBox(): SVGRectAttr;
-    get transform(): SVGTransformListAttr;
+    get r(): SVGAnimatedLength;
+    get x(): SVGAnimatedLength;
+    get y(): SVGAnimatedLength;
+    get cx(): SVGAnimatedLength;
+    get cy(): SVGAnimatedLength;
+    get rx(): SVGAnimatedLength;
+    get ry(): SVGAnimatedLength;
+    get x1(): SVGAnimatedLength;
+    get x2(): SVGAnimatedLength;
+    get y1(): SVGAnimatedLength;
+    get y2(): SVGAnimatedLength;
+    get width(): SVGAnimatedLength;
+    get height(): SVGAnimatedLength;
+    get viewBox(): SVGAnimatedRect;
+    get transform(): SVGAnimatedTransformList;
     get nearestViewportElement(): SVGElement | null;
     get farthestViewportElement(): SVGElement | null;
     get ownTM(): Matrix;
@@ -73,7 +73,7 @@ export declare class SVGSVGElement extends SVGGraphicsElement {
 }
 import { Element } from "../element.js";
 import { ChildNode } from "../child-node.js";
-import { SVGLength, SVGLengthAttr } from "./length.js";
-import { SVGRectAttr } from "./rect.js";
+import { SVGLength, SVGAnimatedLength } from "./length.js";
+import { SVGAnimatedRect } from "./rect.js";
 import { SVGLayout } from "./layout.js";
-import { SVGTransformListAttr } from "./attr-transform.js";
+import { SVGAnimatedTransformList } from "./attr-transform.js";

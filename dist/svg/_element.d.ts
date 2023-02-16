@@ -1,8 +1,10 @@
-import { Box, Matrix, SVGTransform } from "svggeom";
+import { Vec, Box, Matrix, SVGTransform } from "svggeom";
 export declare class SVGElement extends Element {
     get _isViewportElement(): number;
     get viewportElement(): SVGElement | null;
     get ownerSVGElement(): SVGSVGElement | null;
+    createSVGPoint(): Vec;
+    createSVGRect(): import("svggeom").BoxMut;
     createSVGLength(): SVGLength;
     createSVGMatrix(): Matrix;
     createSVGTransform(): SVGTransform;

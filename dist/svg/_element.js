@@ -1,4 +1,4 @@
-import { Box, Matrix, SVGTransform } from "svggeom";
+import { Vec, Box, Matrix, SVGTransform } from "svggeom";
 export class SVGElement extends Element {
     get _isViewportElement() {
         return 0;
@@ -20,6 +20,12 @@ export class SVGElement extends Element {
             }
         }
         return null;
+    }
+    createSVGPoint() {
+        return Vec.pos(0, 0);
+    }
+    createSVGRect() {
+        return SVGRect.forRect(0, 0, 0, 0);
     }
     createSVGLength() {
         return new SVGLength();
@@ -495,7 +501,7 @@ function composeTransforms(parent, tm, root) {
 }
 import { Element } from "../element.js";
 import { SVGLength, SVGAnimatedLength, SVGLengthHAttr, SVGLengthWAttr, SVGLengthXAttr, SVGLengthYAttr, } from "./length.js";
-import { SVGAnimatedRect } from "./rect.js";
+import { SVGAnimatedRect, SVGRect } from "./rect.js";
 import { SVGLayout } from "./layout.js";
-import { SVGAnimatedTransformList, viewbox_transform } from "./attr-transform.js";
+import { SVGAnimatedTransformList, viewbox_transform, } from "./attr-transform.js";
 //# sourceMappingURL=_element.js.map

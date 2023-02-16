@@ -1,4 +1,3 @@
-export declare function userUnit(src: string, default_value?: number): number;
 export declare class SVGNumber {
     _num?: number;
     constructor(value?: string);

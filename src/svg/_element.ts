@@ -24,6 +24,15 @@ export class SVGElement extends Element {
 		}
 		return null;
 	}
+
+	// SVGNumber createSVGNumber();
+	// SVGAngle createSVGAngle();
+	createSVGPoint() {
+		return Vec.pos(0, 0);
+	}
+	createSVGRect() {
+		return SVGRect.forRect(0, 0, 0, 0);
+	}
 	createSVGLength() {
 		return new SVGLength();
 	}
@@ -539,7 +548,6 @@ import { Element } from "../element.js";
 import { ChildNode } from "../child-node.js";
 
 import {
-	userUnit,
 	SVGLength,
 	SVGAnimatedLength,
 	SVGLengthHAttr,
@@ -547,7 +555,10 @@ import {
 	SVGLengthXAttr,
 	SVGLengthYAttr,
 } from "./length.js";
-import { SVGAnimatedRect } from "./rect.js";
+import { SVGAnimatedRect, SVGRect } from "./rect.js";
 import { SVGLayout } from "./layout.js";
 import { SVGLengthListAttr, SVGLengthList } from "./length-list.js";
-import { SVGAnimatedTransformList, viewbox_transform } from "./attr-transform.js";
+import {
+	SVGAnimatedTransformList,
+	viewbox_transform,
+} from "./attr-transform.js";

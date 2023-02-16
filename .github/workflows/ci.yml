@@ -32,7 +32,7 @@ jobs:
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('package.json') }}
 
       - run: npm i
-      - run: npm i -g --no-save codecov c8 typescript eslint prettier
+      - run: npm i -g --no-save c8 typescript eslint prettier
       # - run: |
       #     wget https://github.com/biojet1/saxes/archive/refs/heads/master.tar.gz
       #     tar xvzf master.tar.gz
@@ -103,14 +103,14 @@ jobs:
             git push
           fi
 
-      # - name: Codecov
-      #   uses: codecov/codecov-action@v2
-      #   with:
-      #     token: ${{ secrets.CODECOV_TOKEN }}
-      #     files: coverage/lcov.info
+      - name: Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage/lcov.info
 
-      # - name: Coveralls
-      #   uses: coverallsapp/github-action@1.1.3
-      #   with:
-      #     # path-to-lcov: ${{ github.workspace }}/coverage/lcov.info
-      #     github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Coveralls
+        uses: coverallsapp/github-action@1.1.3
+        with:
+          # path-to-lcov: ${{ github.workspace }}/coverage/lcov.info
+          github-token: ${{ secrets.GITHUB_TOKEN }}

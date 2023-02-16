@@ -15,29 +15,29 @@ const CONVERSIONS: { [k: string]: number } = {
 	"": 1.0,
 };
 
-export function userUnit(src: string, default_value?: number): number {
-	if (src) {
-		const m = src.match(BOTH_MATCH);
-		if (m) {
-			const value = parseFloat(m[1]);
-			const unit = m.pop();
-			if (unit) {
-				const mul = CONVERSIONS[unit];
-				if (mul) {
-					return value * mul;
-				}
-			} else {
-				return value;
-			}
-			throw new Error(`Can not convert to user unit ${src}, [${m}]`);
-		} else {
-			throw new Error(`Invalid unit ${src}`);
-		}
-	} else if (default_value != undefined) {
-		return default_value;
-	}
-	throw new Error(`Invalid unit ${src}`);
-}
+// export function userUnit(src: string, default_value?: number): number {
+// 	if (src) {
+// 		const m = src.match(BOTH_MATCH);
+// 		if (m) {
+// 			const value = parseFloat(m[1]);
+// 			const unit = m.pop();
+// 			if (unit) {
+// 				const mul = CONVERSIONS[unit];
+// 				if (mul) {
+// 					return value * mul;
+// 				}
+// 			} else {
+// 				return value;
+// 			}
+// 			throw new Error(`Can not convert to user unit ${src}, [${m}]`);
+// 		} else {
+// 			throw new Error(`Invalid unit ${src}`);
+// 		}
+// 	} else if (default_value != undefined) {
+// 		return default_value;
+// 	}
+// 	throw new Error(`Invalid unit ${src}`);
+// }
 
 const UNITS = ["", "", "%", "em", "ex", "px", "cm", "mm", "in", "pt", "pc"];
 const CONVS = [0, 1, 1];

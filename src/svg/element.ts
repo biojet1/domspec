@@ -44,12 +44,12 @@ export class SVGGeometryElement extends SVGGraphicsElement {
 			// if (tm) {
 			// 	return path.bbox().transform(tm.cat(this._ownTM));
 			// } else {
-			// 	return path.bbox().transform(this.rootTM);
+			// 	return path.bbox().transform(this._rootTM);
 			// }
 			if (tm) {
 				path = path.transform(tm.cat(this._ownTM));
 			} else {
-				path = path.transform(this.rootTM);
+				path = path.transform(this._rootTM);
 			}
 			return path.bbox();
 		}

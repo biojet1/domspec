@@ -37,8 +37,8 @@ function apply(m, node) {
 }
 
 function toParent(parent, i) {
-	const childTM = i.rootTM;
-	const parentTM = parent.rootTM;
+	const childTM = i._rootTM;
+	const parentTM = parent._rootTM;
 	parent.appendChild(i);
 	i._ownTM = parentTM.inverse().cat(childTM);
 }
@@ -71,7 +71,7 @@ tap.test("layout1", { bail: 0 }, function (t) {
 			const [x, y, w, h] = metrix.root_box;
 			const m = Matrix.new(a, b, c, d, e, f);
 			const v = document.getElementById(id);
-			const r = v.rootTM;
+			const r = v._rootTM;
 			const l = v.localTM();
 			const o = v._ownTM;
 			const b0 = Box.forRect(x, y, w, h);
@@ -86,8 +86,8 @@ tap.test("layout1", { bail: 0 }, function (t) {
 
 			t.ok(r.equals(n, 1e-3), `localTM ${id} ${l.describe()} ${o.describe()}`);
 			t.ok(
-				r.equals(v.docTM(), 1e-3),
-				`docTM ${id} ${r.describe()} ${v.docTM().describe()}`
+				r.equals(v._rootTM, 1e-3),
+				`docTM ${id} ${r.describe()} ${v._rootTM.describe()}`
 			);
 			if ((metrix.tag_name != "defs", !b0.isEmpty())) {
 				eqBox(t, b0, b1, 1e-1, id);
@@ -187,7 +187,7 @@ tap.test("localTM()", { bail: 0 }, function (t) {
 		const n = Matrix.parse(d);
 		const v = document.getElementById(id);
 		t.same(v.localTM().describe(), m.describe(), `localTM ${id}`);
-		t.same(v.docTM().describe(), n.describe(), `docTM ${id}`);
+		t.same(v._rootTM.describe(), n.describe(), `docTM ${id}`);
 		t.same(v._composeTM().describe(), n.describe(), `_composeTM ${id}`);
 		t.same(
 			v._composeTM(rootSVG).describe(),

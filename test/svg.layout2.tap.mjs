@@ -18,8 +18,8 @@ function apply(m, node) {
 }
 
 function toParent(parent, i) {
-	const childTM = i.rootTM;
-	const parentTM = parent.rootTM;
+	const childTM = i._rootTM;
+	const parentTM = parent._rootTM;
 	parent.appendChild(i);
 	i._ownTM = parentTM.inverse().cat(childTM);
 }

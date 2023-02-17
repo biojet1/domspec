@@ -49,9 +49,9 @@ tap.test("transform", function (t) {
   });
   let [p, o] = R3.pairTM();
   t.same(p.describe(), Matrix.translate(100, 100).describe());
-  t.same(R3.rootTM.describe(), Matrix.translate(100, 100).describe());
+  t.same(R3._rootTM.describe(), Matrix.translate(100, 100).describe());
   t.same(R4.pairTM()[0].describe(), Matrix.translate(100, 100).describe());
-  t.same(R4.rootTM.describe(), Matrix.translate(90, 90).describe());
+  t.same(R4._rootTM.describe(), Matrix.translate(90, 90).describe());
   [p, o] = top.pairTM();
   t.same(p.describe(), Matrix.identity().describe());
   t.same(o.describe(), Matrix.identity().describe());
@@ -98,7 +98,7 @@ tap.test("viewportTM", function (t) {
   ].forEach(([id, par, a, b, c, d, e, f]) => {
     const m = Matrix.new(a, b, c, d, e, f);
     const v = document.getElementById(id);
-    const r = v.rootTM;
+    const r = v._rootTM;
     t.same(r.toString(), m.toString(), par);
     // console.log();
   });
@@ -135,7 +135,7 @@ tap.test("viewportTM", function (t) {
     const m = Matrix.new(a, b, c, d, e, f);
     const v = document.getElementById(id);
     const u = v.querySelector("use");
-    const r = v.rootTM;
+    const r = v._rootTM;
     t.ok(v.nearestViewportElement === top);
     t.ok(v.farthestViewportElement === top);
     t.ok(u.farthestViewportElement === top);
@@ -311,7 +311,7 @@ tap.test("viewportTM", function (t) {
   ].forEach(([id, a, b, c, d, e, f]) => {
     const v = document.getElementById(id);
     const m = Matrix.new(a, b, c, d, e, f);
-    const r = v.rootTM;
+    const r = v._rootTM;
     t.ok(m.equals(r, 1e-4), `${id} ${r} ${m}`);
   });
 

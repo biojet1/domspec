@@ -211,7 +211,8 @@ export class SVGGraphicsElement extends SVGElement {
 		return this._ownTM;
 	}
 	//////////////
-	get rootTM(): Matrix {
+	// The transformation under document root
+	get _rootTM(): Matrix {
 		const { parentNode: parent, _ownTM } = this;
 		if (parent instanceof SVGGraphicsElement) {
 			return parent._relTM(_ownTM);
@@ -219,6 +220,7 @@ export class SVGGraphicsElement extends SVGElement {
 			return _ownTM;
 		}
 	}
+	//////////////
 
 	localTM(): Matrix {
 		const { parentNode: parent, _ownTM } = this;
@@ -230,9 +232,7 @@ export class SVGGraphicsElement extends SVGElement {
 			return this._innerTM;
 		}
 	}
-	docTM(): Matrix {
-		return this.rootTM;
-	}
+
 	pairTM(): Matrix[] {
 		const { parentNode: parent, _ownTM } = this;
 		if (parent instanceof SVGGraphicsElement) {
@@ -345,7 +345,7 @@ export class SVGGraphicsElement extends SVGElement {
 
 	_shapeBox(tm?: Matrix): Box {
 		// for <g/> box of decendant children
-		const m = tm ? tm.cat(this._ownTM) : this.rootTM;
+		const m = tm ? tm.cat(this._ownTM) : this._rootTM;
 		let box = Box.new();
 		for (const sub of this.children) {
 			if (sub instanceof SVGGraphicsElement && sub._canRender()) {
@@ -365,7 +365,7 @@ export class SVGGraphicsElement extends SVGElement {
 			if (tm) {
 				b = b.transform(tm);
 			} else {
-				b = b.transform(this.rootTM);
+				b = b.transform(this._rootTM);
 			}
 			return b;
 		}
@@ -377,10 +377,10 @@ export class SVGGraphicsElement extends SVGElement {
 		}
 	}
 	_placeChild(ref: ChildNode | null | undefined, nodes: SVGGraphicsElement[]) {
-		const pCtm = this.rootTM.inverse();
+		const pCtm = this._rootTM.inverse();
 		for (const that of nodes) {
 			if (that !== this) {
-				const ctm = that.rootTM;
+				const ctm = that._rootTM;
 				if (ref) {
 					this.insertBefore(that, ref);
 				} else {
@@ -428,7 +428,7 @@ export class SVGGraphicsElement extends SVGElement {
 				if (grand) {
 					throw new Error(`root not reached`);
 				} else {
-					const p = (root as SVGGraphicsElement).rootTM.inverse();
+					const p = (root as SVGGraphicsElement)._rootTM.inverse();
 					return p.cat(tm);
 				}
 			} else {

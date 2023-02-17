@@ -109,9 +109,9 @@ tap.test("transform2", function (t) {
 		t.same(v.getScreenCTM().toString(), m, `getScreenCTM ${id}`);
 		// t.same(v._composeTM().toString(), m, `_composeTM ${id}`);
 		const w = top._innerTM;
-		const u = v.rootTM;
+		const u = v._rootTM;
 
-		t.same(w.cat(u).toString(), m, `rootTM ${id} ${w} ${u}`);
+		t.same(w.cat(u).toString(), m, `_rootTM ${id} ${w} ${u}`);
 	});
 
 	t.same(
@@ -134,11 +134,11 @@ tap.test("transform2", function (t) {
 		`R2.composeTM(G2)`
 	);
 	t.same(
-		R2.rootTM.toString(),
+		R2._rootTM.toString(),
 		Matrix.parse(
 			`translate(100) translate(0 80) translate(-50 -50) translate(-10 -10)`
 		).toString(),
-		`R2.rootTM()`
+		`R2._rootTM()`
 	);
 	// R1.composeTM(R2);
 	// 	t.throws(() => R1.composeTM(R2), { message: /not reached/ });
@@ -226,7 +226,7 @@ tap.test("transform2", function (t) {
 			// t.same(v.composeTM(top).describe(), m.describe(), `composeTM(top) ${id}`);
 			// t.same(v._composeTM().describe(), m.describe(), `_composeTM() ${id}`);
 			const [p, o] = lay.pairTM(sub);
-			const r = lay.rootTM(sub);
+			const r = lay._rootTM(sub);
 			t.same(
 				sub._composeTM(root).describe(),
 				m.describe(),
@@ -237,7 +237,7 @@ tap.test("transform2", function (t) {
 				m.describe(),
 				`${subId}.p.cat(o) <-- ${rootId}`
 			);
-			t.same(r.describe(), m.describe(), `${subId}.rootTM(o) <-- ${rootId}`);
+			t.same(r.describe(), m.describe(), `${subId}._rootTM(o) <-- ${rootId}`);
 		});
 	});
 	t.end();

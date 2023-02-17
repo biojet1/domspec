@@ -186,7 +186,7 @@ export class SVGAnimatedRect extends Attr {
 			if (v) {
 				const n = v.viewBox.calcWidth();
 				return n;
-				// const scale = v.innerTM.inverse().d;
+				// const scale = v._innerTM.inverse().d;
 				// return n * scale;
 			}
 		}
@@ -217,7 +217,7 @@ export class SVGAnimatedRect extends Attr {
 			if (v) {
 				const n = v.viewBox.calcHeight();
 				return n;
-				// const scale = v.innerTM.inverse().d;
+				// const scale = v._innerTM.inverse().d;
 				// return n * scale;
 			} else if (o as SVGSVGElement) {
 			}

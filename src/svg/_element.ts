@@ -206,10 +206,11 @@ export class SVGGraphicsElement extends SVGElement {
 		this.setAttribute("transform", T.toString());
 	}
 	//////////////
-
-	get innerTM(): Matrix {
+	// The transform attribute + viewport transformation, see SVGSVGElement._innerTM
+	get _innerTM(): Matrix {
 		return this._ownTM;
 	}
+	//////////////
 	get rootTM(): Matrix {
 		const { parentNode: parent, _ownTM } = this;
 		if (parent instanceof SVGGraphicsElement) {
@@ -222,11 +223,11 @@ export class SVGGraphicsElement extends SVGElement {
 	localTM(): Matrix {
 		const { parentNode: parent, _ownTM } = this;
 		if (parent instanceof SVGGraphicsElement) {
-			return parent._relTM(this.innerTM);
+			return parent._relTM(this._innerTM);
 		} else if (this instanceof SVGSVGElement) {
 			return Matrix.identity();
 		} else {
-			return this.innerTM;
+			return this._innerTM;
 		}
 	}
 	docTM(): Matrix {
@@ -244,7 +245,7 @@ export class SVGGraphicsElement extends SVGElement {
 		let { parentNode: parent, _ownTM: tm } = this;
 		for (; parent; parent = parent.parentNode) {
 			if (parent instanceof SVGGraphicsElement) {
-				tm = tm.postCat(parent.innerTM);
+				tm = tm.postCat(parent._innerTM);
 			} else {
 				break;
 			}
@@ -421,7 +422,7 @@ export class SVGGraphicsElement extends SVGElement {
 		while (parent != root) {
 			const grand: Element | null = parent.parentElement;
 			if (grand instanceof SVGGraphicsElement) {
-				tm = tm.postCat(parent.innerTM);
+				tm = tm.postCat(parent._innerTM);
 				parent = grand;
 			} else if (root) {
 				if (grand) {
@@ -442,7 +443,7 @@ export class SVGSVGElement extends SVGGraphicsElement {
 	get _isViewportElement() {
 		return 1;
 	}
-	get innerTM(): Matrix {
+	get _innerTM(): Matrix {
 		// return this.viewportTM().cat(this._ownTM);
 		return this._ownTM.cat(this.viewportTM());
 	}
@@ -530,7 +531,7 @@ function composeTransforms(
 	while (parent != root) {
 		const grand: Element | null = parent.parentElement;
 		if (grand instanceof SVGGraphicsElement) {
-			tm = tm.postCat(parent.innerTM);
+			tm = tm.postCat(parent._innerTM);
 			parent = grand;
 		} else if (root) {
 			throw new Error(`root not reached`);

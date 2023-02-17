@@ -20,7 +20,7 @@ export declare class SVGPathElement extends SVGGeometryElement {
     static TAGS: string[];
     describe(): string;
     beginPath(): _PathD;
-    fuseTransform(parentT?: Matrix): void;
+    _fuseTransform(parentT?: Matrix): void;
 }
 export declare class SVGCircleElement extends SVGGeometryElement {
     static TAGS: string[];
@@ -29,12 +29,12 @@ export declare class SVGCircleElement extends SVGGeometryElement {
 export declare class SVGRectElement extends SVGGeometryElement {
     static TAGS: string[];
     describe(): string;
-    fuseTransform(parentT?: Matrix): void;
+    _fuseTransform(parentT?: Matrix): void;
 }
 export declare class SVGLineElement extends SVGGeometryElement {
     static TAGS: string[];
     describe(): string;
-    fuseTransform(parentT: Matrix): void;
+    _fuseTransform(parentT: Matrix): void;
 }
 export declare class SVGEllipseElement extends SVGGeometryElement {
     static TAGS: string[];
@@ -43,12 +43,12 @@ export declare class SVGEllipseElement extends SVGGeometryElement {
 export declare class SVGPolygonElement extends SVGGeometryElement {
     static TAGS: string[];
     describe(): string;
-    fuseTransform(parentT?: Matrix): void;
+    _fuseTransform(parentT?: Matrix): void;
 }
 export declare class SVGPolylineElement extends SVGGeometryElement {
     static TAGS: string[];
     describe(): string;
-    fuseTransform(parentT?: Matrix): void;
+    _fuseTransform(parentT?: Matrix): void;
 }
 export declare class SVGAElement extends SVGGraphicsElement {
     static TAGS: string[];

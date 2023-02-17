@@ -45,9 +45,9 @@ export declare class SVGGraphicsElement extends SVGElement {
     _viewportBox(tm?: Matrix): Box;
     _boundingBox(tm?: Matrix): Box;
     _shapeBox(tm?: Matrix): Box;
+    _fuseTransform(parentT?: Matrix): void;
     getScreenCTM(): Matrix;
     getBBox(): Box;
-    fuseTransform(parentT?: Matrix): void;
     _placeChild(ref: ChildNode | null | undefined, nodes: SVGGraphicsElement[]): void;
     _placePriorTo(ref: ChildNode | null | undefined, ...nodes: SVGGraphicsElement[]): void;
     _placeAppend(...nodes: SVGGraphicsElement[]): void;

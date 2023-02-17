@@ -78,7 +78,7 @@ export class SVGPathElement extends SVGGeometryElement {
     beginPath() {
         return new _PathD(this);
     }
-    fuseTransform(parentT) {
+    _fuseTransform(parentT) {
         let tm = parentT ? this._ownTM.postCat(parentT) : this._ownTM;
         this.setAttribute("d", PathLS.parse(this.describe()).transform(tm).describe());
         this.removeAttribute("transform");
@@ -106,7 +106,7 @@ export class SVGRectElement extends SVGGeometryElement {
         const ry = this.ry.baseVal.value;
         return `M ${x} ${y} h ${width} v ${height} h ${-width} Z`;
     }
-    fuseTransform(parentT) {
+    _fuseTransform(parentT) {
         let tm = parentT ? this._ownTM.postCat(parentT) : this._ownTM;
         const { a: scale_x, b: skew_x, c: skew_y, d: scale_y, e: translate_x, f: translate_y, } = tm;
         if (skew_x == 0 && skew_y == 0) {
@@ -126,7 +126,7 @@ export class SVGRectElement extends SVGGeometryElement {
             this.removeAttribute("transform");
         }
         else {
-            throw new Error(`fuseTransform of ${this.constructor.name} with skew_x == ${skew_x}, skew_y == ${skew_y}`);
+            throw new Error(`fuse transform of ${this.constructor.name} with skew_x == ${skew_x}, skew_y == ${skew_y}`);
         }
     }
 }
@@ -139,7 +139,7 @@ export class SVGLineElement extends SVGGeometryElement {
         const y2 = this.y2.baseVal.value;
         return `M ${x1} ${y1} L ${x2} ${y2}`;
     }
-    fuseTransform(parentT) {
+    _fuseTransform(parentT) {
         let tm = parentT ? this._ownTM.postCat(parentT) : this._ownTM;
         if (!tm.isIdentity) {
             let x1 = this.x1.baseVal.value;
@@ -172,7 +172,7 @@ export class SVGPolygonElement extends SVGGeometryElement {
         const p = this.getAttribute("points");
         return p ? `M ${p} Z` : "";
     }
-    fuseTransform(parentT) {
+    _fuseTransform(parentT) {
         let tm = parentT ? this._ownTM.postCat(parentT) : this._ownTM;
         if (!tm.isIdentity) {
             const l = this.getAttribute("points")
@@ -193,7 +193,7 @@ export class SVGPolylineElement extends SVGGeometryElement {
         const p = this.getAttribute("points");
         return p ? `M ${p}` : "";
     }
-    fuseTransform(parentT) {
+    _fuseTransform(parentT) {
         let tm = parentT ? this._ownTM.postCat(parentT) : this._ownTM;
         if (!tm.isIdentity) {
             const l = this.getAttribute("points")

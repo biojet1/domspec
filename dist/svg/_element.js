@@ -286,6 +286,15 @@ export class SVGGraphicsElement extends SVGElement {
         }
         return box;
     }
+    _fuseTransform(parentT) {
+        let tm = parentT ? this._ownTM.postCat(parentT) : this._ownTM;
+        for (const sub of this.children) {
+            if (sub instanceof SVGGraphicsElement) {
+                sub._fuseTransform(tm);
+            }
+        }
+        this.removeAttribute("transform");
+    }
     getScreenCTM() {
         let { parentNode: parent, _ownTM: tm } = this;
         for (; parent; parent = parent.parentNode) {
@@ -301,15 +310,6 @@ export class SVGGraphicsElement extends SVGElement {
     getBBox() {
         const box = this._objectBBox();
         return box.isValid() ? box : Box.empty();
-    }
-    fuseTransform(parentT) {
-        let tm = parentT ? this._ownTM.postCat(parentT) : this._ownTM;
-        for (const sub of this.children) {
-            if (sub instanceof SVGGraphicsElement) {
-                sub.fuseTransform(tm);
-            }
-        }
-        this.removeAttribute("transform");
     }
     _placeChild(ref, nodes) {
         const pCtm = this._rootTM.inverse();

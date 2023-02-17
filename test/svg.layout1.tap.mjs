@@ -188,15 +188,14 @@ tap.test("localTM()", { bail: 0 }, function (t) {
 		const v = document.getElementById(id);
 		t.same(v.localTM().describe(), m.describe(), `localTM ${id}`);
 		t.same(v._rootTM.describe(), n.describe(), `docTM ${id}`);
-		t.same(v._composeTM().describe(), n.describe(), `_composeTM ${id}`);
-		t.same(
-			v._composeTM(rootSVG).describe(),
-			n.describe(),
-			`_composeTM rootSVG ${id}`
-		);
+		// t.same(
+		// 	v._relTM(Matrix.identity(), rootSVG).describe(),
+		// 	n.describe(),
+		// 	`_composeTM rootSVG ${id}`
+		// );
 	});
 	t.same(
-		rootSVG._composeTM().describe(),
+		rootSVG._rootTM.describe(),
 		Matrix.identity().describe(),
 		`_composeTM documentElement`
 	);

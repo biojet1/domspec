@@ -45,7 +45,7 @@ export class SVGLayout {
             return [Matrix.identity(), this.getTM(node)];
         }
     }
-    localTM(node) {
+    _localTM(node) {
         const { _root } = this;
         const { parentNode: parent } = node;
         if (parent instanceof SVGGraphicsElement) {

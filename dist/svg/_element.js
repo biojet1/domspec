@@ -222,7 +222,7 @@ export class SVGGraphicsElement extends SVGElement {
             return [Matrix.identity(), _ownTM];
         }
     }
-    localTM() {
+    _localTM() {
         const { parentNode: parent, _ownTM } = this;
         if (parent instanceof SVGGraphicsElement) {
             return parent._relTM(this._innerTM);

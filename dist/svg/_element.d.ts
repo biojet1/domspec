@@ -40,7 +40,7 @@ export declare class SVGGraphicsElement extends SVGElement {
     _relTM(tm: Matrix, root?: SVGElement | null): Matrix;
     get _rootTM(): Matrix;
     _pairTM(root?: SVGElement | null): Matrix[];
-    localTM(): Matrix;
+    _localTM(): Matrix;
     getScreenCTM(): Matrix;
     boundingBox(T?: Matrix): Box;
     getBBox(): Box;

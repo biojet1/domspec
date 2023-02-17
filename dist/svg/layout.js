@@ -12,7 +12,7 @@ export class SVGLayout {
         node._ownTM = m;
         return this;
     }
-    innerTM(node) {
+    _innerTM(node) {
         const m = this.getTM(node);
         if (node instanceof SVGSVGElement) {
             return m.cat(node.viewportTM());
@@ -23,7 +23,7 @@ export class SVGLayout {
         while (parent != root) {
             const grand = parent.parentElement;
             if (grand instanceof SVGGraphicsElement) {
-                tm = tm.postCat(this.innerTM(parent));
+                tm = tm.postCat(this._innerTM(parent));
                 parent = grand;
             }
             else if (root) {
@@ -49,13 +49,13 @@ export class SVGLayout {
         const { _root } = this;
         const { parentNode: parent } = node;
         if (parent instanceof SVGGraphicsElement) {
-            return this.relTM(parent, this.innerTM(node), _root);
+            return this.relTM(parent, this._innerTM(node), _root);
         }
         else if (node instanceof SVGSVGElement) {
             return Matrix.identity();
         }
         else {
-            return this.innerTM(node);
+            return this._innerTM(node);
         }
     }
     rootTM(node) {

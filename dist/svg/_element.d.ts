@@ -36,7 +36,7 @@ export declare class SVGGraphicsElement extends SVGElement {
     _canRender(): boolean;
     get _ownTM(): Matrix;
     set _ownTM(T: Matrix);
-    get innerTM(): Matrix;
+    get _innerTM(): Matrix;
     get rootTM(): Matrix;
     localTM(): Matrix;
     docTM(): Matrix;
@@ -65,7 +65,7 @@ export declare class SVGGraphicsElement extends SVGElement {
 export declare class SVGSVGElement extends SVGGraphicsElement {
     static TAGS: string[];
     get _isViewportElement(): number;
-    get innerTM(): Matrix;
+    get _innerTM(): Matrix;
     viewportTM(): Matrix;
     _shapeBox(tm?: Matrix): Box;
     defs(): Element;

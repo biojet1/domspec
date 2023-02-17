@@ -37,11 +37,11 @@ export declare class SVGGraphicsElement extends SVGElement {
     get _ownTM(): Matrix;
     set _ownTM(T: Matrix);
     get _innerTM(): Matrix;
+    _relTM(tm: Matrix, root?: SVGElement | null): Matrix;
     get _rootTM(): Matrix;
-    localTM(): Matrix;
-    pairTM(): Matrix[];
-    getScreenCTM(): Matrix;
     _pairTM(root?: SVGElement | null): Matrix[];
+    localTM(): Matrix;
+    getScreenCTM(): Matrix;
     boundingBox(T?: Matrix): Box;
     getBBox(): Box;
     fuseTransform(parentT?: Matrix): void;
@@ -57,7 +57,6 @@ export declare class SVGGraphicsElement extends SVGElement {
     _placeBefore(...nodes: SVGGraphicsElement[]): false | void;
     _placeAfter(...nodes: SVGGraphicsElement[]): false | void;
     _layout(): SVGLayout;
-    _relTM(tm: Matrix, root?: SVGElement | null): Matrix;
 }
 export declare class SVGSVGElement extends SVGGraphicsElement {
     static TAGS: string[];

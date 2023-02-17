@@ -247,7 +247,7 @@ export class SVGUseElement extends SVGGraphicsElement {
         const ref = this._hrefElement;
         if (ref) {
             const m = (() => {
-                let [p, o] = this.pairTM();
+                let [p, o] = this._pairTM();
                 const x = this.x.baseVal.value;
                 const y = this.y.baseVal.value;
                 if (x || y) {
@@ -275,7 +275,7 @@ export class SVGUseElement extends SVGGraphicsElement {
         const ref = this._hrefElement;
         if (ref) {
             const m = (() => {
-                let [p, o] = this.pairTM();
+                let [p, o] = this._pairTM();
                 const x = this.x.baseVal.value;
                 const y = this.y.baseVal.value;
                 if (x || y) {

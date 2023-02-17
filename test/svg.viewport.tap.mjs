@@ -108,7 +108,7 @@ tap.test("Geoms 1", function (t) {
     eqBox(t, b, r.isValid() ? r : Box.empty(), x - ~~x === 0 ? 1e-9 : 1, id);
   });
   const R5 = document.getElementById("R5");
-  const [p, m] = V1.pairTM();
+  const [p, m] = V1._pairTM();
 
   // console.log(R5._shapeBox().transform(V1._rootTM.cat(V1._innerTM).inverse()));
   // console.log(R5._shapeBox().transform(p.cat(V1._innerTM).inverse()));

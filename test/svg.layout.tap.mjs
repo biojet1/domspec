@@ -9,7 +9,7 @@ import { SVGLayout } from '../dist/svg/layout.js';
 
 class Lay extends SVGLayout {
 	trans(m, node) {
-		const [P, M] = this.pairTM(node);
+		const [P, M] = this._pairTM(node);
 		if (M.isIdentity) {
 			node._ownTM = P.inverse().cat(m);
 		} else {

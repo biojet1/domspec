@@ -10,7 +10,7 @@ import { Box, Matrix } from "svggeom";
 import { SVGLayout } from "../dist/svg/layout.js";
 
 function apply(m, node) {
-	const [P, M] = node.pairTM();
+	const [P, M] = node._pairTM();
 	const L = P.inverse().cat(m).cat(P);
 	const R = P.cat(M);
 

@@ -225,7 +225,7 @@ tap.test("transform2", function (t) {
 			const sub = doc.getElementById(subId);
 			// t.same(v.composeTM(top).describe(), m.describe(), `composeTM(top) ${id}`);
 			// t.same(v._composeTM().describe(), m.describe(), `_composeTM() ${id}`);
-			const [p, o] = lay.pairTM(sub);
+			const [p, o] = lay._pairTM(sub);
 			const r = lay._rootTM(sub);
 			// t.same(
 			// 	sub._relTM(sub._ownTM, root).describe(),

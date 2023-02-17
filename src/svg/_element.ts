@@ -210,8 +210,31 @@ export class SVGGraphicsElement extends SVGElement {
 	get _innerTM(): Matrix {
 		return this._ownTM;
 	}
+	//////////////////
+	// The transformation up to 'root'
+	// if root == null up to document root
+	_relTM(tm: Matrix, root?: SVGElement | null): Matrix {
+		let parent: SVGGraphicsElement = this;
+		while (parent != root) {
+			const grand: Element | null = parent.parentElement;
+			if (grand instanceof SVGGraphicsElement) {
+				tm = tm.postCat(parent._innerTM);
+				parent = grand;
+			} else if (root) {
+				if (grand) {
+					throw new Error(`root not reached`);
+				} else {
+					const p = (root as SVGGraphicsElement)._rootTM.inverse();
+					return p.cat(tm);
+				}
+			} else {
+				break;
+			}
+		}
+		return tm;
+	}
 	//////////////
-	// The transformation under document root
+	// The transformation up to document root
 	get _rootTM(): Matrix {
 		const { parentNode: parent, _ownTM } = this;
 		if (parent instanceof SVGGraphicsElement) {
@@ -219,6 +242,17 @@ export class SVGGraphicsElement extends SVGElement {
 		} else {
 			return _ownTM;
 		}
+	}
+	//////////////
+	// The transformation up to document root excluding _ownTM and _ownTM
+	_pairTM(root?: SVGElement | null): Matrix[] {
+		const { parentNode: parent, _ownTM } = this;
+		if (parent instanceof SVGGraphicsElement) {
+			return [parent._relTM(Matrix.identity(), root), _ownTM];
+		} else {
+			return [Matrix.identity(), _ownTM];
+		}
+		// return [this._composeTM(Matrix.identity(), root) ?? ]
 	}
 	//////////////
 
@@ -233,14 +267,6 @@ export class SVGGraphicsElement extends SVGElement {
 		}
 	}
 
-	pairTM(): Matrix[] {
-		const { parentNode: parent, _ownTM } = this;
-		if (parent instanceof SVGGraphicsElement) {
-			return [parent._relTM(Matrix.identity()), _ownTM];
-		} else {
-			return [Matrix.identity(), _ownTM];
-		}
-	}
 	getScreenCTM(): Matrix {
 		let { parentNode: parent, _ownTM: tm } = this;
 		for (; parent; parent = parent.parentNode) {
@@ -251,16 +277,6 @@ export class SVGGraphicsElement extends SVGElement {
 			}
 		}
 		return tm;
-	}
-
-	_pairTM(root?: SVGElement | null): Matrix[] {
-		const { parentNode: parent, _ownTM } = this;
-		if (parent instanceof SVGGraphicsElement) {
-			return [parent._relTM(Matrix.identity(), root), _ownTM];
-		} else {
-			return [Matrix.identity(), _ownTM];
-		}
-		// return [this._composeTM(Matrix.identity(), root) ?? ]
 	}
 
 	boundingBox(T?: Matrix): Box {
@@ -389,27 +405,6 @@ export class SVGGraphicsElement extends SVGElement {
 	}
 	_layout() {
 		return new SVGLayout(this);
-	}
-	//////////////////
-	_relTM(tm: Matrix, root?: SVGElement | null): Matrix {
-		let parent: SVGGraphicsElement = this;
-		while (parent != root) {
-			const grand: Element | null = parent.parentElement;
-			if (grand instanceof SVGGraphicsElement) {
-				tm = tm.postCat(parent._innerTM);
-				parent = grand;
-			} else if (root) {
-				if (grand) {
-					throw new Error(`root not reached`);
-				} else {
-					const p = (root as SVGGraphicsElement)._rootTM.inverse();
-					return p.cat(tm);
-				}
-			} else {
-				break;
-			}
-		}
-		return tm;
 	}
 }
 export class SVGSVGElement extends SVGGraphicsElement {

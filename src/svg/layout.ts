@@ -41,7 +41,7 @@ export class SVGLayout {
 		return tm;
 	}
 
-	pairTM(node: SVGGraphicsElement): Matrix[] {
+	_pairTM(node: SVGGraphicsElement): Matrix[] {
 		const { parentNode: parent } = node;
 		const { _root } = this;
 		if (parent instanceof SVGGraphicsElement) {
@@ -73,7 +73,7 @@ export class SVGLayout {
 	}
 	catTM(m: Matrix, ...nodes: Array<SVGGraphicsElement>) {
 		nodes.forEach((node) => {
-			const [P, M] = this.pairTM(node);
+			const [P, M] = this._pairTM(node);
 			this.setTM(node, P.inverse().cat(m).cat(P).cat(M));
 		});
 	}
@@ -96,7 +96,7 @@ export class SVGLayout {
 				const { x, y } = v;
 				bbox = Box.new(x, y, 0, 0).merge(bbox);
 			} else {
-				const [p, o] = this.pairTM(v);
+				const [p, o] = this._pairTM(v);
 				try {
 					bbox = v._boundingBox(p).merge(bbox);
 				} catch (err) {

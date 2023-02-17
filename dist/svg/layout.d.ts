@@ -11,5 +11,5 @@ export declare class SVGLayout {
     _localTM(node: SVGGraphicsElement): Matrix;
     _rootTM(node: SVGGraphicsElement): Matrix;
     catTM(m: Matrix, ...nodes: Array<SVGGraphicsElement>): void;
-    boundingBox(...args: Array<SVGGraphicsElement | Box | Vec | Ray | Array<SVGGraphicsElement | Box | Vec | Ray>>): Box;
+    _boundingBox(...args: Array<SVGGraphicsElement | Box | Vec | Ray | Array<SVGGraphicsElement | Box | Vec | Ray>>): Box;
 }

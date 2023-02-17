@@ -74,11 +74,11 @@ export class SVGLayout {
             this.setTM(node, P.inverse().cat(m).cat(P).cat(M));
         });
     }
-    boundingBox(...args) {
+    _boundingBox(...args) {
         let bbox = Box.new();
         for (const v of args) {
             if (v instanceof Array) {
-                bbox = this.boundingBox(...v).merge(bbox);
+                bbox = this._boundingBox(...v).merge(bbox);
             }
             else if (v instanceof Box) {
                 bbox = v.merge(bbox);

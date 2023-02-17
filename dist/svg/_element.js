@@ -245,33 +245,22 @@ export class SVGGraphicsElement extends SVGElement {
         }
         return box;
     }
-    getScreenCTM() {
-        let { parentNode: parent, _ownTM: tm } = this;
-        for (; parent; parent = parent.parentNode) {
-            if (parent instanceof SVGGraphicsElement) {
-                tm = tm.postCat(parent._innerTM);
+    _viewportBox(tm) {
+        const width = this.width.baseVal.value;
+        const height = this.height.baseVal.value;
+        const x = this.x.baseVal.value;
+        const y = this.y.baseVal.value;
+        if (width && height) {
+            let b = Box.new(x, y, width, height);
+            if (tm) {
+                b = b.transform(tm);
             }
             else {
-                break;
+                b = b.transform(this._rootTM);
             }
+            return b;
         }
-        return tm;
-    }
-    boundingBox(T) {
-        return this._boundingBox(T);
-    }
-    getBBox() {
-        const box = this._objectBBox();
-        return box.isValid() ? box : Box.empty();
-    }
-    fuseTransform(parentT) {
-        let tm = parentT ? this._ownTM.postCat(parentT) : this._ownTM;
-        for (const sub of this.children) {
-            if (sub instanceof SVGGraphicsElement) {
-                sub.fuseTransform(tm);
-            }
-        }
-        this.removeAttribute("transform");
+        return Box.not();
     }
     _boundingBox(tm) {
         const { _clipElement: clip } = this;
@@ -297,27 +286,30 @@ export class SVGGraphicsElement extends SVGElement {
         }
         return box;
     }
-    _viewportBox(tm) {
-        const width = this.width.baseVal.value;
-        const height = this.height.baseVal.value;
-        const x = this.x.baseVal.value;
-        const y = this.y.baseVal.value;
-        if (width && height) {
-            let b = Box.new(x, y, width, height);
-            if (tm) {
-                b = b.transform(tm);
+    getScreenCTM() {
+        let { parentNode: parent, _ownTM: tm } = this;
+        for (; parent; parent = parent.parentNode) {
+            if (parent instanceof SVGGraphicsElement) {
+                tm = tm.postCat(parent._innerTM);
             }
             else {
-                b = b.transform(this._rootTM);
+                break;
             }
-            return b;
         }
-        return Box.not();
+        return tm;
     }
-    calcWidth() {
-        const w = this.getAttribute("width");
-        if (w) {
+    getBBox() {
+        const box = this._objectBBox();
+        return box.isValid() ? box : Box.empty();
+    }
+    fuseTransform(parentT) {
+        let tm = parentT ? this._ownTM.postCat(parentT) : this._ownTM;
+        for (const sub of this.children) {
+            if (sub instanceof SVGGraphicsElement) {
+                sub.fuseTransform(tm);
+            }
         }
+        this.removeAttribute("transform");
     }
     _placeChild(ref, nodes) {
         const pCtm = this._rootTM.inverse();
@@ -388,7 +380,7 @@ export class SVGSVGElement extends SVGGraphicsElement {
     _shapeBox(tm) {
         return this._viewportBox(tm);
     }
-    defs() {
+    _defs() {
         let { ownerDocument, children } = this;
         if (ownerDocument) {
             for (const sub of this.children) {
@@ -401,27 +393,6 @@ export class SVGSVGElement extends SVGGraphicsElement {
             return defs;
         }
         throw new Error(`No ownerDocument`);
-    }
-    geom2UU() {
-        this.width.baseVal.convertToSpecifiedUnits(1);
-        this.height.baseVal.convertToSpecifiedUnits(1);
-        for (const x in [
-            "r",
-            "x",
-            "y",
-            "cx",
-            "cy",
-            "rx",
-            "ry",
-            "x1",
-            "x2",
-            "y1",
-            "y2",
-            "width",
-            "height",
-        ]) {
-            this.getAttributeNode(x);
-        }
     }
 }
 function composeTransforms(parent, tm, root) {

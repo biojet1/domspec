@@ -42,14 +42,12 @@ export declare class SVGGraphicsElement extends SVGElement {
     _pairTM(root?: SVGElement | null): Matrix[];
     _localTM(): Matrix;
     _objectBBox(T?: Matrix): Box;
-    getScreenCTM(): Matrix;
-    boundingBox(T?: Matrix): Box;
-    getBBox(): Box;
-    fuseTransform(parentT?: Matrix): void;
+    _viewportBox(tm?: Matrix): Box;
     _boundingBox(tm?: Matrix): Box;
     _shapeBox(tm?: Matrix): Box;
-    _viewportBox(tm?: Matrix): Box;
-    calcWidth(): void;
+    getScreenCTM(): Matrix;
+    getBBox(): Box;
+    fuseTransform(parentT?: Matrix): void;
     _placeChild(ref: ChildNode | null | undefined, nodes: SVGGraphicsElement[]): void;
     _placePriorTo(ref: ChildNode | null | undefined, ...nodes: SVGGraphicsElement[]): void;
     _placeAppend(...nodes: SVGGraphicsElement[]): void;
@@ -63,8 +61,7 @@ export declare class SVGSVGElement extends SVGGraphicsElement {
     get _innerTM(): Matrix;
     _viewportTM(): Matrix;
     _shapeBox(tm?: Matrix): Box;
-    defs(): Element;
-    geom2UU(): void;
+    _defs(): Element;
 }
 import { Element } from "../element.js";
 import { ChildNode } from "../child-node.js";

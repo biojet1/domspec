@@ -311,7 +311,7 @@ export class SVGTextElement extends SVGTextContentElement {
         box = box.merge(Box.new(Vec.at(x, y).transform(m).toArray().concat([0, 0])));
         for (const sub of this.children) {
             if (sub instanceof SVGGraphicsElement && sub.localName == "tspan") {
-                box = sub.boundingBox(m).merge(box);
+                box = sub._boundingBox(m).merge(box);
             }
         }
         return box;

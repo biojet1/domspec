@@ -5,7 +5,7 @@ export declare class SVGGeometryElement extends SVGGraphicsElement {
     describe(): string;
     getPath(): PathLS;
     get path(): PathLS;
-    objectBBox(T?: Matrix): Box;
+    _objectBBox(T?: Matrix): Box;
     _shapeBox(tm?: Matrix): Box;
     toPathElement(): SVGGeometryElement;
     getTotalLength(): number;
@@ -76,7 +76,7 @@ export declare class SVGSwitchElement extends SVGGraphicsElement {
 export declare class SVGUseElement extends SVGGraphicsElement {
     static TAGS: string[];
     _shapeBox(tm?: Matrix): Box;
-    objectBBox(T?: Matrix): Box;
+    _objectBBox(T?: Matrix): Box;
 }
 export declare class SVGSymbolElement extends SVGGraphicsElement {
     static TAGS: string[];

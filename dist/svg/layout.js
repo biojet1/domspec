@@ -15,7 +15,7 @@ export class SVGLayout {
     _innerTM(node) {
         const m = this.getTM(node);
         if (node instanceof SVGSVGElement) {
-            return m.cat(node.viewportTM());
+            return m.cat(node._viewportTM());
         }
         return m;
     }

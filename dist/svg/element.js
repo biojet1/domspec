@@ -16,7 +16,7 @@ export class SVGGeometryElement extends SVGGraphicsElement {
             return new PathLS(undefined);
         }
     }
-    objectBBox(T) {
+    _objectBBox(T) {
         let { path } = this;
         if (path.firstPoint) {
             if (T) {
@@ -271,7 +271,7 @@ export class SVGUseElement extends SVGGraphicsElement {
         }
         return Box.not();
     }
-    objectBBox(T) {
+    _objectBBox(T) {
         const ref = this._hrefElement;
         if (ref) {
             const m = (() => {
@@ -288,7 +288,7 @@ export class SVGUseElement extends SVGGraphicsElement {
                     return o;
                 }
             })();
-            return ref.objectBBox(m);
+            return ref._objectBBox(m);
         }
         return Box.not();
     }

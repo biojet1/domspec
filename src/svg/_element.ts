@@ -267,6 +267,19 @@ export class SVGGraphicsElement extends SVGElement {
 		}
 	}
 	//////////////
+	// 	<g/> box of decendant children
+	_objectBBox(T?: Matrix) {
+		let box = Box.new();
+		for (const sub of this.children) {
+			if (sub instanceof SVGGraphicsElement && sub._canRender()) {
+				const M = sub._ownTM;
+				const E = T ? T.cat(M) : M;
+				box = box.merge(sub._objectBBox(E));
+			}
+		}
+		return box;
+	}
+	//////////////
 
 	getScreenCTM(): Matrix {
 		let { parentNode: parent, _ownTM: tm } = this;
@@ -284,7 +297,7 @@ export class SVGGraphicsElement extends SVGElement {
 		return this._boundingBox(T);
 	}
 	getBBox() {
-		const box = this.objectBBox();
+		const box = this._objectBBox();
 		return box.isValid() ? box : Box.empty();
 	}
 	fuseTransform(parentT?: Matrix) {
@@ -295,30 +308,6 @@ export class SVGGraphicsElement extends SVGElement {
 			}
 		}
 		this.removeAttribute("transform");
-	}
-
-	objectBBox(T?: Matrix) {
-		let box = Box.new();
-		for (const sub of this.children) {
-			if (sub instanceof SVGGraphicsElement && sub._canRender()) {
-				const M = sub._ownTM;
-				const E = T ? T.cat(M) : M;
-				box = box.merge(sub.objectBBox(E));
-			}
-		}
-		return box;
-	}
-
-	_objectBBox(T?: Matrix) {
-		let box = Box.new();
-		for (const sub of this.children) {
-			if (sub instanceof SVGGraphicsElement && sub._canRender()) {
-				const M = sub._ownTM;
-				const E = T ? T.cat(M) : M;
-				box = box.merge(sub.objectBBox(E));
-			}
-		}
-		return box;
 	}
 
 	_boundingBox(tm?: Matrix): Box {
@@ -414,11 +403,10 @@ export class SVGSVGElement extends SVGGraphicsElement {
 		return 1;
 	}
 	get _innerTM(): Matrix {
-		// return this.viewportTM().cat(this._ownTM);
-		return this._ownTM.cat(this.viewportTM());
+		return this._ownTM.cat(this._viewportTM());
 	}
 
-	viewportTM() {
+	_viewportTM() {
 		const w = this.width.baseVal.value;
 		const h = this.height.baseVal.value;
 		const x = this.x.baseVal.value;

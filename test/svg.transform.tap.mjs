@@ -44,7 +44,7 @@ tap.test("transform", function (t) {
     // ['R4', 10, 20, 100, 200],
   ].forEach(([id, x, y, w, h]) => {
     const v = document.getElementById(id);
-    const r = v.objectBBox();
+    const r = v._objectBBox();
     t.same(r.toArray(), [x, y, w, h], `getBBox ${id}`);
   });
   let [p, o] = R3._pairTM();
@@ -65,7 +65,7 @@ import fs from "fs";
 function closeEnough(a, b, threshold = 1e-6) {
   return Math.abs(b - a) <= threshold;
 }
-tap.test("viewportTM", function (t) {
+tap.test("_viewportTM", function (t) {
   function eqBox(a, b, epsilon = 0, tag) {
     t.ok(a.equals(b, epsilon), `${tag} [${a}] vs [${b}]`);
   }
@@ -81,7 +81,7 @@ tap.test("viewportTM", function (t) {
   const G_F = document.getElementById("G_F");
   document.querySelectorAll(`text`).forEach((x) => x.remove());
 
-  t.same(top.viewportTM().toString(), Matrix.identity().toString());
+  t.same(top._viewportTM().toString(), Matrix.identity().toString());
   [
     ["V_A", "xMinYMin meet", 1, 0, 0, 1, 100, 60],
     ["V_B", "xMidYMid meet", 1, 0, 0, 1, 170, 60],
@@ -140,7 +140,7 @@ tap.test("viewportTM", function (t) {
     t.ok(v.farthestViewportElement === top);
     t.ok(u.farthestViewportElement === top);
     t.ok(u.nearestViewportElement === v);
-    const x = r.cat(v.viewportTM());
+    const x = r.cat(v._viewportTM());
     t.ok(x.equals(m, 1e-4), `${id} ${r} ${m}`);
     // console.log();
   });

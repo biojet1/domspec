@@ -157,7 +157,7 @@ tap.test("transform2", function (t) {
 		["RB", 50, 50, 30, 30],
 	].forEach(([id, x, y, w, h]) => {
 		const v = doc.getElementById(id);
-		const r = v.objectBBox();
+		const r = v._objectBBox();
 		t.same(r.toArray(), [x, y, w, h], `getBBox ${id}`);
 	});
 	[
@@ -167,7 +167,7 @@ tap.test("transform2", function (t) {
 		["G4", 0, 10, 50, 70],
 	].forEach(([id, x, y, w, h]) => {
 		const v = doc.getElementById(id);
-		const r = v.objectBBox();
+		const r = v._objectBBox();
 		t.same(r.toArray(), [x, y, w, h], `getBBox ${id}`);
 	});
 
@@ -176,7 +176,7 @@ tap.test("transform2", function (t) {
 		["V2", 50, 50, 30, 30],
 	].forEach(([id, x, y, w, h]) => {
 		const v = doc.getElementById(id);
-		const r = v.objectBBox();
+		const r = v._objectBBox();
 		t.same(r.toArray(), [x, y, w, h], `getBBox ${id}`);
 	});
 	//////////////////////

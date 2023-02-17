@@ -18,7 +18,7 @@ export class SVGLayout {
 	_innerTM(node: SVGGraphicsElement): Matrix {
 		const m = this.getTM(node);
 		if (node instanceof SVGSVGElement) {
-			return m.cat(node.viewportTM());
+			return m.cat(node._viewportTM());
 		}
 		return m;
 	}

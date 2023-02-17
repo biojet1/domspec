@@ -82,7 +82,7 @@ tap.test("layout1", { bail: 0 }, function (t) {
 			);
 
 			t.ok(r.equals(m, 1e-3), `${id} ${r.describe()} ${m.describe()}`);
-			const n = metrix.tag_name == "svg" ? l.cat(v.viewportTM().inverse()) : l;
+			const n = metrix.tag_name == "svg" ? l.cat(v._viewportTM().inverse()) : l;
 
 			t.ok(r.equals(n, 1e-3), `_localTM ${id} ${l.describe()} ${o.describe()}`);
 			t.ok(

@@ -26,7 +26,7 @@ export class SVGGeometryElement extends SVGGraphicsElement {
 		}
 	}
 	// https://greensock.com/forums/topic/13681-svg-gotchas/page/2/?tab=comments#comment-72060
-	objectBBox(T?: Matrix) {
+	_objectBBox(T?: Matrix) {
 		let { path } = this;
 		if (path.firstPoint) {
 			if (T) {
@@ -335,7 +335,7 @@ export class SVGUseElement extends SVGGraphicsElement {
 		return Box.not();
 	}
 
-	objectBBox(T?: Matrix) {
+	_objectBBox(T?: Matrix) {
 		// const E = T ? T.cat(this._ownTM) : this._ownTM;
 		const ref = this._hrefElement;
 		if (ref) {
@@ -354,14 +354,14 @@ export class SVGUseElement extends SVGGraphicsElement {
 			})();
 
 			// if (ref instanceof SVGSymbolElement) {
-			// 	return (ref as SVGGraphicsElement).objectBBox(m);
+			// 	return (ref as SVGGraphicsElement)._objectBBox(m);
 			// }
 
 			// if (T) {
-			// 	return (ref as SVGGraphicsElement).objectBBox(m);
+			// 	return (ref as SVGGraphicsElement)._objectBBox(m);
 			// }
 
-			return (ref as SVGGraphicsElement).objectBBox(m);
+			return (ref as SVGGraphicsElement)._objectBBox(m);
 		}
 		return Box.not();
 	}

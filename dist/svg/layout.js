@@ -6,10 +6,10 @@ export class SVGLayout {
         this._root = node;
     }
     getTM(node) {
-        return node.ownTM;
+        return node._ownTM;
     }
     setTM(node, m) {
-        node.ownTM = m;
+        node._ownTM = m;
         return this;
     }
     innerTM(node) {

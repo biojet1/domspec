@@ -30,7 +30,7 @@ export class SVGGeometryElement extends SVGGraphicsElement {
         let { path } = this;
         if (path.firstPoint) {
             if (tm) {
-                path = path.transform(tm.cat(this.ownTM));
+                path = path.transform(tm.cat(this._ownTM));
             }
             else {
                 path = path.transform(this.rootTM);
@@ -79,7 +79,7 @@ export class SVGPathElement extends SVGGeometryElement {
         return new _PathD(this);
     }
     fuseTransform(parentT) {
-        let tm = parentT ? this.ownTM.postCat(parentT) : this.ownTM;
+        let tm = parentT ? this._ownTM.postCat(parentT) : this._ownTM;
         this.setAttribute("d", PathLS.parse(this.describe()).transform(tm).describe());
         this.removeAttribute("transform");
     }
@@ -107,7 +107,7 @@ export class SVGRectElement extends SVGGeometryElement {
         return `M ${x} ${y} h ${width} v ${height} h ${-width} Z`;
     }
     fuseTransform(parentT) {
-        let tm = parentT ? this.ownTM.postCat(parentT) : this.ownTM;
+        let tm = parentT ? this._ownTM.postCat(parentT) : this._ownTM;
         const { a: scale_x, b: skew_x, c: skew_y, d: scale_y, e: translate_x, f: translate_y, } = tm;
         if (skew_x == 0 && skew_y == 0) {
             const { abs } = Math;
@@ -140,7 +140,7 @@ export class SVGLineElement extends SVGGeometryElement {
         return `M ${x1} ${y1} L ${x2} ${y2}`;
     }
     fuseTransform(parentT) {
-        let tm = parentT ? this.ownTM.postCat(parentT) : this.ownTM;
+        let tm = parentT ? this._ownTM.postCat(parentT) : this._ownTM;
         if (!tm.isIdentity) {
             let x1 = this.x1.baseVal.value;
             let x2 = this.x2.baseVal.value;
@@ -173,7 +173,7 @@ export class SVGPolygonElement extends SVGGeometryElement {
         return p ? `M ${p} Z` : "";
     }
     fuseTransform(parentT) {
-        let tm = parentT ? this.ownTM.postCat(parentT) : this.ownTM;
+        let tm = parentT ? this._ownTM.postCat(parentT) : this._ownTM;
         if (!tm.isIdentity) {
             const l = this.getAttribute("points")
                 ?.split(/(\s+)/)
@@ -194,7 +194,7 @@ export class SVGPolylineElement extends SVGGeometryElement {
         return p ? `M ${p}` : "";
     }
     fuseTransform(parentT) {
-        let tm = parentT ? this.ownTM.postCat(parentT) : this.ownTM;
+        let tm = parentT ? this._ownTM.postCat(parentT) : this._ownTM;
         if (!tm.isIdentity) {
             const l = this.getAttribute("points")
                 ?.split(/(\s+)/)
@@ -244,7 +244,7 @@ export class SVGSwitchElement extends SVGGraphicsElement {
 export class SVGUseElement extends SVGGraphicsElement {
     static TAGS = ["use"];
     _shapeBox(tm) {
-        const ref = this.hrefElement;
+        const ref = this._hrefElement;
         if (ref) {
             const m = (() => {
                 let [p, o] = this.pairTM();
@@ -272,7 +272,7 @@ export class SVGUseElement extends SVGGraphicsElement {
         return Box.not();
     }
     objectBBox(T) {
-        const ref = this.hrefElement;
+        const ref = this._hrefElement;
         if (ref) {
             const m = (() => {
                 let [p, o] = this.pairTM();
@@ -305,7 +305,7 @@ export class SVGSymbolElement extends SVGGraphicsElement {
 export class SVGTextElement extends SVGTextContentElement {
     static TAGS = ["text"];
     _shapeBox(tm) {
-        const m = tm ? tm.cat(this.ownTM) : this.ownTM;
+        const m = tm ? tm.cat(this._ownTM) : this._ownTM;
         const { x: { baseVal: { value: x }, }, y: { baseVal: { value: y }, }, } = this;
         let box = Box.new();
         box = box.merge(Box.new(Vec.at(x, y).transform(m).toArray().concat([0, 0])));
@@ -320,7 +320,7 @@ export class SVGTextElement extends SVGTextContentElement {
 export class SVGTSpanElement extends SVGTextContentElement {
     static TAGS = ["tspan"];
     _shapeBox(tm) {
-        const m = tm ? tm.cat(this.ownTM) : this.ownTM;
+        const m = tm ? tm.cat(this._ownTM) : this._ownTM;
         let box = Box.new();
         let s;
         const x1 = this.x.baseVal.value;

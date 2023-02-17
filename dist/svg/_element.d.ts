@@ -29,13 +29,13 @@ export declare class SVGGraphicsElement extends SVGElement {
     get transform(): SVGAnimatedTransformList;
     get nearestViewportElement(): SVGElement | null;
     get farthestViewportElement(): SVGElement | null;
-    get ownTM(): Matrix;
-    set ownTM(T: Matrix);
     get _clipElement(): SVGGraphicsElement | null;
     set _clipElement(target: SVGElement | null);
-    get hrefElement(): SVGElement | null;
-    set hrefElement(target: SVGElement | null);
-    canRender(): boolean;
+    get _hrefElement(): SVGElement | null;
+    set _hrefElement(target: SVGElement | null);
+    _canRender(): boolean;
+    get _ownTM(): Matrix;
+    set _ownTM(T: Matrix);
     get innerTM(): Matrix;
     get rootTM(): Matrix;
     localTM(): Matrix;

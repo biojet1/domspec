@@ -223,36 +223,6 @@ export class SVGGraphicsElement extends SVGElement {
         }
         return tm;
     }
-    composeTM(root) {
-        {
-            const { parentNode: parent, _ownTM } = this;
-            if (parent instanceof SVGGraphicsElement) {
-                return parent._relTM(_ownTM, root);
-            }
-            else if (root) {
-                throw new Error(`root not reached`);
-            }
-            else {
-                return _ownTM;
-            }
-        }
-    }
-    _composeTM(root) {
-        let parent = this
-            .parentElement;
-        if (parent instanceof SVGGraphicsElement) {
-            return parent._relTM(this._ownTM, root);
-        }
-        else if (root) {
-            throw new Error(`root not reached`);
-        }
-        else if (this instanceof SVGSVGElement) {
-            return Matrix.identity();
-        }
-        else {
-            return this._ownTM;
-        }
-    }
     _pairTM(root) {
         const { parentNode: parent, _ownTM } = this;
         if (parent instanceof SVGGraphicsElement) {

@@ -8,6 +8,7 @@ export declare class SVGRect extends BoxMut {
     set width(value: number);
     get height(): number;
     set height(value: number);
+    toString(): string;
 }
 export declare class SVGAnimatedRect extends Attr {
     _var?: SVGRect | string;

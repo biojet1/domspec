@@ -265,9 +265,6 @@ export class SVGGraphicsElement extends SVGElement {
             return [Matrix.identity(), ownTM];
         }
     }
-    shapeBox(T) {
-        return this._shapeBox(T);
-    }
     boundingBox(T) {
         return this._boundingBox(T);
     }
@@ -440,9 +437,6 @@ export class SVGSVGElement extends SVGGraphicsElement {
         }
         const [tx, ty, sx, sy] = viewbox_transform(x, y, w, h, vx, vy, vw, vh, this.getAttribute("preserveAspectRatio"));
         return Matrix.translate(tx, ty).scale(sx, sy);
-    }
-    shapeBox(T) {
-        return this._shapeBox(T);
     }
     _shapeBox(tm) {
         return this._viewportBox(tm);

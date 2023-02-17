@@ -26,9 +26,6 @@ export class SVGGeometryElement extends SVGGraphicsElement {
         }
         return Box.not();
     }
-    shapeBox(T) {
-        return this._shapeBox(T);
-    }
     _shapeBox(tm) {
         let { path } = this;
         if (path.firstPoint) {
@@ -225,9 +222,6 @@ export class SVGForeignObjectElement extends SVGGraphicsElement {
     get _isViewportElement() {
         return 2;
     }
-    shapeBox(T) {
-        return this._shapeBox(T);
-    }
     _shapeBox(tm) {
         return this._viewportBox(tm);
     }
@@ -240,9 +234,6 @@ export class SVGImageElement extends SVGGraphicsElement {
     get _isViewportElement() {
         return 1;
     }
-    shapeBox(T) {
-        return this._shapeBox(T);
-    }
     _shapeBox(tm) {
         return this._viewportBox(tm);
     }
@@ -252,9 +243,6 @@ export class SVGSwitchElement extends SVGGraphicsElement {
 }
 export class SVGUseElement extends SVGGraphicsElement {
     static TAGS = ["use"];
-    shapeBox(T) {
-        return this._shapeBox(T);
-    }
     _shapeBox(tm) {
         const ref = this.hrefElement;
         if (ref) {
@@ -319,9 +307,6 @@ export class SVGSymbolElement extends SVGGraphicsElement {
 }
 export class SVGTextElement extends SVGTextContentElement {
     static TAGS = ["text"];
-    shapeBox(T) {
-        return this._shapeBox(T);
-    }
     _shapeBox(tm) {
         const m = tm ? tm.cat(this.ownTM) : this.ownTM;
         const { x: { baseVal: { value: x }, }, y: { baseVal: { value: y }, }, } = this;

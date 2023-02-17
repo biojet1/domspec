@@ -45,7 +45,6 @@ export declare class SVGGraphicsElement extends SVGElement {
     composeTM(root?: SVGElement | null): Matrix;
     _composeTM(root?: SVGElement | null): Matrix | null;
     _pairTM(root?: SVGElement | null): Matrix[];
-    shapeBox(T?: Matrix): Box;
     boundingBox(T?: Matrix): Box;
     getBBox(): Box;
     fuseTransform(parentT?: Matrix): void;
@@ -68,7 +67,6 @@ export declare class SVGSVGElement extends SVGGraphicsElement {
     get _isViewportElement(): number;
     get innerTM(): Matrix;
     viewportTM(): Matrix;
-    shapeBox(T?: Matrix): Box;
     _shapeBox(tm?: Matrix): Box;
     defs(): Element;
     geom2UU(): void;

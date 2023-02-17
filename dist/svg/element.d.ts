@@ -6,7 +6,6 @@ export declare class SVGGeometryElement extends SVGGraphicsElement {
     getPath(): PathLS;
     get path(): PathLS;
     objectBBox(T?: Matrix): Box;
-    shapeBox(T?: Matrix): Box;
     _shapeBox(tm?: Matrix): Box;
     toPathElement(): SVGGeometryElement;
     getTotalLength(): number;
@@ -61,7 +60,6 @@ export declare class SVGDefsElement extends SVGGraphicsElement {
 export declare class SVGForeignObjectElement extends SVGGraphicsElement {
     static TAGS: string[];
     get _isViewportElement(): number;
-    shapeBox(T?: Matrix): Box;
     _shapeBox(tm?: Matrix): Box;
 }
 export declare class SVGGElement extends SVGGraphicsElement {
@@ -70,7 +68,6 @@ export declare class SVGGElement extends SVGGraphicsElement {
 export declare class SVGImageElement extends SVGGraphicsElement {
     static TAGS: string[];
     get _isViewportElement(): number;
-    shapeBox(T?: Matrix): Box;
     _shapeBox(tm?: Matrix): Box;
 }
 export declare class SVGSwitchElement extends SVGGraphicsElement {
@@ -78,7 +75,6 @@ export declare class SVGSwitchElement extends SVGGraphicsElement {
 }
 export declare class SVGUseElement extends SVGGraphicsElement {
     static TAGS: string[];
-    shapeBox(T?: Matrix): Box;
     _shapeBox(tm?: Matrix): Box;
     objectBBox(T?: Matrix): Box;
 }
@@ -90,7 +86,6 @@ export declare class SVGSymbolElement extends SVGGraphicsElement {
 }
 export declare class SVGTextElement extends SVGTextContentElement {
     static TAGS: string[];
-    shapeBox(T?: Matrix): Box;
     _shapeBox(tm?: Matrix): Box;
 }
 export declare class SVGTSpanElement extends SVGTextContentElement {

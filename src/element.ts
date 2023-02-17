@@ -574,7 +574,7 @@ export class Element extends ParentNode {
 		// return true;
 	}
 
-	letId() {
+	_ensureId() {
 		let id = this.getAttribute('id');
 		if (!id) {
 			this.setAttribute('id', (id = nextUniqueId().toString(36)));

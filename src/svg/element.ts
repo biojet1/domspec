@@ -394,9 +394,6 @@ export class SVGSymbolElement extends SVGGraphicsElement {
 	get _isViewportElement() {
 		return 1;
 	}
-	shapeBox(T?: Matrix): Box {
-		return this._shapeBox(T);
-	}
 	_shapeBox(tm?: Matrix): Box {
 		return this._viewportBox(tm);
 	}
@@ -432,10 +429,6 @@ export class SVGTextElement extends SVGTextContentElement {
 
 export class SVGTSpanElement extends SVGTextContentElement {
 	static TAGS = ["tspan"];
-	shapeBox(T?: Matrix) {
-		return this._shapeBox(T);
-	}
-
 	_shapeBox(tm?: Matrix): Box {
 		const m = tm ? tm.cat(this.ownTM) : this.ownTM;
 		let box = Box.new();

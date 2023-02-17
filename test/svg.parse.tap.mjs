@@ -43,12 +43,12 @@ tap.test("SVG clip-path", function (t) {
 		`);
 	const svg = doc.documentElement;
 	const R1 = doc.getElementById("R1");
-	t.same(R1.clipElement?.id, "myClip");
-	R1.clipElement = null;
-	t.notOk(R1.clipElement);
+	t.same(R1._clipElement?.id, "myClip");
+	R1._clipElement = null;
+	t.notOk(R1._clipElement);
 	t.notOk(R1.hasAttribute("clip-path"));
-	R1.clipElement = svg;
-	t.ok(R1.clipElement);
+	R1._clipElement = svg;
+	t.ok(R1._clipElement);
 	t.ok(R1.hasAttribute("clip-path"));
 	t.ok(svg.id);
 	// console.log(svg.outerHTML);

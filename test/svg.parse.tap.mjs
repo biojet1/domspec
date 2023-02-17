@@ -21,9 +21,9 @@ tap.test("SVG innerHTML/defs", function (t) {
 	const use = VPA.firstChild.firstChild;
 	t.match(use.constructor.name, "SVGUseElement");
 	t.notOk(doc.querySelector("defs"));
-	VPA.defs().appendChild(R1);
+	VPA._defs().appendChild(R1);
 	t.ok(doc.querySelector("defs"));
-	t.same(R1.parentNode, VPA.defs());
+	t.same(R1.parentNode, VPA._defs());
 	t.same(use._hrefElement, null);
 	use._hrefElement = R1;
 	t.same(use?._hrefElement?.id, "R1");

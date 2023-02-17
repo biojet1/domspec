@@ -195,6 +195,7 @@ export class SVGGraphicsElement extends SVGElement {
 		}
 		return true;
 	}
+
 	//////////////
 	// The transform attribute
 	get _ownTM() {
@@ -280,61 +281,8 @@ export class SVGGraphicsElement extends SVGElement {
 		return box;
 	}
 	//////////////
-
-	getScreenCTM(): Matrix {
-		let { parentNode: parent, _ownTM: tm } = this;
-		for (; parent; parent = parent.parentNode) {
-			if (parent instanceof SVGGraphicsElement) {
-				tm = tm.postCat(parent._innerTM);
-			} else {
-				break;
-			}
-		}
-		return tm;
-	}
-
-	boundingBox(T?: Matrix): Box {
-		return this._boundingBox(T);
-	}
-	getBBox() {
-		const box = this._objectBBox();
-		return box.isValid() ? box : Box.empty();
-	}
-	fuseTransform(parentT?: Matrix) {
-		let tm = parentT ? this._ownTM.postCat(parentT) : this._ownTM;
-		for (const sub of this.children) {
-			if (sub instanceof SVGGraphicsElement) {
-				sub.fuseTransform(tm);
-			}
-		}
-		this.removeAttribute("transform");
-	}
-
-	_boundingBox(tm?: Matrix): Box {
-		const { _clipElement: clip } = this;
-		if (clip) {
-			if (tm) {
-				return this._shapeBox(tm).overlap(clip._boundingBox(tm));
-			} else {
-				return this._shapeBox().overlap(clip._boundingBox());
-			}
-		} else {
-			return this._shapeBox(tm);
-		}
-	}
-
-	_shapeBox(tm?: Matrix): Box {
-		// for <g/> box of decendant children
-		const m = tm ? tm.cat(this._ownTM) : this._rootTM;
-		let box = Box.new();
-		for (const sub of this.children) {
-			if (sub instanceof SVGGraphicsElement && sub._canRender()) {
-				box = box.merge(sub._boundingBox(m));
-			}
-		}
-		return box;
-	}
-
+	// The box of element with viewport that has x, y, width, height
+	// like image, svg, symbol, foreignObject, ...
 	_viewportBox(tm?: Matrix): Box {
 		const width = this.width.baseVal.value;
 		const height = this.height.baseVal.value;
@@ -351,11 +299,59 @@ export class SVGGraphicsElement extends SVGElement {
 		}
 		return Box.not();
 	}
-	calcWidth() {
-		const w = this.getAttribute("width");
-		if (w) {
+	//////////////
+	// The bounding box, transformed up to document root
+	_boundingBox(tm?: Matrix): Box {
+		const { _clipElement: clip } = this;
+		if (clip) {
+			if (tm) {
+				return this._shapeBox(tm).overlap(clip._boundingBox(tm));
+			} else {
+				return this._shapeBox().overlap(clip._boundingBox());
+			}
+		} else {
+			return this._shapeBox(tm);
 		}
 	}
+	//////////////
+	// The bounding box of <g/>, decendants,  transformed up to document root
+	_shapeBox(tm?: Matrix): Box {
+		const m = tm ? tm.cat(this._ownTM) : this._rootTM;
+		let box = Box.new();
+		for (const sub of this.children) {
+			if (sub instanceof SVGGraphicsElement && sub._canRender()) {
+				box = box.merge(sub._boundingBox(m));
+			}
+		}
+		return box;
+	}
+	//////////////
+	getScreenCTM(): Matrix {
+		let { parentNode: parent, _ownTM: tm } = this;
+		for (; parent; parent = parent.parentNode) {
+			if (parent instanceof SVGGraphicsElement) {
+				tm = tm.postCat(parent._innerTM);
+			} else {
+				break;
+			}
+		}
+		return tm;
+	}
+
+	getBBox() {
+		const box = this._objectBBox();
+		return box.isValid() ? box : Box.empty();
+	}
+	fuseTransform(parentT?: Matrix) {
+		let tm = parentT ? this._ownTM.postCat(parentT) : this._ownTM;
+		for (const sub of this.children) {
+			if (sub instanceof SVGGraphicsElement) {
+				sub.fuseTransform(tm);
+			}
+		}
+		this.removeAttribute("transform");
+	}
+
 	_placeChild(ref: ChildNode | null | undefined, nodes: SVGGraphicsElement[]) {
 		const pCtm = this._rootTM.inverse();
 		for (const that of nodes) {
@@ -444,7 +440,7 @@ export class SVGSVGElement extends SVGGraphicsElement {
 		return this._viewportBox(tm);
 	}
 
-	defs() {
+	_defs() {
 		let { ownerDocument, children } = this;
 		if (ownerDocument) {
 			for (const sub of this.children) {
@@ -457,27 +453,6 @@ export class SVGSVGElement extends SVGGraphicsElement {
 			return defs; // avoids error "Object is possibly 'null'"
 		}
 		throw new Error(`No ownerDocument`);
-	}
-	geom2UU() {
-		this.width.baseVal.convertToSpecifiedUnits(1);
-		this.height.baseVal.convertToSpecifiedUnits(1);
-		for (const x in [
-			"r",
-			"x",
-			"y",
-			"cx",
-			"cy",
-			"rx",
-			"ry",
-			"x1",
-			"x2",
-			"y1",
-			"y2",
-			"width",
-			"height",
-		]) {
-			this.getAttributeNode(x);
-		}
 	}
 }
 

@@ -80,7 +80,7 @@ tap.test('Geoms 1', function (t) {
 	].forEach(([id, x, y, w, h]) => {
 		const v = document.getElementById(id);
 		const b = Box.new(x, y, w, h);
-		const r = lay.boundingBox(v);
+		const r = lay._boundingBox(v);
 		eqBox(t, b, r.isValid() ? r : Box.empty(), x - ~~x === 0 ? 1e-9 : 1, id);
 	});
 	// lay.transform(Matrix.translate(0, -40), R5);
@@ -101,7 +101,7 @@ tap.test('Geoms 1', function (t) {
 		].forEach(([id, x, y, w, h]) => {
 			const v = document.getElementById(id);
 			const b = Box.new(x, y, w, h);
-			const r = LV3.boundingBox(v);
+			const r = LV3._boundingBox(v);
 			eqBox(t, b, r.isValid() ? r : Box.empty(), x - ~~x === 0 ? 1e-9 : 1, id);
 		});
 	}

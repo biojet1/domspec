@@ -77,7 +77,7 @@ export class SVGLayout {
 			this.setTM(node, P.inverse().cat(m).cat(P).cat(M));
 		});
 	}
-	boundingBox(
+	_boundingBox(
 		...args: Array<
 			| SVGGraphicsElement
 			| Box
@@ -89,7 +89,7 @@ export class SVGLayout {
 		let bbox = Box.new();
 		for (const v of args) {
 			if (v instanceof Array) {
-				bbox = this.boundingBox(...v).merge(bbox);
+				bbox = this._boundingBox(...v).merge(bbox);
 			} else if (v instanceof Box) {
 				bbox = v.merge(bbox);
 			} else if (v instanceof Vec || v instanceof Ray) {

@@ -399,7 +399,7 @@ export class SVGTextElement extends SVGTextContentElement {
 		);
 		for (const sub of this.children) {
 			if (sub instanceof SVGGraphicsElement && sub.localName == "tspan") {
-				box = sub.boundingBox(m).merge(box);
+				box = sub._boundingBox(m).merge(box);
 			}
 		}
 		return box;

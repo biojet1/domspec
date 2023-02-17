@@ -31,7 +31,7 @@ tap.test('fuseTranform', function (t) {
 </svg>
 		`);
 	function eqBox(a, b, epsilon = 0, tag) {
-		const v = a.boundingBox()
+		const v = a._boundingBox()
 		t.ok(v.equals(b, epsilon), `${tag || a.id} [${v}] vs [${b}]`);
 	}
 

@@ -31,8 +31,8 @@ export declare class SVGGraphicsElement extends SVGElement {
     get farthestViewportElement(): SVGElement | null;
     get ownTM(): Matrix;
     set ownTM(T: Matrix);
-    get clipElement(): SVGGraphicsElement | null;
-    set clipElement(target: SVGElement | null);
+    get _clipElement(): SVGGraphicsElement | null;
+    set _clipElement(target: SVGElement | null);
     get hrefElement(): SVGElement | null;
     set hrefElement(target: SVGElement | null);
     canRender(): boolean;

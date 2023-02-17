@@ -145,16 +145,16 @@ export class SVGGraphicsElement extends SVGElement {
     set ownTM(T) {
         this.setAttribute("transform", T.toString());
     }
-    get clipElement() {
+    get _clipElement() {
         const v = this.getAttribute("clip-path");
         const a = v && /#([^#\(\)\s]+)/.exec(v);
         return a
             ? this.ownerDocument?.getElementById(a[1])
             : null;
     }
-    set clipElement(target) {
+    set _clipElement(target) {
         if (target) {
-            this.setAttribute("clip-path", `url(#${target.letId()})`);
+            this.setAttribute("clip-path", `url(#${target._ensureId()})`);
         }
         else {
             this.removeAttribute("clip-path");
@@ -170,7 +170,7 @@ export class SVGGraphicsElement extends SVGElement {
     }
     set hrefElement(target) {
         target &&
-            this.setAttributeNS("http://www.w3.org/1999/xlink", "href", `#${target.letId()}`);
+            this.setAttributeNS("http://www.w3.org/1999/xlink", "href", `#${target._ensureId()}`);
     }
     canRender() {
         if (this.getAttribute("display") === "none") {
@@ -304,7 +304,7 @@ export class SVGGraphicsElement extends SVGElement {
         return box;
     }
     _boundingBox(tm) {
-        const { clipElement: clip } = this;
+        const { _clipElement: clip } = this;
         if (clip) {
             if (tm) {
                 return this._shapeBox(tm).overlap(clip._boundingBox(tm));

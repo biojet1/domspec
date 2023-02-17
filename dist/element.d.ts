@@ -60,7 +60,7 @@ export declare class Element extends ParentNode {
     get dataset(): any;
     cloneNode(deep?: boolean): ParentNode;
     isEqualNode(node: Node): boolean;
-    letId(): string;
+    _ensureId(): string;
 }
 import { Attr } from './attr.js';
 import { ChildNode } from './child-node.js';

@@ -81,7 +81,6 @@ export declare class SVGUseElement extends SVGGraphicsElement {
 export declare class SVGSymbolElement extends SVGGraphicsElement {
     static TAGS: string[];
     get _isViewportElement(): number;
-    shapeBox(T?: Matrix): Box;
     _shapeBox(tm?: Matrix): Box;
 }
 export declare class SVGTextElement extends SVGTextContentElement {
@@ -90,7 +89,6 @@ export declare class SVGTextElement extends SVGTextContentElement {
 }
 export declare class SVGTSpanElement extends SVGTextContentElement {
     static TAGS: string[];
-    shapeBox(T?: Matrix): Box;
     _shapeBox(tm?: Matrix): Box;
 }
 export declare class SVGTRefElement extends SVGTextContentElement {

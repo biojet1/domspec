@@ -76,7 +76,7 @@ tap.test("SVG getPointAtLength getTotalLength", function (t) {
 	t.same(L1.getTotalLength(), 500);
 	t.same(L1.getPointAtLength(500).toString(), Vec.pos(300, 400).toString());
 	t.same(L1.getPointAtLength(0).toString(), Vec.pos(0, 0).toString());
-	const p = L1.toPathElement();
+	const p = L1._toPathElement();
 	t.match(p.getAttribute("d"), /^M\s*0[\s,]+0\s*L\s*300[\s,]+400$/);
 
 	const PL1 = doc.getElementById("PL1");
@@ -94,11 +94,11 @@ tap.test("SVG getPointAtLength getTotalLength", function (t) {
 	t.same(PL1.getAttribute("points"), "-300,400 -400,400");
 	// t.same(PL1.getAttribute('points'), '-400,400 -300,400');
 	t.same(
-		PathLS.parse(PL1.toPathElement().getAttribute("d")).toString(),
+		PathLS.parse(PL1._toPathElement().getAttribute("d")).toString(),
 		PathLS.parse("M-300,400L-400,400").toString()
 	);
 	t.same(
-		PathLS.parse(PG1.toPathElement().getAttribute("d")).toString(),
+		PathLS.parse(PG1._toPathElement().getAttribute("d")).toString(),
 		PathLS.parse("M 400,300 H 300Z").toString()
 	);
 

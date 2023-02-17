@@ -54,7 +54,7 @@ tap.test('fuseTranform', function (t) {
 	t.same(L1.y1.baseVal.value, 80);
 	t.same(L1.x2.baseVal.value, 100);
 	t.same(L1.y2.baseVal.value, 20);
-	t.same(L1.describe(), `M 0 80 L 100 20`);
+	t.same(L1._describe(), `M 0 80 L 100 20`);
 	t.same(C1.cx.baseVal.value, 50);
 	t.same(C1.cy.baseVal.value, 50);
 	t.same(C1.r.baseVal.value, 50);
@@ -86,21 +86,21 @@ tap.test('fuseTranform', function (t) {
 		[R1.x.baseVal.value, R1.y.baseVal.value, R1.width.baseVal.value, R1.height.baseVal.value],
 		[50, 120, 150, 150]
 	);
-	t.same([...R1.path.firstPoint], [50, 120, 0]);
+	t.same([...R1._path.firstPoint], [50, 120, 0]);
 	t.same(
 		[R2.x.baseVal.value, R2.y.baseVal.value, R2.width.baseVal.value, R2.height.baseVal.value],
 		[50 - 100, 20 + 100, 150, 150]
 	);
-	t.same([...R2.path.firstPoint], [50 - 100, 20 + 100, 0]);
+	t.same([...R2._path.firstPoint], [50 - 100, 20 + 100, 0]);
 
 	t.same(PL1.getAttribute('points'), '0,200 50,125 50,175 100,100');
 	t.same(PL2.getAttribute('points'), '200,-100 300,-25 300,-75 400,0');
-	let p = P1.path;
+	let p = P1._path;
 	let [x, y] = p.firstPoint;
 	t.same([x, y], [130, 140]);
 
 	t.same(
-		[...P2.path].reverse().map((s) => s.to).map((p) => [p.x - 100, p.y - 100]),
+		[...P2._path].reverse().map((s) => s.to).map((p) => [p.x - 100, p.y - 100]),
 		[
 			[50, 80],
 			[140, 110],
@@ -111,7 +111,7 @@ tap.test('fuseTranform', function (t) {
 	);
 	
 	t.same(
-		[...P3.path].reverse().map((s) => s.to).map((p) => [p.x, p.y]),
+		[...P3._path].reverse().map((s) => s.to).map((p) => [p.x, p.y]),
 		[
 
 			[50, 80],
@@ -133,7 +133,7 @@ tap.test('polygon', function (t) {
 		`);
 	const top = doc.documentElement;
 	const PG1 = doc.getElementById('PG1');
-	t.same(PathLS.parse(PG1.describe()).describe(), 'M10,10L50,50L10,15L15,10Z');
+	t.same(PathLS.parse(PG1._describe()).describe(), 'M10,10L50,50L10,15L15,10Z');
 	t.end();
 });
 
@@ -145,7 +145,7 @@ tap.test('line', function (t) {
 		`);
 	const top = doc.documentElement;
 	const L1 = doc.getElementById('L1');
-	t.same(L1.describe(), 'M 2 3 L 4 5');
+	t.same(L1._describe(), 'M 2 3 L 4 5');
 
 	t.end();
 });
@@ -164,7 +164,7 @@ tap.test('rect', function (t) {
 	t.same(R1.width.baseVal.value, 100);
 	t.same(R1.height.baseVal.value, 200);
 
-	// t.same(PathLS.parse(PG1.describe()).describe(), 'M 2 3 L 4 5 Z');
+	// t.same(PathLS.parse(PG1._describe()).describe(), 'M 2 3 L 4 5 Z');
 	t.end();
 });
 

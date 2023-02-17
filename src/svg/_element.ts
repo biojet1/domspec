@@ -354,7 +354,6 @@ export class SVGGraphicsElement extends SVGElement {
 		return box.isValid() ? box : Box.empty();
 	}
 
-
 	_placeChild(ref: ChildNode | null | undefined, nodes: SVGGraphicsElement[]) {
 		const pCtm = this._rootTM.inverse();
 		for (const that of nodes) {
@@ -459,27 +458,8 @@ export class SVGSVGElement extends SVGGraphicsElement {
 	}
 }
 
-function composeTransforms(
-	parent: SVGGraphicsElement,
-	tm: Matrix,
-	root?: SVGElement | null
-): Matrix {
-	while (parent != root) {
-		const grand: Element | null = parent.parentElement;
-		if (grand instanceof SVGGraphicsElement) {
-			tm = tm.postCat(parent._innerTM);
-			parent = grand;
-		} else if (root) {
-			throw new Error(`root not reached`);
-		} else {
-			break;
-		}
-	}
-	return tm;
-}
 import { Element } from "../element.js";
 import { ChildNode } from "../child-node.js";
-
 import {
 	SVGLength,
 	SVGAnimatedLength,

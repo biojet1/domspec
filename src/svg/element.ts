@@ -11,52 +11,49 @@ interface IBBoxParam {
 export class SVGTextContentElement extends SVGGraphicsElement {}
 
 export class SVGGeometryElement extends SVGGraphicsElement {
-	describe(): string {
+	_describe(): string {
 		/* c8 ignore next */
 		throw new Error("NotImplemented");
 	}
-	getPath() {
-		return PathLS.parse(this.describe());
-	}
-	get path() {
+	get _path() {
 		try {
-			return PathLS.parse(this.describe());
+			return PathLS.parse(this._describe());
 		} catch (err) {
 			return new PathLS(undefined);
 		}
 	}
 	// https://greensock.com/forums/topic/13681-svg-gotchas/page/2/?tab=comments#comment-72060
 	_objectBBox(T?: Matrix) {
-		let { path } = this;
-		if (path.firstPoint) {
+		let { _path } = this;
+		if (_path.firstPoint) {
 			if (T) {
-				return path.transform(T).bbox();
+				return _path.transform(T).bbox();
 			}
-			return path.bbox();
+			return _path.bbox();
 		}
 		return Box.not();
 	}
 
 	_shapeBox(tm?: Matrix) {
-		let { path } = this;
-		if (path.firstPoint) {
+		let { _path } = this;
+		if (_path.firstPoint) {
 			// NOTE: bbox error
 			// if (tm) {
-			// 	return path.bbox().transform(tm.cat(this._ownTM));
+			// 	return _path.bbox().transform(tm.cat(this._ownTM));
 			// } else {
-			// 	return path.bbox().transform(this._rootTM);
+			// 	return _path.bbox().transform(this._rootTM);
 			// }
 			if (tm) {
-				path = path.transform(tm.cat(this._ownTM));
+				_path = _path.transform(tm.cat(this._ownTM));
 			} else {
-				path = path.transform(this._rootTM);
+				_path = _path.transform(this._rootTM);
 			}
-			return path.bbox();
+			return _path.bbox();
 		}
 		return Box.not();
 	}
 
-	toPathElement() {
+	_toPathElement() {
 		const { ownerDocument } = this;
 		if (ownerDocument) {
 			const p = ownerDocument.createElementNS(
@@ -64,7 +61,7 @@ export class SVGGeometryElement extends SVGGraphicsElement {
 				"path"
 			) as SVGGeometryElement;
 			let s;
-			(s = this.describe()) && p.setAttribute("d", s);
+			(s = this._describe()) && p.setAttribute("d", s);
 			(s = this.getAttribute("style")) && p.setAttribute("style", s);
 			(s = this.getAttribute("class")) && p.setAttribute("class", s);
 			(s = this.getAttribute("transform")) && p.setAttribute("transform", s);
@@ -73,10 +70,10 @@ export class SVGGeometryElement extends SVGGraphicsElement {
 		throw DOMException.new(`InvalidStateError`);
 	}
 	getTotalLength() {
-		return this.path.length;
+		return this._path.length;
 	}
 	getPointAtLength(L: number) {
-		return this.path.pointAtLength(L, true);
+		return this._path.pointAtLength(L, true);
 	}
 }
 
@@ -98,10 +95,10 @@ class _PathD extends PathLS {
 
 export class SVGPathElement extends SVGGeometryElement {
 	static TAGS = ["path"];
-	describe() {
+	_describe() {
 		return this.getAttribute("d") || "";
 	}
-	beginPath() {
+	_beginPath() {
 		// ._beginPath().withFont().text()
 		return new _PathD(this);
 	}
@@ -110,7 +107,7 @@ export class SVGPathElement extends SVGGeometryElement {
 		let tm = parentT ? this._ownTM.postCat(parentT) : this._ownTM;
 		this.setAttribute(
 			"d",
-			PathLS.parse(this.describe()).transform(tm).describe()
+			PathLS.parse(this._describe()).transform(tm).describe()
 		);
 		this.removeAttribute("transform");
 	}
@@ -118,7 +115,7 @@ export class SVGPathElement extends SVGGeometryElement {
 
 export class SVGCircleElement extends SVGGeometryElement {
 	static TAGS = ["circle"];
-	describe() {
+	_describe() {
 		const r = this.r.baseVal.value;
 		const x = this.cx.baseVal.value;
 		const y = this.cy.baseVal.value;
@@ -133,7 +130,7 @@ export class SVGCircleElement extends SVGGeometryElement {
 
 export class SVGRectElement extends SVGGeometryElement {
 	static TAGS = ["rect"];
-	describe() {
+	_describe() {
 		const width = this.width.baseVal.value;
 		const height = this.height.baseVal.value;
 		const x = this.x.baseVal.value;
@@ -178,7 +175,7 @@ export class SVGRectElement extends SVGGeometryElement {
 
 export class SVGLineElement extends SVGGeometryElement {
 	static TAGS = ["line"];
-	describe() {
+	_describe() {
 		const x1 = this.x1.baseVal.value;
 		const x2 = this.x2.baseVal.value;
 		const y1 = this.y1.baseVal.value;
@@ -205,7 +202,7 @@ export class SVGLineElement extends SVGGeometryElement {
 
 export class SVGEllipseElement extends SVGGeometryElement {
 	static TAGS = ["ellipse"];
-	describe() {
+	_describe() {
 		const rx = this.rx.baseVal.value;
 		const ry = this.ry.baseVal.value;
 		const x = this.cx.baseVal.value;
@@ -218,7 +215,7 @@ export class SVGEllipseElement extends SVGGeometryElement {
 
 export class SVGPolygonElement extends SVGGeometryElement {
 	static TAGS = ["polygon"];
-	describe() {
+	_describe() {
 		const p = this.getAttribute("points");
 		return p ? `M ${p} Z` : "";
 	}
@@ -240,7 +237,7 @@ export class SVGPolygonElement extends SVGGeometryElement {
 
 export class SVGPolylineElement extends SVGGeometryElement {
 	static TAGS = ["polyline"];
-	describe() {
+	_describe() {
 		const p = this.getAttribute("points");
 		return p ? `M ${p}` : "";
 	}
@@ -463,60 +460,6 @@ interface ScriptElement {
 export class SVGScriptElement extends SVGElement {
 	static TAGS = ["script"];
 	_alreadyStarted?: boolean;
-
-	// _eval() {
-	// 	if (this._alreadyStarted) {
-	// 		return;
-	// 	}
-
-	// 	// TODO: this text check doesn't seem completely the same as the spec, which e.g. will try to execute scripts with
-	// 	// child element nodes. Spec bug? https://github.com/whatwg/html/issues/3419
-	// 	const src = this.getAttributeNS(null, "src");
-	// 	let text = !src && this.textContent;
-
-	// 	if (!text || !src) {
-	// 		return;
-	// 	}
-
-	// 	// if (!this._attached) {
-	// 	// 	return;
-	// 	// }
-
-	// 	// const scriptBlocksTypeString = this._getTypeString();
-	// 	// const type = getType(scriptBlocksTypeString);
-
-	// 	// if (type !== "classic") {
-	// 	// 	// TODO: implement modules, and then change the check to `type === null`.
-	// 	// 	return;
-	// 	// }
-
-	// 	this._alreadyStarted = true;
-
-	// 	// TODO: implement nomodule here, **but only after we support modules**.
-
-	// 	// At this point we completely depart from the spec.
-
-	// 	if (src) {
-	// 		// this._fetchExternalScript();
-	// 	} else {
-	// 		// this._fetchInternalScript();
-	// 	}
-	// }
-
-	// _fetchExternalScript(src: string) {
-	// 	const document = this.ownerDocument;
-	// 	if (document) {
-	// 		const { defaultView: window } = document;
-	// 		if(window){
-
-	// 		}
-	// 		document.resolveURL(src)
-	// 	}
-	// 	// const { ownerDocument: document, defaultView: window } =
-	// 	// 	this.ownerDocument;
-	// 	// const resourceLoader = document._fetcher;
-	// 	// const { URL, defaultView } = document;
-	// }
 }
 
 import { SVGElement, SVGSVGElement, SVGGraphicsElement } from "./_element.js";

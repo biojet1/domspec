@@ -2,49 +2,46 @@ import { Vec, Box, Matrix, PathLS } from "svggeom";
 export class SVGTextContentElement extends SVGGraphicsElement {
 }
 export class SVGGeometryElement extends SVGGraphicsElement {
-    describe() {
+    _describe() {
         throw new Error("NotImplemented");
     }
-    getPath() {
-        return PathLS.parse(this.describe());
-    }
-    get path() {
+    get _path() {
         try {
-            return PathLS.parse(this.describe());
+            return PathLS.parse(this._describe());
         }
         catch (err) {
             return new PathLS(undefined);
         }
     }
     _objectBBox(T) {
-        let { path } = this;
-        if (path.firstPoint) {
+        let { _path } = this;
+        if (_path.firstPoint) {
             if (T) {
-                return path.transform(T).bbox();
+                return _path.transform(T).bbox();
             }
-            return path.bbox();
+            return _path.bbox();
         }
         return Box.not();
     }
     _shapeBox(tm) {
-        let { path } = this;
-        if (path.firstPoint) {
+        let { _path } = this;
+        if (_path.firstPoint) {
             if (tm) {
-                path = path.transform(tm.cat(this._ownTM));
+                _path = _path.transform(tm.cat(this._ownTM));
             }
             else {
-                path = path.transform(this._rootTM);
+                _path = _path.transform(this._rootTM);
             }
-            return path.bbox();
+            return _path.bbox();
         }
         return Box.not();
     }
-    toPathElement() {
+    _toPathElement() {
         const { ownerDocument } = this;
         if (ownerDocument) {
             const p = ownerDocument.createElementNS(this.namespaceURI, "path");
             let s;
-            (s = this.describe()) && p.setAttribute("d", s);
+            (s = this._describe()) && p.setAttribute("d", s);
             (s = this.getAttribute("style")) && p.setAttribute("style", s);
             (s = this.getAttribute("class")) && p.setAttribute("class", s);
             (s = this.getAttribute("transform")) && p.setAttribute("transform", s);
@@ -53,10 +50,10 @@ export class SVGGeometryElement extends SVGGraphicsElement {
         throw DOMException.new(`InvalidStateError`);
     }
     getTotalLength() {
-        return this.path.length;
+        return this._path.length;
     }
     getPointAtLength(L) {
-        return this.path.pointAtLength(L, true);
+        return this._path.pointAtLength(L, true);
     }
 }
 class _PathD extends PathLS {
@@ -72,21 +69,21 @@ class _PathD extends PathLS {
 }
 export class SVGPathElement extends SVGGeometryElement {
     static TAGS = ["path"];
-    describe() {
+    _describe() {
         return this.getAttribute("d") || "";
     }
-    beginPath() {
+    _beginPath() {
         return new _PathD(this);
     }
     _fuseTransform(parentT) {
         let tm = parentT ? this._ownTM.postCat(parentT) : this._ownTM;
-        this.setAttribute("d", PathLS.parse(this.describe()).transform(tm).describe());
+        this.setAttribute("d", PathLS.parse(this._describe()).transform(tm).describe());
         this.removeAttribute("transform");
     }
 }
 export class SVGCircleElement extends SVGGeometryElement {
     static TAGS = ["circle"];
-    describe() {
+    _describe() {
         const r = this.r.baseVal.value;
         const x = this.cx.baseVal.value;
         const y = this.cy.baseVal.value;
@@ -97,7 +94,7 @@ export class SVGCircleElement extends SVGGeometryElement {
 }
 export class SVGRectElement extends SVGGeometryElement {
     static TAGS = ["rect"];
-    describe() {
+    _describe() {
         const width = this.width.baseVal.value;
         const height = this.height.baseVal.value;
         const x = this.x.baseVal.value;
@@ -132,7 +129,7 @@ export class SVGRectElement extends SVGGeometryElement {
 }
 export class SVGLineElement extends SVGGeometryElement {
     static TAGS = ["line"];
-    describe() {
+    _describe() {
         const x1 = this.x1.baseVal.value;
         const x2 = this.x2.baseVal.value;
         const y1 = this.y1.baseVal.value;
@@ -158,7 +155,7 @@ export class SVGLineElement extends SVGGeometryElement {
 }
 export class SVGEllipseElement extends SVGGeometryElement {
     static TAGS = ["ellipse"];
-    describe() {
+    _describe() {
         const rx = this.rx.baseVal.value;
         const ry = this.ry.baseVal.value;
         const x = this.cx.baseVal.value;
@@ -168,7 +165,7 @@ export class SVGEllipseElement extends SVGGeometryElement {
 }
 export class SVGPolygonElement extends SVGGeometryElement {
     static TAGS = ["polygon"];
-    describe() {
+    _describe() {
         const p = this.getAttribute("points");
         return p ? `M ${p} Z` : "";
     }
@@ -189,7 +186,7 @@ export class SVGPolygonElement extends SVGGeometryElement {
 }
 export class SVGPolylineElement extends SVGGeometryElement {
     static TAGS = ["polyline"];
-    describe() {
+    _describe() {
         const p = this.getAttribute("points");
         return p ? `M ${p}` : "";
     }

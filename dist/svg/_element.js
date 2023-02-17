@@ -395,22 +395,6 @@ export class SVGSVGElement extends SVGGraphicsElement {
         throw new Error(`No ownerDocument`);
     }
 }
-function composeTransforms(parent, tm, root) {
-    while (parent != root) {
-        const grand = parent.parentElement;
-        if (grand instanceof SVGGraphicsElement) {
-            tm = tm.postCat(parent._innerTM);
-            parent = grand;
-        }
-        else if (root) {
-            throw new Error(`root not reached`);
-        }
-        else {
-            break;
-        }
-    }
-    return tm;
-}
 import { Element } from "../element.js";
 import { SVGLength, SVGAnimatedLength, SVGLengthHAttr, SVGLengthWAttr, SVGLengthXAttr, SVGLengthYAttr, } from "./length.js";
 import { SVGAnimatedRect, SVGRect } from "./rect.js";

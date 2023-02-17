@@ -2,12 +2,11 @@ import { Vec, Box, Matrix, PathLS } from "svggeom";
 export declare class SVGTextContentElement extends SVGGraphicsElement {
 }
 export declare class SVGGeometryElement extends SVGGraphicsElement {
-    describe(): string;
-    getPath(): PathLS;
-    get path(): PathLS;
+    _describe(): string;
+    get _path(): PathLS;
     _objectBBox(T?: Matrix): Box;
     _shapeBox(tm?: Matrix): Box;
-    toPathElement(): SVGGeometryElement;
+    _toPathElement(): SVGGeometryElement;
     getTotalLength(): number;
     getPointAtLength(L: number): Vec | undefined;
 }
@@ -18,36 +17,36 @@ declare class _PathD extends PathLS {
 }
 export declare class SVGPathElement extends SVGGeometryElement {
     static TAGS: string[];
-    describe(): string;
-    beginPath(): _PathD;
+    _describe(): string;
+    _beginPath(): _PathD;
     _fuseTransform(parentT?: Matrix): void;
 }
 export declare class SVGCircleElement extends SVGGeometryElement {
     static TAGS: string[];
-    describe(): string;
+    _describe(): string;
 }
 export declare class SVGRectElement extends SVGGeometryElement {
     static TAGS: string[];
-    describe(): string;
+    _describe(): string;
     _fuseTransform(parentT?: Matrix): void;
 }
 export declare class SVGLineElement extends SVGGeometryElement {
     static TAGS: string[];
-    describe(): string;
+    _describe(): string;
     _fuseTransform(parentT: Matrix): void;
 }
 export declare class SVGEllipseElement extends SVGGeometryElement {
     static TAGS: string[];
-    describe(): string;
+    _describe(): string;
 }
 export declare class SVGPolygonElement extends SVGGeometryElement {
     static TAGS: string[];
-    describe(): string;
+    _describe(): string;
     _fuseTransform(parentT?: Matrix): void;
 }
 export declare class SVGPolylineElement extends SVGGeometryElement {
     static TAGS: string[];
-    describe(): string;
+    _describe(): string;
     _fuseTransform(parentT?: Matrix): void;
 }
 export declare class SVGAElement extends SVGGraphicsElement {

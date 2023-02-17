@@ -62,6 +62,16 @@ export class SVGRect extends BoxMut {
 	override set height(value: number) {
 		this._h = value;
 	}
+	toString() {
+		return this.toArray()
+			.map((n) => {
+				const v = n.toFixed(3);
+				return v.indexOf(".") < 0
+					? v
+					: v.replace(/0+$/g, "").replace(/\.$/g, "");
+			})
+			.join(" ");
+	}
 }
 
 export class SVGAnimatedRect extends Attr {
@@ -88,8 +98,7 @@ export class SVGAnimatedRect extends Attr {
 	get value() {
 		const { _var } = this;
 		if (_var instanceof BoxMut) {
-			const { x, y, width, height } = _var;
-			return `${x} ${y} ${width} ${height}`;
+			return _var.toString();
 		}
 		return _var || "";
 	}
@@ -117,13 +126,7 @@ export class SVGAnimatedRect extends Attr {
 	}
 
 	valueOf() {
-		const { _var } = this;
-		if (_var instanceof BoxMut) {
-			const { x, y, width, height } = _var;
-			return `${x} ${y} ${width} ${height}`;
-		} else {
-			return _var?.toString();
-		}
+		return this._var?.toString();
 	}
 
 	contain(

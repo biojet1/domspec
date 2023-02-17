@@ -37,10 +37,6 @@ export class SVGGeometryElement extends SVGGraphicsElement {
 		return Box.not();
 	}
 
-	shapeBox(T?: Matrix) {
-		return this._shapeBox(T);
-	}
-
 	_shapeBox(tm?: Matrix) {
 		let { path } = this;
 		if (path.firstPoint) {
@@ -284,9 +280,6 @@ export class SVGForeignObjectElement extends SVGGraphicsElement {
 	get _isViewportElement() {
 		return 2;
 	}
-	shapeBox(T?: Matrix): Box {
-		return this._shapeBox(T);
-	}
 	_shapeBox(tm?: Matrix): Box {
 		return this._viewportBox(tm);
 	}
@@ -301,9 +294,6 @@ export class SVGImageElement extends SVGGraphicsElement {
 	static TAGS = ["image"];
 	get _isViewportElement() {
 		return 1;
-	}
-	shapeBox(T?: Matrix): Box {
-		return this._shapeBox(T);
 	}
 	_shapeBox(tm?: Matrix): Box {
 		return this._viewportBox(tm);
@@ -337,10 +327,6 @@ export class SVGUseElement extends SVGGraphicsElement {
 	// 	}
 	// 	this.setAttribute('transform', m.toString());
 	// }
-
-	shapeBox(T?: Matrix) {
-		return this._shapeBox(T);
-	}
 
 	_shapeBox(tm?: Matrix) {
 		const ref = this.hrefElement;
@@ -420,9 +406,7 @@ export class SVGSymbolElement extends SVGGraphicsElement {
 
 export class SVGTextElement extends SVGTextContentElement {
 	static TAGS = ["text"];
-	shapeBox(T?: Matrix): Box {
-		return this._shapeBox(T);
-	}
+
 	_shapeBox(tm?: Matrix): Box {
 		const m = tm ? tm.cat(this.ownTM) : this.ownTM;
 		const {

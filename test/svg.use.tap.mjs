@@ -23,9 +23,9 @@ That's why the circles have different x positions, but the same stroke value.
 	t.same(use2.hrefElement.id, 'myCircle');
 	t.same(use2.hrefElement.id, 'myCircle');
 
-	t.same(myCircle.shapeBox().toArray(), [5 - 4, 5 - 4, 4 * 2, 4 * 2]);
-	t.same(use1.shapeBox().toArray(), [11, 1, 8, 8]);
-	t.same(use2.shapeBox().toArray(), [21, 1, 8, 8]);
+	t.same(myCircle._shapeBox().toArray(), [5 - 4, 5 - 4, 4 * 2, 4 * 2]);
+	t.same(use1._shapeBox().toArray(), [11, 1, 8, 8]);
+	t.same(use2._shapeBox().toArray(), [21, 1, 8, 8]);
 
 	t.end();
 });
@@ -35,7 +35,7 @@ tap.test('size', function (t) {
 		`<svg xmlns="http://www.w3.org/2000/svg" width="2in" height="3in"/>`,
 	);
 	const top = doc.documentElement;
-	t.same(top.shapeBox().toArray(), [0, 0, 2 * 96, 3 * 96]);
+	t.same(top._shapeBox().toArray(), [0, 0, 2 * 96, 3 * 96]);
 	t.end();
 });
 

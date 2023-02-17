@@ -287,9 +287,7 @@ export class SVGGraphicsElement extends SVGElement {
 		// return [this._composeTM(Matrix.identity(), root) ?? ]
 	}
 
-	shapeBox(T?: Matrix): Box {
-		return this._shapeBox(T);
-	}
+
 
 	boundingBox(T?: Matrix): Box {
 		return this._boundingBox(T);
@@ -346,6 +344,7 @@ export class SVGGraphicsElement extends SVGElement {
 	}
 
 	_shapeBox(tm?: Matrix): Box {
+		// for <g/> box of decendant children
 		const m = tm ? tm.cat(this.ownTM) : this.rootTM;
 		let box = Box.new();
 		for (const sub of this.children) {
@@ -482,9 +481,7 @@ export class SVGSVGElement extends SVGGraphicsElement {
 		);
 		return Matrix.translate(tx, ty).scale(sx, sy);
 	}
-	shapeBox(T?: Matrix): Box {
-		return this._shapeBox(T);
-	}
+
 	_shapeBox(tm?: Matrix): Box {
 		return this._viewportBox(tm);
 	}

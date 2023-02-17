@@ -541,5 +541,15 @@
     <!-- Batik sample mark                                             -->
     <!-- ============================================================= -->
     <use xlink:href="../../../batikLogo.svg#Batik_Tag_Box" />
+                    <g >
+                        <rect x="5" y="5" width="20" height="20" fill="black" />
+                        <!-- <circle cx="10" cy="25" r="4" fill="crimson" />
+                        <circle cx="20" cy="25" r="4" fill="crimson" /> -->
+                        <circle cx="15" cy="15" r="10" fill="yellow"/>
+                        <circle cx="12" cy="12" r="1.5" fill="grey"/>
+                        <circle cx="17" cy="12" r="1.5" fill="black"/>
+                        <path d="M 10 19 A 8 8 0 0 0 20 19" stroke="black" stroke-width="1" fill="none"/>
+                    </g>
+                      <script href="metrics.js"></script>
 
 </svg>

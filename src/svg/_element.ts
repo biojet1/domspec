@@ -326,6 +326,17 @@ export class SVGGraphicsElement extends SVGElement {
 		return box;
 	}
 	//////////////
+	// The fuse transform <g/>, decendants
+	_fuseTransform(parentT?: Matrix) {
+		let tm = parentT ? this._ownTM.postCat(parentT) : this._ownTM;
+		for (const sub of this.children) {
+			if (sub instanceof SVGGraphicsElement) {
+				sub._fuseTransform(tm);
+			}
+		}
+		this.removeAttribute("transform");
+	}
+	//////////////
 	getScreenCTM(): Matrix {
 		let { parentNode: parent, _ownTM: tm } = this;
 		for (; parent; parent = parent.parentNode) {
@@ -342,15 +353,7 @@ export class SVGGraphicsElement extends SVGElement {
 		const box = this._objectBBox();
 		return box.isValid() ? box : Box.empty();
 	}
-	fuseTransform(parentT?: Matrix) {
-		let tm = parentT ? this._ownTM.postCat(parentT) : this._ownTM;
-		for (const sub of this.children) {
-			if (sub instanceof SVGGraphicsElement) {
-				sub.fuseTransform(tm);
-			}
-		}
-		this.removeAttribute("transform");
-	}
+
 
 	_placeChild(ref: ChildNode | null | undefined, nodes: SVGGraphicsElement[]) {
 		const pCtm = this._rootTM.inverse();

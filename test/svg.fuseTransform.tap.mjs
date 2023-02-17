@@ -69,7 +69,7 @@ tap.test('fuseTranform', function (t) {
 	eqBox(PL2, Box.new('200 -100 200 100'));
 	eqBox(C1, Box.new('0 100 100 100'));
 	eqBox(L1, Box.new('100 120 100 60'));
-	top.fuseTransform();
+	top._fuseTransform();
 
 
 	t.notOk(P1.hasAttribute('transform'));

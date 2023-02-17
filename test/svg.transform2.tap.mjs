@@ -84,7 +84,6 @@ tap.test("transform2", function (t) {
 	const R2 = doc.getElementById("R2");
 	const G2 = doc.getElementById("G2");
 	const G4 = doc.getElementById("G4");
-	const TL = top._layout();
 
 	[
 		["R0", 1, 0, 0, 1, -50, -10],

@@ -88,8 +88,8 @@ tap.test("SVG getPointAtLength getTotalLength", function (t) {
 		t.ok(m1.equals(m2), [m1, m2, ]);
 	}
 
-	PL1.fuseTransform();
-	svg.fuseTransform();
+	PL1._fuseTransform();
+	svg._fuseTransform();
 	// console.log(PL1.getAttribute('points'));
 	t.same(PL1.getAttribute("points"), "-300,400 -400,400");
 	// t.same(PL1.getAttribute('points'), '-400,400 -300,400');

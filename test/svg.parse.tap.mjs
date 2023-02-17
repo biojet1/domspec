@@ -24,9 +24,9 @@ tap.test("SVG innerHTML/defs", function (t) {
 	VPA.defs().appendChild(R1);
 	t.ok(doc.querySelector("defs"));
 	t.same(R1.parentNode, VPA.defs());
-	t.same(use.hrefElement, null);
-	use.hrefElement = R1;
-	t.same(use?.hrefElement?.id, "R1");
+	t.same(use._hrefElement, null);
+	use._hrefElement = R1;
+	t.same(use?._hrefElement?.id, "R1");
 
 	t.end();
 });
@@ -53,9 +53,9 @@ tap.test("SVG clip-path", function (t) {
 	t.ok(svg.id);
 	// console.log(svg.outerHTML);
 
-	t.ok(R1.ownTM.isIdentity);
-	R1.ownTM = Matrix.parse("matrix(1 2 3 4 5 6)");
-	t.ok(R1.ownTM.equals(Matrix.new([1, 2, 3, 4, 5, 6])));
+	t.ok(R1._ownTM.isIdentity);
+	R1._ownTM = Matrix.parse("matrix(1 2 3 4 5 6)");
+	t.ok(R1._ownTM.equals(Matrix.new([1, 2, 3, 4, 5, 6])));
 
 	t.end();
 });

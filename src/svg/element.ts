@@ -42,12 +42,12 @@ export class SVGGeometryElement extends SVGGraphicsElement {
 		if (path.firstPoint) {
 			// NOTE: bbox error
 			// if (tm) {
-			// 	return path.bbox().transform(tm.cat(this.ownTM));
+			// 	return path.bbox().transform(tm.cat(this._ownTM));
 			// } else {
 			// 	return path.bbox().transform(this.rootTM);
 			// }
 			if (tm) {
-				path = path.transform(tm.cat(this.ownTM));
+				path = path.transform(tm.cat(this._ownTM));
 			} else {
 				path = path.transform(this.rootTM);
 			}
@@ -107,7 +107,7 @@ export class SVGPathElement extends SVGGeometryElement {
 	}
 
 	fuseTransform(parentT?: Matrix) {
-		let tm = parentT ? this.ownTM.postCat(parentT) : this.ownTM;
+		let tm = parentT ? this._ownTM.postCat(parentT) : this._ownTM;
 		this.setAttribute(
 			"d",
 			PathLS.parse(this.describe()).transform(tm).describe()
@@ -144,7 +144,7 @@ export class SVGRectElement extends SVGGeometryElement {
 		return `M ${x} ${y} h ${width} v ${height} h ${-width} Z`;
 	}
 	fuseTransform(parentT?: Matrix) {
-		let tm = parentT ? this.ownTM.postCat(parentT) : this.ownTM;
+		let tm = parentT ? this._ownTM.postCat(parentT) : this._ownTM;
 		const {
 			a: scale_x,
 			b: skew_x,
@@ -186,7 +186,7 @@ export class SVGLineElement extends SVGGeometryElement {
 		return `M ${x1} ${y1} L ${x2} ${y2}`;
 	}
 	fuseTransform(parentT: Matrix) {
-		let tm = parentT ? this.ownTM.postCat(parentT) : this.ownTM;
+		let tm = parentT ? this._ownTM.postCat(parentT) : this._ownTM;
 		if (!tm.isIdentity) {
 			let x1 = this.x1.baseVal.value;
 			let x2 = this.x2.baseVal.value;
@@ -223,7 +223,7 @@ export class SVGPolygonElement extends SVGGeometryElement {
 		return p ? `M ${p} Z` : "";
 	}
 	fuseTransform(parentT?: Matrix) {
-		let tm = parentT ? this.ownTM.postCat(parentT) : this.ownTM;
+		let tm = parentT ? this._ownTM.postCat(parentT) : this._ownTM;
 		if (!tm.isIdentity) {
 			const l = this.getAttribute("points")
 				?.split(/(\s+)/)
@@ -245,7 +245,7 @@ export class SVGPolylineElement extends SVGGeometryElement {
 		return p ? `M ${p}` : "";
 	}
 	fuseTransform(parentT?: Matrix) {
-		let tm = parentT ? this.ownTM.postCat(parentT) : this.ownTM;
+		let tm = parentT ? this._ownTM.postCat(parentT) : this._ownTM;
 		if (!tm.isIdentity) {
 			const l = this.getAttribute("points")
 				?.split(/(\s+)/)
@@ -307,29 +307,8 @@ export class SVGSwitchElement extends SVGGraphicsElement {
 export class SVGUseElement extends SVGGraphicsElement {
 	static TAGS = ["use"];
 
-	// get ownTM() {
-	// 	// const m = Matrix.parse(this.getAttribute('transform') || '');
-	// 	const m = Matrix.parse(this.getAttribute('transform') || '');
-	// 	const x = this.x.baseVal.value;
-	// 	const y = this.y.baseVal.value;
-	// 	if (x || y) {
-	// 		return Matrix.translate(x, y).cat(m);
-	// 	}
-	// 	return m;
-	// }
-	// set ownTM(m: Matrix) {
-	// 	const x = this.x.baseVal.value;
-	// 	const y = this.y.baseVal.value;
-	// 	if (x || y) {
-	// 		const m0 = Matrix.parse(this.getAttribute('transform') || '');
-
-	// 		m = Matrix.translate(x, y).inverse().cat(m);
-	// 	}
-	// 	this.setAttribute('transform', m.toString());
-	// }
-
 	_shapeBox(tm?: Matrix) {
-		const ref = this.hrefElement;
+		const ref = this._hrefElement;
 		if (ref) {
 			const m = (() => {
 				let [p, o] = this.pairTM();
@@ -357,8 +336,8 @@ export class SVGUseElement extends SVGGraphicsElement {
 	}
 
 	objectBBox(T?: Matrix) {
-		// const E = T ? T.cat(this.ownTM) : this.ownTM;
-		const ref = this.hrefElement;
+		// const E = T ? T.cat(this._ownTM) : this._ownTM;
+		const ref = this._hrefElement;
 		if (ref) {
 			const m = (() => {
 				let [p, o] = this.pairTM();
@@ -405,7 +384,7 @@ export class SVGTextElement extends SVGTextContentElement {
 	static TAGS = ["text"];
 
 	_shapeBox(tm?: Matrix): Box {
-		const m = tm ? tm.cat(this.ownTM) : this.ownTM;
+		const m = tm ? tm.cat(this._ownTM) : this._ownTM;
 		const {
 			x: {
 				baseVal: { value: x },
@@ -430,7 +409,7 @@ export class SVGTextElement extends SVGTextContentElement {
 export class SVGTSpanElement extends SVGTextContentElement {
 	static TAGS = ["tspan"];
 	_shapeBox(tm?: Matrix): Box {
-		const m = tm ? tm.cat(this.ownTM) : this.ownTM;
+		const m = tm ? tm.cat(this._ownTM) : this._ownTM;
 		let box = Box.new();
 		// Returns a horrible bounding box that just contains the coord points
 		// of the text without width or height (which is impossible to calculate)

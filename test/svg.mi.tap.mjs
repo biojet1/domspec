@@ -79,7 +79,7 @@ tap.test("Mi", function (t) {
         let M = t.at(1, Matrix.identity());
         let [p, m] = v.pairTM();
         // console.log(p, m, M);
-        v.ownTM = p.inverse().cat(M).cat(p);
+        v._ownTM = p.inverse().cat(M).cat(p);
       }
     });
   }
@@ -103,7 +103,7 @@ tap.test("Mi", function (t) {
   //     let M = t.at(1, Matrix.identity());
   //     let [p, m] = v.pairTM();
   //     // console.log(p, m, M);
-  //     v.ownTM = p.inverse().cat(M).cat(p);
+  //     v._ownTM = p.inverse().cat(M).cat(p);
   // });
 
   writeFileSync(`/tmp/mi.svg`, document.documentElement.outerHTML);

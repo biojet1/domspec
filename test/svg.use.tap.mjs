@@ -19,9 +19,9 @@ That's why the circles have different x positions, but the same stroke value.
 		`);
 	const { myCircle, use1, use2 } = document.all;
 
-	t.same(use1.hrefElement.id, 'myCircle');
-	t.same(use2.hrefElement.id, 'myCircle');
-	t.same(use2.hrefElement.id, 'myCircle');
+	t.same(use1._hrefElement.id, 'myCircle');
+	t.same(use2._hrefElement.id, 'myCircle');
+	t.same(use2._hrefElement.id, 'myCircle');
 
 	t.same(myCircle._shapeBox().toArray(), [5 - 4, 5 - 4, 4 * 2, 4 * 2]);
 	t.same(use1._shapeBox().toArray(), [11, 1, 8, 8]);
@@ -42,8 +42,8 @@ tap.test('size', function (t) {
 tap.test('Use+Symbol', async function (t) {
 	const document = await parser.parseFile(new URL('res/symbol.svg', import.meta.url));
 	const { U1, U2, U3, U4, U5, G1, G2 } = document.all;
-	t.same(U1.hrefElement.id, 'myDot');
-	t.same(U5.hrefElement.id, 'myDot');
+	t.same(U1._hrefElement.id, 'myDot');
+	t.same(U5._hrefElement.id, 'myDot');
 	t.same(U1._shapeBox().toArray(), [5, 5, 10, 10]);
 	t.same(U2._shapeBox().toArray(), [20, 5, 10, 10]);
 	t.same(U3._shapeBox().toArray(), [35, 5, 10, 10]);

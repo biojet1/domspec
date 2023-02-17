@@ -152,16 +152,6 @@ export class SVGGraphicsElement extends SVGElement {
 		}
 		return farthest;
 	}
-
-	get ownTM() {
-		// return Matrix.parse(this.getAttribute("transform") || "");
-		return this.transform.baseVal.combine();
-	}
-
-	set ownTM(T: Matrix) {
-		this.setAttribute("transform", T.toString());
-	}
-
 	get _clipElement(): SVGGraphicsElement | null {
 		const v = this.getAttribute("clip-path");
 		const a = v && /#([^#\(\)\s]+)/.exec(v);
@@ -178,7 +168,7 @@ export class SVGGraphicsElement extends SVGElement {
 		}
 	}
 
-	get hrefElement() {
+	get _hrefElement() {
 		const id =
 			this.getAttributeNS("http://www.w3.org/1999/xlink", "href") ||
 			this.getAttribute("href");
@@ -190,7 +180,7 @@ export class SVGGraphicsElement extends SVGElement {
 		return null;
 	}
 
-	set hrefElement(target: SVGElement | null) {
+	set _hrefElement(target: SVGElement | null) {
 		target &&
 			this.setAttributeNS(
 				"http://www.w3.org/1999/xlink",
@@ -199,27 +189,38 @@ export class SVGGraphicsElement extends SVGElement {
 			);
 	}
 
-	canRender() {
+	_canRender() {
 		if (this.getAttribute("display") === "none") {
 			return false;
 		}
 		return true;
 	}
+	//////////////
+	// The transform attribute
+	get _ownTM() {
+		// return Matrix.parse(this.getAttribute("transform") || "");
+		return this.transform.baseVal.combine();
+	}
+
+	set _ownTM(T: Matrix) {
+		this.setAttribute("transform", T.toString());
+	}
+	//////////////
 
 	get innerTM(): Matrix {
-		return this.ownTM;
+		return this._ownTM;
 	}
 	get rootTM(): Matrix {
-		const { parentNode: parent, ownTM } = this;
+		const { parentNode: parent, _ownTM } = this;
 		if (parent instanceof SVGGraphicsElement) {
-			return parent._relTM(ownTM);
+			return parent._relTM(_ownTM);
 		} else {
-			return ownTM;
+			return _ownTM;
 		}
 	}
 
 	localTM(): Matrix {
-		const { parentNode: parent, ownTM } = this;
+		const { parentNode: parent, _ownTM } = this;
 		if (parent instanceof SVGGraphicsElement) {
 			return parent._relTM(this.innerTM);
 		} else if (this instanceof SVGSVGElement) {
@@ -232,15 +233,15 @@ export class SVGGraphicsElement extends SVGElement {
 		return this.rootTM;
 	}
 	pairTM(): Matrix[] {
-		const { parentNode: parent, ownTM } = this;
+		const { parentNode: parent, _ownTM } = this;
 		if (parent instanceof SVGGraphicsElement) {
-			return [parent._relTM(Matrix.identity()), ownTM];
+			return [parent._relTM(Matrix.identity()), _ownTM];
 		} else {
-			return [Matrix.identity(), ownTM];
+			return [Matrix.identity(), _ownTM];
 		}
 	}
 	getScreenCTM(): Matrix {
-		let { parentNode: parent, ownTM: tm } = this;
+		let { parentNode: parent, _ownTM: tm } = this;
 		for (; parent; parent = parent.parentNode) {
 			if (parent instanceof SVGGraphicsElement) {
 				tm = tm.postCat(parent.innerTM);
@@ -253,13 +254,13 @@ export class SVGGraphicsElement extends SVGElement {
 
 	composeTM(root?: SVGElement | null): Matrix {
 		{
-			const { parentNode: parent, ownTM } = this;
+			const { parentNode: parent, _ownTM } = this;
 			if (parent instanceof SVGGraphicsElement) {
-				return parent._relTM(ownTM, root);
+				return parent._relTM(_ownTM, root);
 			} else if (root) {
 				throw new Error(`root not reached`);
 			} else {
-				return ownTM;
+				return _ownTM;
 			}
 		}
 	}
@@ -267,22 +268,22 @@ export class SVGGraphicsElement extends SVGElement {
 		let parent: SVGGraphicsElement | null = this
 			.parentElement as SVGGraphicsElement;
 		if (parent instanceof SVGGraphicsElement) {
-			return parent._relTM(this.ownTM, root);
+			return parent._relTM(this._ownTM, root);
 		} else if (root) {
 			throw new Error(`root not reached`);
 		} else if (this instanceof SVGSVGElement) {
 			return Matrix.identity(); // root?
 		} else {
-			return this.ownTM;
+			return this._ownTM;
 		}
 	}
 
 	_pairTM(root?: SVGElement | null): Matrix[] {
-		const { parentNode: parent, ownTM } = this;
+		const { parentNode: parent, _ownTM } = this;
 		if (parent instanceof SVGGraphicsElement) {
-			return [parent._relTM(Matrix.identity(), root), ownTM];
+			return [parent._relTM(Matrix.identity(), root), _ownTM];
 		} else {
-			return [Matrix.identity(), ownTM];
+			return [Matrix.identity(), _ownTM];
 		}
 		// return [this._composeTM(Matrix.identity(), root) ?? ]
 	}
@@ -295,7 +296,7 @@ export class SVGGraphicsElement extends SVGElement {
 		return box.isValid() ? box : Box.empty();
 	}
 	fuseTransform(parentT?: Matrix) {
-		let tm = parentT ? this.ownTM.postCat(parentT) : this.ownTM;
+		let tm = parentT ? this._ownTM.postCat(parentT) : this._ownTM;
 		for (const sub of this.children) {
 			if (sub instanceof SVGGraphicsElement) {
 				sub.fuseTransform(tm);
@@ -307,8 +308,8 @@ export class SVGGraphicsElement extends SVGElement {
 	objectBBox(T?: Matrix) {
 		let box = Box.new();
 		for (const sub of this.children) {
-			if (sub instanceof SVGGraphicsElement && sub.canRender()) {
-				const M = sub.ownTM;
+			if (sub instanceof SVGGraphicsElement && sub._canRender()) {
+				const M = sub._ownTM;
 				const E = T ? T.cat(M) : M;
 				box = box.merge(sub.objectBBox(E));
 			}
@@ -319,8 +320,8 @@ export class SVGGraphicsElement extends SVGElement {
 	_objectBBox(T?: Matrix) {
 		let box = Box.new();
 		for (const sub of this.children) {
-			if (sub instanceof SVGGraphicsElement && sub.canRender()) {
-				const M = sub.ownTM;
+			if (sub instanceof SVGGraphicsElement && sub._canRender()) {
+				const M = sub._ownTM;
 				const E = T ? T.cat(M) : M;
 				box = box.merge(sub.objectBBox(E));
 			}
@@ -343,10 +344,10 @@ export class SVGGraphicsElement extends SVGElement {
 
 	_shapeBox(tm?: Matrix): Box {
 		// for <g/> box of decendant children
-		const m = tm ? tm.cat(this.ownTM) : this.rootTM;
+		const m = tm ? tm.cat(this._ownTM) : this.rootTM;
 		let box = Box.new();
 		for (const sub of this.children) {
-			if (sub instanceof SVGGraphicsElement && sub.canRender()) {
+			if (sub instanceof SVGGraphicsElement && sub._canRender()) {
 				box = box.merge(sub._boundingBox(m));
 			}
 		}
@@ -384,7 +385,7 @@ export class SVGGraphicsElement extends SVGElement {
 				} else {
 					this.appendChild(that);
 				}
-				that.ownTM = pCtm.cat(ctm);
+				that._ownTM = pCtm.cat(ctm);
 			}
 		}
 	}
@@ -442,8 +443,8 @@ export class SVGSVGElement extends SVGGraphicsElement {
 		return 1;
 	}
 	get innerTM(): Matrix {
-		// return this.viewportTM().cat(this.ownTM);
-		return this.ownTM.cat(this.viewportTM());
+		// return this.viewportTM().cat(this._ownTM);
+		return this._ownTM.cat(this.viewportTM());
 	}
 
 	viewportTM() {

@@ -27,7 +27,7 @@ function apply(m, node) {
 	}
 	// T = R.inverse().cat(m).cat(P)
 	T = L.cat(M); // R1,R2,R3,R4 OK
-	node.ownTM = T;
+	node._ownTM = T;
 
 	console.log(
 		"trans",
@@ -40,7 +40,7 @@ function toParent(parent, i) {
 	const childTM = i.rootTM;
 	const parentTM = parent.rootTM;
 	parent.appendChild(i);
-	i.ownTM = parentTM.inverse().cat(childTM);
+	i._ownTM = parentTM.inverse().cat(childTM);
 }
 
 const parser = new DOMParser();
@@ -73,7 +73,7 @@ tap.test("layout1", { bail: 0 }, function (t) {
 			const v = document.getElementById(id);
 			const r = v.rootTM;
 			const l = v.localTM();
-			const o = v.ownTM;
+			const o = v._ownTM;
 			const b0 = Box.forRect(x, y, w, h);
 			const b1 = v.boundingBox();
 			root.insertAdjacentHTML(

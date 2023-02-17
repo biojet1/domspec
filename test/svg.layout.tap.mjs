@@ -11,23 +11,23 @@ class Lay extends SVGLayout {
 	trans(m, node) {
 		const [P, M] = this.pairTM(node);
 		if (M.isIdentity) {
-			node.ownTM = P.inverse().cat(m);
+			node._ownTM = P.inverse().cat(m);
 		} else {
 			const T = P.cat(M);
 			const R = P.cat(M);
-			// node.ownTM =P.inverse().cat(m).cat(M)
-			// node.ownTM = R.inverse().cat(m).cat(P).inverse();
+			// node._ownTM =P.inverse().cat(m).cat(M)
+			// node._ownTM = R.inverse().cat(m).cat(P).inverse();
 			if (P.isIdentity) {
-				// node.ownTM = M.cat(P.inverse().cat(m));
-				// 	// node.ownTM = m.cat(M);
-				node.ownTM = M.cat(m);
+				// node._ownTM = M.cat(P.inverse().cat(m));
+				// 	// node._ownTM = m.cat(M);
+				node._ownTM = M.cat(m);
 			} else {
-				// 	node.ownTM = P.cat(M).inverse().cat(m).cat(P.inverse());
-				node.ownTM = P.cat(M).inverse().cat(m).cat(P).inverse();
+				// 	node._ownTM = P.cat(M).inverse().cat(m).cat(P.inverse());
+				node._ownTM = P.cat(M).inverse().cat(m).cat(P).inverse();
 			}
-			// node.ownTM = P.inverse().cat(m).cat(M); // OK
+			// node._ownTM = P.inverse().cat(m).cat(M); // OK
 		}
-		// console.log('trans', node.id, `[${P.describe()}] ${m.describe()} [${M.describe()}] -> ${node.ownTM.describe()}`);
+		// console.log('trans', node.id, `[${P.describe()}] ${m.describe()} [${M.describe()}] -> ${node._ownTM.describe()}`);
 	}
 }
 
@@ -87,8 +87,8 @@ tap.test('Geoms 1', function (t) {
 	// console.log(Matrix.translate(50).describe())
 	// lay.transform(Matrix.translate(-50), R6);
 	// console.log(Matrix.translate(-50));
-	// t.same(R5.ownTM.describe(), 'translate(0 -40)');
-	// t.same(R6.ownTM.describe(), 'translate(0 40)');
+	// t.same(R5._ownTM.describe(), 'translate(0 -40)');
+	// t.same(R6._ownTM.describe(), 'translate(0 40)');
 	// lay.saveTM('A', R5, R6);
 	// console.log(R6.outerHTML);
 	// lay.align({ hGap: 5 });

@@ -9,10 +9,10 @@ export class SVGLayout {
 		this._root = node;
 	}
 	getTM(node: SVGGraphicsElement): Matrix {
-		return node.ownTM;
+		return node._ownTM;
 	}
 	setTM(node: SVGGraphicsElement, m: Matrix) {
-		node.ownTM = m;
+		node._ownTM = m;
 		return this;
 	}
 	innerTM(node: SVGGraphicsElement): Matrix {

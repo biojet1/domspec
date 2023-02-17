@@ -9,11 +9,11 @@ import { SVGLayout } from "../dist/svg/layout.js";
 
 function apply(m, node) {
 	const P = node.parentNode.localTM();
-	const M = node.ownTM;
+	const M = node._ownTM;
 	const L = P.inverse().cat(m).cat(P);
 	let T;
 	T = L.cat(M); // R1,R2,R3,R4 OK
-	node.ownTM = T;
+	node._ownTM = T;
 	// console.log('trans', node.id, `[${T.describe()}]\n\tL[${L.describe()}]\n\t-> ${T.describe()}`);
 }
 
@@ -21,7 +21,7 @@ function toParent(parent, i) {
 	const childTM = i.rootTM;
 	const parentTM = parent.rootTM;
 	parent.appendChild(i);
-	i.ownTM = parentTM.inverse().cat(childTM);
+	i._ownTM = parentTM.inverse().cat(childTM);
 }
 
 const parser = new DOMParser();
@@ -46,18 +46,18 @@ tap.test("translate", function (t) {
 	// console.log(svg.querySelector('svg>g>g>g>g>g>rect:nth-of-type(1)').outerHTML);
 	const m = Matrix.translate(-20, 30);
 	apply(m, R1);
-	t.same(R1.ownTM.describe(), Matrix.translate(15, 10).describe(), "R1");
+	t.same(R1._ownTM.describe(), Matrix.translate(15, 10).describe(), "R1");
 	apply(m, R2);
-	t.same(R2.ownTM.describe(), Matrix.translate(-15, -10).describe(), "R2");
+	t.same(R2._ownTM.describe(), Matrix.translate(-15, -10).describe(), "R2");
 	apply(m, R3);
 	t.same(
-		R3.ownTM.describe(),
+		R3._ownTM.describe(),
 		Matrix.parse("translate(15 10)rotate(45)").describe(),
 		"R3"
 	);
 	apply(m, R4); // scale(2)translate(7.5 5)
 	t.same(
-		R4.ownTM.describe(),
+		R4._ownTM.describe(),
 		Matrix.parse("translate(15 10)scale(2 2)").describe(),
 		"R4"
 	);
@@ -83,25 +83,25 @@ tap.test("scale", function (t) {
 	// console.log('TRANSFORM', m.describe());
 	apply(m, R1);
 	t.same(
-		R1.ownTM.describe(),
+		R1._ownTM.describe(),
 		Matrix.parse("translate(0 -40)scale(2 2)").describe(),
 		"R1"
 	);
 	apply(m, R2);
 	t.same(
-		R2.ownTM.describe(),
+		R2._ownTM.describe(),
 		Matrix.parse("translate(-60 -80)scale(2 2)").describe(),
 		"R2"
 	);
 	apply(m, R3);
 	t.same(
-		R3.ownTM.describe(),
+		R3._ownTM.describe(),
 		Matrix.parse("translate(0 -40)rotate(45)scale(2 2)").describe(),
 		"R3"
 	);
 	apply(m, R4);
 	t.same(
-		R4.ownTM.describe(),
+		R4._ownTM.describe(),
 		Matrix.parse("translate(0 -40)scale(4 4)").describe(),
 		"R4"
 	);
@@ -119,7 +119,7 @@ tap.test("toParent", function (t) {
 
 	function toP(p, c, m, n) {
 		toParent(p, c);
-		const m1 = c.ownTM;
+		const m1 = c._ownTM;
 		t.ok(m1.equals(m, 1e-5), `${n} ${c.id} ${m1.describe()} ${m.describe()}`);
 	}
 	const R3 = document.getElementById("R3");
@@ -187,12 +187,12 @@ tap.test("VP translate", function (t) {
 
 	const m = Matrix.translate(50, 40);
 	apply(m, R1);
-	t.same(R1.ownTM.describe(), Matrix.translate(5, 4).describe(), "R1");
+	t.same(R1._ownTM.describe(), Matrix.translate(5, 4).describe(), "R1");
 	// apply(m, R2);
-	// t.same(R2.ownTM.describe(), Matrix.translate(-15, -10).describe(), 'R2');
+	// t.same(R2._ownTM.describe(), Matrix.translate(-15, -10).describe(), 'R2');
 	// apply(m, R3);
-	// t.same(R3.ownTM.describe(), Matrix.parse('translate(15 10)rotate(45)').describe(), 'R3');
+	// t.same(R3._ownTM.describe(), Matrix.parse('translate(15 10)rotate(45)').describe(), 'R3');
 	// apply(m, R4); // scale(2)translate(7.5 5)
-	// t.same(R4.ownTM.describe(), Matrix.parse('translate(15 10)scale(2 2)').describe(), 'R4');
+	// t.same(R4._ownTM.describe(), Matrix.parse('translate(15 10)scale(2 2)').describe(), 'R4');
 	t.end();
 });

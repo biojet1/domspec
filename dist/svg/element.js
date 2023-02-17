@@ -33,7 +33,7 @@ export class SVGGeometryElement extends SVGGraphicsElement {
                 path = path.transform(tm.cat(this._ownTM));
             }
             else {
-                path = path.transform(this.rootTM);
+                path = path.transform(this._rootTM);
             }
             return path.bbox();
         }

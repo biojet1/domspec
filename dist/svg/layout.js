@@ -58,7 +58,7 @@ export class SVGLayout {
             return this._innerTM(node);
         }
     }
-    rootTM(node) {
+    _rootTM(node) {
         const { _root } = this;
         const { parentNode: parent } = node;
         if (parent instanceof SVGGraphicsElement) {

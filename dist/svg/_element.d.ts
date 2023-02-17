@@ -37,9 +37,8 @@ export declare class SVGGraphicsElement extends SVGElement {
     get _ownTM(): Matrix;
     set _ownTM(T: Matrix);
     get _innerTM(): Matrix;
-    get rootTM(): Matrix;
+    get _rootTM(): Matrix;
     localTM(): Matrix;
-    docTM(): Matrix;
     pairTM(): Matrix[];
     getScreenCTM(): Matrix;
     composeTM(root?: SVGElement | null): Matrix;

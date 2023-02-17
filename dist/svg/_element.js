@@ -181,7 +181,7 @@ export class SVGGraphicsElement extends SVGElement {
     get _innerTM() {
         return this._ownTM;
     }
-    get rootTM() {
+    get _rootTM() {
         const { parentNode: parent, _ownTM } = this;
         if (parent instanceof SVGGraphicsElement) {
             return parent._relTM(_ownTM);
@@ -201,9 +201,6 @@ export class SVGGraphicsElement extends SVGElement {
         else {
             return this._innerTM;
         }
-    }
-    docTM() {
-        return this.rootTM;
     }
     pairTM() {
         const { parentNode: parent, _ownTM } = this;
@@ -318,7 +315,7 @@ export class SVGGraphicsElement extends SVGElement {
         }
     }
     _shapeBox(tm) {
-        const m = tm ? tm.cat(this._ownTM) : this.rootTM;
+        const m = tm ? tm.cat(this._ownTM) : this._rootTM;
         let box = Box.new();
         for (const sub of this.children) {
             if (sub instanceof SVGGraphicsElement && sub._canRender()) {
@@ -338,7 +335,7 @@ export class SVGGraphicsElement extends SVGElement {
                 b = b.transform(tm);
             }
             else {
-                b = b.transform(this.rootTM);
+                b = b.transform(this._rootTM);
             }
             return b;
         }
@@ -350,10 +347,10 @@ export class SVGGraphicsElement extends SVGElement {
         }
     }
     _placeChild(ref, nodes) {
-        const pCtm = this.rootTM.inverse();
+        const pCtm = this._rootTM.inverse();
         for (const that of nodes) {
             if (that !== this) {
-                const ctm = that.rootTM;
+                const ctm = that._rootTM;
                 if (ref) {
                     this.insertBefore(that, ref);
                 }
@@ -396,7 +393,7 @@ export class SVGGraphicsElement extends SVGElement {
                     throw new Error(`root not reached`);
                 }
                 else {
-                    const p = root.rootTM.inverse();
+                    const p = root._rootTM.inverse();
                     return p.cat(tm);
                 }
             }

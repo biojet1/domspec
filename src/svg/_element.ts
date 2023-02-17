@@ -49,8 +49,8 @@ export class SVGElement extends Element {
 	}
 }
 export class SVGGraphicsElement extends SVGElement {
-	newAttributeNode(name: string) {
-		// console.warn("newAttributeNode", name);
+	_newAttributeNode(name: string) {
+		// console.warn("_newAttributeNode", name);
 		switch (name) {
 			// https://svgwg.org/svg2-draft/geometry.html#Sizing
 			case "r":
@@ -86,52 +86,52 @@ export class SVGGraphicsElement extends SVGElement {
 			// case "points":
 			// 	return new SVGNumberListAttr(name);
 		}
-		return super.newAttributeNode(name);
+		return super._newAttributeNode(name);
 	}
 	get r(): SVGAnimatedLength {
-		return this.letAttributeNode("r") as SVGAnimatedLength; // for now
+		return this._letAttributeNode("r") as SVGAnimatedLength; // for now
 	}
 	get x(): SVGAnimatedLength {
-		return this.letAttributeNode("x") as SVGAnimatedLength; // for now
+		return this._letAttributeNode("x") as SVGAnimatedLength; // for now
 	}
 	get y(): SVGAnimatedLength {
-		return this.letAttributeNode("y") as SVGAnimatedLength; // for now
+		return this._letAttributeNode("y") as SVGAnimatedLength; // for now
 	}
 	get cx(): SVGAnimatedLength {
-		return this.letAttributeNode("cx") as SVGAnimatedLength; // for now
+		return this._letAttributeNode("cx") as SVGAnimatedLength; // for now
 	}
 	get cy(): SVGAnimatedLength {
-		return this.letAttributeNode("cy") as SVGAnimatedLength; // for now
+		return this._letAttributeNode("cy") as SVGAnimatedLength; // for now
 	}
 	get rx(): SVGAnimatedLength {
-		return this.letAttributeNode("rx") as SVGAnimatedLength; // for now
+		return this._letAttributeNode("rx") as SVGAnimatedLength; // for now
 	}
 	get ry(): SVGAnimatedLength {
-		return this.letAttributeNode("ry") as SVGAnimatedLength; // for now
+		return this._letAttributeNode("ry") as SVGAnimatedLength; // for now
 	}
 	get x1(): SVGAnimatedLength {
-		return this.letAttributeNode("x1") as SVGAnimatedLength; // for now
+		return this._letAttributeNode("x1") as SVGAnimatedLength; // for now
 	}
 	get x2(): SVGAnimatedLength {
-		return this.letAttributeNode("x2") as SVGAnimatedLength; // for now
+		return this._letAttributeNode("x2") as SVGAnimatedLength; // for now
 	}
 	get y1(): SVGAnimatedLength {
-		return this.letAttributeNode("y1") as SVGAnimatedLength; // for now
+		return this._letAttributeNode("y1") as SVGAnimatedLength; // for now
 	}
 	get y2(): SVGAnimatedLength {
-		return this.letAttributeNode("y2") as SVGAnimatedLength; // for now
+		return this._letAttributeNode("y2") as SVGAnimatedLength; // for now
 	}
 	get width(): SVGAnimatedLength {
-		return this.letAttributeNode("width") as SVGAnimatedLength; // for now
+		return this._letAttributeNode("width") as SVGAnimatedLength; // for now
 	}
 	get height(): SVGAnimatedLength {
-		return this.letAttributeNode("height") as SVGAnimatedLength; // for now
+		return this._letAttributeNode("height") as SVGAnimatedLength; // for now
 	}
 	get viewBox(): SVGAnimatedRect {
-		return this.letAttributeNode("viewBox") as SVGAnimatedRect; // for now
+		return this._letAttributeNode("viewBox") as SVGAnimatedRect; // for now
 	}
 	get transform(): SVGAnimatedTransformList {
-		return this.letAttributeNode("transform") as SVGAnimatedTransformList; // for now
+		return this._letAttributeNode("transform") as SVGAnimatedTransformList; // for now
 	}
 	get nearestViewportElement(): SVGElement | null {
 		let parent: SVGElement = this;

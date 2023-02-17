@@ -43,7 +43,7 @@ export class SVGElement extends Element {
     }
 }
 export class SVGGraphicsElement extends SVGElement {
-    newAttributeNode(name) {
+    _newAttributeNode(name) {
         switch (name) {
             case "r":
                 return new SVGAnimatedLength(name);
@@ -73,52 +73,52 @@ export class SVGGraphicsElement extends SVGElement {
             case "transform":
                 return new SVGAnimatedTransformList(name);
         }
-        return super.newAttributeNode(name);
+        return super._newAttributeNode(name);
     }
     get r() {
-        return this.letAttributeNode("r");
+        return this._letAttributeNode("r");
     }
     get x() {
-        return this.letAttributeNode("x");
+        return this._letAttributeNode("x");
     }
     get y() {
-        return this.letAttributeNode("y");
+        return this._letAttributeNode("y");
     }
     get cx() {
-        return this.letAttributeNode("cx");
+        return this._letAttributeNode("cx");
     }
     get cy() {
-        return this.letAttributeNode("cy");
+        return this._letAttributeNode("cy");
     }
     get rx() {
-        return this.letAttributeNode("rx");
+        return this._letAttributeNode("rx");
     }
     get ry() {
-        return this.letAttributeNode("ry");
+        return this._letAttributeNode("ry");
     }
     get x1() {
-        return this.letAttributeNode("x1");
+        return this._letAttributeNode("x1");
     }
     get x2() {
-        return this.letAttributeNode("x2");
+        return this._letAttributeNode("x2");
     }
     get y1() {
-        return this.letAttributeNode("y1");
+        return this._letAttributeNode("y1");
     }
     get y2() {
-        return this.letAttributeNode("y2");
+        return this._letAttributeNode("y2");
     }
     get width() {
-        return this.letAttributeNode("width");
+        return this._letAttributeNode("width");
     }
     get height() {
-        return this.letAttributeNode("height");
+        return this._letAttributeNode("height");
     }
     get viewBox() {
-        return this.letAttributeNode("viewBox");
+        return this._letAttributeNode("viewBox");
     }
     get transform() {
-        return this.letAttributeNode("transform");
+        return this._letAttributeNode("transform");
     }
     get nearestViewportElement() {
         let parent = this;

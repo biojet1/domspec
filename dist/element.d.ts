@@ -1,5 +1,5 @@
-import { Node } from './node.js';
-import { ParentNode } from './parent-node.js';
+import { Node } from "./node.js";
+import { ParentNode } from "./parent-node.js";
 declare const DATASET: unique symbol;
 export declare class Element extends ParentNode {
     #private;
@@ -21,16 +21,16 @@ export declare class Element extends ParentNode {
     get className(): string;
     set className(str: string);
     getAttribute(name: string): string | null;
-    popAttribute(name: string): string | undefined;
+    _popAttribute(name: string): string | undefined;
     getAttributeNS(ns: string | null, localName: string): string | null;
     getAttributeNode(name: string): Attr | null;
-    popAttributeNode(name: string): Attr | null;
-    newAttributeNode(name: string): Attr;
-    newAttributeNodeNS(nsu: string | null, name: string, localName: string): Attr;
-    letAttributeNode(name: string): Attr;
+    _popAttributeNode(name: string): Attr | null;
+    _newAttributeNode(name: string): Attr;
+    _newAttributeNodeNS(nsu: string | null, name: string, localName: string): Attr;
+    _letAttributeNode(name: string): Attr;
     getAttributeNodeNS(nsu: string | null, localName: string): Attr | null;
     setAttribute(name: string, value: string): void;
-    letAttributeNodeNS(nms: string | null, qname: string): Attr;
+    _letAttributeNodeNS(nms: string | null, qname: string): Attr;
     setAttributeNS(nms: string | null, qname: string, value: string): void;
     setAttributeNode(node: Attr): Attr | null;
     setAttributeNodeNS(node: Attr): Attr | null;
@@ -62,8 +62,8 @@ export declare class Element extends ParentNode {
     isEqualNode(node: Node): boolean;
     _ensureId(): string;
 }
-import { Attr } from './attr.js';
-import { ChildNode } from './child-node.js';
-import { StyleAttr } from './attr-style.js';
-import { NamedNodeMap } from './named-node-map.js';
+import { Attr } from "./attr.js";
+import { ChildNode } from "./child-node.js";
+import { StyleAttr } from "./attr-style.js";
+import { NamedNodeMap } from "./named-node-map.js";
 export { NamedNodeMap };

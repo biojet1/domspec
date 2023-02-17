@@ -11,7 +11,7 @@ export declare class SVGElement extends Element {
     createSVGTransformFromMatrix(M: Matrix): SVGTransform;
 }
 export declare class SVGGraphicsElement extends SVGElement {
-    newAttributeNode(name: string): import("../attr.js").Attr;
+    _newAttributeNode(name: string): import("../attr.js").Attr;
     get r(): SVGAnimatedLength;
     get x(): SVGAnimatedLength;
     get y(): SVGAnimatedLength;

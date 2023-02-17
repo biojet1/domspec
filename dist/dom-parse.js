@@ -161,7 +161,7 @@ export function htmlParser2(doc, top, options) {
                 for (const [key, value] of Object.entries(attribs)) {
                     const i = key.indexOf(":");
                     if (i < 0) {
-                        tag.letAttributeNode(key).value = value;
+                        tag._letAttributeNode(key).value = value;
                     }
                     else {
                         const prefix = key.substring(0, i);
@@ -173,7 +173,7 @@ export function htmlParser2(doc, top, options) {
                             default:
                                 ns = getNamespace(prefix, top, attribs);
                         }
-                        tag.letAttributeNodeNS(ns, key).value = value;
+                        tag._letAttributeNodeNS(ns, key).value = value;
                     }
                 }
                 _appendChild(top, tag);

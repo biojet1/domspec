@@ -50,7 +50,7 @@ export class SVGLayout {
 			return [Matrix.identity(), this.getTM(node)];
 		}
 	}
-	localTM(node: SVGGraphicsElement): Matrix {
+	_localTM(node: SVGGraphicsElement): Matrix {
 		// transform applied to decendants
 		const { _root } = this;
 		const { parentNode: parent } = node;

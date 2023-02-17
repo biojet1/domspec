@@ -255,8 +255,8 @@ export class SVGGraphicsElement extends SVGElement {
 		// return [this._composeTM(Matrix.identity(), root) ?? ]
 	}
 	//////////////
-
-	localTM(): Matrix {
+	// The transform attribute + viewport transformation (if SVGSVGElement) + up to document root
+	_localTM(): Matrix {
 		const { parentNode: parent, _ownTM } = this;
 		if (parent instanceof SVGGraphicsElement) {
 			return parent._relTM(this._innerTM);
@@ -266,6 +266,7 @@ export class SVGGraphicsElement extends SVGElement {
 			return this._innerTM;
 		}
 	}
+	//////////////
 
 	getScreenCTM(): Matrix {
 		let { parentNode: parent, _ownTM: tm } = this;

@@ -10,7 +10,7 @@ import { Box, Matrix } from "svggeom";
 import { SVGLayout } from "../dist/svg/layout.js";
 
 function apply(m, node) {
-	const [P, M] = node._pairTM();
+	const [P, M] = node.pairTM();
 	const L = P.inverse().cat(m).cat(P);
 	const R = P.cat(M);
 
@@ -72,7 +72,7 @@ tap.test("layout1", { bail: 0 }, function (t) {
 			const m = Matrix.new(a, b, c, d, e, f);
 			const v = document.getElementById(id);
 			const r = v._rootTM;
-			const l = v.localTM();
+			const l = v._localTM();
 			const o = v._ownTM;
 			const b0 = Box.forRect(x, y, w, h);
 			const b1 = v.boundingBox();
@@ -84,7 +84,7 @@ tap.test("layout1", { bail: 0 }, function (t) {
 			t.ok(r.equals(m, 1e-3), `${id} ${r.describe()} ${m.describe()}`);
 			const n = metrix.tag_name == "svg" ? l.cat(v.viewportTM().inverse()) : l;
 
-			t.ok(r.equals(n, 1e-3), `localTM ${id} ${l.describe()} ${o.describe()}`);
+			t.ok(r.equals(n, 1e-3), `_localTM ${id} ${l.describe()} ${o.describe()}`);
 			t.ok(
 				r.equals(v._rootTM, 1e-3),
 				`docTM ${id} ${r.describe()} ${v._rootTM.describe()}`
@@ -99,7 +99,7 @@ tap.test("layout1", { bail: 0 }, function (t) {
 
 	t.end();
 });
-tap.test("localTM()", { bail: 0 }, function (t) {
+tap.test("_localTM()", { bail: 0 }, function (t) {
 	const document = parser.parseFromString(`
 <svg xmlns="http://www.w3.org/2000/svg" id="VPA" viewBox="0 0 200 100">
 	<g id="G1" transform="translate(100,0)">
@@ -136,39 +136,39 @@ tap.test("localTM()", { bail: 0 }, function (t) {
 	const { documentElement: rootSVG } = document;
 
 	t.same(
-		document.getElementById("G1").localTM().describe(),
+		document.getElementById("G1")._localTM().describe(),
 		Matrix.translate(100, 0).describe()
 	);
 	t.same(
-		document.getElementById("G2").localTM().describe(),
+		document.getElementById("G2")._localTM().describe(),
 		Matrix.translate(100, 100).describe()
 	);
 	t.same(
-		document.getElementById("G3").localTM().describe(),
+		document.getElementById("G3")._localTM().describe(),
 		Matrix.translate(100, 100).describe()
 	);
 	t.same(
-		document.getElementById("G4").localTM().describe(),
+		document.getElementById("G4")._localTM().describe(),
 		Matrix.translate(50, 50).describe()
 	);
 	t.same(
-		document.getElementById("R1").localTM().describe(),
+		document.getElementById("R1")._localTM().describe(),
 		Matrix.translate(50, 50).describe()
 	);
 	t.same(
-		document.getElementById("R2").localTM().describe(),
+		document.getElementById("R2")._localTM().describe(),
 		Matrix.translate(40, 40).describe()
 	);
 	t.same(
-		document.getElementById("R3").localTM().describe(),
+		document.getElementById("R3")._localTM().describe(),
 		Matrix.translate(100, 100).describe()
 	);
 	t.same(
-		document.getElementById("R4").localTM().describe(),
+		document.getElementById("R4")._localTM().describe(),
 		Matrix.translate(90, 90).describe()
 	);
 	t.same(
-		document.documentElement.localTM().describe(),
+		document.documentElement._localTM().describe(),
 		Matrix.identity().describe()
 	);
 	[
@@ -186,7 +186,7 @@ tap.test("localTM()", { bail: 0 }, function (t) {
 		const m = Matrix.parse(s);
 		const n = Matrix.parse(d);
 		const v = document.getElementById(id);
-		t.same(v.localTM().describe(), m.describe(), `localTM ${id}`);
+		t.same(v._localTM().describe(), m.describe(), `_localTM ${id}`);
 		t.same(v._rootTM.describe(), n.describe(), `docTM ${id}`);
 		// t.same(
 		// 	v._relTM(Matrix.identity(), rootSVG).describe(),

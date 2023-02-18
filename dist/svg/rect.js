@@ -106,7 +106,7 @@ export class SVGAnimatedRect extends Attr {
             catch (err) {
             }
         }
-        return null;
+        return (this._var = SVGRect.forRect(0, 0, NaN, NaN));
     }
     get animVal() {
         return this.baseVal;
@@ -138,7 +138,7 @@ export class SVGAnimatedRect extends Attr {
     }
     _calcWidth() {
         const { baseVal } = this;
-        if (baseVal) {
+        if (baseVal && baseVal.isValid()) {
             return baseVal.width;
         }
         const o = this.ownerElement;
@@ -157,7 +157,7 @@ export class SVGAnimatedRect extends Attr {
     }
     _calcHeight() {
         const { baseVal } = this;
-        if (baseVal) {
+        if (baseVal && baseVal.isValid()) {
             return baseVal.height;
         }
         const o = this.ownerElement;
@@ -178,7 +178,7 @@ export class SVGAnimatedRect extends Attr {
     }
     _calcBox() {
         const { baseVal } = this;
-        if (baseVal) {
+        if (baseVal && baseVal.isValid()) {
             return baseVal;
         }
         let x = 0, y = 0, w = 100, h = 100;

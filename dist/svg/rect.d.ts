@@ -14,8 +14,8 @@ export declare class SVGAnimatedRect extends Attr {
     _var?: SVGRect | string;
     set value(value: string);
     get value(): string;
-    get baseVal(): BoxMut | null;
-    get animVal(): BoxMut | null;
+    get baseVal(): BoxMut;
+    get animVal(): BoxMut;
     get specified(): boolean;
     valueOf(): string | undefined;
     contain(...args: Array<SVGGraphicsElement | Box | Vec | Ray | Array<SVGGraphicsElement | Box | Vec | Ray>>): this;

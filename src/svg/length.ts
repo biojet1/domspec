@@ -15,30 +15,6 @@ const CONVERSIONS: { [k: string]: number } = {
 	"": 1.0,
 };
 
-// export function userUnit(src: string, default_value?: number): number {
-// 	if (src) {
-// 		const m = src.match(BOTH_MATCH);
-// 		if (m) {
-// 			const value = parseFloat(m[1]);
-// 			const unit = m.pop();
-// 			if (unit) {
-// 				const mul = CONVERSIONS[unit];
-// 				if (mul) {
-// 					return value * mul;
-// 				}
-// 			} else {
-// 				return value;
-// 			}
-// 			throw new Error(`Can not convert to user unit ${src}, [${m}]`);
-// 		} else {
-// 			throw new Error(`Invalid unit ${src}`);
-// 		}
-// 	} else if (default_value != undefined) {
-// 		return default_value;
-// 	}
-// 	throw new Error(`Invalid unit ${src}`);
-// }
-
 const UNITS = ["", "", "%", "em", "ex", "px", "cm", "mm", "in", "pt", "pc"];
 const CONVS = [0, 1, 1];
 
@@ -264,8 +240,8 @@ export class SVGLength {
 			const v = e.nearestViewportElement as SVGGraphicsElement;
 			if (v) {
 				const b = v.viewBox;
-				const w = b.calcWidth();
-				const h = b.calcHeight();
+				const w = b._calcWidth();
+				const h = b._calcHeight();
 				// return Math.sqrt(w ** 2 + h ** 2) / Math.sqrt(2);
 				return Math.sqrt((w ** 2 + h ** 2) / 2);
 			}
@@ -362,7 +338,7 @@ export class SVGLengthW extends SVGLength {
 		if (e) {
 			const v = e.nearestViewportElement as SVGGraphicsElement;
 			if (v) {
-				return v.viewBox.calcWidth();
+				return v.viewBox._calcWidth();
 			} else if (e instanceof SVGSVGElement) {
 				const a = e.viewBox;
 				if (a.specified) {
@@ -383,7 +359,7 @@ export class SVGLengthH extends SVGLength {
 		if (e) {
 			const v = e.nearestViewportElement as SVGGraphicsElement;
 			if (v) {
-				return v.viewBox.calcHeight();
+				return v.viewBox._calcHeight();
 			} else if (e instanceof SVGSVGElement) {
 				const a = e.viewBox;
 				if (a.specified) {

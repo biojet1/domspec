@@ -13,9 +13,10 @@ tap.test("SVGLength", function (t) {
 		`);
 	const top = doc.documentElement;
 	const R1 = doc.getElementById("R1");
+	const VPA = doc.getElementById("VPA");
 	var cssPixelsPerInch = 96;
 	(() => {
-		var length = R1.createSVGLength();
+		var length = VPA.createSVGLength();
 		length.valueAsString = "48px";
 		length.convertToSpecifiedUnits(SVGLength.SVG_LENGTHTYPE_IN);
 		var referenceValue = 48 / cssPixelsPerInch;
@@ -26,7 +27,7 @@ tap.test("SVGLength", function (t) {
 	})();
 
 	(() => {
-		var length = R1.createSVGLength();
+		var length = VPA.createSVGLength();
 		length.valueAsString = "48px";
 		length.convertToSpecifiedUnits(SVGLength.SVG_LENGTHTYPE_CM);
 		var referenceValue = (48 * 2.54) / cssPixelsPerInch;
@@ -37,7 +38,7 @@ tap.test("SVGLength", function (t) {
 	})();
 
 	(() => {
-		var length = R1.createSVGLength();
+		var length = VPA.createSVGLength();
 		length.valueAsString = "48px";
 		length.convertToSpecifiedUnits(SVGLength.SVG_LENGTHTYPE_MM);
 		var referenceValue = (48 * 25.4) / cssPixelsPerInch;
@@ -48,7 +49,7 @@ tap.test("SVGLength", function (t) {
 	})();
 
 	(() => {
-		var length = R1.createSVGLength();
+		var length = VPA.createSVGLength();
 		length.valueAsString = "4px";
 		length.convertToSpecifiedUnits(SVGLength.SVG_LENGTHTYPE_PT);
 		var referenceValue = (4 / cssPixelsPerInch) * 72;
@@ -59,7 +60,7 @@ tap.test("SVGLength", function (t) {
 	})();
 
 	(() => {
-		var length = R1.createSVGLength();
+		var length = VPA.createSVGLength();
 		length.valueAsString = "16px";
 		length.convertToSpecifiedUnits(SVGLength.SVG_LENGTHTYPE_PC);
 		var referenceValue = (16 / cssPixelsPerInch) * 6;
@@ -70,7 +71,7 @@ tap.test("SVGLength", function (t) {
 	})();
 
 	(() => {
-		var length = R1.createSVGLength();
+		var length = VPA.createSVGLength();
 		length.valueAsString = "2px";
 		length.convertToSpecifiedUnits(SVGLength.SVG_LENGTHTYPE_NUMBER);
 		t.same(length.valueAsString, "2");
@@ -117,7 +118,6 @@ tap.test("SVGLength", function (t) {
 	// t.same(R1.x.baseVal.value, 0);
 	// t.same(R1.x.baseVal.valueInSpecifiedUnits, 0);
 	// t.same(R1.x.baseVal.unitType, 1);
-	const VPA = doc.getElementById("VPA");
 	VPA.width.baseVal;
 	t.match(VPA.outerHTML, /x="31\.75cm"/);
 	t.end();
@@ -139,7 +139,7 @@ tap.test("SVGLength", function (t) {
 
 	var cssPixelsPerInch = 96;
 	(() => {
-		var length = R1.createSVGLength();
+		var length = VPA.createSVGLength();
 		length.valueAsString = "48px";
 		length.convertToSpecifiedUnits(SVGLength.SVG_LENGTHTYPE_IN);
 		var referenceValue = 48 / cssPixelsPerInch;
@@ -150,7 +150,7 @@ tap.test("SVGLength", function (t) {
 	})();
 
 	(() => {
-		var length = R1.createSVGLength();
+		var length = VPA.createSVGLength();
 		length.valueAsString = "48px";
 		length.convertToSpecifiedUnits(SVGLength.SVG_LENGTHTYPE_CM);
 		var referenceValue = (48 * 2.54) / cssPixelsPerInch;
@@ -161,7 +161,7 @@ tap.test("SVGLength", function (t) {
 	})();
 
 	(() => {
-		var length = R1.createSVGLength();
+		var length = VPA.createSVGLength();
 		length.valueAsString = "48px";
 		length.convertToSpecifiedUnits(SVGLength.SVG_LENGTHTYPE_MM);
 		var referenceValue = (48 * 25.4) / cssPixelsPerInch;
@@ -172,7 +172,7 @@ tap.test("SVGLength", function (t) {
 	})();
 
 	(() => {
-		var length = R1.createSVGLength();
+		var length = VPA.createSVGLength();
 		length.valueAsString = "4px";
 		length.convertToSpecifiedUnits(SVGLength.SVG_LENGTHTYPE_PT);
 		var referenceValue = (4 / cssPixelsPerInch) * 72;
@@ -183,7 +183,7 @@ tap.test("SVGLength", function (t) {
 	})();
 
 	(() => {
-		var length = R1.createSVGLength();
+		var length = VPA.createSVGLength();
 		length.valueAsString = "16px";
 		length.convertToSpecifiedUnits(SVGLength.SVG_LENGTHTYPE_PC);
 		var referenceValue = (16 / cssPixelsPerInch) * 6;
@@ -194,7 +194,7 @@ tap.test("SVGLength", function (t) {
 	})();
 
 	(() => {
-		var length = R1.createSVGLength();
+		var length = VPA.createSVGLength();
 		length.valueAsString = "2px";
 		length.convertToSpecifiedUnits(SVGLength.SVG_LENGTHTYPE_NUMBER);
 		t.same(length.valueAsString, "2");

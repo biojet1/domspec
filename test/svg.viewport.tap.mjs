@@ -31,7 +31,10 @@ tap.test("Geoms 1", function (t) {
     })
   );
   const svg = document.documentElement;
-  const { V1, V3, C1, C2, C3, C4, R1, R2, R3 } = document.all;
+  const { V1, V2, V3, C1, C2, C3, C4, R1, R2, R3 } = document.all;
+  console.log(V1.viewBox.baseVal, V1.hasAttribute("viewBox"));
+  console.log(V2.viewBox.baseVal, V2.hasAttribute("viewBox"));
+  console.log(V3.viewBox.baseVal, V3.hasAttribute("viewBox"));
   t.same(V1.x.baseVal.value, 200, `V1.x`);
   t.same(V1.y.baseVal.value, 0, `V1.y`);
   t.same(V1.width.baseVal.value, 100, `V1.width`);
@@ -129,7 +132,8 @@ tap.test("Geoms 1", function (t) {
       [x1, y1, x2, y2]
     );
   });
-  t.ok(Box.forRect(0, 0, 0, 0).equals(V3.viewBox.baseVal), V3.viewBox.baseVal);
+  // t.ok(Box.forRect(0, 0, 0, 0).equals(V3.viewBox.baseVal), V3.viewBox.baseVal);
+  t.strictSame(V3.viewBox.baseVal, null);
 
   t.end();
 });
@@ -187,7 +191,8 @@ tap.test("Geoms 2", function (t) {
   ].forEach(([id, x, y, w, h]) => {
     const v = document.getElementById(id);
     const b = Box.new(x, y, w, h);
-    eqBox(t, b, v.viewBox.calcBox(), 1e-9, id);
+    eqBox(t, b, v.viewBox._calcBox(), 1e-9, id);
+    if (v.hasAttribute("viewBox")) eqBox(t, b, v.viewBox.baseVal, 1e-9, id);
   });
 
   t.end();

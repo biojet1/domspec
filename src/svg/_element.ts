@@ -24,29 +24,6 @@ export class SVGElement extends Element {
 		}
 		return null;
 	}
-
-	// SVGNumber createSVGNumber();
-	// SVGAngle createSVGAngle();
-	createSVGPoint() {
-		return Vec.pos(0, 0);
-	}
-	createSVGRect() {
-		return SVGRect.forRect(0, 0, 0, 0);
-	}
-	createSVGLength() {
-		return new SVGLength();
-	}
-	createSVGMatrix() {
-		return new Matrix();
-	}
-	createSVGTransform() {
-		return new SVGTransform();
-	}
-	createSVGTransformFromMatrix(M: Matrix) {
-		const m = this.createSVGTransform();
-		m.setMatrix(M);
-		return m;
-	}
 }
 export class SVGGraphicsElement extends SVGElement {
 	_newAttributeNode(name: string) {
@@ -397,6 +374,30 @@ export class SVGGraphicsElement extends SVGElement {
 }
 export class SVGSVGElement extends SVGGraphicsElement {
 	static TAGS = ["svg"];
+
+	// SVGNumber createSVGNumber();
+	// SVGAngle createSVGAngle();
+	createSVGPoint() {
+		return Vec.pos(0, 0);
+	}
+	createSVGRect() {
+		return SVGRect.forRect(0, 0, 0, 0);
+	}
+	createSVGLength() {
+		return new SVGLength();
+	}
+	createSVGMatrix() {
+		return new Matrix();
+	}
+	createSVGTransform() {
+		return new SVGTransform();
+	}
+	createSVGTransformFromMatrix(M: Matrix) {
+		const m = this.createSVGTransform();
+		m.setMatrix(M);
+		return m;
+	}
+
 	get _isViewportElement() {
 		return 1;
 	}
@@ -407,35 +408,28 @@ export class SVGSVGElement extends SVGGraphicsElement {
 	_viewportTM() {
 		const w = this.width.baseVal.value;
 		const h = this.height.baseVal.value;
-		const x = this.x.baseVal.value;
-		const y = this.y.baseVal.value;
-		// const v = this.viewBox.baseVal;
-		if (!(w && h)) {
-			return Matrix.identity();
+		if (w && h) {
+			const b = this.viewBox.baseVal;
+			if (b) {
+				const { x: vx, y: vy, width: vw, height: vh } = b;
+				if (vw && vh) {
+					const [tx, ty, sx, sy] = viewbox_transform(
+						this.x.baseVal.value,
+						this.y.baseVal.value,
+						w,
+						h,
+						vx,
+						vy,
+						vw,
+						vh,
+						this.getAttribute("preserveAspectRatio")
+					);
+					return Matrix.translate(tx, ty).scale(sx, sy);
+				}
+			}
 		}
-		const a = this.getAttribute("viewBox");
-		let vx, vy, vw, vh;
-		if (a) {
-			const { x: _x, y: _y, width: _width, height: _height } = Box.parse(a);
-			vx = _x;
-			vy = _y;
-			vw = _width;
-			vh = _height;
-		} else {
-			return Matrix.identity();
-		}
-		const [tx, ty, sx, sy] = viewbox_transform(
-			x,
-			y,
-			w,
-			h,
-			vx,
-			vy,
-			vw,
-			vh,
-			this.getAttribute("preserveAspectRatio")
-		);
-		return Matrix.translate(tx, ty).scale(sx, sy);
+
+		return Matrix.identity();
 	}
 
 	_shapeBox(tm?: Matrix): Box {

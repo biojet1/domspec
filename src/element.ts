@@ -236,7 +236,10 @@ export class Element extends ParentNode {
 		let attr = this[NEXT];
 		for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
 			// if (attr.name === name || attr.localName === name) return true;
-			if (attr.name === name) return true;
+			if (attr.name === name) {
+				// return true;
+				return attr.specified;
+			}
 		}
 		return false;
 	}

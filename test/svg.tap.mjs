@@ -177,8 +177,9 @@ tap.test("width.baseVal", function (t) {
 		"http://www.w3.org/2000/svg",
 		"svg"
 	);
-
+	svgElement.setAttribute("viewBox", "1 2 3 4");
 	// Check initial viewBox value.
+	t.match(svgElement.constructor.name, /SVGSVGElement/);
 	t.match(svgElement.viewBox.constructor.name, /SVGAnimatedRect/);
 	t.match(svgElement.viewBox.baseVal.constructor.name, /SVGRect/);
 	t.match(svgElement.viewBox.animVal.constructor.name, /SVGRect/);

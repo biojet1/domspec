@@ -213,10 +213,11 @@ tap.test('createSVGLength', function (t) {
 </svg>
 		`);
 	const top = doc.documentElement;
+	const VPA = doc.getElementById('VPA');
 	const R1 = doc.getElementById('R1');
 	var cssPixelsPerInch = 96;
 	(() => {
-		var length = R1.createSVGLength();
+		var length = VPA.createSVGLength();
 		length.valueAsString = '48px';
 		length.convertToSpecifiedUnits(SVGLength.SVG_LENGTHTYPE_IN);
 		var referenceValue = 48 / cssPixelsPerInch;
@@ -227,7 +228,7 @@ tap.test('createSVGLength', function (t) {
 	})();
 
 	(() => {
-		var length = R1.createSVGLength();
+		var length = VPA.createSVGLength();
 		length.valueAsString = '48px';
 		length.convertToSpecifiedUnits(SVGLength.SVG_LENGTHTYPE_CM);
 		var referenceValue = (48 * 2.54) / cssPixelsPerInch;
@@ -238,7 +239,7 @@ tap.test('createSVGLength', function (t) {
 	})();
 
 	(() => {
-		var length = R1.createSVGLength();
+		var length = VPA.createSVGLength();
 		length.valueAsString = '48px';
 		length.convertToSpecifiedUnits(SVGLength.SVG_LENGTHTYPE_MM);
 		var referenceValue = (48 * 25.4) / cssPixelsPerInch;
@@ -249,7 +250,7 @@ tap.test('createSVGLength', function (t) {
 	})();
 
 	(() => {
-		var length = R1.createSVGLength();
+		var length = VPA.createSVGLength();
 		length.valueAsString = '4px';
 		length.convertToSpecifiedUnits(SVGLength.SVG_LENGTHTYPE_PT);
 		var referenceValue = (4 / cssPixelsPerInch) * 72;
@@ -260,7 +261,7 @@ tap.test('createSVGLength', function (t) {
 	})();
 
 	(() => {
-		var length = R1.createSVGLength();
+		var length = VPA.createSVGLength();
 		length.valueAsString = '16px';
 		length.convertToSpecifiedUnits(SVGLength.SVG_LENGTHTYPE_PC);
 		var referenceValue = (16 / cssPixelsPerInch) * 6;
@@ -271,7 +272,7 @@ tap.test('createSVGLength', function (t) {
 	})();
 
 	(() => {
-		var length = R1.createSVGLength();
+		var length = VPA.createSVGLength();
 		length.valueAsString = '2px';
 		length.convertToSpecifiedUnits(SVGLength.SVG_LENGTHTYPE_NUMBER);
 		t.same(length.valueAsString, '2');
@@ -306,9 +307,9 @@ tap.test('createSVGLength', function (t) {
 	t.same(xVal.toString(), '31.75cm');
 	xAttr.value = '';
 	// t.same(xAttr.value, ""); // todo
-	// t.same(R1.x.baseVal.value, 0);
-	// t.same(R1.x.baseVal.valueInSpecifiedUnits, 0);
-	// t.same(R1.x.baseVal.unitType, 1);
+	// t.same(VPA.x.baseVal.value, 0);
+	// t.same(VPA.x.baseVal.valueInSpecifiedUnits, 0);
+	// t.same(VPA.x.baseVal.unitType, 1);
 
 	t.end();
 });

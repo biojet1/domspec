@@ -28,7 +28,8 @@ export class SVGRect extends BoxMut {
 				} else {
 					const v = o.nearestViewportElement as SVGSVGElement;
 					if (v) {
-						_w = v.viewBox.baseVal.width;
+						// _w = v.viewBox.baseVal.width;
+						_w = v.viewBox._calcWidth();
 					}
 				}
 			}
@@ -51,7 +52,8 @@ export class SVGRect extends BoxMut {
 				} else {
 					const v = o.nearestViewportElement as SVGSVGElement;
 					if (v) {
-						_h = v.viewBox.baseVal.height;
+						// _h = v.viewBox.baseVal.height;
+						_h = v.viewBox._calcHeight();
 					}
 				}
 			}
@@ -114,7 +116,8 @@ export class SVGAnimatedRect extends Attr {
 				// return null;
 			}
 		}
-		return (this._var = SVGRect.forRect(0, 0, 0, 0));
+		// return (this._var = SVGRect.forRect(0, 0, 0, 0));
+		return null;
 	}
 
 	get animVal() {
@@ -164,17 +167,10 @@ export class SVGAnimatedRect extends Attr {
 		return this.contain(...args);
 	}
 	// https://svgwg.org/svg-next/coords.html#Units
-	calcWidth(): number {
-		const { _var } = this;
-		if (_var instanceof BoxMut) {
-			return _var.width;
-		} else if (_var) {
-			try {
-				this._var = BoxMut.parse(_var) as BoxMut;
-				return this._var.width;
-			} catch (err) {
-				console.error(`Failed to parse as Box "${_var}"`);
-			}
+	_calcWidth(): number {
+		const { baseVal } = this;
+		if (baseVal) {
+			return baseVal.width;
 		}
 		const o = this.ownerElement as SVGGraphicsElement;
 		if (o) {
@@ -184,58 +180,38 @@ export class SVGAnimatedRect extends Attr {
 			}
 			const v = o.nearestViewportElement as SVGSVGElement;
 			if (v) {
-				const n = v.viewBox.calcWidth();
+				const n = v.viewBox._calcWidth();
 				return n;
-				// const scale = v._innerTM.inverse().d;
-				// return n * scale;
 			}
 		}
 
-		// throw new Error(`calcWidth`);
 		return 100;
 	}
-	calcHeight(): number {
-		const { _var } = this;
-		if (_var instanceof BoxMut) {
-			return _var.height;
-		} else if (_var) {
-			try {
-				this._var = BoxMut.parse(_var) as BoxMut;
-				return this._var.height;
-			} catch (err) {
-				console.error(`Failed to parse as Box "${_var}"`);
-			}
+	_calcHeight(): number {
+		const { baseVal } = this;
+		if (baseVal) {
+			return baseVal.height;
 		}
 		const o = this.ownerElement as SVGGraphicsElement;
 		if (o) {
 			const a = o.height;
 			if (a.specified) {
 				return a.baseVal.value;
-			}
-
-			const v = o.nearestViewportElement as SVGSVGElement;
-			if (v) {
-				const n = v.viewBox.calcHeight();
-				return n;
-				// const scale = v._innerTM.inverse().d;
-				// return n * scale;
-			} else if (o as SVGSVGElement) {
+			} else {
+				const v = o.nearestViewportElement as SVGSVGElement;
+				if (v) {
+					const n = v.viewBox._calcHeight();
+					return n;
+				}
 			}
 		}
 
-		// throw new Error(`calcWidth`);
 		return 100;
 	}
-	calcBox(): Box {
-		const { _var } = this;
-		if (_var instanceof BoxMut) {
-			return _var;
-		} else if (_var) {
-			try {
-				return (this._var = BoxMut.parse(_var) as BoxMut);
-			} catch (err) {
-				console.error(`Failed to parse as Box "${_var}"`);
-			}
+	_calcBox(): Box {
+		const { baseVal } = this;
+		if (baseVal) {
+			return baseVal;
 		}
 		let x = 0,
 			y = 0,
@@ -243,27 +219,10 @@ export class SVGAnimatedRect extends Attr {
 			h = 100;
 		const o = this.ownerElement as SVGGraphicsElement;
 		if (o) {
-			let a;
 			x = o.x.baseVal.value;
 			y = o.y.baseVal.value;
-			a = o.height;
-			if (a.specified) {
-				h = a.baseVal.value;
-			} else {
-				const v = o.nearestViewportElement as SVGSVGElement;
-				if (v) {
-					h = v.viewBox.calcHeight();
-				}
-			}
-			a = o.width;
-			if (a.specified) {
-				w = a.baseVal.value;
-			} else {
-				const v = o.nearestViewportElement as SVGSVGElement;
-				if (v) {
-					w = v.viewBox.calcWidth();
-				}
-			}
+			w = this._calcWidth();
+			h = this._calcHeight();
 		}
 		return Box.forRect(x, y, w, h);
 	}

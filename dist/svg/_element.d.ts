@@ -30,7 +30,7 @@ export declare class SVGGraphicsElement extends SVGElement {
     _canRender(): boolean;
     get _ownTM(): Matrix;
     set _ownTM(T: Matrix);
-    get _innerTM(): Matrix;
+    get _vboxTM(): Matrix;
     _relTM(tm: Matrix, root?: SVGElement | null): Matrix;
     get _rootTM(): Matrix;
     _pairTM(root?: SVGElement | null): Matrix[];
@@ -58,7 +58,7 @@ export declare class SVGSVGElement extends SVGGraphicsElement {
     createSVGTransform(): SVGTransform;
     createSVGTransformFromMatrix(M: Matrix): SVGTransform;
     get _isViewportElement(): number;
-    get _innerTM(): Matrix;
+    get _vboxTM(): Matrix;
     _viewportTM(): Matrix;
     _shapeBox(tm?: Matrix): Box;
     _defs(): Element;

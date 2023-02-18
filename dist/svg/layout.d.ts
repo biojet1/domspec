@@ -5,7 +5,7 @@ export declare class SVGLayout {
     constructor(node: SVGGraphicsElement);
     getTM(node: SVGGraphicsElement): Matrix;
     setTM(node: SVGGraphicsElement, m: Matrix): this;
-    _innerTM(node: SVGGraphicsElement): Matrix;
+    _vboxTM(node: SVGGraphicsElement): Matrix;
     protected relTM(parent: SVGGraphicsElement, tm: Matrix, root?: SVGGraphicsElement | null): Matrix;
     _pairTM(node: SVGGraphicsElement): Matrix[];
     _localTM(node: SVGGraphicsElement): Matrix;

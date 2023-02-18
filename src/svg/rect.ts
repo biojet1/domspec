@@ -125,7 +125,9 @@ export class SVGAnimatedRect extends Attr {
 	}
 
 	get specified() {
-		return this._var != undefined;
+		const { _var } = this;
+		// return _var != undefined;
+		return !!(_var && (!(_var instanceof BoxMut) || _var.isValid()));
 	}
 
 	valueOf() {

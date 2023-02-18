@@ -24,7 +24,7 @@ export class SVGRect extends BoxMut {
                 else {
                     const v = o.nearestViewportElement;
                     if (v) {
-                        _w = v.viewBox.baseVal.width;
+                        _w = v.viewBox._calcWidth();
                     }
                 }
             }
@@ -46,7 +46,7 @@ export class SVGRect extends BoxMut {
                 else {
                     const v = o.nearestViewportElement;
                     if (v) {
-                        _h = v.viewBox.baseVal.height;
+                        _h = v.viewBox._calcHeight();
                     }
                 }
             }
@@ -106,13 +106,14 @@ export class SVGAnimatedRect extends Attr {
             catch (err) {
             }
         }
-        return (this._var = SVGRect.forRect(0, 0, 0, 0));
+        return null;
     }
     get animVal() {
         return this.baseVal;
     }
     get specified() {
-        return this._var != undefined;
+        const { _var } = this;
+        return !!(_var && (!(_var instanceof BoxMut) || _var.isValid()));
     }
     valueOf() {
         return this._var?.toString();
@@ -135,19 +136,10 @@ export class SVGAnimatedRect extends Attr {
     contain2(...args) {
         return this.contain(...args);
     }
-    calcWidth() {
-        const { _var } = this;
-        if (_var instanceof BoxMut) {
-            return _var.width;
-        }
-        else if (_var) {
-            try {
-                this._var = BoxMut.parse(_var);
-                return this._var.width;
-            }
-            catch (err) {
-                console.error(`Failed to parse as Box "${_var}"`);
-            }
+    _calcWidth() {
+        const { baseVal } = this;
+        if (baseVal) {
+            return baseVal.width;
         }
         const o = this.ownerElement;
         if (o) {
@@ -157,25 +149,16 @@ export class SVGAnimatedRect extends Attr {
             }
             const v = o.nearestViewportElement;
             if (v) {
-                const n = v.viewBox.calcWidth();
+                const n = v.viewBox._calcWidth();
                 return n;
             }
         }
         return 100;
     }
-    calcHeight() {
-        const { _var } = this;
-        if (_var instanceof BoxMut) {
-            return _var.height;
-        }
-        else if (_var) {
-            try {
-                this._var = BoxMut.parse(_var);
-                return this._var.height;
-            }
-            catch (err) {
-                console.error(`Failed to parse as Box "${_var}"`);
-            }
+    _calcHeight() {
+        const { baseVal } = this;
+        if (baseVal) {
+            return baseVal.height;
         }
         const o = this.ownerElement;
         if (o) {
@@ -183,55 +166,28 @@ export class SVGAnimatedRect extends Attr {
             if (a.specified) {
                 return a.baseVal.value;
             }
-            const v = o.nearestViewportElement;
-            if (v) {
-                const n = v.viewBox.calcHeight();
-                return n;
-            }
-            else if (o) {
+            else {
+                const v = o.nearestViewportElement;
+                if (v) {
+                    const n = v.viewBox._calcHeight();
+                    return n;
+                }
             }
         }
         return 100;
     }
-    calcBox() {
-        const { _var } = this;
-        if (_var instanceof BoxMut) {
-            return _var;
-        }
-        else if (_var) {
-            try {
-                return (this._var = BoxMut.parse(_var));
-            }
-            catch (err) {
-                console.error(`Failed to parse as Box "${_var}"`);
-            }
+    _calcBox() {
+        const { baseVal } = this;
+        if (baseVal) {
+            return baseVal;
         }
         let x = 0, y = 0, w = 100, h = 100;
         const o = this.ownerElement;
         if (o) {
-            let a;
             x = o.x.baseVal.value;
             y = o.y.baseVal.value;
-            a = o.height;
-            if (a.specified) {
-                h = a.baseVal.value;
-            }
-            else {
-                const v = o.nearestViewportElement;
-                if (v) {
-                    h = v.viewBox.calcHeight();
-                }
-            }
-            a = o.width;
-            if (a.specified) {
-                w = a.baseVal.value;
-            }
-            else {
-                const v = o.nearestViewportElement;
-                if (v) {
-                    w = v.viewBox.calcWidth();
-                }
-            }
+            w = this._calcWidth();
+            h = this._calcHeight();
         }
         return Box.forRect(x, y, w, h);
     }

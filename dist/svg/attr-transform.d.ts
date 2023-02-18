@@ -6,7 +6,7 @@ export declare class SVGAnimatedTransformList extends Attr {
     get baseVal(): SVGTransformList;
     get specified(): boolean;
     valueOf(): string | undefined;
-    apply(m: Matrix): Matrix | this;
+    apply(m: Matrix): this | Matrix;
 }
 import { Attr } from "../attr.js";
 export declare function viewbox_transform(e_x: number, e_y: number, e_width: number, e_height: number, vb_x: number, vb_y: number, vb_width: number, vb_height: number, aspect?: string | null): number[];

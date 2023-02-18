@@ -228,8 +228,8 @@ export class SVGLength {
             const v = e.nearestViewportElement;
             if (v) {
                 const b = v.viewBox;
-                const w = b.calcWidth();
-                const h = b.calcHeight();
+                const w = b._calcWidth();
+                const h = b._calcHeight();
                 return Math.sqrt((w ** 2 + h ** 2) / 2);
             }
         }
@@ -311,7 +311,7 @@ export class SVGLengthW extends SVGLength {
         if (e) {
             const v = e.nearestViewportElement;
             if (v) {
-                return v.viewBox.calcWidth();
+                return v.viewBox._calcWidth();
             }
             else if (e instanceof SVGSVGElement) {
                 const a = e.viewBox;
@@ -332,7 +332,7 @@ export class SVGLengthH extends SVGLength {
         if (e) {
             const v = e.nearestViewportElement;
             if (v) {
-                return v.viewBox.calcHeight();
+                return v.viewBox._calcHeight();
             }
             else if (e instanceof SVGSVGElement) {
                 const a = e.viewBox;

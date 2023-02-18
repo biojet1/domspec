@@ -3,12 +3,6 @@ export declare class SVGElement extends Element {
     get _isViewportElement(): number;
     get viewportElement(): SVGElement | null;
     get ownerSVGElement(): SVGSVGElement | null;
-    createSVGPoint(): Vec;
-    createSVGRect(): import("svggeom").BoxMut;
-    createSVGLength(): SVGLength;
-    createSVGMatrix(): Matrix;
-    createSVGTransform(): SVGTransform;
-    createSVGTransformFromMatrix(M: Matrix): SVGTransform;
 }
 export declare class SVGGraphicsElement extends SVGElement {
     _newAttributeNode(name: string): import("../attr.js").Attr;
@@ -57,6 +51,12 @@ export declare class SVGGraphicsElement extends SVGElement {
 }
 export declare class SVGSVGElement extends SVGGraphicsElement {
     static TAGS: string[];
+    createSVGPoint(): Vec;
+    createSVGRect(): import("svggeom").BoxMut;
+    createSVGLength(): SVGLength;
+    createSVGMatrix(): Matrix;
+    createSVGTransform(): SVGTransform;
+    createSVGTransformFromMatrix(M: Matrix): SVGTransform;
     get _isViewportElement(): number;
     get _innerTM(): Matrix;
     _viewportTM(): Matrix;

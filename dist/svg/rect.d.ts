@@ -14,15 +14,15 @@ export declare class SVGAnimatedRect extends Attr {
     _var?: SVGRect | string;
     set value(value: string);
     get value(): string;
-    get baseVal(): BoxMut;
-    get animVal(): BoxMut;
+    get baseVal(): BoxMut | null;
+    get animVal(): BoxMut | null;
     get specified(): boolean;
     valueOf(): string | undefined;
     contain(...args: Array<SVGGraphicsElement | Box | Vec | Ray | Array<SVGGraphicsElement | Box | Vec | Ray>>): this;
     contain2(...args: Array<SVGGraphicsElement | Box | Vec | Ray | Array<SVGGraphicsElement | Box | Vec | Ray>>): this;
-    calcWidth(): number;
-    calcHeight(): number;
-    calcBox(): Box;
+    _calcWidth(): number;
+    _calcHeight(): number;
+    _calcBox(): Box;
 }
 import { BoxMut, Box, Vec, Ray } from "svggeom";
 import { Attr } from "../attr.js";

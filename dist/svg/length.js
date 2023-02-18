@@ -316,10 +316,7 @@ export class SVGLengthW extends SVGLength {
             else if (e instanceof SVGSVGElement) {
                 const a = e.viewBox;
                 if (a.specified) {
-                    const b = a.baseVal;
-                    if (b) {
-                        return b.width;
-                    }
+                    return a._calcWidth();
                 }
             }
         }
@@ -337,10 +334,7 @@ export class SVGLengthH extends SVGLength {
             else if (e instanceof SVGSVGElement) {
                 const a = e.viewBox;
                 if (a.specified) {
-                    const b = a.baseVal;
-                    if (b) {
-                        return b.height;
-                    }
+                    return a._calcHeight();
                 }
             }
         }

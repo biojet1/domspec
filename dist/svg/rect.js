@@ -116,7 +116,12 @@ export class SVGAnimatedRect extends Attr {
         return !!(_var && (!(_var instanceof BoxMut) || _var.isValid()));
     }
     valueOf() {
-        return this._var?.toString();
+        const { _var } = this;
+        if (_var) {
+            if (!(_var instanceof BoxMut) || _var.isValid()) {
+                return _var.toString();
+            }
+        }
     }
     contain(...args) {
         let bbox = contain(args);
@@ -137,9 +142,12 @@ export class SVGAnimatedRect extends Attr {
         return this.contain(...args);
     }
     _calcWidth() {
-        const { baseVal } = this;
-        if (baseVal && baseVal.isValid()) {
-            return baseVal.width;
+        const { _var } = this;
+        if (_var) {
+            const { baseVal } = this;
+            if (baseVal && baseVal.isValid()) {
+                return baseVal.width;
+            }
         }
         const o = this.ownerElement;
         if (o) {
@@ -156,9 +164,12 @@ export class SVGAnimatedRect extends Attr {
         return 100;
     }
     _calcHeight() {
-        const { baseVal } = this;
-        if (baseVal && baseVal.isValid()) {
-            return baseVal.height;
+        const { _var } = this;
+        if (_var) {
+            const { baseVal } = this;
+            if (baseVal && baseVal.isValid()) {
+                return baseVal.height;
+            }
         }
         const o = this.ownerElement;
         if (o) {
@@ -177,9 +188,12 @@ export class SVGAnimatedRect extends Attr {
         return 100;
     }
     _calcBox() {
-        const { baseVal } = this;
-        if (baseVal && baseVal.isValid()) {
-            return baseVal;
+        const { _var } = this;
+        if (_var) {
+            const { baseVal } = this;
+            if (baseVal && baseVal.isValid()) {
+                return baseVal;
+            }
         }
         let x = 0, y = 0, w = 100, h = 100;
         const o = this.ownerElement;

@@ -409,23 +409,20 @@ export class SVGSVGElement extends SVGGraphicsElement {
 		const w = this.width.baseVal.value;
 		const h = this.height.baseVal.value;
 		if (w && h) {
-			const b = this.viewBox.baseVal;
-			if (b) {
-				const { x: vx, y: vy, width: vw, height: vh } = b;
-				if (vw && vh) {
-					const [tx, ty, sx, sy] = viewbox_transform(
-						this.x.baseVal.value,
-						this.y.baseVal.value,
-						w,
-						h,
-						vx,
-						vy,
-						vw,
-						vh,
-						this.getAttribute("preserveAspectRatio")
-					);
-					return Matrix.translate(tx, ty).scale(sx, sy);
-				}
+			const { x: vx, y: vy, width: vw, height: vh } = this.viewBox._calcBox();
+			if (vw && vh) {
+				const [tx, ty, sx, sy] = viewbox_transform(
+					this.x.baseVal.value,
+					this.y.baseVal.value,
+					w,
+					h,
+					vx,
+					vy,
+					vw,
+					vh,
+					this.getAttribute("preserveAspectRatio")
+				);
+				return Matrix.translate(tx, ty).scale(sx, sy);
 			}
 		}
 

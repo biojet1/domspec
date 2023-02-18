@@ -131,7 +131,12 @@ export class SVGAnimatedRect extends Attr {
 	}
 
 	valueOf() {
-		return this._var?.toString();
+		const { _var } = this;
+		if (_var) {
+			if (!(_var instanceof BoxMut) || _var.isValid()) {
+				return _var.toString();
+			}
+		}
 	}
 
 	contain(
@@ -170,9 +175,12 @@ export class SVGAnimatedRect extends Attr {
 	}
 	// https://svgwg.org/svg-next/coords.html#Units
 	_calcWidth(): number {
-		const { baseVal } = this;
-		if (baseVal && baseVal.isValid()) {
-			return baseVal.width;
+		const { _var } = this;
+		if (_var) {
+			const { baseVal } = this;
+			if (baseVal && baseVal.isValid()) {
+				return baseVal.width;
+			}
 		}
 		const o = this.ownerElement as SVGGraphicsElement;
 		if (o) {
@@ -190,9 +198,12 @@ export class SVGAnimatedRect extends Attr {
 		return 100;
 	}
 	_calcHeight(): number {
-		const { baseVal } = this;
-		if (baseVal && baseVal.isValid()) {
-			return baseVal.height;
+		const { _var } = this;
+		if (_var) {
+			const { baseVal } = this;
+			if (baseVal && baseVal.isValid()) {
+				return baseVal.height;
+			}
 		}
 		const o = this.ownerElement as SVGGraphicsElement;
 		if (o) {
@@ -211,9 +222,12 @@ export class SVGAnimatedRect extends Attr {
 		return 100;
 	}
 	_calcBox(): Box {
-		const { baseVal } = this;
-		if (baseVal && baseVal.isValid()) {
-			return baseVal;
+		const { _var } = this;
+		if (_var) {
+			const { baseVal } = this;
+			if (baseVal && baseVal.isValid()) {
+				return baseVal;
+			}
 		}
 		let x = 0,
 			y = 0,

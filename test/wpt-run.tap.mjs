@@ -347,7 +347,7 @@ svg/types/scripted/SVGLength.html
  css/css-typed-om/factory-frequency.html
  css/css-typed-om/factory-duration.html
  css/css-typed-om/factory-absolute-length.html
-     // svg/types/scripted/SVGAnimatedRect.html
+     svg/types/scripted/SVGAnimatedRect.html
      svg/types/scripted/SVGAnimatedLength.html
 
 //     `;

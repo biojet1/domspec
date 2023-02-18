@@ -116,8 +116,8 @@ export class SVGAnimatedRect extends Attr {
 				// return null;
 			}
 		}
-		// return (this._var = SVGRect.forRect(0, 0, 0, 0));
-		return null;
+		return (this._var = SVGRect.forRect(0, 0, NaN, NaN));
+		// return null;
 	}
 
 	get animVal() {
@@ -171,7 +171,7 @@ export class SVGAnimatedRect extends Attr {
 	// https://svgwg.org/svg-next/coords.html#Units
 	_calcWidth(): number {
 		const { baseVal } = this;
-		if (baseVal) {
+		if (baseVal && baseVal.isValid()) {
 			return baseVal.width;
 		}
 		const o = this.ownerElement as SVGGraphicsElement;
@@ -191,7 +191,7 @@ export class SVGAnimatedRect extends Attr {
 	}
 	_calcHeight(): number {
 		const { baseVal } = this;
-		if (baseVal) {
+		if (baseVal && baseVal.isValid()) {
 			return baseVal.height;
 		}
 		const o = this.ownerElement as SVGGraphicsElement;
@@ -212,7 +212,7 @@ export class SVGAnimatedRect extends Attr {
 	}
 	_calcBox(): Box {
 		const { baseVal } = this;
-		if (baseVal) {
+		if (baseVal && baseVal.isValid()) {
 			return baseVal;
 		}
 		let x = 0,

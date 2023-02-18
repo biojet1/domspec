@@ -107,7 +107,7 @@ tap.test("transform2", function (t) {
 		// t.same(v.composeTM().toString(), m, `composeTM ${id}`);
 		t.same(v.getScreenCTM().toString(), m, `getScreenCTM ${id}`);
 		// t.same(v._composeTM().toString(), m, `_composeTM ${id}`);
-		const w = top._innerTM;
+		const w = top._vboxTM;
 		const u = v._rootTM;
 
 		t.same(w.cat(u).toString(), m, `_rootTM ${id} ${w} ${u}`);

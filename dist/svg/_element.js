@@ -185,13 +185,15 @@ export class SVGGraphicsElement extends SVGElement {
         return tm;
     }
     get _rootTM() {
-        const { parentNode: parent, _ownTM } = this;
-        if (parent instanceof SVGGraphicsElement) {
-            return parent._relTM(_ownTM);
+        let { parentElement: parent, _ownTM: tm } = this;
+        while (parent instanceof SVGGraphicsElement) {
+            const { _vboxTM } = parent;
+            if ((parent = parent.parentElement) == null) {
+                break;
+            }
+            tm = tm.postCat(_vboxTM);
         }
-        else {
-            return _ownTM;
-        }
+        return tm;
     }
     _pairTM(root) {
         const { parentNode: parent, _ownTM } = this;

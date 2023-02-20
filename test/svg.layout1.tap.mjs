@@ -188,6 +188,7 @@ tap.test("_localTM()", { bail: 0 }, function (t) {
 		const v = document.getElementById(id);
 		t.same(v._localTM().describe(), m.describe(), `_localTM ${id}`);
 		t.same(v._rootTM.describe(), n.describe(), `docTM ${id}`);
+		t.same(_rootTM(v).describe(), n.describe(), `docTM ${id}`);
 		// t.same(
 		// 	v._relTM(Matrix.identity(), rootSVG).describe(),
 		// 	n.describe(),
@@ -202,3 +203,22 @@ tap.test("_localTM()", { bail: 0 }, function (t) {
 
 	t.end();
 });
+import {  SVGGraphicsElement } from "../dist/svg/_element.js";
+
+	function _rootTM(node) {
+		// const { parentNode: parent, _ownTM } = node;
+		// if (parent instanceof SVGGraphicsElement) {
+		// 	return _relTM(parent, _ownTM);
+		// } else {
+		// 	return _ownTM;
+		// }
+		let { parentElement: parent, _ownTM: tm } = node;
+		while (parent instanceof SVGGraphicsElement) {
+			const { _vboxTM } = parent;
+			if ((parent = parent.parentElement) == null) {
+				break;
+			}
+			tm = tm.postCat(_vboxTM);
+		}
+		return tm;
+	}

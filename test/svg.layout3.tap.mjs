@@ -76,25 +76,50 @@ tap.test("_rootTM", async (t) => {
 
 	t.end();
 });
+import {  SVGGraphicsElement } from "../dist/svg/_element.js";
 
-// tap.test("_pairTM", async (t) => {
-// 	elements
-// 		.forEach(([node, ...m]) => {
-// 			node.parentNode
-// 			const b = Matrix.hexad(...m);
-// 			const c = node._localTM();
-// 			let a;
-// 			if (node.localName == "svg") {
-// 				a = c;
-// 			} else {
-// 				a = node._rootTM;
-// 			}
-// 			t.ok(b.equals(a, 1e-5), `rootTM ${node.id} [${a}] [${b}]`);
-// 			t.ok(b.equals(c, 1e-5), `localTM ${node.id} [${c}] [${b}]`);
-// 		});
+tap.test("_rootTM()", async (t) => {
+	function _rootTM(node) {
+		let { parentElement: parent, _ownTM: tm } = node;
+		while (parent instanceof SVGGraphicsElement) {
+			const { _vboxTM } = parent;
+			if ((parent = parent.parentElement) == null) {
+				break;
+			}
+			tm = tm.postCat(_vboxTM);
+		}
+		return tm;
+	}
+	function _localTM(node) {
+		let { _rootTM: parent, _vboxTM: tm } = node;
+		while (parent instanceof SVGGraphicsElement) {
+			const { _vboxTM } = parent;
+			if ((parent = parent.parentNode) == null) {
+				break;
+			}
+			tm = tm.postCat(_vboxTM);
+		}
+		return tm;
+	}
+	elements
+		.map(([k, v], i) => [k, ...(v.root_tm ?? [])])
+		.forEach(([node, ...m]) => {
+			const b = Matrix.hexad(...m);
+			const c = _rootTM(node);
+			let a;
+			if (node.localName == "svg") {
+				a = _localTM(node);
+				return;
+			} else {
+				a = _rootTM(node);
+			}
+			t.ok(b.equals(a, 1e-5), `rootTM ${node.id} [${a}] [${b}]`);
+			t.ok(b.equals(c, 1e-5), `localTM ${node.id} [${c}] [${b}]`);
+		});
 
-// 	t.end();
-// });
+
+	t.end();
+});
 
 tap.test("_boundingBox", async (t) => {
 	elements

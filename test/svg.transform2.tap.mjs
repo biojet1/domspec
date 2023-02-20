@@ -108,7 +108,8 @@ tap.test("transform2", function (t) {
 		t.same(v.getScreenCTM().toString(), m, `getScreenCTM ${id}`);
 		// t.same(v._composeTM().toString(), m, `_composeTM ${id}`);
 		const w = top._vboxTM;
-		const u = v._rootTM;
+		// const u = v._rootTM;
+		const u = _rootTM(v);
 
 		t.same(w.cat(u).toString(), m, `_rootTM ${id} ${w} ${u}`);
 	});
@@ -269,19 +270,19 @@ import {  SVGGraphicsElement } from "../dist/svg/_element.js";
 
 
 	function _rootTM(node) {
-		const { parentNode: parent, _ownTM } = node;
-		if (parent instanceof SVGGraphicsElement) {
-			return _relTM(parent, _ownTM);
-		} else {
-			return _ownTM;
-		}
-		// let { parentElement: parent, _ownTM: tm } = this;
-		// while (parent instanceof SVGGraphicsElement) {
-		// 	const { _vboxTM } = parent;
-		// 	if ((parent = parent.parentElement) == null) {
-		// 		break;
-		// 	}
-		// 	tm = tm.postCat(_vboxTM);
+		// const { parentNode: parent, _ownTM } = node;
+		// if (parent instanceof SVGGraphicsElement) {
+		// 	return _relTM(parent, _ownTM);
+		// } else {
+		// 	return _ownTM;
 		// }
-		// return tm;
+		let { parentElement: parent, _ownTM: tm } = node;
+		while (parent instanceof SVGGraphicsElement) {
+			const { _vboxTM } = parent;
+			if ((parent = parent.parentElement) == null) {
+				break;
+			}
+			tm = tm.postCat(_vboxTM);
+		}
+		return tm;
 	}

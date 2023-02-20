@@ -235,21 +235,21 @@ export class SVGGraphicsElement extends SVGElement {
 	//////////////
 	// The transformation up to document root
 	get _rootTM(): Matrix {
-		const { parentNode: parent, _ownTM } = this;
-		if (parent instanceof SVGGraphicsElement) {
-			return parent._relTM(_ownTM);
-		} else {
-			return _ownTM;
-		}
-		// let { parentElement: parent, _ownTM: tm } = this;
-		// while (parent instanceof SVGGraphicsElement) {
-		// 	const { _vboxTM } = parent;
-		// 	if ((parent = parent.parentElement) == null) {
-		// 		break;
-		// 	}
-		// 	tm = tm.postCat(_vboxTM);
+		// const { parentNode: parent, _ownTM } = this;
+		// if (parent instanceof SVGGraphicsElement) {
+		// 	return parent._relTM(_ownTM);
+		// } else {
+		// 	return _ownTM;
 		// }
-		// return tm;
+		let { parentElement: parent, _ownTM: tm } = this;
+		while (parent instanceof SVGGraphicsElement) {
+			const { _vboxTM } = parent;
+			if ((parent = parent.parentElement) == null) {
+				break;
+			}
+			tm = tm.postCat(_vboxTM);
+		}
+		return tm;
 	}
 	//////////////
 	// The transformation up to document root excluding _ownTM and _ownTM
@@ -275,12 +275,17 @@ export class SVGGraphicsElement extends SVGElement {
 			return this._vboxTM;
 		}
 		// let { parentNode: parent, _vboxTM: tm } = this;
-		// while (parent instanceof SVGGraphicsElement) {
-		// 	const { _vboxTM } = parent;
-		// 	if ((parent = parent.parentNode) == null) {
-		// 		break;
+		// if (parent) {
+		// 	while (parent instanceof SVGGraphicsElement) {
+		// 		const { _vboxTM } = parent;
+		// 		if ((parent = parent.parentNode) == null) {
+		// 			break;
+		// 		}
+		// 		tm = tm.postCat(_vboxTM);
 		// 	}
-		// 	tm = tm.postCat(_vboxTM);
+		// } else if (this instanceof SVGSVGElement) {
+		// 	// Assume the root element
+		// 	return Matrix.identity();
 		// }
 		// return tm;
 	}

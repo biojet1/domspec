@@ -12,6 +12,7 @@ export { DOMParser } from "./dom-parse.js";
 export { XMLSerializer } from "./dom-serialize.js";
 export * from "./html/element.js";
 export * from "./svg/element.js";
+export * from "./svg/_element.js";
 export * from "./event-target.js";
 export * from "./css/index.js";
 export * from "./css/stylemap.js";

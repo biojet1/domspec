@@ -257,7 +257,7 @@ export class SVGGraphicsElement extends SVGElement {
         }
     }
     _shapeBox(tm) {
-        const m = tm ? tm.cat(this._ownTM) : this._rootTM;
+        const m = tm ? tm.cat(this._ownTM) : this._localTM();
         let box = Box.new();
         for (const sub of this.children) {
             if (sub instanceof SVGGraphicsElement && sub._canRender()) {
@@ -282,6 +282,19 @@ export class SVGGraphicsElement extends SVGElement {
                 tm = tm.postCat(parent._vboxTM);
             }
             else {
+                break;
+            }
+        }
+        return tm;
+    }
+    getCTM() {
+        let { parentNode: parent, _ownTM: tm } = this;
+        for (; parent; parent = parent.parentNode) {
+            if (!(parent instanceof SVGGraphicsElement)) {
+                break;
+            }
+            tm = tm.postCat(parent._vboxTM);
+            if (parent instanceof SVGSVGElement) {
                 break;
             }
         }

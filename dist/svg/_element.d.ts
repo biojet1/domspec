@@ -1,4 +1,10 @@
 import { Vec, Box, Matrix, SVGTransform } from "svggeom";
+export interface SVGBoundingBoxOptions {
+    fill?: boolean;
+    stroke?: boolean;
+    markers?: boolean;
+    clipped?: boolean;
+}
 export declare class SVGElement extends Element {
     get _isViewportElement(): number;
     get viewportElement(): SVGElement | null;
@@ -31,9 +37,9 @@ export declare class SVGGraphicsElement extends SVGElement {
     get _ownTM(): Matrix;
     set _ownTM(T: Matrix);
     get _vboxTM(): Matrix;
-    _relTM(tm: Matrix, root?: SVGElement | null): Matrix;
+    _relTM(tm: Matrix, root?: SVGGraphicsElement | null): Matrix;
     get _rootTM(): Matrix;
-    _pairTM(root?: SVGElement | null): Matrix[];
+    _pairTM(root?: SVGGraphicsElement | null): Matrix[];
     _localTM(): Matrix;
     _objectBBox(T?: Matrix): Box;
     _viewportBox(tm?: Matrix): Box;
@@ -41,6 +47,7 @@ export declare class SVGGraphicsElement extends SVGElement {
     _shapeBox(tm?: Matrix): Box;
     _fuseTransform(parentT?: Matrix): void;
     getScreenCTM(): Matrix;
+    getCTM(): Matrix;
     getBBox(): Box;
     _placeChild(ref: ChildNode | null | undefined, nodes: SVGGraphicsElement[]): void;
     _placePriorTo(ref: ChildNode | null | undefined, ...nodes: SVGGraphicsElement[]): void;

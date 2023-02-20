@@ -214,6 +214,7 @@ tap.test("transform2", function (t) {
 		const m = Matrix.new([a, b, c, d, e, f]);
 		// t.same(v.composeTM(top).describe(), m.describe(), `composeTM(top) ${id}`);
 		t.same(v._rootTM.describe(), m.describe(), `_composeTM() ${id}`);
+		t.same(_rootTM(v).describe(), m.describe(), `_composeTM() ${id}`);
 		// t.same(v._relTM(v._ownTM, top).describe(), m.describe(), `_composeTM(top) ${id}`);
 	});
 	trsubs.forEach(([rootId, ...subs]) => {
@@ -242,40 +243,45 @@ tap.test("transform2", function (t) {
 	t.end();
 });
 
-if (0) {
-	Array.from(document.documentElement.querySelectorAll(`*[id]`)).map((v) => {
-		const m = v.getScreenCTM();
-		const r = v.getBBox();
-		return [v.id, m.a, m.b, m.c, m.d, m.e, m.f];
-	});
-	Array.from(document.documentElement.querySelectorAll(`*[id]`))
-		.map((v) => {
-			if (v.getBBox) {
-				const r = v.getBBox();
-				return [v.id, r.x, r.y, r.width, r.height];
+import {  SVGGraphicsElement } from "../dist/svg/_element.js";
+
+	function _relTM(parent, tm, root) {
+		while (parent != root) {
+			const grand = parent.parentElement;
+			if (grand instanceof SVGGraphicsElement) {
+				tm = tm.postCat(parent._vboxTM);
+				parent = grand;
+			} else if (root) {
+				if (grand) {
+					throw new Error(`root not reached`);
+				} else {
+					const p = root._rootTM.inverse();
+					return p.cat(tm);
+				}
+			} else {
+				break;
 			}
-		})
-		.filter((v) => !!v);
-	document.documentElement.querySelectorAll(`rect`).forEach((v) => {
-		v.style.fill = "grey";
-		v.style.stroke = "none";
-	});
+		}
+		return tm;
 
-	Array.from(document.documentElement.querySelectorAll(`rect[id]`)).map((v) => {
-		const r = v.getBBox();
-		return [v.id, r.x, r.y, r.width, r.height];
-	});
 
-	Array.from(document.documentElement.querySelectorAll(`rect[id]`)).map((v) => {
-		const r = v.getBoundingClientRect();
-		return [v.id, r.x + 50, r.y + 10, r.width, r.height];
-	});
-	Array.from(document.documentElement.querySelectorAll(`g[id]`)).map((v) => {
-		const r = v.getBBox();
-		return [v.id, r.x, r.y, r.width, r.height];
-	});
-	Array.from(document.documentElement.querySelectorAll(`svg[id]`)).map((v) => {
-		const r = v.getBBox();
-		return [v.id, r.x, r.y, r.width, r.height];
-	});
-}
+	}
+
+
+	function _rootTM(node) {
+		const { parentNode: parent, _ownTM } = node;
+		if (parent instanceof SVGGraphicsElement) {
+			return _relTM(parent, _ownTM);
+		} else {
+			return _ownTM;
+		}
+		// let { parentElement: parent, _ownTM: tm } = this;
+		// while (parent instanceof SVGGraphicsElement) {
+		// 	const { _vboxTM } = parent;
+		// 	if ((parent = parent.parentElement) == null) {
+		// 		break;
+		// 	}
+		// 	tm = tm.postCat(_vboxTM);
+		// }
+		// return tm;
+	}

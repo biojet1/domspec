@@ -27,7 +27,7 @@
 <!-- @author vhardy@apache.org                                                 -->
 <!-- @version $Id: symbolViewBox.svg 1733420 2016-03-03 07:41:59Z gadams $   -->
 <!-- ========================================================================= -->
-<?xml-stylesheet type="text/css" href="../../resources/style/test.css" ?>  
+<!-- <?xml-stylesheet type="text/css" href="../../resources/style/test.css" ?>   -->
 
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="body" width="450" height="500" viewBox="0 0 450 500">
 <title>&lt;symbol&gt; and viewBox &amp; preserveAspectRatio</title>
@@ -540,7 +540,7 @@
     <!-- ============================================================= -->
     <!-- Batik sample mark                                             -->
     <!-- ============================================================= -->
-    <use xlink:href="../../../batikLogo.svg#Batik_Tag_Box" />
+    <!-- <use xlink:href="../../../batikLogo.svg#Batik_Tag_Box" /> -->
                     <g >
                         <rect x="5" y="5" width="20" height="20" fill="black" />
                         <!-- <circle cx="10" cy="25" r="4" fill="crimson" />
@@ -551,5 +551,6 @@
                         <path d="M 10 19 A 8 8 0 0 0 20 19" stroke="black" stroke-width="1" fill="none"/>
                     </g>
                       <script href="metrics.js"></script>
+  <rect id="R5" x="200" y="160" width="50" height="40" style="fill:#81b4fe;stroke:none;opacity:0.5"/>
 
 </svg>

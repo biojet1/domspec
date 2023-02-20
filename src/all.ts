@@ -13,6 +13,7 @@ export {XMLSerializer} from "./dom-serialize.js";
 // export * from "./resource.js";
 export * from "./html/element.js";
 export * from "./svg/element.js";
+export * from "./svg/_element.js";
 export * from "./event-target.js";
 // export * from "./attr-style.js";
 export * from "./css/index.js";

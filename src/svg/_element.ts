@@ -8,7 +8,7 @@ export interface SVGBoundingBoxOptions {
 }
 
 export class SVGElement extends Element {
-	_newAttributeNode(name: string) {
+	override _newAttributeNode(name: string) {
 		// console.warn("_newAttributeNode", name);
 		switch (name) {
 			// https://svgwg.org/svg2-draft/geometry.html#Sizing
@@ -171,6 +171,20 @@ export class SVGElement extends Element {
 		}
 		return tm;
 	}
+	//////////////
+	// The transformation up to document root
+	get _windowTM(): Matrix {
+		let { parentElement: parent, _ownTM: tm } = this;
+		while (parent instanceof SVGGraphicsElement) {
+			const { parentElement: grand, _subTM } = parent;
+			tm = tm.postCat(_subTM);
+			if (grand == null) {
+				break;
+			}
+			parent = grand;
+		}
+		return tm;
+	}
 }
 
 export class SVGGraphicsElement extends SVGElement {
@@ -193,6 +207,10 @@ export class SVGGraphicsElement extends SVGElement {
 		}
 		return farthest;
 	}
+	getBoundingClientRect() {
+		return this._shapeBox(this._windowTM);
+	}
+
 	get _clipElement(): SVGGraphicsElement | null {
 		const v = this.getAttribute("clip-path");
 		const a = v && /#([^#\(\)\s]+)/.exec(v);
@@ -564,6 +582,7 @@ export class SVGSVGElement extends SVGGraphicsElement {
 	}
 }
 
+export { Vec as SVGPoint };
 import { Element } from "../element.js";
 import { ChildNode } from "../child-node.js";
 import {

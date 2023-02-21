@@ -3,7 +3,7 @@ import { Document, SVGDocument } from "../dist/document.js";
 import { ParentNode } from "../dist/parent-node.js";
 import { DOMParser } from "../dist/dom-parse.js";
 import { SVGLength } from "../dist/svg/element.js";
-import { PathLS, Matrix, Vec } from "svggeom";
+import { PathLS, Matrix, Vec, Box } from "svggeom";
 
 const parser = new DOMParser();
 
@@ -85,7 +85,7 @@ tap.test("SVG getPointAtLength getTotalLength", function (t) {
 	{
 		const m1 = PG1.transform.baseVal.consolidate().matrix;
 		const m2 = Matrix.parse("matrix(0 1 -1 0 700 -100)");
-		t.ok(m1.equals(m2), [m1, m2, ]);
+		t.ok(m1.equals(m2), [m1, m2]);
 	}
 
 	PL1._fuseTransform();
@@ -101,9 +101,51 @@ tap.test("SVG getPointAtLength getTotalLength", function (t) {
 		PathLS.parse(PG1._toPathElement().getAttribute("d")).toString(),
 		PathLS.parse("M 400,300 H 300Z").toString()
 	);
+	t.end();
+});
+tap.test("SVG width", function (t) {
+	const { wrapper, mySVG } = parser.parseFromString(
+		`
+<html>
+<head>
+  <style>
+    #wrapper {
+        width: 500px;
+    }
+  </style>
+</head>
+<body>
+  <div id="wrapper">
+    <svg id="mySVG"></svg>
+  </div>
+</body>
+</html>
+`,
+		"text/html"
+	).all;
+	{
+		const csm = wrapper.computedStyleMap();
+		const q = csm.get("width");
+		let r = new SVGLength();
+		t.ok(q);
+		t.ok(r.parse(q.toString()), q);
+		t.strictSame(r.value, 500, q);
+		t.strictSame(mySVG.parentElement, wrapper);
+		t.match(mySVG.constructor.name, /SVGSVGElement/);
+		t.ok(mySVG.viewBox);
+		t.match(mySVG.viewBox.constructor.name, /SVGAnimatedRect/);
+const x=mySVG.createSVGLength();
+x.valueAsString = '100%';
 
-	// const q = ;
-	// t.same(q.end, );
+		 console.dir(x.value);
+		// console.dir(mySVG.viewBox.constructor.name);
+		// console.dir(mySVG.viewBox.baseVal.width);
+		// console.dir(mySVG.viewBox._calcWidth());
+		// const b = mySVG.getBoundingClientRect();
+		// console.dir(b);
+		// console.dir(b.width);
+		// console.dir(Box.forRect(0, 0, NaN, NaN));
+	}
 
 	t.end();
 });

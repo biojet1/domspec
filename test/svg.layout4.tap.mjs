@@ -202,9 +202,3 @@ function checkParent(that, klass) {
 	],
 	["Event", ["TimeEvent"]],
 ];
-
-// container element
-//  a, clipPath, defs, g, marker, mask, pattern, svg, switch, symbol
-
-// elements that establish SVG viewports
-// svg, symbol, image, marker, pattern, view

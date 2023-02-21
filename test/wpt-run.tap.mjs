@@ -349,6 +349,7 @@ svg/types/scripted/SVGLength.html
  css/css-typed-om/factory-absolute-length.html
      svg/types/scripted/SVGAnimatedRect.html
      svg/types/scripted/SVGAnimatedLength.html
+    svg/types/scripted/SVGGraphicsElement.getBBox-01.html
 
 //     `;
     //     tests = `
@@ -452,7 +453,10 @@ svg/types/scripted/SVGLength.html
 // css/css-box/parsing/margin-shorthand.html
 // domparsing/xml-serialization.xhtml
     // css/css-typed-om/declared-styleMap-accepts-inherit.html
-    svg/types/scripted/SVGAnimatedRect.html
+    // svg/types/scripted/SVGAnimatedRect.html
+    // svg/coordinate-systems/outer-svg-intrinsic-size-001.html
+    // svg/types/elements/SVGGeometryElement-rect.svg
+    svg/types/scripted/SVGGraphicsElement.svg
 `;
     tests = (process.env.TRY ? tests_try : tests)
         .split(/[\r\n]+/)

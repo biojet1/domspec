@@ -194,6 +194,10 @@ SVGGraphicsElement:
 
 // container element
 //  a, clipPath, defs, g, marker, mask, pattern, svg, switch, symbol
+//    SVGAElement SVGClipPathElement SVGDefsElement SVGGElement SVGMarkerElement
+//    SVGMaskElement SVGPatternElement SVGSVGElement SVGSwitchElement SVGSymbolElement
 
 // elements that establish SVG viewports
-// svg, symbol, image, marker, pattern, view
+//  svg, symbol, image, marker, pattern, view
+//    SVGSVGElement, SVGSymbolElement, SVGImageElement,
+//    SVGMarkerElement, SVGPatternElement, SVGViewElement

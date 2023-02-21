@@ -32,9 +32,9 @@ tap.test("Geoms 1", function (t) {
   );
   const svg = document.documentElement;
   const { V1, V2, V3, C1, C2, C3, C4, R1, R2, R3 } = document.all;
-  console.log(V1.viewBox.baseVal, V1.hasAttribute("viewBox"));
-  console.log(V2.viewBox.baseVal, V2.hasAttribute("viewBox"));
-  console.log(V3.viewBox.baseVal, V3.hasAttribute("viewBox"));
+  // console.log(V1.viewBox.baseVal, V1.hasAttribute("viewBox"));
+  // console.log(V2.viewBox.baseVal, V2.hasAttribute("viewBox"));
+  // console.log(V3.viewBox.baseVal, V3.hasAttribute("viewBox"));
   t.same(V1.x.baseVal.value, 200, `V1.x`);
   t.same(V1.y.baseVal.value, 0, `V1.y`);
   t.same(V1.width.baseVal.value, 100, `V1.width`);
@@ -117,7 +117,7 @@ tap.test("Geoms 1", function (t) {
   // console.log(R5._shapeBox().transform(p.cat(V1._subTM).inverse()));
   // console.log(p.cat(V1._subTM).inverse());
   // console.log(V1._rootTM.cat(V1._subTM).inverse());
-  V1.viewBox.contain2(R5._shapeBox());
+  V1.viewBox._closeIn(R5._shapeBox());
   // console.log(V1.viewBox.baseVal);
   [["L1", 0, 2.5, 5, 7.5]].forEach(([id, x1, y1, x2, y2]) => {
     const v = document.getElementById(id);
@@ -197,47 +197,3 @@ tap.test("Geoms 2", function (t) {
 
   t.end();
 });
-if (0) {
-  Array.from(document.documentElement.querySelectorAll(`*[id]`)).map((v) => {
-    const r = v.getBoundingClientRect();
-    v.setAttribute("bcr", `${r.x},${r.y} ${r.width}x${r.height}`);
-    return [v.id, r.x, r.y, r.width, r.height];
-  });
-  Array.from(document.documentElement.querySelectorAll(`circle[id]`)).map(
-    (v) => {
-      const r = v.getBoundingClientRect();
-      const a = [v.r.baseVal.value, v.cx.baseVal.value, v.cy.baseVal.value];
-      v.setAttribute("geom", `${a[0]} ${a[1]},${a[2]}`);
-      return [v.id, ...a];
-    }
-  );
-  Array.from(
-    document.documentElement.querySelectorAll(`rect[id], svg[id]`)
-  ).map((v) => {
-    const r = v.getBoundingClientRect();
-    const a = [
-      v.x.baseVal.value,
-      v.y.baseVal.value,
-      v.width.baseVal.value,
-      v.height.baseVal.value,
-    ];
-    v.setAttribute("geom", `${a[0]},${a[1]} ${a[2]}x${a[3]}`);
-    return [v.id, ...a];
-  });
-  ((a) => {
-    window.geom_lines = a;
-  })(
-    Array.from(document.documentElement.querySelectorAll(`line[id]`)).map(
-      (v) => {
-        const [x1, y1, x2, y2] = [
-          v.x1.baseVal.value,
-          v.y1.baseVal.value,
-          v.x2.baseVal.value,
-          v.y2.baseVal.value,
-        ];
-        v.setAttribute("pts", `${x1},${y1} ${x2},${y2}`);
-        return [v.id, x1, y1, x2, y2];
-      }
-    )
-  );
-}

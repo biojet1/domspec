@@ -3,6 +3,7 @@ import tap from "tap";
 import { Document, SVGDocument } from "../dist/document.js";
 import { ParentNode } from "../dist/parent-node.js";
 import { DOMParser } from "../dist/dom-parse.js";
+import { SVGRect } from "../dist/all.js";
 
 const parser = new DOMParser();
 
@@ -181,8 +182,8 @@ tap.test("width.baseVal", function (t) {
 	// Check initial viewBox value.
 	t.match(svgElement.constructor.name, /SVGSVGElement/);
 	t.match(svgElement.viewBox.constructor.name, /SVGAnimatedRect/);
-	t.match(svgElement.viewBox.baseVal.constructor.name, /SVGRect/);
-	t.match(svgElement.viewBox.animVal.constructor.name, /SVGRect/);
+	t.ok(svgElement.viewBox.baseVal instanceof SVGRect);
+	t.ok(svgElement.viewBox.animVal instanceof SVGRect);
 	// assert_equals(svgElement.viewBox.baseVal.x, 0);
 
 	t.end();

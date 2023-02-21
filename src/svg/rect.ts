@@ -1,79 +1,118 @@
-export class SVGRect extends BoxMut {
-	owner?: SVGSVGElement;
+// export class SVGRect extends BoxMut {
+// 	owner?: SVGSVGElement;
 
-	override get x() {
-		return this._x ?? 0;
-	}
+// 	override get x() {
+// 		return this._x ?? 0;
+// 	}
 
-	override set x(value: number) {
-		this._x = value;
-	}
+// 	override set x(value: number) {
+// 		this._x = value;
+// 	}
 
-	override get y() {
-		return this._y ?? 0;
-	}
+// 	override get y() {
+// 		return this._y ?? 0;
+// 	}
 
-	override set y(value: number) {
-		this._y = value;
-	}
+// 	override set y(value: number) {
+// 		this._y = value;
+// 	}
 
-	override get width() {
-		let { _w = 100 } = this;
-		if (_w == null) {
-			const { owner: o } = this;
-			if (o) {
-				const a = o.width;
-				if (a.specified) {
-					_w = a.baseVal.value;
-				} else {
-					const v = o.nearestViewportElement as SVGSVGElement;
-					if (v) {
-						// _w = v.viewBox.baseVal.width;
-						_w = v.viewBox._calcWidth();
-					}
-				}
-			}
-		}
-		return _w;
-	}
+// 	override get width() {
+// 		let { _w = 100 } = this;
+// 		if (_w == null || isNaN(_w)) {
+// 			const { owner: o } = this;
+// 			if (o) {
+// 				// const a = o.width;
+// 				// if (a.specified && a.baseVal !== this) {
+// 				// 	_w = a.baseVal.value;
+// 				// } else {
+// 				// 	const v = o.nearestViewportElement as SVGSVGElement;
+// 				// 	if (v) {
+// 				// 		// _w = v.viewBox.baseVal.width;
+// 				// 		_w = v.viewBox._calcWidth();
+// 				// 	} else {
+// 				// 		const p = o.parentElement;
+// 				// 		if (p) {
+// 				// 			const csm = p.computedStyleMap();
+// 				// 			const q = csm.get("width");
+// 				// 			if (q) {
+// 				// 				let r = new SVGLength();
+// 				// 				if (r.parse(q.toString())) {
+// 				// 					_w = r.value;
+// 				// 				}
+// 				// 			}
+// 				// 		}
+// 				// 	}
+// 				// }
+// 			}
+// 		}
+// 		return _w;
+// 	}
 
-	override set width(value: number) {
-		this._w = value;
-	}
+// 	override set width(value: number) {
+// 		this._w = value;
+// 	}
 
-	override get height() {
-		let { _h = 100 } = this;
-		if (_h == null) {
-			const { owner: o } = this;
-			if (o) {
-				const a = o.height;
-				if (a.specified) {
-					_h = a.baseVal.value;
-				} else {
-					const v = o.nearestViewportElement as SVGSVGElement;
-					if (v) {
-						// _h = v.viewBox.baseVal.height;
-						_h = v.viewBox._calcHeight();
-					}
-				}
-			}
-		}
-		return _h;
-	}
+// 	override get height() {
+// 		let { _h = 100 } = this;
+// 		if (_h == null || isNaN(_h)) {
+// 			const { owner: o } = this;
+// 			if (o) {
+// 				// const a = o.height;
+// 				// if (a.specified  && a.baseVal !== this) {
+// 				// 	_h = a.baseVal.value;
+// 				// } else {
+// 				// 	const v = o.nearestViewportElement as SVGSVGElement;
+// 				// 	if (v) {
+// 				// 		// _h = v.viewBox.baseVal.height;
+// 				// 		_h = v.viewBox._calcHeight();
+// 				// 	} else {
+// 				// 		const p = o.parentElement;
+// 				// 		if (p) {
+// 				// 			const csm = p.computedStyleMap();
+// 				// 			const q = csm.get("height");
+// 				// 			if (q) {
+// 				// 				let r = new SVGLength();
+// 				// 				if (r.parse(q.toString())) {
+// 				// 					_h = r.value;
+// 				// 				}
+// 				// 			}
+// 				// 		}
+// 				// 	}
+// 				// }
+// 			}
+// 		}
+// 		return _h;
+// 	}
 
-	override set height(value: number) {
-		this._h = value;
-	}
-	toString() {
-		return this.toArray()
-			.map((n) => {
-				const v = n.toFixed(3);
-				return v.indexOf(".") < 0
-					? v
-					: v.replace(/0+$/g, "").replace(/\.$/g, "");
-			})
-			.join(" ");
-	}
+// 	override set height(value: number) {
+// 		this._h = value;
+// 	}
+// 	// toString() {
+// 	// 	return this.toArray()
+// 	// 		.map((n) => {
+// 	// 			const v = n.toFixed(3);
+// 	// 			return v.indexOf(".") < 0
+// 	// 				? v
+// 	// 				: v.replace(/0+$/g, "").replace(/\.$/g, "");
+// 	// 		})
+// 	// 		.join(" ");
+// 	// }
+// }
+
+function _format(box: SVGRect) {
+	return box
+		.toArray()
+		.map((n, i) => {
+			// if (i < 2) {
+			// 	if (isNaN(n)) {
+			// 		n = 0;
+			// 	}
+			// }
+			const v = n.toFixed(3);
+			return v.indexOf(".") < 0 ? v : v.replace(/0+$/g, "").replace(/\.$/g, "");
+		})
+		.join(" ");
 }
 
 export class SVGAnimatedRect extends Attr {
@@ -82,7 +121,7 @@ export class SVGAnimatedRect extends Attr {
 
 	set value(value: string) {
 		const { _var } = this;
-		if (_var instanceof BoxMut) {
+		if (_var instanceof SVGRect) {
 			try {
 				const { x, y, width, height } = SVGRect.parse(value);
 				_var.x = x;
@@ -99,24 +138,33 @@ export class SVGAnimatedRect extends Attr {
 
 	get value() {
 		const { _var } = this;
-		if (_var instanceof BoxMut) {
-			return _var.toString();
+		if (_var instanceof SVGRect) {
+			return _format(_var);
 		}
 		return _var || "";
 	}
 
-	get baseVal() {
+	get baseVal(): SVGRect {
 		const { _var } = this;
-		if (_var instanceof BoxMut) {
+		if (_var instanceof SVGRect) {
 			return _var;
-		} else if (_var) {
+		}
+
+		{
+			let box: SVGRect | undefined;
 			try {
-				return (this._var = SVGRect.parse(_var) as BoxMut);
-			} catch (err) {
-				// return null;
+				if (_var) {
+					box = SVGRect.parse(_var) as SVGRect;
+				}
+			} finally {
+				if (!box) {
+					box = SVGRect.forRect(0, 0, NaN, NaN);
+				}
+				// box.owner = this.ownerElement as SVGSVGElement;
+				return (this._var = box);
 			}
 		}
-		return (this._var = SVGRect.forRect(0, 0, NaN, NaN));
+		// return (this.);
 		// return null;
 	}
 
@@ -127,19 +175,22 @@ export class SVGAnimatedRect extends Attr {
 	get specified() {
 		const { _var } = this;
 		// return _var != undefined;
-		return !!(_var && (!(_var instanceof BoxMut) || _var.isValid()));
+		return !!(_var && (!(_var instanceof SVGRect) || _var.isValid()));
 	}
 
 	valueOf() {
 		const { _var } = this;
 		if (_var) {
-			if (!(_var instanceof BoxMut) || _var.isValid()) {
-				return _var.toString();
+			// if (!(_var instanceof SVGRect) || _var.isValid()) {
+			// 	return _format(_var);
+			// }
+			if (_var instanceof SVGRect && _var.isValid()) {
+				return _format(_var);
 			}
 		}
 	}
 
-	contain(
+	_closeIn(
 		...args: Array<
 			| SVGGraphicsElement
 			| Box
@@ -154,25 +205,14 @@ export class SVGAnimatedRect extends Attr {
 			bbox = bbox.transform(o._innerTM.inverse());
 		}
 		const { _var } = this;
-		if (_var instanceof BoxMut) {
+		if (_var instanceof SVGRect) {
 			_var.copy(bbox);
 		} else {
-			this._var = BoxMut.new(bbox) as BoxMut;
+			this._var = SVGRect.new(bbox) as SVGRect;
 		}
 		return this;
 	}
 
-	contain2(
-		...args: Array<
-			| SVGGraphicsElement
-			| Box
-			| Vec
-			| Ray
-			| Array<SVGGraphicsElement | Box | Vec | Ray>
-		>
-	) {
-		return this.contain(...args);
-	}
 	// https://svgwg.org/svg-next/coords.html#Units
 	_calcWidth(): number {
 		const { _var } = this;
@@ -188,10 +228,22 @@ export class SVGAnimatedRect extends Attr {
 			if (a.specified) {
 				return a.baseVal.value;
 			}
+
 			const v = o.nearestViewportElement as SVGSVGElement;
 			if (v) {
-				const n = v.viewBox._calcWidth();
-				return n;
+				return v.viewBox._calcWidth();
+			}
+
+			const p = o.parentElement;
+			if (p) {
+				const csm = p.computedStyleMap();
+				const q = csm.get("width");
+				if (q) {
+					let r = new SVGLength();
+					if (r.parse(q.toString())) {
+						return r.value;
+					}
+				}
 			}
 		}
 
@@ -215,6 +267,19 @@ export class SVGAnimatedRect extends Attr {
 				if (v) {
 					const n = v.viewBox._calcHeight();
 					return n;
+				}
+			}
+			{
+				const p = o.parentElement;
+				if (p) {
+					const csm = p.computedStyleMap();
+					const q = csm.get("height");
+					if (q) {
+						let r = new SVGLength();
+						if (r.parse(q.toString())) {
+							return r.value;
+						}
+					}
 				}
 			}
 		}
@@ -253,7 +318,7 @@ function contain(
 		| Array<SVGGraphicsElement | Box | Vec | Ray>
 	>
 ): Box {
-	let bbox = BoxMut.new() as BoxMut;
+	let bbox = SVGRect.new() as SVGRect;
 	for (const v of args) {
 		if (v instanceof Array) {
 			bbox.mergeSelf(contain(v));
@@ -275,7 +340,9 @@ function contain(
 	}
 	return bbox;
 }
-
-import { BoxMut, Box, Vec, Ray } from "svggeom";
+import { BoxMut as SVGRect } from "svggeom";
+import { Box, Vec, Ray } from "svggeom";
 import { Attr } from "../attr.js";
-import { SVGGraphicsElement, SVGSVGElement } from "./element.js";
+import { SVGGraphicsElement, SVGSVGElement, SVGElement } from "./element.js";
+import { SVGLength } from "./length.js";
+export { SVGRect };

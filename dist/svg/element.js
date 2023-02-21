@@ -1,4 +1,13 @@
 import { Vec, Box, Matrix, PathLS } from "svggeom";
+export class SVGMarkerElement extends SVGGraphicsElement {
+    static TAGS = ["marker"];
+    get _isViewportElement() {
+        return 2;
+    }
+    _shapeBox(tm) {
+        return this._viewportBox(tm);
+    }
+}
 export class SVGTextContentElement extends SVGGraphicsElement {
 }
 export class SVGGeometryElement extends SVGGraphicsElement {
@@ -24,17 +33,12 @@ export class SVGGeometryElement extends SVGGraphicsElement {
         return Box.not();
     }
     _shapeBox(tm) {
-        let { _path } = this;
-        if (_path.firstPoint) {
-            if (tm) {
-                _path = _path.transform(tm.cat(this._ownTM));
-            }
-            else {
-                _path = _path.transform(this._rootTM);
-            }
-            return _path.bbox();
+        if (tm) {
+            return this._objectBBox(tm.cat(this._ownTM));
         }
-        return Box.not();
+        else {
+            return this._objectBBox(this._rootTM);
+        }
     }
     _toPathElement() {
         const { ownerDocument } = this;
@@ -210,7 +214,7 @@ export class SVGAElement extends SVGGraphicsElement {
 }
 export class SVGDefsElement extends SVGGraphicsElement {
     static TAGS = ["defs"];
-    getBBox() {
+    _objectBBox() {
         return Box.empty();
     }
 }
@@ -351,6 +355,9 @@ export class SVGGlyphElement extends SVGElement {
 }
 export class SVGPatternElement extends SVGElement {
     static TAGS = ["pattern"];
+    _shapeBox(tm) {
+        return this._viewportBox(tm);
+    }
 }
 export class SVGScriptElement extends SVGElement {
     static TAGS = ["script"];

@@ -1,28 +1,5 @@
 import { Vec, Box, Matrix, SVGTransform } from "svggeom";
 export class SVGElement extends Element {
-    get _isViewportElement() {
-        return 0;
-    }
-    get viewportElement() {
-        let parent = this;
-        while ((parent = parent.parentElement)) {
-            if (1 === parent._isViewportElement) {
-                return parent;
-            }
-        }
-        return null;
-    }
-    get ownerSVGElement() {
-        let parent = this;
-        while ((parent = parent.parentElement)) {
-            if (parent instanceof SVGSVGElement) {
-                return parent;
-            }
-        }
-        return null;
-    }
-}
-export class SVGGraphicsElement extends SVGElement {
     _newAttributeNode(name) {
         switch (name) {
             case "r":
@@ -100,6 +77,67 @@ export class SVGGraphicsElement extends SVGElement {
     get transform() {
         return this._letAttributeNode("transform");
     }
+    get _isViewportElement() {
+        return 0;
+    }
+    get viewportElement() {
+        let parent = this;
+        while ((parent = parent.parentElement)) {
+            if (1 === parent._isViewportElement) {
+                return parent;
+            }
+        }
+        return null;
+    }
+    get ownerSVGElement() {
+        let parent = this;
+        while ((parent = parent.parentElement)) {
+            if (parent instanceof SVGSVGElement) {
+                return parent;
+            }
+        }
+        return null;
+    }
+    get _ownTM() {
+        return this.transform.baseVal.combine();
+    }
+    set _ownTM(T) {
+        this.setAttribute("transform", T.toString());
+    }
+    get _subTM() {
+        return this._ownTM;
+    }
+    _viewportBox(tm) {
+        const width = this.width.baseVal.value;
+        const height = this.height.baseVal.value;
+        const x = this.x.baseVal.value;
+        const y = this.y.baseVal.value;
+        if (width && height) {
+            let b = Box.new(x, y, width, height);
+            if (tm) {
+                b = b.transform(tm);
+            }
+            else {
+                b = b.transform(this._rootTM);
+            }
+            return b;
+        }
+        return Box.not();
+    }
+    get _rootTM() {
+        let { parentElement: parent, _ownTM: tm } = this;
+        while (parent instanceof SVGGraphicsElement) {
+            const { parentElement: grand } = parent;
+            if (grand == null) {
+                break;
+            }
+            tm = tm.postCat(parent._subTM);
+            parent = grand;
+        }
+        return tm;
+    }
+}
+export class SVGGraphicsElement extends SVGElement {
     get nearestViewportElement() {
         let parent = this;
         while ((parent = parent.parentElement)) {
@@ -152,21 +190,12 @@ export class SVGGraphicsElement extends SVGElement {
         }
         return true;
     }
-    get _ownTM() {
-        return this.transform.baseVal.combine();
-    }
-    set _ownTM(T) {
-        this.setAttribute("transform", T.toString());
-    }
-    get _vboxTM() {
-        return this._ownTM;
-    }
     _relTM(tm, root) {
         let parent = this;
         while (parent != root) {
             const grand = parent.parentElement;
             if (grand instanceof SVGGraphicsElement) {
-                tm = tm.postCat(parent._vboxTM);
+                tm = tm.postCat(parent._subTM);
                 parent = grand;
             }
             else if (root) {
@@ -184,19 +213,8 @@ export class SVGGraphicsElement extends SVGElement {
         }
         return tm;
     }
-    get _rootTM() {
-        let { parentElement: parent, _ownTM: tm } = this;
-        while (parent instanceof SVGGraphicsElement) {
-            const { _vboxTM } = parent;
-            if ((parent = parent.parentElement) == null) {
-                break;
-            }
-            tm = tm.postCat(_vboxTM);
-        }
-        return tm;
-    }
     _pairTM(root) {
-        const { parentNode: parent, _ownTM } = this;
+        const { parentElement: parent, _ownTM } = this;
         if (parent instanceof SVGGraphicsElement) {
             return [parent._relTM(Matrix.identity(), root), _ownTM];
         }
@@ -204,17 +222,22 @@ export class SVGGraphicsElement extends SVGElement {
             return [Matrix.identity(), _ownTM];
         }
     }
-    _localTM() {
-        const { parentNode: parent, _ownTM } = this;
-        if (parent instanceof SVGGraphicsElement) {
-            return parent._relTM(this._vboxTM);
+    get _innerTM() {
+        let { parentElement: parent, _subTM: tm } = this;
+        if (parent) {
+            while (parent instanceof SVGGraphicsElement) {
+                const { parentElement: grand } = parent;
+                if (null == grand) {
+                    break;
+                }
+                tm = tm.postCat(parent._subTM);
+                parent = grand;
+            }
         }
         else if (this instanceof SVGSVGElement) {
             return Matrix.identity();
         }
-        else {
-            return this._vboxTM;
-        }
+        return tm;
     }
     _objectBBox(T) {
         let box = Box.new();
@@ -226,23 +249,6 @@ export class SVGGraphicsElement extends SVGElement {
             }
         }
         return box;
-    }
-    _viewportBox(tm) {
-        const width = this.width.baseVal.value;
-        const height = this.height.baseVal.value;
-        const x = this.x.baseVal.value;
-        const y = this.y.baseVal.value;
-        if (width && height) {
-            let b = Box.new(x, y, width, height);
-            if (tm) {
-                b = b.transform(tm);
-            }
-            else {
-                b = b.transform(this._rootTM);
-            }
-            return b;
-        }
-        return Box.not();
     }
     _boundingBox(tm) {
         const { _clipElement: clip } = this;
@@ -259,7 +265,7 @@ export class SVGGraphicsElement extends SVGElement {
         }
     }
     _shapeBox(tm) {
-        const m = tm ? tm.cat(this._ownTM) : this._localTM();
+        const m = tm ? tm.cat(this._ownTM) : this._innerTM;
         let box = Box.new();
         for (const sub of this.children) {
             if (sub instanceof SVGGraphicsElement && sub._canRender()) {
@@ -278,10 +284,10 @@ export class SVGGraphicsElement extends SVGElement {
         this.removeAttribute("transform");
     }
     getScreenCTM() {
-        let { parentNode: parent, _ownTM: tm } = this;
-        for (; parent; parent = parent.parentNode) {
+        let { parentElement: parent, _ownTM: tm } = this;
+        for (; parent; parent = parent.parentElement) {
             if (parent instanceof SVGGraphicsElement) {
-                tm = tm.postCat(parent._vboxTM);
+                tm = tm.postCat(parent._subTM);
             }
             else {
                 break;
@@ -290,12 +296,12 @@ export class SVGGraphicsElement extends SVGElement {
         return tm;
     }
     getCTM() {
-        let { parentNode: parent, _ownTM: tm } = this;
-        for (; parent; parent = parent.parentNode) {
+        let { parentElement: parent, _ownTM: tm } = this;
+        for (; parent; parent = parent.parentElement) {
             if (!(parent instanceof SVGGraphicsElement)) {
                 break;
             }
-            tm = tm.postCat(parent._vboxTM);
+            tm = tm.postCat(parent._subTM);
             if (parent instanceof SVGSVGElement) {
                 break;
             }
@@ -328,17 +334,41 @@ export class SVGGraphicsElement extends SVGElement {
         return this._placeChild(null, nodes);
     }
     _placeBefore(...nodes) {
-        const { parentNode } = this;
-        return (parentNode instanceof SVGGraphicsElement &&
-            parentNode._placeChild(this, nodes));
+        const { parentElement } = this;
+        return (parentElement instanceof SVGGraphicsElement &&
+            parentElement._placeChild(this, nodes));
     }
     _placeAfter(...nodes) {
-        const { parentNode } = this;
-        return (parentNode instanceof SVGGraphicsElement &&
-            parentNode._placeChild(this.nextSibling, nodes));
+        const { parentElement } = this;
+        return (parentElement instanceof SVGGraphicsElement &&
+            parentElement._placeChild(this.nextSibling, nodes));
     }
     _layout() {
         return new SVGLayout(this);
+    }
+    _viewportTM() {
+        const w = this.width.baseVal.value;
+        const h = this.height.baseVal.value;
+        if (w && h) {
+            const { x: vx, y: vy, width: vw, height: vh } = this.viewBox._calcBox();
+            if (vw && vh) {
+                const [tx, ty, sx, sy] = viewbox_transform(this.x.baseVal.value, this.y.baseVal.value, w, h, vx, vy, vw, vh, this.getAttribute("preserveAspectRatio"));
+                return Matrix.translate(tx, ty).scale(sx, sy);
+            }
+        }
+        return Matrix.identity();
+    }
+    _subBBox(m, params) {
+        let box = Box.new();
+        for (const sub of this.children) {
+            if (sub instanceof SVGGraphicsElement && sub._canRender()) {
+                box = box.merge(sub._ownBBox(m, params));
+            }
+        }
+        return box;
+    }
+    _ownBBox(m, params) {
+        return this._subBBox(m, params);
     }
 }
 export class SVGSVGElement extends SVGGraphicsElement {
@@ -366,22 +396,13 @@ export class SVGSVGElement extends SVGGraphicsElement {
     get _isViewportElement() {
         return 1;
     }
-    get _vboxTM() {
+    get _subTM() {
         return this._ownTM.cat(this._viewportTM());
     }
-    _viewportTM() {
-        const w = this.width.baseVal.value;
-        const h = this.height.baseVal.value;
-        if (w && h) {
-            const { x: vx, y: vy, width: vw, height: vh } = this.viewBox._calcBox();
-            if (vw && vh) {
-                const [tx, ty, sx, sy] = viewbox_transform(this.x.baseVal.value, this.y.baseVal.value, w, h, vx, vy, vw, vh, this.getAttribute("preserveAspectRatio"));
-                return Matrix.translate(tx, ty).scale(sx, sy);
-            }
-        }
-        return Matrix.identity();
-    }
     _shapeBox(tm) {
+        return this._viewportBox(tm);
+    }
+    _ownBBox(tm) {
         return this._viewportBox(tm);
     }
     _defs() {

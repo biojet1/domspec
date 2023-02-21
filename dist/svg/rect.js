@@ -127,7 +127,7 @@ export class SVGAnimatedRect extends Attr {
         let bbox = contain(args);
         const o = this.ownerElement;
         if (o instanceof SVGGraphicsElement) {
-            bbox = bbox.transform(o._localTM().inverse());
+            bbox = bbox.transform(o._innerTM.inverse());
         }
         const { _var } = this;
         if (_var instanceof BoxMut) {

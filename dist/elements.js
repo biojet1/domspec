@@ -1,7 +1,7 @@
 import { XMLNS, XML_NS, HTML_NS } from "./namespace.js";
 import { DOMException } from "./event-target.js";
 import { Element } from "./element.js";
-import { SVGElement, SVGAElement, SVGCircleElement, SVGClipPathElement, SVGDefsElement, SVGEllipseElement, SVGForeignObjectElement, SVGGElement, SVGGlyphElement, SVGImageElement, SVGLineElement, SVGMaskElement, SVGMissingGlyphElement, SVGPathElement, SVGPatternElement, SVGPolygonElement, SVGPolylineElement, SVGRectElement, SVGSVGElement, SVGSwitchElement, SVGSymbolElement, SVGTRefElement, SVGTSpanElement, SVGTextElement, SVGTextPathElement, SVGUseElement, } from "./svg/element.js";
+import { SVGElement, SVGAElement, SVGCircleElement, SVGClipPathElement, SVGDefsElement, SVGEllipseElement, SVGForeignObjectElement, SVGGElement, SVGGlyphElement, SVGImageElement, SVGLineElement, SVGMaskElement, SVGMissingGlyphElement, SVGPathElement, SVGPatternElement, SVGPolygonElement, SVGPolylineElement, SVGRectElement, SVGSVGElement, SVGSwitchElement, SVGSymbolElement, SVGTRefElement, SVGTSpanElement, SVGTextElement, SVGTextPathElement, SVGUseElement, SVGMarkerElement, } from "./svg/element.js";
 import { HTMLAnchorElement, HTMLAreaElement, HTMLAudioElement, HTMLBRElement, HTMLBaseElement, HTMLBodyElement, HTMLButtonElement, HTMLCanvasElement, HTMLDListElement, HTMLDataElement, HTMLDataListElement, HTMLDetailsElement, HTMLDialogElement, HTMLDirectoryElement, HTMLDivElement, HTMLElement, HTMLEmbedElement, HTMLFieldSetElement, HTMLFontElement, HTMLFormElement, HTMLFrameElement, HTMLFrameSetElement, HTMLHRElement, HTMLHeadElement, HTMLHeadingElement, HTMLHtmlElement, HTMLIFrameElement, HTMLImageElement, HTMLInputElement, HTMLLIElement, HTMLLabelElement, HTMLLegendElement, HTMLLinkElement, HTMLMapElement, HTMLMarqueeElement, HTMLMenuElement, HTMLMetaElement, HTMLMeterElement, HTMLModElement, HTMLOListElement, HTMLObjectElement, HTMLOptGroupElement, HTMLOptionElement, HTMLOutputElement, HTMLParagraphElement, HTMLParamElement, HTMLPictureElement, HTMLPreElement, HTMLProgressElement, HTMLQuoteElement, HTMLScriptElement, HTMLSelectElement, HTMLSlotElement, HTMLSourceElement, HTMLSpanElement, HTMLStyleElement, HTMLTableCaptionElement, HTMLTableCellElement, HTMLTableColElement, HTMLTableElement, HTMLTableRowElement, HTMLTableSectionElement, HTMLTemplateElement, HTMLTextAreaElement, HTMLTimeElement, HTMLTitleElement, HTMLTrackElement, HTMLUListElement, HTMLUnknownElement, HTMLVideoElement, } from "./html/element.js";
 export function createElement(doc, name, namespace) {
     const { isHTML, contentType } = doc;
@@ -288,6 +288,8 @@ export function createElement(doc, name, namespace) {
                     return new SVGTextPathElement(localName, ns, prefix, tag);
                 case "use":
                     return new SVGUseElement(localName, ns, prefix, tag);
+                case "marker":
+                    return new SVGMarkerElement(localName, ns, prefix, tag);
                 default:
                     return new SVGElement(localName, ns, prefix, tag);
             }

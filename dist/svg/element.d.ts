@@ -1,4 +1,9 @@
 import { Vec, Box, Matrix, PathLS } from "svggeom";
+export declare class SVGMarkerElement extends SVGGraphicsElement {
+    static TAGS: string[];
+    get _isViewportElement(): number;
+    _shapeBox(tm?: Matrix): Box;
+}
 export declare class SVGTextContentElement extends SVGGraphicsElement {
 }
 export declare class SVGGeometryElement extends SVGGraphicsElement {
@@ -54,7 +59,7 @@ export declare class SVGAElement extends SVGGraphicsElement {
 }
 export declare class SVGDefsElement extends SVGGraphicsElement {
     static TAGS: string[];
-    getBBox(): Box;
+    _objectBBox(): Box;
 }
 export declare class SVGForeignObjectElement extends SVGGraphicsElement {
     static TAGS: string[];
@@ -110,6 +115,7 @@ export declare class SVGGlyphElement extends SVGElement {
 }
 export declare class SVGPatternElement extends SVGElement {
     static TAGS: string[];
+    _shapeBox(tm?: Matrix): Box;
 }
 export declare class SVGScriptElement extends SVGElement {
     static TAGS: string[];

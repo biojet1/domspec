@@ -6,11 +6,6 @@ export interface SVGBoundingBoxOptions {
     clipped?: boolean;
 }
 export declare class SVGElement extends Element {
-    get _isViewportElement(): number;
-    get viewportElement(): SVGElement | null;
-    get ownerSVGElement(): SVGSVGElement | null;
-}
-export declare class SVGGraphicsElement extends SVGElement {
     _newAttributeNode(name: string): import("../attr.js").Attr;
     get r(): SVGAnimatedLength;
     get x(): SVGAnimatedLength;
@@ -27,6 +22,16 @@ export declare class SVGGraphicsElement extends SVGElement {
     get height(): SVGAnimatedLength;
     get viewBox(): SVGAnimatedRect;
     get transform(): SVGAnimatedTransformList;
+    get _isViewportElement(): number;
+    get viewportElement(): SVGElement | null;
+    get ownerSVGElement(): SVGSVGElement | null;
+    get _ownTM(): Matrix;
+    set _ownTM(T: Matrix);
+    get _subTM(): Matrix;
+    _viewportBox(tm?: Matrix): Box;
+    get _rootTM(): Matrix;
+}
+export declare class SVGGraphicsElement extends SVGElement {
     get nearestViewportElement(): SVGElement | null;
     get farthestViewportElement(): SVGElement | null;
     get _clipElement(): SVGGraphicsElement | null;
@@ -34,15 +39,10 @@ export declare class SVGGraphicsElement extends SVGElement {
     get _hrefElement(): SVGElement | null;
     set _hrefElement(target: SVGElement | null);
     _canRender(): boolean;
-    get _ownTM(): Matrix;
-    set _ownTM(T: Matrix);
-    get _vboxTM(): Matrix;
     _relTM(tm: Matrix, root?: SVGGraphicsElement | null): Matrix;
-    get _rootTM(): Matrix;
     _pairTM(root?: SVGGraphicsElement | null): Matrix[];
-    _localTM(): Matrix;
+    get _innerTM(): Matrix;
     _objectBBox(T?: Matrix): Box;
-    _viewportBox(tm?: Matrix): Box;
     _boundingBox(tm?: Matrix): Box;
     _shapeBox(tm?: Matrix): Box;
     _fuseTransform(parentT?: Matrix): void;
@@ -55,6 +55,9 @@ export declare class SVGGraphicsElement extends SVGElement {
     _placeBefore(...nodes: SVGGraphicsElement[]): false | void;
     _placeAfter(...nodes: SVGGraphicsElement[]): false | void;
     _layout(): SVGLayout;
+    _viewportTM(): Matrix;
+    _subBBox(m: Matrix, params: SVGBoundingBoxOptions): Box;
+    _ownBBox(m: Matrix, params: SVGBoundingBoxOptions): Box;
 }
 export declare class SVGSVGElement extends SVGGraphicsElement {
     static TAGS: string[];
@@ -65,9 +68,9 @@ export declare class SVGSVGElement extends SVGGraphicsElement {
     createSVGTransform(): SVGTransform;
     createSVGTransformFromMatrix(M: Matrix): SVGTransform;
     get _isViewportElement(): number;
-    get _vboxTM(): Matrix;
-    _viewportTM(): Matrix;
+    get _subTM(): Matrix;
     _shapeBox(tm?: Matrix): Box;
+    _ownBBox(tm?: Matrix): Box;
     _defs(): Element;
 }
 import { Element } from "../element.js";

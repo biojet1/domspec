@@ -8,32 +8,6 @@ export interface SVGBoundingBoxOptions {
 }
 
 export class SVGElement extends Element {
-	get _isViewportElement() {
-		return 0;
-	}
-	get viewportElement(): SVGElement | null {
-		// The returned element is often the nearest ancestor svg element.
-		let parent: SVGElement = this;
-		while ((parent = parent.parentElement as SVGElement)) {
-			if (1 === parent._isViewportElement) {
-				return parent;
-			}
-		}
-		return null;
-	}
-	get ownerSVGElement(): SVGSVGElement | null {
-		// https://svgwg.org/svg-next/types.html#__svg__SVGElement__ownerSVGElement
-		let parent: SVGElement = this;
-		while ((parent = parent.parentElement as SVGElement)) {
-			if (parent instanceof SVGSVGElement) {
-				return parent;
-			}
-		}
-		return null;
-	}
-}
-
-export class SVGGraphicsElement extends SVGElement {
 	_newAttributeNode(name: string) {
 		// console.warn("_newAttributeNode", name);
 		switch (name) {
@@ -118,6 +92,88 @@ export class SVGGraphicsElement extends SVGElement {
 	get transform(): SVGAnimatedTransformList {
 		return this._letAttributeNode("transform") as SVGAnimatedTransformList; // for now
 	}
+	get _isViewportElement() {
+		return 0;
+	}
+	get viewportElement(): SVGElement | null {
+		// The returned element is often the nearest ancestor svg element.
+		let parent: SVGElement = this;
+		while ((parent = parent.parentElement as SVGElement)) {
+			if (1 === parent._isViewportElement) {
+				return parent;
+			}
+		}
+		return null;
+	}
+	get ownerSVGElement(): SVGSVGElement | null {
+		// https://svgwg.org/svg-next/types.html#__svg__SVGElement__ownerSVGElement
+		let parent: SVGElement = this;
+		while ((parent = parent.parentElement as SVGElement)) {
+			if (parent instanceof SVGSVGElement) {
+				return parent;
+			}
+		}
+		return null;
+	}
+
+	//////////////
+	// The transform attribute
+	get _ownTM() {
+		// return Matrix.parse(this.getAttribute("transform") || "");
+		return this.transform.baseVal.combine();
+	}
+
+	set _ownTM(T: Matrix) {
+		this.setAttribute("transform", T.toString());
+	}
+	//////////////
+	// The transform attribute + viewport transformation, see SVGSVGElement._subTM
+	get _subTM(): Matrix {
+		return this._ownTM;
+	}
+
+	//////////////
+	// The box of element with viewport that has x, y, width, height
+	// like image, svg, symbol, foreignObject, ...
+	_viewportBox(tm?: Matrix): Box {
+		const width = this.width.baseVal.value;
+		const height = this.height.baseVal.value;
+		const x = this.x.baseVal.value;
+		const y = this.y.baseVal.value;
+		if (width && height) {
+			let b = Box.new(x, y, width, height);
+			if (tm) {
+				b = b.transform(tm);
+			} else {
+				b = b.transform(this._rootTM);
+			}
+			return b;
+		}
+		return Box.not();
+	}
+	//////////////
+	// The transformation up to document root
+	get _rootTM(): Matrix {
+		// const { parentElement: parent, _ownTM } = this;
+		// if (parent instanceof SVGGraphicsElement) {
+		// 	return parent._relTM(_ownTM);
+		// } else {
+		// 	return _ownTM;
+		// }
+		let { parentElement: parent, _ownTM: tm } = this;
+		while (parent instanceof SVGGraphicsElement) {
+			const { parentElement: grand } = parent;
+			if (grand == null) {
+				break;
+			}
+			tm = tm.postCat(parent._subTM);
+			parent = grand;
+		}
+		return tm;
+	}
+}
+
+export class SVGGraphicsElement extends SVGElement {
 	get nearestViewportElement(): SVGElement | null {
 		let parent: SVGElement = this;
 		while ((parent = parent.parentElement as SVGElement)) {
@@ -181,21 +237,6 @@ export class SVGGraphicsElement extends SVGElement {
 		return true;
 	}
 
-	//////////////
-	// The transform attribute
-	get _ownTM() {
-		// return Matrix.parse(this.getAttribute("transform") || "");
-		return this.transform.baseVal.combine();
-	}
-
-	set _ownTM(T: Matrix) {
-		this.setAttribute("transform", T.toString());
-	}
-	//////////////
-	// The transform attribute + viewport transformation, see SVGSVGElement._vboxTM
-	get _vboxTM(): Matrix {
-		return this._ownTM;
-	}
 	//////////////////
 	// The transformation up to 'root'
 	// if root == null up to document root
@@ -204,7 +245,7 @@ export class SVGGraphicsElement extends SVGElement {
 		while (parent != root) {
 			const grand: Element | null = parent.parentElement;
 			if (grand instanceof SVGGraphicsElement) {
-				tm = tm.postCat(parent._vboxTM);
+				tm = tm.postCat(parent._subTM);
 				parent = grand;
 			} else if (root) {
 				if (grand) {
@@ -218,43 +259,36 @@ export class SVGGraphicsElement extends SVGElement {
 			}
 		}
 		return tm;
-
-		// let { parentNode: parent, _ownTM: tm } = this;
-		// while (parent) {
+		// while (parent != root) {
 		// 	if (parent instanceof SVGGraphicsElement) {
-		// 		const { _vboxTM } = parent;
-		// 		if ((parent = parent.parentNode) != null) {
-		// 			tm = tm.postCat(_vboxTM);
+		// 		const { parentElement: grand } = parent;
+		// 		if (grand != null) {
+		// 			tm = tm.postCat(parent._subTM);
+		// 			parent = grand;
 		// 			continue;
 		// 		}
+		// 	}
+		// 	break;
+		// }
+		// let { parentElement: parent } = this;
+		// for (;;) {
+		// 	if (parent instanceof SVGGraphicsElement) {
+		// 		const { parentElement: grand } = parent;
+		// 		if (grand != null) {
+		// 			tm = tm.postCat(_subTM);
+		// 			parent = grand;
+		// 			continue;
+		// 		}
+		// 	} else if (parent == null) {
 		// 	}
 		// 	break;
 		// }
 		// return tm;
 	}
 	//////////////
-	// The transformation up to document root
-	get _rootTM(): Matrix {
-		// const { parentNode: parent, _ownTM } = this;
-		// if (parent instanceof SVGGraphicsElement) {
-		// 	return parent._relTM(_ownTM);
-		// } else {
-		// 	return _ownTM;
-		// }
-		let { parentElement: parent, _ownTM: tm } = this;
-		while (parent instanceof SVGGraphicsElement) {
-			const { _vboxTM } = parent;
-			if ((parent = parent.parentElement) == null) {
-				break;
-			}
-			tm = tm.postCat(_vboxTM);
-		}
-		return tm;
-	}
-	//////////////
 	// The transformation up to document root excluding _ownTM and _ownTM
 	_pairTM(root?: SVGGraphicsElement | null): Matrix[] {
-		const { parentNode: parent, _ownTM } = this;
+		const { parentElement: parent, _ownTM } = this;
 		if (parent instanceof SVGGraphicsElement) {
 			return [parent._relTM(Matrix.identity(), root), _ownTM];
 		} else {
@@ -264,30 +298,33 @@ export class SVGGraphicsElement extends SVGElement {
 	}
 	//////////////
 	// The transform attribute + viewport transformation (if SVGSVGElement) + up to document root
-	_localTM(): Matrix {
-		const { parentNode: parent, _ownTM } = this;
-		if (parent instanceof SVGGraphicsElement) {
-			return parent._relTM(this._vboxTM);
+	// _localTM(): Matrix {
+	// 	const { parentElement: parent, _ownTM } = this;
+	// 	if (parent instanceof SVGGraphicsElement) {
+	// 		return parent._relTM(this._subTM);
+	// 	} else if (this instanceof SVGSVGElement) {
+	// 		// Assume the root element
+	// 		return Matrix.identity();
+	// 	} else {
+	// 		return this._subTM;
+	// 	}
+	// }
+	get _innerTM(): Matrix {
+		let { parentElement: parent, _subTM: tm } = this;
+		if (parent) {
+			while (parent instanceof SVGGraphicsElement) {
+				const { parentElement: grand } = parent;
+				if (null == grand) {
+					break;
+				}
+				tm = tm.postCat(parent._subTM);
+				parent = grand as SVGGraphicsElement;
+			}
 		} else if (this instanceof SVGSVGElement) {
 			// Assume the root element
 			return Matrix.identity();
-		} else {
-			return this._vboxTM;
 		}
-		// let { parentNode: parent, _vboxTM: tm } = this;
-		// if (parent) {
-		// 	while (parent instanceof SVGGraphicsElement) {
-		// 		const { _vboxTM } = parent;
-		// 		if ((parent = parent.parentNode) == null) {
-		// 			break;
-		// 		}
-		// 		tm = tm.postCat(_vboxTM);
-		// 	}
-		// } else if (this instanceof SVGSVGElement) {
-		// 	// Assume the root element
-		// 	return Matrix.identity();
-		// }
-		// return tm;
+		return tm;
 	}
 	//////////////
 	// 	<g/> box of decendant children
@@ -302,25 +339,7 @@ export class SVGGraphicsElement extends SVGElement {
 		}
 		return box;
 	}
-	//////////////
-	// The box of element with viewport that has x, y, width, height
-	// like image, svg, symbol, foreignObject, ...
-	_viewportBox(tm?: Matrix): Box {
-		const width = this.width.baseVal.value;
-		const height = this.height.baseVal.value;
-		const x = this.x.baseVal.value;
-		const y = this.y.baseVal.value;
-		if (width && height) {
-			let b = Box.new(x, y, width, height);
-			if (tm) {
-				b = b.transform(tm);
-			} else {
-				b = b.transform(this._rootTM);
-			}
-			return b;
-		}
-		return Box.not();
-	}
+
 	//////////////
 	// The bounding box, transformed up to document root
 	_boundingBox(tm?: Matrix): Box {
@@ -355,7 +374,7 @@ export class SVGGraphicsElement extends SVGElement {
 	// The bounding box of <g/>, decendants,  transformed up to document root
 	_shapeBox(tm?: Matrix): Box {
 		// const m = tm ? tm.cat(this._ownTM) : this._rootTM;
-		const m = tm ? tm.cat(this._ownTM) : this._localTM();
+		const m = tm ? tm.cat(this._ownTM) : this._innerTM;
 		let box = Box.new();
 		for (const sub of this.children) {
 			if (sub instanceof SVGGraphicsElement && sub._canRender()) {
@@ -377,10 +396,10 @@ export class SVGGraphicsElement extends SVGElement {
 	}
 	//////////////
 	getScreenCTM(): Matrix {
-		let { parentNode: parent, _ownTM: tm } = this;
-		for (; parent; parent = parent.parentNode) {
+		let { parentElement: parent, _ownTM: tm } = this;
+		for (; parent; parent = parent.parentElement) {
 			if (parent instanceof SVGGraphicsElement) {
-				tm = tm.postCat(parent._vboxTM);
+				tm = tm.postCat(parent._subTM);
 			} else {
 				break;
 			}
@@ -389,12 +408,12 @@ export class SVGGraphicsElement extends SVGElement {
 	}
 
 	getCTM(): Matrix {
-		let { parentNode: parent, _ownTM: tm } = this;
-		for (; parent; parent = parent.parentNode) {
+		let { parentElement: parent, _ownTM: tm } = this;
+		for (; parent; parent = parent.parentElement) {
 			if (!(parent instanceof SVGGraphicsElement)) {
 				break;
 			}
-			tm = tm.postCat(parent._vboxTM);
+			tm = tm.postCat(parent._subTM);
 			if (parent instanceof SVGSVGElement) {
 				break;
 			}
@@ -431,23 +450,63 @@ export class SVGGraphicsElement extends SVGElement {
 		return this._placeChild(null, nodes);
 	}
 	_placeBefore(...nodes: SVGGraphicsElement[]) {
-		const { parentNode } = this;
+		const { parentElement } = this;
 		return (
-			parentNode instanceof SVGGraphicsElement &&
-			parentNode._placeChild(this, nodes)
+			parentElement instanceof SVGGraphicsElement &&
+			parentElement._placeChild(this, nodes)
 		);
 	}
 	_placeAfter(...nodes: SVGGraphicsElement[]) {
-		const { parentNode } = this;
+		const { parentElement } = this;
 		return (
-			parentNode instanceof SVGGraphicsElement &&
-			parentNode._placeChild(this.nextSibling, nodes)
+			parentElement instanceof SVGGraphicsElement &&
+			parentElement._placeChild(this.nextSibling, nodes)
 		);
 	}
 	_layout() {
 		return new SVGLayout(this);
 	}
+	// for elements that establish SVG viewports
+	// svg, symbol, image, marker, pattern, view
+	_viewportTM() {
+		const w = this.width.baseVal.value;
+		const h = this.height.baseVal.value;
+		if (w && h) {
+			const { x: vx, y: vy, width: vw, height: vh } = this.viewBox._calcBox();
+			if (vw && vh) {
+				const [tx, ty, sx, sy] = viewbox_transform(
+					this.x.baseVal.value,
+					this.y.baseVal.value,
+					w,
+					h,
+					vx,
+					vy,
+					vw,
+					vh,
+					this.getAttribute("preserveAspectRatio")
+				);
+				return Matrix.translate(tx, ty).scale(sx, sy);
+			}
+		}
+
+		return Matrix.identity();
+	}
+	//////////////
+	//  decendants,  boxes
+	_subBBox(m: Matrix, params: SVGBoundingBoxOptions): Box {
+		let box = Box.new();
+		for (const sub of this.children) {
+			if (sub instanceof SVGGraphicsElement && sub._canRender()) {
+				box = box.merge(sub._ownBBox(m, params));
+			}
+		}
+		return box;
+	}
+	_ownBBox(m: Matrix, params: SVGBoundingBoxOptions): Box {
+		return this._subBBox(m, params);
+	}
 }
+
 export class SVGSVGElement extends SVGGraphicsElement {
 	static TAGS = ["svg"];
 
@@ -477,48 +536,17 @@ export class SVGSVGElement extends SVGGraphicsElement {
 	get _isViewportElement() {
 		return 1;
 	}
-	get _vboxTM(): Matrix {
+	get _subTM(): Matrix {
 		return this._ownTM.cat(this._viewportTM());
-	}
-
-	_viewportTM() {
-		const w = this.width.baseVal.value;
-		const h = this.height.baseVal.value;
-		if (w && h) {
-			const { x: vx, y: vy, width: vw, height: vh } = this.viewBox._calcBox();
-			if (vw && vh) {
-				const [tx, ty, sx, sy] = viewbox_transform(
-					this.x.baseVal.value,
-					this.y.baseVal.value,
-					w,
-					h,
-					vx,
-					vy,
-					vw,
-					vh,
-					this.getAttribute("preserveAspectRatio")
-				);
-				return Matrix.translate(tx, ty).scale(sx, sy);
-			}
-		}
-
-		return Matrix.identity();
 	}
 
 	_shapeBox(tm?: Matrix): Box {
 		return this._viewportBox(tm);
 	}
 
-	// _objectBBox(T?: Matrix) {
-	// 	const width = this.width.baseVal.value;
-	// 	const height = this.height.baseVal.value;
-	// 	const x = this.x.baseVal.value;
-	// 	const y = this.y.baseVal.value;
-	// 	if (T) {
-	// 		return SVGRect.forRect(x, y, width, height).transform(T);
-	// 	}
-	// 	return SVGRect.forRect(x, y, width, height);
-	// }
+	_ownBBox(tm?: Matrix): Box {
+		return this._viewportBox(tm);
+	}
 
 	_defs() {
 		let { ownerDocument, children } = this;

@@ -113,10 +113,10 @@ tap.test("Geoms 1", function (t) {
   const R5 = document.getElementById("R5");
   const [p, m] = V1._pairTM();
 
-  // console.log(R5._shapeBox().transform(V1._rootTM.cat(V1._vboxTM).inverse()));
-  // console.log(R5._shapeBox().transform(p.cat(V1._vboxTM).inverse()));
-  // console.log(p.cat(V1._vboxTM).inverse());
-  // console.log(V1._rootTM.cat(V1._vboxTM).inverse());
+  // console.log(R5._shapeBox().transform(V1._rootTM.cat(V1._subTM).inverse()));
+  // console.log(R5._shapeBox().transform(p.cat(V1._subTM).inverse()));
+  // console.log(p.cat(V1._subTM).inverse());
+  // console.log(V1._rootTM.cat(V1._subTM).inverse());
   V1.viewBox.contain2(R5._shapeBox());
   // console.log(V1.viewBox.baseVal);
   [["L1", 0, 2.5, 5, 7.5]].forEach(([id, x1, y1, x2, y2]) => {

@@ -8,7 +8,7 @@ import { Box, Matrix } from "svggeom";
 import { SVGLayout } from "../dist/svg/layout.js";
 
 function apply(m, node) {
-	const P = node.parentNode._localTM();
+	const P = node.parentNode._innerTM;
 	// const P = node._pairTM()[0];
 	const M = node._ownTM;
 	const L = P.inverse().cat(m).cat(P);

@@ -107,7 +107,7 @@ tap.test("transform2", function (t) {
 		// t.same(v.composeTM().toString(), m, `composeTM ${id}`);
 		t.same(v.getScreenCTM().toString(), m, `getScreenCTM ${id}`);
 		// t.same(v._composeTM().toString(), m, `_composeTM ${id}`);
-		const w = top._vboxTM;
+		const w = top._subTM;
 		// const u = v._rootTM;
 		const u = _rootTM(v);
 
@@ -250,7 +250,7 @@ import {  SVGGraphicsElement } from "../dist/svg/_element.js";
 		while (parent != root) {
 			const grand = parent.parentElement;
 			if (grand instanceof SVGGraphicsElement) {
-				tm = tm.postCat(parent._vboxTM);
+				tm = tm.postCat(parent._subTM);
 				parent = grand;
 			} else if (root) {
 				if (grand) {
@@ -278,11 +278,11 @@ import {  SVGGraphicsElement } from "../dist/svg/_element.js";
 		// }
 		let { parentElement: parent, _ownTM: tm } = node;
 		while (parent instanceof SVGGraphicsElement) {
-			const { _vboxTM } = parent;
+			const { _subTM } = parent;
 			if ((parent = parent.parentElement) == null) {
 				break;
 			}
-			tm = tm.postCat(_vboxTM);
+			tm = tm.postCat(_subTM);
 		}
 		return tm;
 	}

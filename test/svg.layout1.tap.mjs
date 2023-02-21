@@ -72,7 +72,8 @@ tap.test("layout1", { bail: 0 }, function (t) {
 			const m = Matrix.new(a, b, c, d, e, f);
 			const v = document.getElementById(id);
 			const r = v._rootTM;
-			const l = v._localTM();
+			const l = v._innerTM;
+			// const l = _innerTM(v);
 			const o = v._ownTM;
 			const b0 = Box.forRect(x, y, w, h);
 			const b1 = v._boundingBox();
@@ -84,7 +85,7 @@ tap.test("layout1", { bail: 0 }, function (t) {
 			t.ok(r.equals(m, 1e-3), `${id} ${r.describe()} ${m.describe()}`);
 			const n = metrix.tag_name == "svg" ? l.cat(v._viewportTM().inverse()) : l;
 
-			t.ok(r.equals(n, 1e-3), `_localTM ${id} ${l.describe()} ${o.describe()}`);
+			t.ok(r.equals(n, 1e-3), `_innerTM ${id} ${l.describe()} ${o.describe()}`);
 			t.ok(
 				r.equals(v._rootTM, 1e-3),
 				`docTM ${id} ${r.describe()} ${v._rootTM.describe()}`
@@ -99,7 +100,7 @@ tap.test("layout1", { bail: 0 }, function (t) {
 
 	t.end();
 });
-tap.test("_localTM()", { bail: 0 }, function (t) {
+tap.test("_innerTM", { bail: 0 }, function (t) {
 	const document = parser.parseFromString(`
 <svg xmlns="http://www.w3.org/2000/svg" id="VPA" viewBox="0 0 200 100">
 	<g id="G1" transform="translate(100,0)">
@@ -136,39 +137,39 @@ tap.test("_localTM()", { bail: 0 }, function (t) {
 	const { documentElement: rootSVG } = document;
 
 	t.same(
-		document.getElementById("G1")._localTM().describe(),
+		document.getElementById("G1")._innerTM.describe(),
 		Matrix.translate(100, 0).describe()
 	);
 	t.same(
-		document.getElementById("G2")._localTM().describe(),
+		document.getElementById("G2")._innerTM.describe(),
 		Matrix.translate(100, 100).describe()
 	);
 	t.same(
-		document.getElementById("G3")._localTM().describe(),
+		document.getElementById("G3")._innerTM.describe(),
 		Matrix.translate(100, 100).describe()
 	);
 	t.same(
-		document.getElementById("G4")._localTM().describe(),
+		document.getElementById("G4")._innerTM.describe(),
 		Matrix.translate(50, 50).describe()
 	);
 	t.same(
-		document.getElementById("R1")._localTM().describe(),
+		document.getElementById("R1")._innerTM.describe(),
 		Matrix.translate(50, 50).describe()
 	);
 	t.same(
-		document.getElementById("R2")._localTM().describe(),
+		document.getElementById("R2")._innerTM.describe(),
 		Matrix.translate(40, 40).describe()
 	);
 	t.same(
-		document.getElementById("R3")._localTM().describe(),
+		document.getElementById("R3")._innerTM.describe(),
 		Matrix.translate(100, 100).describe()
 	);
 	t.same(
-		document.getElementById("R4")._localTM().describe(),
+		document.getElementById("R4")._innerTM.describe(),
 		Matrix.translate(90, 90).describe()
 	);
 	t.same(
-		document.documentElement._localTM().describe(),
+		document.documentElement._innerTM.describe(),
 		Matrix.identity().describe()
 	);
 	[
@@ -186,9 +187,10 @@ tap.test("_localTM()", { bail: 0 }, function (t) {
 		const m = Matrix.parse(s);
 		const n = Matrix.parse(d);
 		const v = document.getElementById(id);
-		t.same(v._localTM().describe(), m.describe(), `_localTM ${id}`);
-		t.same(v._rootTM.describe(), n.describe(), `docTM ${id}`);
-		t.same(_rootTM(v).describe(), n.describe(), `docTM ${id}`);
+		t.same(v._innerTM.describe(), m.describe(), `._innerTM ${id}`);
+		t.same(v._rootTM.describe(), n.describe(), `._rootTM ${id}`);
+		t.same(_rootTM(v).describe(), n.describe(), `_rootTM() ${id}`);
+		t.same(_innerTM(v).describe(), m.describe(), `_innerTM() ${id}`);
 		// t.same(
 		// 	v._relTM(Matrix.identity(), rootSVG).describe(),
 		// 	n.describe(),
@@ -203,22 +205,27 @@ tap.test("_localTM()", { bail: 0 }, function (t) {
 
 	t.end();
 });
-import {  SVGGraphicsElement } from "../dist/svg/_element.js";
+import { SVGGraphicsElement } from "../dist/svg/_element.js";
 
-	function _rootTM(node) {
-		// const { parentNode: parent, _ownTM } = node;
-		// if (parent instanceof SVGGraphicsElement) {
-		// 	return _relTM(parent, _ownTM);
-		// } else {
-		// 	return _ownTM;
-		// }
-		let { parentElement: parent, _ownTM: tm } = node;
-		while (parent instanceof SVGGraphicsElement) {
-			const { _vboxTM } = parent;
-			if ((parent = parent.parentElement) == null) {
-				break;
-			}
-			tm = tm.postCat(_vboxTM);
+function _rootTM(node) {
+	let { parentElement: parent, _ownTM: tm } = node;
+	while (parent instanceof SVGGraphicsElement) {
+		const { _subTM } = parent;
+		if ((parent = parent.parentElement) == null) {
+			break;
 		}
-		return tm;
+		tm = tm.postCat(_subTM);
 	}
+	return tm;
+}
+function _innerTM(node) {
+	let { parentElement: parent, _subTM: tm } = node;
+	while (parent instanceof SVGGraphicsElement) {
+		const { _subTM } = parent;
+		if ((parent = parent.parentElement) == null) {
+			break;
+		}
+		tm = tm.postCat(_subTM);
+	}
+	return tm;
+}

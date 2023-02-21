@@ -20,7 +20,7 @@ tap.test("DATA", function (t) {
 	// 	.forEach(([elem, ...m]) => {
 	// 		const b = Matrix.hexad(...m);
 	// 		let a, c;
-	// 		c = elem._localTM();
+	// 		c = elem._innerTM;
 	// 		a = elem._rootTM;
 	// 		if (elem.localName == "svg") {
 	// 			a = c;
@@ -34,7 +34,7 @@ tap.test("DATA", function (t) {
 	// 		const b = Box.forRect(...m);
 	// 		let a;
 	// 		if (elem.localName == "svg") {
-	// 			// a = elem._objectBBox(elem._localTM());
+	// 			// a = elem._objectBBox(elem._innerTM);
 	// 			a = elem._shapeBox();
 	// 			// a = elem._boundingBox();
 	// 		} else {

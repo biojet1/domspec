@@ -1,11 +1,14 @@
 import { Vec, Box, Matrix, PathLS, SVGTransform } from "svggeom";
 /// Base Elements //////////
 
-interface IBBoxParam {
-	fill?: boolean;
-	stroke?: boolean;
-	markers?: boolean;
-	clipped?: boolean;
+export class SVGMarkerElement extends SVGGraphicsElement {
+	static TAGS = ["marker"];
+	get _isViewportElement() {
+		return 2;
+	}
+	_shapeBox(tm?: Matrix): Box {
+		return this._viewportBox(tm);
+	}
 }
 
 export class SVGTextContentElement extends SVGGraphicsElement {}
@@ -35,22 +38,11 @@ export class SVGGeometryElement extends SVGGraphicsElement {
 	}
 
 	_shapeBox(tm?: Matrix) {
-		let { _path } = this;
-		if (_path.firstPoint) {
-			// NOTE: bbox error
-			// if (tm) {
-			// 	return _path.bbox().transform(tm.cat(this._ownTM));
-			// } else {
-			// 	return _path.bbox().transform(this._rootTM);
-			// }
-			if (tm) {
-				_path = _path.transform(tm.cat(this._ownTM));
-			} else {
-				_path = _path.transform(this._rootTM);
-			}
-			return _path.bbox();
+		if (tm) {
+			return this._objectBBox(tm.cat(this._ownTM));
+		} else {
+			return this._objectBBox(this._rootTM);
 		}
-		return Box.not();
 	}
 
 	_toPathElement() {
@@ -88,9 +80,6 @@ class _PathD extends PathLS {
 		this._node.setAttribute("d", this.toString());
 		return this;
 	}
-	// end() {
-	// 	return this._node;
-	// }
 }
 
 export class SVGPathElement extends SVGGeometryElement {
@@ -267,7 +256,7 @@ export class SVGAElement extends SVGGraphicsElement {
 export class SVGDefsElement extends SVGGraphicsElement {
 	static TAGS = ["defs"];
 
-	getBBox() {
+	_objectBBox() {
 		return Box.empty();
 	}
 }
@@ -451,6 +440,9 @@ export class SVGGlyphElement extends SVGElement {
 
 export class SVGPatternElement extends SVGElement {
 	static TAGS = ["pattern"];
+	_shapeBox(tm?: Matrix): Box {
+		return this._viewportBox(tm);
+	}
 }
 
 interface ScriptElement {

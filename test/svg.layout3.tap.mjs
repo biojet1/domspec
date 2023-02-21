@@ -63,7 +63,7 @@ tap.test("_rootTM", async (t) => {
 		.map(([k, v], i) => [k, ...(v.root_tm ?? [])])
 		.forEach(([node, ...m]) => {
 			const b = Matrix.hexad(...m);
-			const c = node._localTM();
+			const c = node._innerTM;
 			let a;
 			if (node.localName == "svg") {
 				a = c;
@@ -82,22 +82,22 @@ tap.test("_rootTM()", async (t) => {
 	function _rootTM(node) {
 		let { parentElement: parent, _ownTM: tm } = node;
 		while (parent instanceof SVGGraphicsElement) {
-			const { _vboxTM } = parent;
+			const { _subTM } = parent;
 			if ((parent = parent.parentElement) == null) {
 				break;
 			}
-			tm = tm.postCat(_vboxTM);
+			tm = tm.postCat(_subTM);
 		}
 		return tm;
 	}
-	function _localTM(node) {
-		let { _rootTM: parent, _vboxTM: tm } = node;
+	function _innerTM(node) {
+		let { _rootTM: parent, _subTM: tm } = node;
 		while (parent instanceof SVGGraphicsElement) {
-			const { _vboxTM } = parent;
-			if ((parent = parent.parentNode) == null) {
+			const { _subTM } = parent;
+			if ((parent = parent.parentElement) == null) {
 				break;
 			}
-			tm = tm.postCat(_vboxTM);
+			tm = tm.postCat(_subTM);
 		}
 		return tm;
 	}
@@ -108,7 +108,7 @@ tap.test("_rootTM()", async (t) => {
 			const c = _rootTM(node);
 			let a;
 			if (node.localName == "svg") {
-				a = _localTM(node);
+				a = _innerTM(node);
 				return;
 			} else {
 				a = _rootTM(node);
@@ -191,3 +191,9 @@ SVGGraphicsElement:
 			SVGTSpanElement SVGTextElement
 	SVGUseElement
 */
+
+// container element
+//  a, clipPath, defs, g, marker, mask, pattern, svg, switch, symbol
+
+// elements that establish SVG viewports
+// svg, symbol, image, marker, pattern, view

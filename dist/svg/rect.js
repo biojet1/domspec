@@ -1,77 +1,17 @@
-export class SVGRect extends BoxMut {
-    owner;
-    get x() {
-        return this._x ?? 0;
-    }
-    set x(value) {
-        this._x = value;
-    }
-    get y() {
-        return this._y ?? 0;
-    }
-    set y(value) {
-        this._y = value;
-    }
-    get width() {
-        let { _w = 100 } = this;
-        if (_w == null) {
-            const { owner: o } = this;
-            if (o) {
-                const a = o.width;
-                if (a.specified) {
-                    _w = a.baseVal.value;
-                }
-                else {
-                    const v = o.nearestViewportElement;
-                    if (v) {
-                        _w = v.viewBox._calcWidth();
-                    }
-                }
-            }
-        }
-        return _w;
-    }
-    set width(value) {
-        this._w = value;
-    }
-    get height() {
-        let { _h = 100 } = this;
-        if (_h == null) {
-            const { owner: o } = this;
-            if (o) {
-                const a = o.height;
-                if (a.specified) {
-                    _h = a.baseVal.value;
-                }
-                else {
-                    const v = o.nearestViewportElement;
-                    if (v) {
-                        _h = v.viewBox._calcHeight();
-                    }
-                }
-            }
-        }
-        return _h;
-    }
-    set height(value) {
-        this._h = value;
-    }
-    toString() {
-        return this.toArray()
-            .map((n) => {
-            const v = n.toFixed(3);
-            return v.indexOf(".") < 0
-                ? v
-                : v.replace(/0+$/g, "").replace(/\.$/g, "");
-        })
-            .join(" ");
-    }
+function _format(box) {
+    return box
+        .toArray()
+        .map((n, i) => {
+        const v = n.toFixed(3);
+        return v.indexOf(".") < 0 ? v : v.replace(/0+$/g, "").replace(/\.$/g, "");
+    })
+        .join(" ");
 }
 export class SVGAnimatedRect extends Attr {
     _var;
     set value(value) {
         const { _var } = this;
-        if (_var instanceof BoxMut) {
+        if (_var instanceof SVGRect) {
             try {
                 const { x, y, width, height } = SVGRect.parse(value);
                 _var.x = x;
@@ -89,57 +29,60 @@ export class SVGAnimatedRect extends Attr {
     }
     get value() {
         const { _var } = this;
-        if (_var instanceof BoxMut) {
-            return _var.toString();
+        if (_var instanceof SVGRect) {
+            return _format(_var);
         }
         return _var || "";
     }
     get baseVal() {
         const { _var } = this;
-        if (_var instanceof BoxMut) {
+        if (_var instanceof SVGRect) {
             return _var;
         }
-        else if (_var) {
+        {
+            let box;
             try {
-                return (this._var = SVGRect.parse(_var));
+                if (_var) {
+                    box = SVGRect.parse(_var);
+                }
             }
-            catch (err) {
+            finally {
+                if (!box) {
+                    box = SVGRect.forRect(0, 0, NaN, NaN);
+                }
+                return (this._var = box);
             }
         }
-        return (this._var = SVGRect.forRect(0, 0, NaN, NaN));
     }
     get animVal() {
         return this.baseVal;
     }
     get specified() {
         const { _var } = this;
-        return !!(_var && (!(_var instanceof BoxMut) || _var.isValid()));
+        return !!(_var && (!(_var instanceof SVGRect) || _var.isValid()));
     }
     valueOf() {
         const { _var } = this;
         if (_var) {
-            if (!(_var instanceof BoxMut) || _var.isValid()) {
-                return _var.toString();
+            if (_var instanceof SVGRect && _var.isValid()) {
+                return _format(_var);
             }
         }
     }
-    contain(...args) {
+    _closeIn(...args) {
         let bbox = contain(args);
         const o = this.ownerElement;
         if (o instanceof SVGGraphicsElement) {
             bbox = bbox.transform(o._innerTM.inverse());
         }
         const { _var } = this;
-        if (_var instanceof BoxMut) {
+        if (_var instanceof SVGRect) {
             _var.copy(bbox);
         }
         else {
-            this._var = BoxMut.new(bbox);
+            this._var = SVGRect.new(bbox);
         }
         return this;
-    }
-    contain2(...args) {
-        return this.contain(...args);
     }
     _calcWidth() {
         const { _var } = this;
@@ -157,8 +100,18 @@ export class SVGAnimatedRect extends Attr {
             }
             const v = o.nearestViewportElement;
             if (v) {
-                const n = v.viewBox._calcWidth();
-                return n;
+                return v.viewBox._calcWidth();
+            }
+            const p = o.parentElement;
+            if (p) {
+                const csm = p.computedStyleMap();
+                const q = csm.get("width");
+                if (q) {
+                    let r = new SVGLength();
+                    if (r.parse(q.toString())) {
+                        return r.value;
+                    }
+                }
             }
         }
         return 100;
@@ -184,6 +137,19 @@ export class SVGAnimatedRect extends Attr {
                     return n;
                 }
             }
+            {
+                const p = o.parentElement;
+                if (p) {
+                    const csm = p.computedStyleMap();
+                    const q = csm.get("height");
+                    if (q) {
+                        let r = new SVGLength();
+                        if (r.parse(q.toString())) {
+                            return r.value;
+                        }
+                    }
+                }
+            }
         }
         return 100;
     }
@@ -207,7 +173,7 @@ export class SVGAnimatedRect extends Attr {
     }
 }
 function contain(args) {
-    let bbox = BoxMut.new();
+    let bbox = SVGRect.new();
     for (const v of args) {
         if (v instanceof Array) {
             bbox.mergeSelf(contain(v));
@@ -231,7 +197,10 @@ function contain(args) {
     }
     return bbox;
 }
-import { BoxMut, Box, Vec, Ray } from "svggeom";
+import { BoxMut as SVGRect } from "svggeom";
+import { Box, Vec, Ray } from "svggeom";
 import { Attr } from "../attr.js";
 import { SVGGraphicsElement } from "./element.js";
+import { SVGLength } from "./length.js";
+export { SVGRect };
 //# sourceMappingURL=rect.js.map

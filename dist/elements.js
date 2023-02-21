@@ -1,4 +1,4 @@
-import { XMLNS, XML_NS, HTML_NS } from "./namespace.js";
+import { XMLNS, XML_NS, HTML_NS, SVG_NS } from "./namespace.js";
 import { DOMException } from "./event-target.js";
 import { Element } from "./element.js";
 import { SVGElement, SVGAElement, SVGCircleElement, SVGClipPathElement, SVGDefsElement, SVGEllipseElement, SVGForeignObjectElement, SVGGElement, SVGGlyphElement, SVGImageElement, SVGLineElement, SVGMaskElement, SVGMissingGlyphElement, SVGPathElement, SVGPatternElement, SVGPolygonElement, SVGPolylineElement, SVGRectElement, SVGSVGElement, SVGSwitchElement, SVGSymbolElement, SVGTRefElement, SVGTSpanElement, SVGTextElement, SVGTextPathElement, SVGUseElement, SVGMarkerElement, } from "./svg/element.js";
@@ -233,7 +233,7 @@ export function createElement(doc, name, namespace) {
                 case "video":
                     return new HTMLVideoElement(localName, ns, prefix, tag);
                 case "svg":
-                    return new SVGSVGElement(localName, ns, prefix, tag);
+                    return new SVGSVGElement(localName, SVG_NS, prefix, tag);
             }
             return new HTMLUnknownElement(localName, ns, prefix, tag);
         case "http://www.w3.org/2000/svg":

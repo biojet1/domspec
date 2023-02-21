@@ -30,10 +30,12 @@ export declare class SVGElement extends Element {
     get _subTM(): Matrix;
     _viewportBox(tm?: Matrix): Box;
     get _rootTM(): Matrix;
+    get _windowTM(): Matrix;
 }
 export declare class SVGGraphicsElement extends SVGElement {
     get nearestViewportElement(): SVGElement | null;
     get farthestViewportElement(): SVGElement | null;
+    getBoundingClientRect(): Box;
     get _clipElement(): SVGGraphicsElement | null;
     set _clipElement(target: SVGElement | null);
     get _hrefElement(): SVGElement | null;
@@ -62,7 +64,7 @@ export declare class SVGGraphicsElement extends SVGElement {
 export declare class SVGSVGElement extends SVGGraphicsElement {
     static TAGS: string[];
     createSVGPoint(): Vec;
-    createSVGRect(): import("svggeom").BoxMut;
+    createSVGRect(): SVGRect;
     createSVGLength(): SVGLength;
     createSVGMatrix(): Matrix;
     createSVGTransform(): SVGTransform;
@@ -73,9 +75,10 @@ export declare class SVGSVGElement extends SVGGraphicsElement {
     _ownBBox(tm?: Matrix): Box;
     _defs(): Element;
 }
+export { Vec as SVGPoint };
 import { Element } from "../element.js";
 import { ChildNode } from "../child-node.js";
 import { SVGLength, SVGAnimatedLength } from "./length.js";
-import { SVGAnimatedRect } from "./rect.js";
+import { SVGAnimatedRect, SVGRect } from "./rect.js";
 import { SVGLayout } from "./layout.js";
 import { SVGAnimatedTransformList } from "./attr-transform.js";

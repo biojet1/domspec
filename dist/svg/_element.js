@@ -136,6 +136,18 @@ export class SVGElement extends Element {
         }
         return tm;
     }
+    get _windowTM() {
+        let { parentElement: parent, _ownTM: tm } = this;
+        while (parent instanceof SVGGraphicsElement) {
+            const { parentElement: grand, _subTM } = parent;
+            tm = tm.postCat(_subTM);
+            if (grand == null) {
+                break;
+            }
+            parent = grand;
+        }
+        return tm;
+    }
 }
 export class SVGGraphicsElement extends SVGElement {
     get nearestViewportElement() {
@@ -156,6 +168,9 @@ export class SVGGraphicsElement extends SVGElement {
             }
         }
         return farthest;
+    }
+    getBoundingClientRect() {
+        return this._shapeBox(this._windowTM);
     }
     get _clipElement() {
         const v = this.getAttribute("clip-path");
@@ -420,6 +435,7 @@ export class SVGSVGElement extends SVGGraphicsElement {
         throw new Error(`No ownerDocument`);
     }
 }
+export { Vec as SVGPoint };
 import { Element } from "../element.js";
 import { SVGLength, SVGAnimatedLength, SVGLengthHAttr, SVGLengthWAttr, SVGLengthXAttr, SVGLengthYAttr, } from "./length.js";
 import { SVGAnimatedRect, SVGRect } from "./rect.js";

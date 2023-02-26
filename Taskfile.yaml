@@ -11,7 +11,7 @@ tasks:
             - dist/**/*.js
 
     testx:
-        method: timestamp
+        method: none
         deps: [tsc]
         sources:
             - test/**/*.tap.*js*
@@ -19,7 +19,7 @@ tasks:
             - tap {{.CLI_ARGS}}
 
     c8tap:
-        method: timestamp
+        method: none
         deps: [tsc]
         sources:
             - test/**/*.tap.*js*

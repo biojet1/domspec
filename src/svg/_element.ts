@@ -487,14 +487,22 @@ export class SVGGraphicsElement extends SVGElement {
 	// for elements that establish SVG viewports
 	// svg, symbol, image, marker, pattern, view
 	_viewportTM() {
-		const w = this.width.baseVal.value;
-		const h = this.height.baseVal.value;
+		let w = this.width.baseVal.value;
+		let h = this.height.baseVal.value;
 		if (w && h) {
-			const { x: vx, y: vy, width: vw, height: vh } = this.viewBox._calcBox();
+			const x = this.x.baseVal.value;
+			const y = this.y.baseVal.value;
+			let { x: vx, y: vy, width: vw, height: vh } = this.viewBox.baseVal;
+			// const { x: vx, y: vy, width: vw, height: vh } = this.viewBox._calcBox();
+			(vx == null || isNaN(vx)) && (vx = x);
+			(vy == null || isNaN(vy)) && (vy = y);
+			(vw == null || isNaN(vw)) && (vw = w);
+			(vh == null || isNaN(vh)) && (vh = h);
+
 			if (vw && vh) {
 				const [tx, ty, sx, sy] = viewbox_transform(
-					this.x.baseVal.value,
-					this.y.baseVal.value,
+					x,
+					y,
 					w,
 					h,
 					vx,

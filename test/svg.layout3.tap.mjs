@@ -6,6 +6,8 @@ import { DOMParser } from "../dist/dom-parse.js";
 import { SVGLength } from "../dist/svg/element.js";
 import { Box, Matrix } from "svggeom";
 import DATA from "./res/transform.json" assert { type: "json" };
+// import DATA from "../../anim8/test/res/vps.json" assert { type: "json" };
+
 
 const parser = new DOMParser();
 const { all } = parser.parseFromString(DATA[""]);

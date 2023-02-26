@@ -445,14 +445,14 @@ export class SVGPatternElement extends SVGElement {
 	}
 }
 
-interface ScriptElement {
-	_alreadyStarted?: boolean;
-}
+// interface ScriptElement {
+// 	_alreadyStarted?: boolean;
+// }
 
-export class SVGScriptElement extends SVGElement {
-	static TAGS = ["script"];
-	_alreadyStarted?: boolean;
-}
+// export class SVGScriptElement extends SVGElement {
+// 	static TAGS = ["script"];
+// 	_alreadyStarted?: boolean;
+// }
 
 import { SVGElement, SVGSVGElement, SVGGraphicsElement } from "./_element.js";
 import { DOMException } from "../event-target.js";

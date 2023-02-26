@@ -357,6 +357,7 @@ export function createElement(
 				case "svg":
 					return new SVGSVGElement(localName, SVG_NS, prefix, tag);
 			}
+			// console.warn(`Unknown html element '${localName}'`);
 			return new HTMLUnknownElement(localName, ns, prefix, tag);
 		case "http://www.w3.org/2000/svg":
 			switch (localName) {
@@ -412,10 +413,9 @@ export function createElement(
 					return new SVGUseElement(localName, ns, prefix, tag);
 				case "marker":
 					return new SVGMarkerElement(localName, ns, prefix, tag);
-
 				////////
-
 				default:
+					console.warn(`Unknown svg element '${localName}'`);
 					return new SVGElement(localName, ns, prefix, tag);
 			}
 		default:

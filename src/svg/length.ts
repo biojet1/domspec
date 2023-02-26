@@ -424,6 +424,7 @@ export class SVGLengthYAttr extends SVGAnimatedLength {
 	}
 }
 
+
 import { DOMException } from "../event-target.js";
 import { Attr } from "../attr.js";
 import { SVGGraphicsElement, SVGSVGElement } from "./_element.js";

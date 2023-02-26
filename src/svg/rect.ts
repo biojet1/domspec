@@ -180,13 +180,12 @@ export class SVGAnimatedRect extends Attr {
 
 	valueOf() {
 		const { _var } = this;
-		if (_var) {
-			// if (!(_var instanceof SVGRect) || _var.isValid()) {
-			// 	return _format(_var);
-			// }
-			if (_var instanceof SVGRect && _var.isValid()) {
+		if (_var instanceof SVGRect) {
+			if (_var.isValid()) {
 				return _format(_var);
 			}
+		} else if (_var) {
+			return _var;
 		}
 	}
 

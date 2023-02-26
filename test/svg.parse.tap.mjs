@@ -101,6 +101,21 @@ tap.test("SVG getPointAtLength getTotalLength", function (t) {
 		PathLS.parse(PG1._toPathElement().getAttribute("d")).toString(),
 		PathLS.parse("M 400,300 H 300Z").toString()
 	);
+	{
+		// viewBox not serializing bug
+		t.same(svg.viewBox.valueOf(), "-100 100 810 410");
+		svg.setAttribute("viewBox", "N S E W");
+		t.same(svg.viewBox.valueOf(), "N S E W");
+		svg.viewBox.baseVal.x = 1;
+		svg.viewBox.baseVal.y = 2;
+		svg.viewBox.baseVal.width = 3;
+		svg.viewBox.baseVal.height = 4;
+		t.same(svg.viewBox.valueOf(), "1 2 3 4");
+		svg.viewBox.baseVal.height = NaN;
+		t.same(svg.viewBox.valueOf(), null);
+		svg.viewBox.baseVal.height = 5;
+		t.same(svg.viewBox.valueOf(), "1 2 3 5");
+	}
 	t.end();
 });
 tap.test("SVG width", function (t) {
@@ -134,10 +149,12 @@ tap.test("SVG width", function (t) {
 		t.match(mySVG.constructor.name, /SVGSVGElement/);
 		t.ok(mySVG.viewBox);
 		t.match(mySVG.viewBox.constructor.name, /SVGAnimatedRect/);
-const x=mySVG.createSVGLength();
-x.valueAsString = '100%';
+		t.same(mySVG.viewBox.valueOf(), null);
 
-		 console.dir(x.value);
+		const x = mySVG.createSVGLength();
+		x.valueAsString = "100%";
+
+		console.dir(x.value);
 		// console.dir(mySVG.viewBox.constructor.name);
 		// console.dir(mySVG.viewBox.baseVal.width);
 		// console.dir(mySVG.viewBox._calcWidth());

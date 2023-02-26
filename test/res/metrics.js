@@ -96,7 +96,6 @@ window.svg_groups = groups;
 window.svg_graphics = graphics;
 window.svg_elements = elements;
 
-
 root.querySelectorAll(`*[id]`).forEach((v) => {
   window[v.id] = v;
 });
@@ -212,6 +211,9 @@ function matArray(r) {
   const ids = new Set();
   let metrix = (window.metrix = {});
   graphics.forEach((v) => {
+    v.style.strokeWidth = 0;
+  });
+  graphics.forEach((v) => {
     const root_tm = (() => {
       try {
         return v.getTransformToElement(root);
@@ -232,7 +234,6 @@ function matArray(r) {
     })();
     // a, clipPath, defs, g, marker, mask, pattern, svg, switch, symbol
     const { a, b, c, d, e, f } = root_tm;
-    v.style.strokeWidth = 0;
     const r = v.getBoundingClientRect();
     const rb = v.getBBox();
     const root_box = transformBox(r, root.getScreenCTM().inverse());
@@ -272,6 +273,9 @@ function matArray(r) {
     );
   });
   metrix[""] = root.outerHTML;
+    graphics.forEach((v) => {
+    v.style.strokeWidth = null;
+  });
 }
 
 function getScreenCTM(n) {

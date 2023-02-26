@@ -362,12 +362,18 @@ export class SVGGraphicsElement extends SVGElement {
         return new SVGLayout(this);
     }
     _viewportTM() {
-        const w = this.width.baseVal.value;
-        const h = this.height.baseVal.value;
+        let w = this.width.baseVal.value;
+        let h = this.height.baseVal.value;
         if (w && h) {
-            const { x: vx, y: vy, width: vw, height: vh } = this.viewBox._calcBox();
+            const x = this.x.baseVal.value;
+            const y = this.y.baseVal.value;
+            let { x: vx, y: vy, width: vw, height: vh } = this.viewBox.baseVal;
+            (vx == null || isNaN(vx)) && (vx = x);
+            (vy == null || isNaN(vy)) && (vy = y);
+            (vw == null || isNaN(vw)) && (vw = w);
+            (vh == null || isNaN(vh)) && (vh = h);
             if (vw && vh) {
-                const [tx, ty, sx, sy] = viewbox_transform(this.x.baseVal.value, this.y.baseVal.value, w, h, vx, vy, vw, vh, this.getAttribute("preserveAspectRatio"));
+                const [tx, ty, sx, sy] = viewbox_transform(x, y, w, h, vx, vy, vw, vh, this.getAttribute("preserveAspectRatio"));
                 return Matrix.translate(tx, ty).scale(sx, sy);
             }
         }

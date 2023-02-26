@@ -359,10 +359,6 @@ export class SVGPatternElement extends SVGElement {
         return this._viewportBox(tm);
     }
 }
-export class SVGScriptElement extends SVGElement {
-    static TAGS = ["script"];
-    _alreadyStarted;
-}
 import { SVGElement, SVGSVGElement, SVGGraphicsElement } from "./_element.js";
 import { DOMException } from "../event-target.js";
 export { SVGLength, SVGAnimatedLength } from "./length.js";

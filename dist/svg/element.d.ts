@@ -117,10 +117,6 @@ export declare class SVGPatternElement extends SVGElement {
     static TAGS: string[];
     _shapeBox(tm?: Matrix): Box;
 }
-export declare class SVGScriptElement extends SVGElement {
-    static TAGS: string[];
-    _alreadyStarted?: boolean;
-}
 import { SVGElement, SVGSVGElement, SVGGraphicsElement } from "./_element.js";
 export { SVGLength, SVGAnimatedLength } from "./length.js";
 export { SVGRect, SVGAnimatedRect } from "./rect.js";

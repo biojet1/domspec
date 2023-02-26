@@ -291,6 +291,7 @@ export function createElement(doc, name, namespace) {
                 case "marker":
                     return new SVGMarkerElement(localName, ns, prefix, tag);
                 default:
+                    console.warn(`Unknown svg element '${localName}'`);
                     return new SVGElement(localName, ns, prefix, tag);
             }
         default:

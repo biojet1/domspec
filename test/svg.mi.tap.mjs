@@ -4,7 +4,7 @@ import { Document, SVGDocument } from "../dist/document.js";
 import { ParentNode } from "../dist/parent-node.js";
 import { DOMParser } from "../dist/dom-parse.js";
 import { SVGLength } from "../dist/svg/element.js";
-import { Box, MatrixInterpolate, Matrix } from "svggeom";
+import { Box, Matrix } from "svggeom";
 import { createWriteStream, writeFileSync, WriteStream } from "fs";
 const parser = new DOMParser();
 
@@ -68,19 +68,19 @@ tap.test("Mi", function (t) {
 
       // console.log(S.id, S._boundingBox().center.sub(b.center), b);
 
-      let t = MatrixInterpolate.parse([
-        { translate: S._boundingBox().center.sub(b.center), weight: 2 },
-        {
-          scale: 10,
-          anchor: b.center,
-        },
-      ]);
-      for (const v of [u, w]) {
-        let M = t.at(1, Matrix.identity());
-        let [p, m] = v._pairTM();
-        // console.log(p, m, M);
-        v._ownTM = p.inverse().cat(M).cat(p);
-      }
+      // let t = MatrixInterpolate.parse([
+      //   { translate: S._boundingBox().center.sub(b.center), weight: 2 },
+      //   {
+      //     scale: 10,
+      //     anchor: b.center,
+      //   },
+      // ]);
+      // for (const v of [u, w]) {
+      //   let M = t.at(1, Matrix.identity());
+      //   let [p, m] = v._pairTM();
+      //   // console.log(p, m, M);
+      //   v._ownTM = p.inverse().cat(M).cat(p);
+      // }
     });
   }
 

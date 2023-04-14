@@ -284,6 +284,9 @@ export class SVGImageElement extends SVGGraphicsElement {
 	_shapeBox(tm?: Matrix): Box {
 		return this._viewportBox(tm);
 	}
+	_objectBBox(tm?: Matrix): Box {
+		return this._viewportBox(tm);
+	}
 }
 
 export class SVGSwitchElement extends SVGGraphicsElement {

@@ -161,7 +161,7 @@ export const AttributesHandler = {
 						}
 					} else {
 						for (const attr of attributes(self)) {
-							if (index == attr.name) return attr;
+							if (index == +attr.name) return attr;
 						}
 					}
 					return null;

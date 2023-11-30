@@ -1,7 +1,9 @@
+import fs from "fs";
 import tap from "tap";
 import { Document, SVGDocument } from "../dist/document.js";
 import { ParentNode } from "../dist/parent-node.js";
 import { DOMParser } from "../dist/dom-parse.js";
+import { SVGRect } from "../dist/all.js";
 
 const parser = new DOMParser();
 
@@ -12,7 +14,7 @@ tap.test("viewBox", function (t) {
 	// console.log(top.constructor.name);
 	// console.log(top.width.constructor.name);
 	// console.log(top.viewBox.constructor.name);
-	t.strictSame(top.viewBox.constructor.name, "SVGRectAttr");
+	t.strictSame(top.viewBox.constructor.name, "SVGAnimatedRect");
 
 	t.strictSame(top.viewBox.baseVal.x, -10);
 	t.strictSame(top.viewBox.baseVal.width, 200);
@@ -146,6 +148,43 @@ tap.test("createSVGTransformFromMatrix", function (t) {
 
 	// document.getElementById("status").setAttributeNS(null, "fill", passed ? "lime" : "red");
 	// document.getElementById("scriptstatus").textContent = "Scripting enabled";
+
+	t.end();
+});
+
+tap.test("width.baseVal", function (t) {
+	const document = parser.parseFromString(
+		fs.readFileSync("test/res/transform.svg", {
+			encoding: "utf-8",
+		})
+	);
+	const { RO } = document.all;
+	const v = RO.width.baseVal;
+	t.ok(v, v);
+	t.strictSame(RO.width.baseVal, v);
+	RO.width.baseVal.value = 7;
+	t.strictSame(RO.width.baseVal, v);
+	t.same(RO.width.baseVal.value, 7, v);
+
+	t.end();
+});
+tap.test("width.baseVal", function (t) {
+	const document = parser.parseFromString(
+		fs.readFileSync("test/res/transform.svg", {
+			encoding: "utf-8",
+		})
+	);
+	var svgElement = document.createElementNS(
+		"http://www.w3.org/2000/svg",
+		"svg"
+	);
+	svgElement.setAttribute("viewBox", "1 2 3 4");
+	// Check initial viewBox value.
+	t.match(svgElement.constructor.name, /SVGSVGElement/);
+	t.match(svgElement.viewBox.constructor.name, /SVGAnimatedRect/);
+	t.ok(svgElement.viewBox.baseVal instanceof SVGRect);
+	t.ok(svgElement.viewBox.animVal instanceof SVGRect);
+	// assert_equals(svgElement.viewBox.baseVal.x, 0);
 
 	t.end();
 });

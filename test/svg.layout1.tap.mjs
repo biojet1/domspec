@@ -27,7 +27,7 @@ function apply(m, node) {
 	}
 	// T = R.inverse().cat(m).cat(P)
 	T = L.cat(M); // R1,R2,R3,R4 OK
-	node.ownTM = T;
+	node._ownTM = T;
 
 	console.log(
 		"trans",
@@ -37,10 +37,10 @@ function apply(m, node) {
 }
 
 function toParent(parent, i) {
-	const childTM = i.rootTM;
-	const parentTM = parent.rootTM;
+	const childTM = i._rootTM;
+	const parentTM = parent._rootTM;
 	parent.appendChild(i);
-	i.ownTM = parentTM.inverse().cat(childTM);
+	i._ownTM = parentTM.inverse().cat(childTM);
 }
 
 const parser = new DOMParser();
@@ -71,23 +71,24 @@ tap.test("layout1", { bail: 0 }, function (t) {
 			const [x, y, w, h] = metrix.root_box;
 			const m = Matrix.new(a, b, c, d, e, f);
 			const v = document.getElementById(id);
-			const r = v.rootTM;
-			const l = v.localTM();
-			const o = v.ownTM;
+			const r = v._rootTM;
+			const l = v._innerTM;
+			// const l = _innerTM(v);
+			const o = v._ownTM;
 			const b0 = Box.forRect(x, y, w, h);
-			const b1 = v.boundingBox();
+			const b1 = v._boundingBox();
 			root.insertAdjacentHTML(
 				"beforeend",
 				`<rect x="${b1.x}" y="${b1.y}" width="${b1.width}" height="${b1.height}" style="fill:none;stroke:red;opacity:50%;">`
 			);
 
 			t.ok(r.equals(m, 1e-3), `${id} ${r.describe()} ${m.describe()}`);
-			const n = metrix.tag_name == "svg" ? l.cat(v.viewportTM().inverse()) : l;
+			const n = metrix.tag_name == "svg" ? l.cat(v._viewportTM().inverse()) : l;
 
-			t.ok(r.equals(n, 1e-3), `localTM ${id} ${l.describe()} ${o.describe()}`);
+			t.ok(r.equals(n, 1e-3), `_innerTM ${id} ${l.describe()} ${o.describe()}`);
 			t.ok(
-				r.equals(v.docTM(), 1e-3),
-				`docTM ${id} ${r.describe()} ${v.docTM().describe()}`
+				r.equals(v._rootTM, 1e-3),
+				`docTM ${id} ${r.describe()} ${v._rootTM.describe()}`
 			);
 			if ((metrix.tag_name != "defs", !b0.isEmpty())) {
 				eqBox(t, b0, b1, 1e-1, id);
@@ -99,7 +100,7 @@ tap.test("layout1", { bail: 0 }, function (t) {
 
 	t.end();
 });
-tap.test("localTM()", { bail: 0 }, function (t) {
+tap.test("_innerTM", { bail: 0 }, function (t) {
 	const document = parser.parseFromString(`
 <svg xmlns="http://www.w3.org/2000/svg" id="VPA" viewBox="0 0 200 100">
 	<g id="G1" transform="translate(100,0)">
@@ -136,39 +137,39 @@ tap.test("localTM()", { bail: 0 }, function (t) {
 	const { documentElement: rootSVG } = document;
 
 	t.same(
-		document.getElementById("G1").localTM().describe(),
+		document.getElementById("G1")._innerTM.describe(),
 		Matrix.translate(100, 0).describe()
 	);
 	t.same(
-		document.getElementById("G2").localTM().describe(),
+		document.getElementById("G2")._innerTM.describe(),
 		Matrix.translate(100, 100).describe()
 	);
 	t.same(
-		document.getElementById("G3").localTM().describe(),
+		document.getElementById("G3")._innerTM.describe(),
 		Matrix.translate(100, 100).describe()
 	);
 	t.same(
-		document.getElementById("G4").localTM().describe(),
+		document.getElementById("G4")._innerTM.describe(),
 		Matrix.translate(50, 50).describe()
 	);
 	t.same(
-		document.getElementById("R1").localTM().describe(),
+		document.getElementById("R1")._innerTM.describe(),
 		Matrix.translate(50, 50).describe()
 	);
 	t.same(
-		document.getElementById("R2").localTM().describe(),
+		document.getElementById("R2")._innerTM.describe(),
 		Matrix.translate(40, 40).describe()
 	);
 	t.same(
-		document.getElementById("R3").localTM().describe(),
+		document.getElementById("R3")._innerTM.describe(),
 		Matrix.translate(100, 100).describe()
 	);
 	t.same(
-		document.getElementById("R4").localTM().describe(),
+		document.getElementById("R4")._innerTM.describe(),
 		Matrix.translate(90, 90).describe()
 	);
 	t.same(
-		document.documentElement.localTM().describe(),
+		document.documentElement._innerTM.describe(),
 		Matrix.identity().describe()
 	);
 	[
@@ -186,20 +187,45 @@ tap.test("localTM()", { bail: 0 }, function (t) {
 		const m = Matrix.parse(s);
 		const n = Matrix.parse(d);
 		const v = document.getElementById(id);
-		t.same(v.localTM().describe(), m.describe(), `localTM ${id}`);
-		t.same(v.docTM().describe(), n.describe(), `docTM ${id}`);
-		t.same(v._composeTM().describe(), n.describe(), `_composeTM ${id}`);
-		t.same(
-			v._composeTM(rootSVG).describe(),
-			n.describe(),
-			`_composeTM rootSVG ${id}`
-		);
+		t.same(v._innerTM.describe(), m.describe(), `._innerTM ${id}`);
+		t.same(v._rootTM.describe(), n.describe(), `._rootTM ${id}`);
+		t.same(_rootTM(v).describe(), n.describe(), `_rootTM() ${id}`);
+		t.same(_innerTM(v).describe(), m.describe(), `_innerTM() ${id}`);
+		// t.same(
+		// 	v._relTM(Matrix.identity(), rootSVG).describe(),
+		// 	n.describe(),
+		// 	`_composeTM rootSVG ${id}`
+		// );
 	});
 	t.same(
-		rootSVG._composeTM().describe(),
+		rootSVG._rootTM.describe(),
 		Matrix.identity().describe(),
 		`_composeTM documentElement`
 	);
 
 	t.end();
 });
+import { SVGGraphicsElement } from "../dist/svg/_element.js";
+
+function _rootTM(node) {
+	let { parentElement: parent, _ownTM: tm } = node;
+	while (parent instanceof SVGGraphicsElement) {
+		const { _subTM } = parent;
+		if ((parent = parent.parentElement) == null) {
+			break;
+		}
+		tm = tm.postCat(_subTM);
+	}
+	return tm;
+}
+function _innerTM(node) {
+	let { parentElement: parent, _subTM: tm } = node;
+	while (parent instanceof SVGGraphicsElement) {
+		const { _subTM } = parent;
+		if ((parent = parent.parentElement) == null) {
+			break;
+		}
+		tm = tm.postCat(_subTM);
+	}
+	return tm;
+}

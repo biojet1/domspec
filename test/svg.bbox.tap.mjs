@@ -34,6 +34,6 @@ test.test(`getBBox`, { bail: !CI }, function (t) {
     t.same(all['defs-1'].getBBox().toArray(), [0, 0, 0, 0], 'defs-1');
     t.same(all['use-1'].getBBox().toArray(), [30, 30, 40, 40], 'use-1');
     t.same(all['group-1'].getBBox().toArray(), [30, 30, 40, 40], 'group-1');
-    t.same(all['use-1'].hrefElement.id, 'rect-1', 'use-1 <- rect-1');
+    t.same(all['use-1']._hrefElement.id, 'rect-1', 'use-1 <- rect-1');
     t.end();
 });

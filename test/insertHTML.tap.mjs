@@ -38,7 +38,7 @@ tap.test('transform', function (t) {
 //     const document = await parser.parseFile(new URL('res/symbol.svg', import.meta.url));
 //     const {U2, U1} = document.all;
 
-//     t.match(U2.boundingBox(), {x: 20, y: 5, width: 10, height: 10})
+//     t.match(U2._boundingBox(), {x: 20, y: 5, width: 10, height: 10})
 //     console.log(U2._shapeBox());
 //     U2.setAttribute("transform", "scale(2)translate(10,5)");
 //     t.end();

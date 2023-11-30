@@ -1,66 +1,51 @@
 import { Vec, Box, Matrix, PathLS, SVGTransform } from "svggeom";
 /// Base Elements //////////
 
-interface IBBoxParam {
-	fill?: boolean;
-	stroke?: boolean;
-	markers?: boolean;
-	clipped?: boolean;
+export class SVGMarkerElement extends SVGGraphicsElement {
+	static TAGS = ["marker"];
+	get _isViewportElement() {
+		return 2;
+	}
+	_shapeBox(tm?: Matrix): Box {
+		return this._viewportBox(tm);
+	}
 }
 
 export class SVGTextContentElement extends SVGGraphicsElement {}
 
 export class SVGGeometryElement extends SVGGraphicsElement {
-	describe(): string {
+	_describe(): string {
 		/* c8 ignore next */
 		throw new Error("NotImplemented");
 	}
-	getPath() {
-		return PathLS.parse(this.describe());
-	}
-	get path() {
+	get _path() {
 		try {
-			return PathLS.parse(this.describe());
+			return PathLS.parse(this._describe());
 		} catch (err) {
 			return new PathLS(undefined);
 		}
 	}
 	// https://greensock.com/forums/topic/13681-svg-gotchas/page/2/?tab=comments#comment-72060
-	objectBBox(T?: Matrix) {
-		let { path } = this;
-		if (path.firstPoint) {
+	_objectBBox(T?: Matrix) {
+		let { _path } = this;
+		if (_path.firstPoint) {
 			if (T) {
-				return path.transform(T).bbox();
+				return _path.transform(T).bbox();
 			}
-			return path.bbox();
+			return _path.bbox();
 		}
 		return Box.not();
-	}
-
-	shapeBox(T?: Matrix) {
-		return this._shapeBox(T);
 	}
 
 	_shapeBox(tm?: Matrix) {
-		let { path } = this;
-		if (path.firstPoint) {
-			// NOTE: bbox error
-			// if (tm) {
-			// 	return path.bbox().transform(tm.cat(this.ownTM));
-			// } else {
-			// 	return path.bbox().transform(this.rootTM);
-			// }
-			if (tm) {
-				path = path.transform(tm.cat(this.ownTM));
-			} else {
-				path = path.transform(this.rootTM);
-			}
-			return path.bbox();
+		if (tm) {
+			return this._objectBBox(tm.cat(this._ownTM));
+		} else {
+			return this._objectBBox(this._rootTM);
 		}
-		return Box.not();
 	}
 
-	toPathElement() {
+	_toPathElement() {
 		const { ownerDocument } = this;
 		if (ownerDocument) {
 			const p = ownerDocument.createElementNS(
@@ -68,7 +53,7 @@ export class SVGGeometryElement extends SVGGraphicsElement {
 				"path"
 			) as SVGGeometryElement;
 			let s;
-			(s = this.describe()) && p.setAttribute("d", s);
+			(s = this._describe()) && p.setAttribute("d", s);
 			(s = this.getAttribute("style")) && p.setAttribute("style", s);
 			(s = this.getAttribute("class")) && p.setAttribute("class", s);
 			(s = this.getAttribute("transform")) && p.setAttribute("transform", s);
@@ -77,10 +62,10 @@ export class SVGGeometryElement extends SVGGraphicsElement {
 		throw DOMException.new(`InvalidStateError`);
 	}
 	getTotalLength() {
-		return this.path.length;
+		return this._path.length;
 	}
 	getPointAtLength(L: number) {
-		return this.path.pointAtLength(L, true);
+		return this._path.pointAtLength(L, true);
 	}
 }
 
@@ -95,26 +80,23 @@ class _PathD extends PathLS {
 		this._node.setAttribute("d", this.toString());
 		return this;
 	}
-	// end() {
-	// 	return this._node;
-	// }
 }
 
 export class SVGPathElement extends SVGGeometryElement {
 	static TAGS = ["path"];
-	describe() {
+	_describe() {
 		return this.getAttribute("d") || "";
 	}
-	beginPath() {
+	_beginPath() {
 		// ._beginPath().withFont().text()
 		return new _PathD(this);
 	}
 
-	fuseTransform(parentT?: Matrix) {
-		let tm = parentT ? this.ownTM.postCat(parentT) : this.ownTM;
+	_fuseTransform(parentT?: Matrix) {
+		let tm = parentT ? this._ownTM.postCat(parentT) : this._ownTM;
 		this.setAttribute(
 			"d",
-			PathLS.parse(this.describe()).transform(tm).describe()
+			PathLS.parse(this._describe()).transform(tm).describe()
 		);
 		this.removeAttribute("transform");
 	}
@@ -122,7 +104,7 @@ export class SVGPathElement extends SVGGeometryElement {
 
 export class SVGCircleElement extends SVGGeometryElement {
 	static TAGS = ["circle"];
-	describe() {
+	_describe() {
 		const r = this.r.baseVal.value;
 		const x = this.cx.baseVal.value;
 		const y = this.cy.baseVal.value;
@@ -137,7 +119,7 @@ export class SVGCircleElement extends SVGGeometryElement {
 
 export class SVGRectElement extends SVGGeometryElement {
 	static TAGS = ["rect"];
-	describe() {
+	_describe() {
 		const width = this.width.baseVal.value;
 		const height = this.height.baseVal.value;
 		const x = this.x.baseVal.value;
@@ -147,8 +129,8 @@ export class SVGRectElement extends SVGGeometryElement {
 
 		return `M ${x} ${y} h ${width} v ${height} h ${-width} Z`;
 	}
-	fuseTransform(parentT?: Matrix) {
-		let tm = parentT ? this.ownTM.postCat(parentT) : this.ownTM;
+	_fuseTransform(parentT?: Matrix) {
+		let tm = parentT ? this._ownTM.postCat(parentT) : this._ownTM;
 		const {
 			a: scale_x,
 			b: skew_x,
@@ -174,7 +156,7 @@ export class SVGRectElement extends SVGGeometryElement {
 			this.removeAttribute("transform");
 		} else {
 			throw new Error(
-				`fuseTransform of ${this.constructor.name} with skew_x == ${skew_x}, skew_y == ${skew_y}`
+				`fuse transform of ${this.constructor.name} with skew_x == ${skew_x}, skew_y == ${skew_y}`
 			);
 		}
 	}
@@ -182,15 +164,15 @@ export class SVGRectElement extends SVGGeometryElement {
 
 export class SVGLineElement extends SVGGeometryElement {
 	static TAGS = ["line"];
-	describe() {
+	_describe() {
 		const x1 = this.x1.baseVal.value;
 		const x2 = this.x2.baseVal.value;
 		const y1 = this.y1.baseVal.value;
 		const y2 = this.y2.baseVal.value;
 		return `M ${x1} ${y1} L ${x2} ${y2}`;
 	}
-	fuseTransform(parentT: Matrix) {
-		let tm = parentT ? this.ownTM.postCat(parentT) : this.ownTM;
+	_fuseTransform(parentT: Matrix) {
+		let tm = parentT ? this._ownTM.postCat(parentT) : this._ownTM;
 		if (!tm.isIdentity) {
 			let x1 = this.x1.baseVal.value;
 			let x2 = this.x2.baseVal.value;
@@ -209,7 +191,7 @@ export class SVGLineElement extends SVGGeometryElement {
 
 export class SVGEllipseElement extends SVGGeometryElement {
 	static TAGS = ["ellipse"];
-	describe() {
+	_describe() {
 		const rx = this.rx.baseVal.value;
 		const ry = this.ry.baseVal.value;
 		const x = this.cx.baseVal.value;
@@ -222,12 +204,12 @@ export class SVGEllipseElement extends SVGGeometryElement {
 
 export class SVGPolygonElement extends SVGGeometryElement {
 	static TAGS = ["polygon"];
-	describe() {
+	_describe() {
 		const p = this.getAttribute("points");
 		return p ? `M ${p} Z` : "";
 	}
-	fuseTransform(parentT?: Matrix) {
-		let tm = parentT ? this.ownTM.postCat(parentT) : this.ownTM;
+	_fuseTransform(parentT?: Matrix) {
+		let tm = parentT ? this._ownTM.postCat(parentT) : this._ownTM;
 		if (!tm.isIdentity) {
 			const l = this.getAttribute("points")
 				?.split(/(\s+)/)
@@ -244,12 +226,12 @@ export class SVGPolygonElement extends SVGGeometryElement {
 
 export class SVGPolylineElement extends SVGGeometryElement {
 	static TAGS = ["polyline"];
-	describe() {
+	_describe() {
 		const p = this.getAttribute("points");
 		return p ? `M ${p}` : "";
 	}
-	fuseTransform(parentT?: Matrix) {
-		let tm = parentT ? this.ownTM.postCat(parentT) : this.ownTM;
+	_fuseTransform(parentT?: Matrix) {
+		let tm = parentT ? this._ownTM.postCat(parentT) : this._ownTM;
 		if (!tm.isIdentity) {
 			const l = this.getAttribute("points")
 				?.split(/(\s+)/)
@@ -274,7 +256,7 @@ export class SVGAElement extends SVGGraphicsElement {
 export class SVGDefsElement extends SVGGraphicsElement {
 	static TAGS = ["defs"];
 
-	getBBox() {
+	_objectBBox() {
 		return Box.empty();
 	}
 }
@@ -283,9 +265,6 @@ export class SVGForeignObjectElement extends SVGGraphicsElement {
 	static TAGS = ["foreignObject"];
 	get _isViewportElement() {
 		return 2;
-	}
-	shapeBox(T?: Matrix): Box {
-		return this._shapeBox(T);
 	}
 	_shapeBox(tm?: Matrix): Box {
 		return this._viewportBox(tm);
@@ -302,10 +281,10 @@ export class SVGImageElement extends SVGGraphicsElement {
 	get _isViewportElement() {
 		return 1;
 	}
-	shapeBox(T?: Matrix): Box {
-		return this._shapeBox(T);
-	}
 	_shapeBox(tm?: Matrix): Box {
+		return this._viewportBox(tm);
+	}
+	_objectBBox(tm?: Matrix): Box {
 		return this._viewportBox(tm);
 	}
 }
@@ -317,36 +296,11 @@ export class SVGSwitchElement extends SVGGraphicsElement {
 export class SVGUseElement extends SVGGraphicsElement {
 	static TAGS = ["use"];
 
-	// get ownTM() {
-	// 	// const m = Matrix.parse(this.getAttribute('transform') || '');
-	// 	const m = Matrix.parse(this.getAttribute('transform') || '');
-	// 	const x = this.x.baseVal.value;
-	// 	const y = this.y.baseVal.value;
-	// 	if (x || y) {
-	// 		return Matrix.translate(x, y).cat(m);
-	// 	}
-	// 	return m;
-	// }
-	// set ownTM(m: Matrix) {
-	// 	const x = this.x.baseVal.value;
-	// 	const y = this.y.baseVal.value;
-	// 	if (x || y) {
-	// 		const m0 = Matrix.parse(this.getAttribute('transform') || '');
-
-	// 		m = Matrix.translate(x, y).inverse().cat(m);
-	// 	}
-	// 	this.setAttribute('transform', m.toString());
-	// }
-
-	shapeBox(T?: Matrix) {
-		return this._shapeBox(T);
-	}
-
 	_shapeBox(tm?: Matrix) {
-		const ref = this.hrefElement;
+		const ref = this._hrefElement;
 		if (ref) {
 			const m = (() => {
-				let [p, o] = this.pairTM();
+				let [p, o] = this._pairTM();
 				const x = this.x.baseVal.value;
 				const y = this.y.baseVal.value;
 				if (x || y) {
@@ -370,12 +324,12 @@ export class SVGUseElement extends SVGGraphicsElement {
 		return Box.not();
 	}
 
-	objectBBox(T?: Matrix) {
-		// const E = T ? T.cat(this.ownTM) : this.ownTM;
-		const ref = this.hrefElement;
+	_objectBBox(T?: Matrix) {
+		// const E = T ? T.cat(this._ownTM) : this._ownTM;
+		const ref = this._hrefElement;
 		if (ref) {
 			const m = (() => {
-				let [p, o] = this.pairTM();
+				let [p, o] = this._pairTM();
 				const x = this.x.baseVal.value;
 				const y = this.y.baseVal.value;
 				if (x || y) {
@@ -389,14 +343,14 @@ export class SVGUseElement extends SVGGraphicsElement {
 			})();
 
 			// if (ref instanceof SVGSymbolElement) {
-			// 	return (ref as SVGGraphicsElement).objectBBox(m);
+			// 	return (ref as SVGGraphicsElement)._objectBBox(m);
 			// }
 
 			// if (T) {
-			// 	return (ref as SVGGraphicsElement).objectBBox(m);
+			// 	return (ref as SVGGraphicsElement)._objectBBox(m);
 			// }
 
-			return (ref as SVGGraphicsElement).objectBBox(m);
+			return (ref as SVGGraphicsElement)._objectBBox(m);
 		}
 		return Box.not();
 	}
@@ -408,9 +362,6 @@ export class SVGSymbolElement extends SVGGraphicsElement {
 	get _isViewportElement() {
 		return 1;
 	}
-	shapeBox(T?: Matrix): Box {
-		return this._shapeBox(T);
-	}
 	_shapeBox(tm?: Matrix): Box {
 		return this._viewportBox(tm);
 	}
@@ -420,11 +371,9 @@ export class SVGSymbolElement extends SVGGraphicsElement {
 
 export class SVGTextElement extends SVGTextContentElement {
 	static TAGS = ["text"];
-	shapeBox(T?: Matrix): Box {
-		return this._shapeBox(T);
-	}
+
 	_shapeBox(tm?: Matrix): Box {
-		const m = tm ? tm.cat(this.ownTM) : this.ownTM;
+		const m = tm ? tm.cat(this._ownTM) : this._ownTM;
 		const {
 			x: {
 				baseVal: { value: x },
@@ -439,7 +388,7 @@ export class SVGTextElement extends SVGTextContentElement {
 		);
 		for (const sub of this.children) {
 			if (sub instanceof SVGGraphicsElement && sub.localName == "tspan") {
-				box = sub.boundingBox(m).merge(box);
+				box = sub._boundingBox(m).merge(box);
 			}
 		}
 		return box;
@@ -448,12 +397,8 @@ export class SVGTextElement extends SVGTextContentElement {
 
 export class SVGTSpanElement extends SVGTextContentElement {
 	static TAGS = ["tspan"];
-	shapeBox(T?: Matrix) {
-		return this._shapeBox(T);
-	}
-
 	_shapeBox(tm?: Matrix): Box {
-		const m = tm ? tm.cat(this.ownTM) : this.ownTM;
+		const m = tm ? tm.cat(this._ownTM) : this._ownTM;
 		let box = Box.new();
 		// Returns a horrible bounding box that just contains the coord points
 		// of the text without width or height (which is impossible to calculate)
@@ -498,75 +443,23 @@ export class SVGGlyphElement extends SVGElement {
 
 export class SVGPatternElement extends SVGElement {
 	static TAGS = ["pattern"];
+	_shapeBox(tm?: Matrix): Box {
+		return this._viewportBox(tm);
+	}
 }
 
-interface ScriptElement {
-	_alreadyStarted?: boolean;
-}
+// interface ScriptElement {
+// 	_alreadyStarted?: boolean;
+// }
 
-export class SVGScriptElement extends SVGElement {
-	static TAGS = ["script"];
-	_alreadyStarted?: boolean;
-
-	// _eval() {
-	// 	if (this._alreadyStarted) {
-	// 		return;
-	// 	}
-
-	// 	// TODO: this text check doesn't seem completely the same as the spec, which e.g. will try to execute scripts with
-	// 	// child element nodes. Spec bug? https://github.com/whatwg/html/issues/3419
-	// 	const src = this.getAttributeNS(null, "src");
-	// 	let text = !src && this.textContent;
-
-	// 	if (!text || !src) {
-	// 		return;
-	// 	}
-
-	// 	// if (!this._attached) {
-	// 	// 	return;
-	// 	// }
-
-	// 	// const scriptBlocksTypeString = this._getTypeString();
-	// 	// const type = getType(scriptBlocksTypeString);
-
-	// 	// if (type !== "classic") {
-	// 	// 	// TODO: implement modules, and then change the check to `type === null`.
-	// 	// 	return;
-	// 	// }
-
-	// 	this._alreadyStarted = true;
-
-	// 	// TODO: implement nomodule here, **but only after we support modules**.
-
-	// 	// At this point we completely depart from the spec.
-
-	// 	if (src) {
-	// 		// this._fetchExternalScript();
-	// 	} else {
-	// 		// this._fetchInternalScript();
-	// 	}
-	// }
-
-	// _fetchExternalScript(src: string) {
-	// 	const document = this.ownerDocument;
-	// 	if (document) {
-	// 		const { defaultView: window } = document;
-	// 		if(window){
-
-	// 		}
-	// 		document.resolveURL(src)
-	// 	}
-	// 	// const { ownerDocument: document, defaultView: window } =
-	// 	// 	this.ownerDocument;
-	// 	// const resourceLoader = document._fetcher;
-	// 	// const { URL, defaultView } = document;
-	// }
-}
+// export class SVGScriptElement extends SVGElement {
+// 	static TAGS = ["script"];
+// 	_alreadyStarted?: boolean;
+// }
 
 import { SVGElement, SVGSVGElement, SVGGraphicsElement } from "./_element.js";
-import { SVGTransformListAttr } from "./attr-transform.js";
 import { DOMException } from "../event-target.js";
-export { SVGLength, SVGLengthAttr } from "./length.js";
+export { SVGLength, SVGAnimatedLength } from "./length.js";
+export { SVGRect, SVGAnimatedRect } from "./rect.js";
 export { SVGLayout } from "./layout.js";
 export { SVGElement, SVGGraphicsElement, SVGSVGElement };
-

@@ -31,7 +31,7 @@ tap.test('fuseTranform', function (t) {
 </svg>
 		`);
 	function eqBox(a, b, epsilon = 0, tag) {
-		const v = a.boundingBox()
+		const v = a._boundingBox()
 		t.ok(v.equals(b, epsilon), `${tag || a.id} [${v}] vs [${b}]`);
 	}
 
@@ -54,7 +54,7 @@ tap.test('fuseTranform', function (t) {
 	t.same(L1.y1.baseVal.value, 80);
 	t.same(L1.x2.baseVal.value, 100);
 	t.same(L1.y2.baseVal.value, 20);
-	t.same(L1.describe(), `M 0 80 L 100 20`);
+	t.same(L1._describe(), `M 0 80 L 100 20`);
 	t.same(C1.cx.baseVal.value, 50);
 	t.same(C1.cy.baseVal.value, 50);
 	t.same(C1.r.baseVal.value, 50);
@@ -69,7 +69,7 @@ tap.test('fuseTranform', function (t) {
 	eqBox(PL2, Box.new('200 -100 200 100'));
 	eqBox(C1, Box.new('0 100 100 100'));
 	eqBox(L1, Box.new('100 120 100 60'));
-	top.fuseTransform();
+	top._fuseTransform();
 
 
 	t.notOk(P1.hasAttribute('transform'));
@@ -86,21 +86,21 @@ tap.test('fuseTranform', function (t) {
 		[R1.x.baseVal.value, R1.y.baseVal.value, R1.width.baseVal.value, R1.height.baseVal.value],
 		[50, 120, 150, 150]
 	);
-	t.same([...R1.path.firstPoint], [50, 120, 0]);
+	t.same([...R1._path.firstPoint], [50, 120, 0]);
 	t.same(
 		[R2.x.baseVal.value, R2.y.baseVal.value, R2.width.baseVal.value, R2.height.baseVal.value],
 		[50 - 100, 20 + 100, 150, 150]
 	);
-	t.same([...R2.path.firstPoint], [50 - 100, 20 + 100, 0]);
+	t.same([...R2._path.firstPoint], [50 - 100, 20 + 100, 0]);
 
 	t.same(PL1.getAttribute('points'), '0,200 50,125 50,175 100,100');
 	t.same(PL2.getAttribute('points'), '200,-100 300,-25 300,-75 400,0');
-	let p = P1.path;
+	let p = P1._path;
 	let [x, y] = p.firstPoint;
 	t.same([x, y], [130, 140]);
 
 	t.same(
-		[...P2.path].reverse().map((s) => s.to).map((p) => [p.x - 100, p.y - 100]),
+		[...P2._path].reverse().map((s) => s.to).map((p) => [p.x - 100, p.y - 100]),
 		[
 			[50, 80],
 			[140, 110],
@@ -111,7 +111,7 @@ tap.test('fuseTranform', function (t) {
 	);
 	
 	t.same(
-		[...P3.path].reverse().map((s) => s.to).map((p) => [p.x, p.y]),
+		[...P3._path].reverse().map((s) => s.to).map((p) => [p.x, p.y]),
 		[
 
 			[50, 80],
@@ -133,7 +133,7 @@ tap.test('polygon', function (t) {
 		`);
 	const top = doc.documentElement;
 	const PG1 = doc.getElementById('PG1');
-	t.same(PathLS.parse(PG1.describe()).describe(), 'M10,10L50,50L10,15L15,10Z');
+	t.same(PathLS.parse(PG1._describe()).describe(), 'M10,10L50,50L10,15L15,10Z');
 	t.end();
 });
 
@@ -145,7 +145,7 @@ tap.test('line', function (t) {
 		`);
 	const top = doc.documentElement;
 	const L1 = doc.getElementById('L1');
-	t.same(L1.describe(), 'M 2 3 L 4 5');
+	t.same(L1._describe(), 'M 2 3 L 4 5');
 
 	t.end();
 });
@@ -164,7 +164,7 @@ tap.test('rect', function (t) {
 	t.same(R1.width.baseVal.value, 100);
 	t.same(R1.height.baseVal.value, 200);
 
-	// t.same(PathLS.parse(PG1.describe()).describe(), 'M 2 3 L 4 5 Z');
+	// t.same(PathLS.parse(PG1._describe()).describe(), 'M 2 3 L 4 5 Z');
 	t.end();
 });
 
@@ -213,10 +213,11 @@ tap.test('createSVGLength', function (t) {
 </svg>
 		`);
 	const top = doc.documentElement;
+	const VPA = doc.getElementById('VPA');
 	const R1 = doc.getElementById('R1');
 	var cssPixelsPerInch = 96;
 	(() => {
-		var length = R1.createSVGLength();
+		var length = VPA.createSVGLength();
 		length.valueAsString = '48px';
 		length.convertToSpecifiedUnits(SVGLength.SVG_LENGTHTYPE_IN);
 		var referenceValue = 48 / cssPixelsPerInch;
@@ -227,7 +228,7 @@ tap.test('createSVGLength', function (t) {
 	})();
 
 	(() => {
-		var length = R1.createSVGLength();
+		var length = VPA.createSVGLength();
 		length.valueAsString = '48px';
 		length.convertToSpecifiedUnits(SVGLength.SVG_LENGTHTYPE_CM);
 		var referenceValue = (48 * 2.54) / cssPixelsPerInch;
@@ -238,7 +239,7 @@ tap.test('createSVGLength', function (t) {
 	})();
 
 	(() => {
-		var length = R1.createSVGLength();
+		var length = VPA.createSVGLength();
 		length.valueAsString = '48px';
 		length.convertToSpecifiedUnits(SVGLength.SVG_LENGTHTYPE_MM);
 		var referenceValue = (48 * 25.4) / cssPixelsPerInch;
@@ -249,7 +250,7 @@ tap.test('createSVGLength', function (t) {
 	})();
 
 	(() => {
-		var length = R1.createSVGLength();
+		var length = VPA.createSVGLength();
 		length.valueAsString = '4px';
 		length.convertToSpecifiedUnits(SVGLength.SVG_LENGTHTYPE_PT);
 		var referenceValue = (4 / cssPixelsPerInch) * 72;
@@ -260,7 +261,7 @@ tap.test('createSVGLength', function (t) {
 	})();
 
 	(() => {
-		var length = R1.createSVGLength();
+		var length = VPA.createSVGLength();
 		length.valueAsString = '16px';
 		length.convertToSpecifiedUnits(SVGLength.SVG_LENGTHTYPE_PC);
 		var referenceValue = (16 / cssPixelsPerInch) * 6;
@@ -271,7 +272,7 @@ tap.test('createSVGLength', function (t) {
 	})();
 
 	(() => {
-		var length = R1.createSVGLength();
+		var length = VPA.createSVGLength();
 		length.valueAsString = '2px';
 		length.convertToSpecifiedUnits(SVGLength.SVG_LENGTHTYPE_NUMBER);
 		t.same(length.valueAsString, '2');
@@ -306,9 +307,9 @@ tap.test('createSVGLength', function (t) {
 	t.same(xVal.toString(), '31.75cm');
 	xAttr.value = '';
 	// t.same(xAttr.value, ""); // todo
-	// t.same(R1.x.baseVal.value, 0);
-	// t.same(R1.x.baseVal.valueInSpecifiedUnits, 0);
-	// t.same(R1.x.baseVal.unitType, 1);
+	// t.same(VPA.x.baseVal.value, 0);
+	// t.same(VPA.x.baseVal.valueInSpecifiedUnits, 0);
+	// t.same(VPA.x.baseVal.unitType, 1);
 
 	t.end();
 });

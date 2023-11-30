@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="450px" height="300px" viewBox="0 0 450 300" id="V0" geom="0,0 450x300">
+  
+  <style type="text/css">text { font-size: 9; }
+    rect { fill: none; stroke: none; }
+  </style>
+  <defs id="defs_1" bcr="0.5,0.5 29x39" bb="0.5,0.5 29x39" root_tm="1 0 0 1 0 0" bbox="0.5,0.5 29x39" rb="0.5,0.5 29x39" style="stroke-width: 0;">
+    <g id="smile" bcr="0.5,0.5 29x39" bb="0.5,0.5 29x39" root_tm="1 0 0 1 0 0" bbox="0.5,0.5 29x39" rb="0.5,0.5 29x39" style="stroke-width: 0;">
+      <rect x=".5" y=".5" width="29" height="39" style="fill: black; stroke: red; stroke-width: 0;" id="rect_1" bcr="0.5,0.5 29x39" bb="0.5,0.5 29x39" root_tm="1 0 0 1 0 0" bbox="0.5,0.5 29x39" rb="0.5,0.5 29x39"/>
+      <circle cx="15" cy="20" r="10" fill="yellow" geom="10 @ 15,20" id="circle_1" bcr="5,10 20x20" bb="5,10 20x20" root_tm="1 0 0 1 0 0" bbox="5,10 20x20" rb="5,10 20x20" style="stroke-width: 0;"/>
+      <circle cx="12" cy="17" r="1.5" fill="black" geom="1.5 @ 12,17" id="circle_2" bcr="10.5,15.5 3x3" bb="10.5,15.5 3x3" root_tm="1 0 0 1 0 0" bbox="10.5,15.5 3x3" rb="10.5,15.5 3x3" style="stroke-width: 0;"/>
+      <circle cx="17" cy="17" r="1.5" fill="black" geom="1.5 @ 17,17" id="circle_3" bcr="15.5,15.5 3x3" bb="15.5,15.5 3x3" root_tm="1 0 0 1 0 0" bbox="15.5,15.5 3x3" rb="15.5,15.5 3x3" style="stroke-width: 0;"/>
+      <path d="M 10 24 A 8 8 0 0 0 20 24" stroke="black" stroke-width="2" id="path_1" bcr="10,24 10x1.7549991607666016" bb="10,24 10x1.7549991607666016" root_tm="1 0 0 1 0 0" bbox="10,24 10x1.7549991607666016" rb="10,24 10x1.7549991607666016" style="stroke-width: 0;"/>
+    </g>
+  </defs>
+    <g id="smile2" bcr="0.5,0.5 29x39" bb="0.5,0.5 29x39" root_tm="1 0 0 1 0 0" bbox="0.5,0.5 29x39" rb="0.5,0.5 29x39" style="stroke-width: 0;">
+      <rect x=".5" y=".5" width="29" height="39" style="fill: black; stroke: red; stroke-width: 0;" id="rect_2" bcr="0.5,0.5 29x39" bb="0.5,0.5 29x39" root_tm="1 0 0 1 0 0" bbox="0.5,0.5 29x39" rb="0.5,0.5 29x39"/>
+      <circle cx="15" cy="20" r="10" fill="yellow" geom="10 @ 15,20" id="circle_4" bcr="5,10 20x20" bb="5,10 20x20" root_tm="1 0 0 1 0 0" bbox="5,10 20x20" rb="5,10 20x20" style="stroke-width: 0;"/>
+      <circle cx="12" cy="17" r="1.5" fill="black" geom="1.5 @ 12,17" id="circle_5" bcr="10.5,15.5 3x3" bb="10.5,15.5 3x3" root_tm="1 0 0 1 0 0" bbox="10.5,15.5 3x3" rb="10.5,15.5 3x3" style="stroke-width: 0;"/>
+      <circle cx="17" cy="17" r="1.5" fill="black" geom="1.5 @ 17,17" id="circle_6" bcr="15.5,15.5 3x3" bb="15.5,15.5 3x3" root_tm="1 0 0 1 0 0" bbox="15.5,15.5 3x3" rb="15.5,15.5 3x3" style="stroke-width: 0;"/>
+      <path d="M 10 24 A 8 8 0 0 0 20 24" stroke="black" stroke-width="0" id="path_2" bcr="10,24 10x1.7549991607666016" bb="10,24 10x1.7549991607666016" root_tm="1 0 0 1 0 0" bbox="10,24 10x1.7549991607666016" rb="10,24 10x1.7549991607666016" style="stroke-width: 0;"/>
+    </g>
+
+  <rect x="1" y="1" width="448" height="298" id="rect_3" bcr="1,1 448x298" bb="1,1 448x298" root_tm="1 0 0 1 0 0" bbox="1,1 448x298" rb="1,1 448x298" style="stroke-width: 0;"/>
+  
+  
+  
+  
+  
+  
+  <g id="meet-group-1" transform="translate(100, 60)" bcr="100,16 198.9375x153.5" bb="0,-44 198.9375x153.5" root_tm="1 0 0 1 100 60" bbox="0,-44 198.9375x153.5" rb="100,16 198.9375x153.5" style="stroke-width: 0;">
+    <rect style="fill:pink;fill-opacity:.3" height="17" width="198.938" x="0" y="-44"/>
+    <g id="G_F" bcr="100,36 49.5x63.5" bb="0,-24 49.5x63.5" root_tm="1 0 0 1 100 60" bbox="0,-24 49.5x63.5" rb="100,36 49.5x63.5" style="stroke-width: 0;">
+      <rect style="fill:pink;fill-opacity:.3" height="17" width="42.6719" x="0" y="-24"/>
+      <rect x=".5" y=".5" width="49" height="29" id="rect_6" bcr="100.5,60.5 49x29" bb="0.5,0.5 49x29" root_tm="1 0 0 1 100 60" bbox="0.5,0.5 49x29" rb="100.5,60.5 49x29" style="stroke-width: 0;"/>
+      <svg preserveAspectRatio="xMinYMin meet" viewBox="0 0 30 40" width="50" height="30" id="V_A" geom="0,0 50x30" bcr="100.375,60.375 21.75x29.25" bb="0.5,0.5 29x39" root_tm="0.75 0 0 0.75 100 60" bbox="0.5,0.5 29x39" rb="100.375,60.375 21.75x29.25" style="stroke-width: 0;">
+        <use href="#smile" id="UB" bcr="100.375,60.375 21.75x29.25" bb="0.5,0.5 29x39" root_tm="0.75 0 0 0.75 100 60" bbox="0.5,0.5 29x39" rb="100.375,60.375 21.75x29.25" style="stroke-width: 0;"/>
+      </svg><rect style="fill:orange;fill-opacity:.3" height="39" width="29" x="0.5" y="0.5"/>
+    </g>
+    
+    
+  </g>
+  
+  
+  
+  <rect x="0" y="0" width="100%" height="100%" id="rect_H" bcr="0,0 450x300" bb="0,0 450x300" root_tm="1 0 0 1 0 0" bbox="0,0 450x300" rb="0,0 450x300" style="stroke-width: 0;"/>
+  <rect id="RECT" x="390.5" y="220.5" width="39" height="29" style="stroke: magenta; opacity: 0.5; stroke-width: 0;" geom="390.5,220.5 39x29" bcr="390.5,220.5 39x29" bb="390.5,220.5 39x29" root_tm="1 0 0 1 0 0" bbox="390.5,220.5 39x29" rb="390.5,220.5 39x29"/>
+  <script href="metrics.js"/>
+</svg>

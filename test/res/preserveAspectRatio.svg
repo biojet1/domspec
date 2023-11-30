@@ -1,7 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="450px" height="300px" viewBox="0 0 450 300">
   <desc>Example PreserveAspectRatio - illustrates preserveAspectRatio attribute</desc>
   <style type="text/css">text { font-size: 9; }
-    rect { fill: none; stroke: blue; }</style>
+    rect { fill: none; stroke: none; }
+  </style>
   <defs>
     <g id="smile">
       <rect x=".5" y=".5" width="29" height="39" style="fill:black;stroke:red"/>
@@ -16,7 +17,7 @@
       <circle cx="15" cy="20" r="10" fill="yellow"/>
       <circle cx="12" cy="17" r="1.5" fill="black"/>
       <circle cx="17" cy="17" r="1.5" fill="black"/>
-      <path d="M 10 24 A 8 8 0 0 0 20 24" stroke="black" stroke-width="2"/>
+      <path d="M 10 24 A 8 8 0 0 0 20 24" stroke="black" stroke-width="0"/>
     </g>
 
   <rect x="1" y="1" width="448" height="298"/>

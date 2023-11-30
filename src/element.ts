@@ -1,5 +1,5 @@
-import { NEXT, PREV, END, Node } from './node.js';
-import { ParentNode } from './parent-node.js';
+import { NEXT, PREV, END, Node } from "./node.js";
+import { ParentNode } from "./parent-node.js";
 const DATASET = Symbol();
 
 function* attributes(node: Element) {
@@ -63,19 +63,19 @@ export class Element extends ParentNode {
 	}
 
 	get id() {
-		return this.getAttribute('id') || '';
+		return this.getAttribute("id") || "";
 	}
 
 	set id(id: string) {
-		this.setAttribute('id', id);
+		this.setAttribute("id", id);
 	}
 
 	get className() {
-		return this.getAttribute('class') || '';
+		return this.getAttribute("class") || "";
 	}
 
 	set className(str: string) {
-		this.setAttribute('class', str);
+		this.setAttribute("class", str);
 	}
 
 	//// DOM: </specialGetters>
@@ -85,8 +85,8 @@ export class Element extends ParentNode {
 		return node ? node.value : null;
 	}
 
-	popAttribute(name: string) {
-		const node = this.popAttributeNode(name);
+	_popAttribute(name: string) {
+		const node = this._popAttributeNode(name);
 		return node?.value;
 	}
 
@@ -106,7 +106,7 @@ export class Element extends ParentNode {
 		return null;
 	}
 
-	popAttributeNode(name: string) {
+	_popAttributeNode(name: string) {
 		if (this.ownerDocument?.isHTML && this._ns === HTML_NS) {
 			name = name.toLowerCase();
 		}
@@ -120,13 +120,17 @@ export class Element extends ParentNode {
 		return null;
 	}
 
-	newAttributeNode(name: string): Attr {
+	_newAttributeNode(name: string): Attr {
 		return new StringAttr(name);
 	}
-	newAttributeNodeNS(nsu: string | null, name: string, localName: string): Attr {
+	_newAttributeNodeNS(
+		nsu: string | null,
+		name: string,
+		localName: string
+	): Attr {
 		return new StringAttr(name, localName);
 	}
-	letAttributeNode(name: string) {
+	_letAttributeNode(name: string) {
 		const { ownerDocument, _ns } = this;
 		if (ownerDocument?.isHTML && _ns === HTML_NS) {
 			name = name.toLowerCase();
@@ -135,7 +139,7 @@ export class Element extends ParentNode {
 		for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
 			if (attr.name === name) return attr;
 		}
-		const node = this.newAttributeNode(name);
+		const node = this._newAttributeNode(name);
 		node.ownerDocument = ownerDocument;
 		const ref = (attr && (attr instanceof Attr ? attr : attr[PREV])) || this;
 		node._attach(ref, ref[NEXT] || this[END], this);
@@ -157,10 +161,10 @@ export class Element extends ParentNode {
 			name = name.toLowerCase();
 		}
 		checkName(name);
-		const attr = this.letAttributeNode(name);
+		const attr = this._letAttributeNode(name);
 		attr.value = value;
 	}
-	letAttributeNodeNS(nms: string | null, qname: string) {
+	_letAttributeNodeNS(nms: string | null, qname: string) {
 		let attr = this[NEXT];
 		const [ns, prefix, lname] = validateAndExtract(nms, qname);
 		for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
@@ -170,7 +174,7 @@ export class Element extends ParentNode {
 			}
 		}
 		const { ownerDocument } = this;
-		const node = this.newAttributeNodeNS(nms, qname, lname);
+		const node = this._newAttributeNodeNS(nms, qname, lname);
 		node._ns = ns;
 		node._prefix = prefix;
 		node.ownerDocument = ownerDocument;
@@ -179,14 +183,17 @@ export class Element extends ParentNode {
 		return node;
 	}
 	setAttributeNS(nms: string | null, qname: string, value: string) {
-		this.letAttributeNodeNS(nms, qname).value = value;
+		this._letAttributeNodeNS(nms, qname).value = value;
 	}
 	setAttributeNode(node: Attr) {
 		return this.setAttributeNodeNS(node);
 	}
 	setAttributeNodeNS(node: Attr) {
 		const { parentNode } = node;
-		const prev = this.getAttributeNodeNS(node.namespaceURI || null, node.localName);
+		const prev = this.getAttributeNodeNS(
+			node.namespaceURI || null,
+			node.localName
+		);
 		if (node === prev) {
 			return node;
 		} else if (parentNode) {
@@ -229,7 +236,10 @@ export class Element extends ParentNode {
 		let attr = this[NEXT];
 		for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
 			// if (attr.name === name || attr.localName === name) return true;
-			if (attr.name === name) return true;
+			if (attr.name === name) {
+				// return true;
+				return attr.specified;
+			}
 		}
 		return false;
 	}
@@ -252,7 +262,7 @@ export class Element extends ParentNode {
 				return true;
 			}
 		} else if (force == true || force === undefined) {
-			this.setAttribute(name, '');
+			this.setAttribute(name, "");
 			return true;
 		}
 		return false;
@@ -270,14 +280,14 @@ export class Element extends ParentNode {
 	//// DOM: </Attributes>
 	// <selectors>
 	matches(selectors: string) {
-		const test = prepareMatch(this, selectors + '');
+		const test = prepareMatch(this, selectors + "");
 		return test(this);
 	}
 	closest(selectors: string) {
 		let cur: Element | null = this;
 		let test;
 		try {
-			test = prepareMatch(cur, selectors + '');
+			test = prepareMatch(cur, selectors + "");
 		} catch {
 			return null;
 		}
@@ -302,15 +312,16 @@ export class Element extends ParentNode {
 	lookupNamespaceURI(prefix: string): string | null {
 		const { namespaceURI, prefix: this_prefix } = this;
 
-		if (namespaceURI && this_prefix ? this_prefix === prefix : !prefix) return namespaceURI || null;
+		if (namespaceURI && this_prefix ? this_prefix === prefix : !prefix)
+			return namespaceURI || null;
 
 		let attr = this[NEXT];
 		for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
 			if (attr.namespaceURI === XMLNS) {
 				const { prefix: prefixA, localName: localNameA } = attr;
 				if (
-					(prefixA === 'xmlns' && localNameA === prefix) ||
-					(!prefix && !prefixA && localNameA === 'xmlns')
+					(prefixA === "xmlns" && localNameA === prefix) ||
+					(!prefix && !prefixA && localNameA === "xmlns")
 				) {
 					return attr.value || null;
 				}
@@ -330,7 +341,7 @@ export class Element extends ParentNode {
 		for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
 			if (attr.namespaceURI === XMLNS) {
 				const { prefix: prefixA, value: valueA } = attr;
-				if (prefixA === 'xmlns' && valueA === ns) {
+				if (prefixA === "xmlns" && valueA === ns) {
 					return attr.localName;
 				}
 			}
@@ -341,7 +352,7 @@ export class Element extends ParentNode {
 	}
 
 	isDefaultNamespace(namespaceURI: string) {
-		const ns1 = this.lookupNamespaceURI('');
+		const ns1 = this.lookupNamespaceURI("");
 		return ns1 ? ns1 === namespaceURI : !namespaceURI;
 	}
 
@@ -352,28 +363,28 @@ export class Element extends ParentNode {
 		}
 
 		switch (position) {
-			case 'beforebegin':
+			case "beforebegin":
 				if (parentNode) {
 					parentNode.insertBefore(element, this);
 				} else {
 					return null;
 				}
 				break;
-			case 'afterend':
+			case "afterend":
 				if (parentNode) {
 					parentNode.insertBefore(element, this.nextSibling);
 				} else {
 					return null;
 				}
 				break;
-			case 'afterbegin':
+			case "afterbegin":
 				this.insertBefore(element, this.firstChild);
 				break;
-			case 'beforeend':
+			case "beforeend":
 				this.insertBefore(element, null);
 				break;
 			default:
-				throw DOMException.new('SyntaxError', `Invalid position ${position}`);
+				throw DOMException.new("SyntaxError", `Invalid position ${position}`);
 		}
 		return element;
 	}
@@ -383,20 +394,20 @@ export class Element extends ParentNode {
 		const node = ownerDocument && ownerDocument.createTextNode(text);
 		if (node)
 			switch (position) {
-				case 'beforebegin':
+				case "beforebegin":
 					if (parentNode) {
 						parentNode.insertBefore(node, this);
 					}
 					break;
-				case 'afterend':
+				case "afterend":
 					if (parentNode) {
 						parentNode.insertBefore(node, this.nextSibling);
 					}
 					break;
-				case 'afterbegin':
+				case "afterbegin":
 					this.insertBefore(node, this.firstChild);
 					break;
-				case 'beforeend':
+				case "beforeend":
 					this.insertBefore(node, null);
 					break;
 				case null:
@@ -404,14 +415,14 @@ export class Element extends ParentNode {
 					break;
 
 				default:
-					throw DOMException.new('SyntaxError', `Invalid position ${position}`);
+					throw DOMException.new("SyntaxError", `Invalid position ${position}`);
 			}
 	}
 
 	get _styleAttr() {
-		const attr = this.getAttributeNode('style');
+		const attr = this.getAttributeNode("style");
 		if (!attr) {
-			const node = new StyleAttr('style');
+			const node = new StyleAttr("style");
 			this.setAttributeNode(node);
 			return node;
 		} else if (attr instanceof StyleAttr) {
@@ -419,7 +430,7 @@ export class Element extends ParentNode {
 		} else {
 			attr.remove();
 			const ref = attr[PREV] || this;
-			const node = new StyleAttr('style');
+			const node = new StyleAttr("style");
 			node._attach(ref, ref[NEXT] || this[END], this);
 			node.value = attr.value;
 			return node;
@@ -431,7 +442,7 @@ export class Element extends ParentNode {
 	}
 
 	set style(value: any) {
-		this.setAttribute('style', value.toString());
+		this.setAttribute("style", value.toString());
 	}
 
 	get attributeStyleMap(): any {
@@ -443,10 +454,10 @@ export class Element extends ParentNode {
 	}
 
 	get classList() {
-		const attr = this.getAttributeNode('class');
+		const attr = this.getAttributeNode("class");
 		if (!attr) {
 			// console.warn("StyleAttr:NEW");
-			const node = new ClassAttr('class');
+			const node = new ClassAttr("class");
 			this.setAttributeNode(node);
 			return node.tokens;
 		} else if (attr instanceof ClassAttr) {
@@ -456,7 +467,7 @@ export class Element extends ParentNode {
 			// console.warn("StyleAttr:REP");
 			attr.remove();
 			const ref = attr[PREV] || this;
-			const node = new ClassAttr('class');
+			const node = new ClassAttr("class");
 			node._attach(ref, ref[NEXT] || this[END], this);
 			node.value = attr.value;
 			return node.tokens;
@@ -464,11 +475,20 @@ export class Element extends ParentNode {
 	}
 
 	get dataset() {
-		return this[DATASET] || (this[DATASET] = new Proxy<Element>(this, dsHandler));
+		return (
+			this[DATASET] || (this[DATASET] = new Proxy<Element>(this, dsHandler))
+		);
 	}
 
 	cloneNode(deep?: boolean) {
-		const { ownerDocument, namespaceURI, localName, prefix, tagName, qualifiedName } = this;
+		const {
+			ownerDocument,
+			namespaceURI,
+			localName,
+			prefix,
+			tagName,
+			qualifiedName,
+		} = this;
 		// const node = new (this.constructor as any)(localName, namespaceURI, prefix, tagName);
 		const node: ParentNode = ownerDocument
 			? ownerDocument.createElementNS(namespaceURI, qualifiedName)
@@ -574,12 +594,9 @@ export class Element extends ParentNode {
 		// return true;
 	}
 
-	letId() {
-		let id = this.getAttribute('id');
-		if (!id) {
-			this.setAttribute('id', (id = nextUniqueId().toString(36)));
-		}
-		return id;
+	_ensureId() {
+		let { id } = this;
+		return id || (this.id = nextUniqueId().toString(36));
 	}
 }
 
@@ -591,7 +608,7 @@ function fromCamelCase(name: string) {
 	if (/-[a-z]/.test(name)) {
 		throw new Error(`Unexpected dataset name`);
 	}
-	return 'data-' + name.replace(/([A-Z])/g, (_, $1) => `-${$1.toLowerCase()}`);
+	return "data-" + name.replace(/([A-Z])/g, (_, $1) => `-${$1.toLowerCase()}`);
 }
 
 const dsHandler = {
@@ -600,7 +617,7 @@ const dsHandler = {
 	},
 
 	set(element: Element, name: string, value: string) {
-		element.setAttribute(fromCamelCase(name), value + '');
+		element.setAttribute(fromCamelCase(name), value + "");
 		return true;
 	},
 	has(element: Element, name: string) {
@@ -620,12 +637,15 @@ const dsHandler = {
 				let attr = element[NEXT];
 				for (; attr && attr instanceof Attr; attr = attr[NEXT]) {
 					const { namespaceURI, name } = attr;
-					if ((!namespaceURI || namespaceURI === '') && name.startsWith('data-')) {
+					if (
+						(!namespaceURI || namespaceURI === "") &&
+						name.startsWith("data-")
+					) {
 						// console.warn("ownKeys", name, toCamelCase(name));
 						yield toCamelCase(name);
 					}
 				}
-			})(),
+			})()
 		);
 	},
 
@@ -646,16 +666,16 @@ function nextUniqueId() {
 	return ++_id_int == 0 ? ++_id_int : _id_int;
 }
 
-import { XMLNS } from './namespace.js';
-import { StringAttr, Attr } from './attr.js';
-import { ChildNode } from './child-node.js';
-import { StyleAttr } from './attr-style.js';
-import { ClassAttr } from './attr-class.js';
-import { NamedNodeMap, AttributesHandler } from './named-node-map.js';
-import { enumXMLDump } from './dom-serialize.js';
-import { validateAndExtract, checkName, HTML_NS } from './namespace.js';
-import { prepareMatch } from './css/match.js';
-import { DOMException } from './event-target.js';
-import { getComputedStyleMap } from './css/domstyle.js';
+import { XMLNS } from "./namespace.js";
+import { StringAttr, Attr } from "./attr.js";
+import { ChildNode } from "./child-node.js";
+import { StyleAttr } from "./attr-style.js";
+import { ClassAttr } from "./attr-class.js";
+import { NamedNodeMap, AttributesHandler } from "./named-node-map.js";
+import { enumXMLDump } from "./dom-serialize.js";
+import { validateAndExtract, checkName, HTML_NS } from "./namespace.js";
+import { prepareMatch } from "./css/match.js";
+import { DOMException } from "./event-target.js";
+import { getComputedStyleMap } from "./css/domstyle.js";
 
 export { NamedNodeMap };

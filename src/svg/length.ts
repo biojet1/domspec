@@ -12,34 +12,10 @@ const CONVERSIONS: { [k: string]: number } = {
 	pc: 16.0,
 	yd: 3456.0,
 	ft: 1152.0,
-	'': 1.0,
+	"": 1.0,
 };
 
-export function userUnit(src: string, default_value?: number): number {
-	if (src) {
-		const m = src.match(BOTH_MATCH);
-		if (m) {
-			const value = parseFloat(m[1]);
-			const unit = m.pop();
-			if (unit) {
-				const mul = CONVERSIONS[unit];
-				if (mul) {
-					return value * mul;
-				}
-			} else {
-				return value;
-			}
-			throw new Error(`Can not convert to user unit ${src}, [${m}]`);
-		} else {
-			throw new Error(`Invalid unit ${src}`);
-		}
-	} else if (default_value != undefined) {
-		return default_value;
-	}
-	throw new Error(`Invalid unit ${src}`);
-}
-
-const UNITS = ['', '', '%', 'em', 'ex', 'px', 'cm', 'mm', 'in', 'pt', 'pc'];
+const UNITS = ["", "", "%", "em", "ex", "px", "cm", "mm", "in", "pt", "pc"];
 const CONVS = [0, 1, 1];
 
 export class SVGNumber {
@@ -93,11 +69,11 @@ export class SVGLength {
 		if (_unit == undefined) {
 			//
 		} else if (_unit >= 0) {
-			return `${_num}${UNITS[_unit] || ''}`;
-		} else {
-			//
+			return `${_num}${UNITS[_unit] || ""}`;
+		} else if (_num != undefined) {
+			return `${_num}`;
 		}
-		return '';
+		return "";
 	}
 
 	set valueAsString(value: string) {
@@ -123,7 +99,7 @@ export class SVGLength {
 			}
 		}
 		if (fail) {
-			throw DOMException.new('SyntaxError');
+			throw DOMException.new("SyntaxError");
 		} else {
 			this._num = value;
 			this._unit = -1;
@@ -132,7 +108,6 @@ export class SVGLength {
 
 	get value() {
 		const { _num = 0, _unit = 1 } = this;
-
 		switch (_unit) {
 			case 0:
 			case 1:
@@ -142,7 +117,7 @@ export class SVGLength {
 				return (this.getRelativeLength() / 100) * (_num as number);
 			case 3: //  "em"
 			case 4: //  "ex"
-				throw DOMException.new('NotSupportedError');
+				throw DOMException.new("NotSupportedError");
 			case 6:
 				return ((_num as number) * 4800) / 127;
 			case 7:
@@ -153,13 +128,15 @@ export class SVGLength {
 				return ((_num as number) * 4) / 3;
 			case 10:
 				return (_num as number) * 16;
+			case -1:
+				return 0;
 			default:
 				throw new TypeError(`Invalid unit: '${_unit}'`);
 		}
 	}
 
 	set value(value: number) {
-		let { _unit = 1 } = this;
+		const { _unit = 1 } = this;
 		if (isFinite(value)) {
 			switch (_unit) {
 				case 0:
@@ -172,7 +149,7 @@ export class SVGLength {
 					return;
 				case 3: //  "em"
 				case 4: //  "ex"
-					throw DOMException.new('NotSupportedError');
+					throw DOMException.new("NotSupportedError");
 				case 6:
 					this._num = (127 * value) / 4800;
 					return;
@@ -187,6 +164,10 @@ export class SVGLength {
 					return;
 				case 10:
 					this._num = 16 / value;
+					return;
+				case -1:
+					this._unit = 1;
+					this._num = 0;
 					return;
 				default:
 					throw new TypeError(`invalid ${_unit}`);
@@ -215,7 +196,7 @@ export class SVGLength {
 				break;
 			case 3: //  "em"
 			case 4: //  "ex"
-				throw DOMException.new('NotSupportedError');
+				throw DOMException.new("NotSupportedError");
 			case 6:
 				this._num = (127 * this.value) / 4800;
 				break;
@@ -235,7 +216,7 @@ export class SVGLength {
 				if (unitType == undefined) {
 					throw new TypeError();
 				} else {
-					throw DOMException.new('NotSupportedError');
+					throw DOMException.new("NotSupportedError");
 				}
 		}
 		this._unit = unitType;
@@ -246,7 +227,7 @@ export class SVGLength {
 		if (_unit == undefined) {
 			return null;
 		} else if (_unit >= 0) {
-			return `${_num}${UNITS[_unit] || ''}`;
+			return `${_num}${UNITS[_unit] || ""}`;
 		} else {
 			// _unit === -1;
 			return `${_num}`;
@@ -259,8 +240,8 @@ export class SVGLength {
 			const v = e.nearestViewportElement as SVGGraphicsElement;
 			if (v) {
 				const b = v.viewBox;
-				const w = b.calcWidth();
-				const h = b.calcHeight();
+				const w = b._calcWidth();
+				const h = b._calcHeight();
 				// return Math.sqrt(w ** 2 + h ** 2) / Math.sqrt(2);
 				return Math.sqrt((w ** 2 + h ** 2) / 2);
 			}
@@ -281,7 +262,7 @@ export class SVGLength {
 	static SVG_LENGTHTYPE_PC = 10;
 }
 
-export class SVGLengthAttr extends Attr {
+export class SVGAnimatedLength extends Attr {
 	_var?: SVGLength | string;
 
 	set value(value: string) {
@@ -298,7 +279,7 @@ export class SVGLengthAttr extends Attr {
 		if (_var instanceof SVGLength) {
 			return _var.valueAsString;
 		}
-		return _var || '';
+		return _var || "";
 	}
 
 	get baseVal(): SVGLength {
@@ -306,27 +287,20 @@ export class SVGLengthAttr extends Attr {
 		if (_var instanceof SVGLength) {
 			return _var;
 		} else {
-			let v = this.parse(_var);
+			let v = this._parse(_var);
 			_setAssoc(v, this);
-			return v;
+			return (this._var = v);
 		}
 	}
-	parse(s?: string) {
+	_parse(s?: string) {
 		if (s) {
 			let v = new SVGLength();
 			if (v.parse(s)) {
-				return (this._var = v);
+				return v;
 			}
 		}
 		return new SVGLength();
 	}
-	// parse2(s?: string) {
-	// 	let v = this.auto();
-	// 	if (s && v.parse(s)) {
-	// 		return (this._var = v);
-	// 	}
-	// 	return v;
-	// }
 
 	valueOf() {
 		return this._var?.toString();
@@ -364,14 +338,11 @@ export class SVGLengthW extends SVGLength {
 		if (e) {
 			const v = e.nearestViewportElement as SVGGraphicsElement;
 			if (v) {
-				return v.viewBox.calcWidth();
+				return v.viewBox._calcWidth();
 			} else if (e instanceof SVGSVGElement) {
 				const a = e.viewBox;
 				if (a.specified) {
-					const b = a.baseVal;
-					if (b) {
-						return b.width;
-					}
+					return a._calcWidth();
 				}
 			}
 		}
@@ -385,14 +356,11 @@ export class SVGLengthH extends SVGLength {
 		if (e) {
 			const v = e.nearestViewportElement as SVGGraphicsElement;
 			if (v) {
-				return v.viewBox.calcHeight();
+				return v.viewBox._calcHeight();
 			} else if (e instanceof SVGSVGElement) {
 				const a = e.viewBox;
 				if (a.specified) {
-					const b = a.baseVal;
-					if (b) {
-						return b.height;
-					}
+					return a._calcHeight();
 				}
 			}
 		}
@@ -400,15 +368,15 @@ export class SVGLengthH extends SVGLength {
 	}
 }
 
-export class SVGLengthWAttr extends SVGLengthAttr {
-	parse(s?: string) {
+export class SVGLengthWAttr extends SVGAnimatedLength {
+	_parse(s?: string) {
 		if (s) {
 			let v = new SVGLengthW();
 			if (v.parse(s)) {
-				return (this._var = v);
+				return v;
 			}
 		}
-		return new SVGLengthW('100%');
+		return new SVGLengthW("100%");
 	}
 	toUU() {
 		const { _var } = this;
@@ -420,42 +388,43 @@ export class SVGLengthWAttr extends SVGLengthAttr {
 	}
 }
 
-export class SVGLengthHAttr extends SVGLengthAttr {
-	parse(s?: string) {
+export class SVGLengthHAttr extends SVGAnimatedLength {
+	_parse(s?: string) {
 		if (s) {
 			let v = new SVGLengthH();
 			if (v.parse(s)) {
-				return (this._var = v);
+				return v;
 			}
 		}
-		return new SVGLengthH('100%');
+		return new SVGLengthH("100%");
 	}
 }
 
-export class SVGLengthXAttr extends SVGLengthAttr {
-	parse(s?: string) {
+export class SVGLengthXAttr extends SVGAnimatedLength {
+	_parse(s?: string) {
 		if (s) {
 			let v = new SVGLengthW();
 			if (v.parse(s)) {
-				return (this._var = v);
+				return v;
 			}
 		}
 		return new SVGLengthW();
 	}
 }
 
-export class SVGLengthYAttr extends SVGLengthAttr {
-	parse(s?: string) {
+export class SVGLengthYAttr extends SVGAnimatedLength {
+	_parse(s?: string) {
 		if (s) {
 			let v = new SVGLengthH();
 			if (v.parse(s)) {
-				return (this._var = v);
+				return v;
 			}
 		}
 		return new SVGLengthH();
 	}
 }
 
-import { DOMException } from '../event-target.js';
-import { Attr } from '../attr.js';
-import { SVGGraphicsElement, SVGSVGElement } from './_element.js';
+
+import { DOMException } from "../event-target.js";
+import { Attr } from "../attr.js";
+import { SVGGraphicsElement, SVGSVGElement } from "./_element.js";

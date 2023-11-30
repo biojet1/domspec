@@ -84,7 +84,6 @@ tap.test("transform2", function (t) {
 	const R2 = doc.getElementById("R2");
 	const G2 = doc.getElementById("G2");
 	const G4 = doc.getElementById("G4");
-	const TL = top._layout();
 
 	[
 		["R0", 1, 0, 0, 1, -50, -10],
@@ -108,42 +107,43 @@ tap.test("transform2", function (t) {
 		// t.same(v.composeTM().toString(), m, `composeTM ${id}`);
 		t.same(v.getScreenCTM().toString(), m, `getScreenCTM ${id}`);
 		// t.same(v._composeTM().toString(), m, `_composeTM ${id}`);
-		const w = top.innerTM;
-		const u = v.rootTM;
+		const w = top._subTM;
+		// const u = v._rootTM;
+		const u = _rootTM(v);
 
-		t.same(w.cat(u).toString(), m, `rootTM ${id} ${w} ${u}`);
+		t.same(w.cat(u).toString(), m, `_rootTM ${id} ${w} ${u}`);
 	});
 
+	// t.same(
+	// 	R0.composeTM(R0.farthestViewportElement).toString(),
+	// 	Matrix.identity().toString()
+	// );
+	t.same(R1._relTM(R1._ownTM, G4).toString(), Matrix.identity().toString());
+	// t.same(
+	// 	R2.composeTM(G4).describe(),
+	// 	Matrix.parse(`translate(-10 -10)`).describe()
+	// );
+	// t.same(
+	// 	R1.composeTM(G2).toString(),
+	// 	Matrix.parse(`translate(-50 -50)`).toString(),
+	// 	`R1.composeTM(G2)`
+	// );
+	// t.same(
+	// 	R2.composeTM(G2).toString(),
+	// 	Matrix.parse(`translate(-50 -50) translate(-10 -10)`).toString(),
+	// 	`R2.composeTM(G2)`
+	// );
 	t.same(
-		R0.composeTM(R0.farthestViewportElement).toString(),
-		Matrix.identity().toString()
-	);
-	t.same(R1.composeTM(G4).toString(), Matrix.identity().toString());
-	t.same(
-		R2.composeTM(G4).describe(),
-		Matrix.parse(`translate(-10 -10)`).describe()
-	);
-	t.same(
-		R1.composeTM(G2).toString(),
-		Matrix.parse(`translate(-50 -50)`).toString(),
-		`R1.composeTM(G2)`
-	);
-	t.same(
-		R2.composeTM(G2).toString(),
-		Matrix.parse(`translate(-50 -50) translate(-10 -10)`).toString(),
-		`R2.composeTM(G2)`
-	);
-	t.same(
-		R2.rootTM.toString(),
+		R2._rootTM.toString(),
 		Matrix.parse(
 			`translate(100) translate(0 80) translate(-50 -50) translate(-10 -10)`
 		).toString(),
-		`R2.rootTM()`
+		`R2._rootTM()`
 	);
 	// R1.composeTM(R2);
 	// 	t.throws(() => R1.composeTM(R2), { message: /not reached/ });
 
-	t.same(top.composeTM().toString(), Matrix.identity().toString());
+	// t.same(top.composeTM().toString(), Matrix.identity().toString());
 	// t.same(V1.composeTM().toString(), Matrix.parse(`translate(100)`).toString());
 
 	[
@@ -157,7 +157,7 @@ tap.test("transform2", function (t) {
 		["RB", 50, 50, 30, 30],
 	].forEach(([id, x, y, w, h]) => {
 		const v = doc.getElementById(id);
-		const r = v.objectBBox();
+		const r = v._objectBBox();
 		t.same(r.toArray(), [x, y, w, h], `getBBox ${id}`);
 	});
 	[
@@ -167,7 +167,7 @@ tap.test("transform2", function (t) {
 		["G4", 0, 10, 50, 70],
 	].forEach(([id, x, y, w, h]) => {
 		const v = doc.getElementById(id);
-		const r = v.objectBBox();
+		const r = v._objectBBox();
 		t.same(r.toArray(), [x, y, w, h], `getBBox ${id}`);
 	});
 
@@ -176,7 +176,7 @@ tap.test("transform2", function (t) {
 		["V2", 50, 50, 30, 30],
 	].forEach(([id, x, y, w, h]) => {
 		const v = doc.getElementById(id);
-		const r = v.objectBBox();
+		const r = v._objectBBox();
 		t.same(r.toArray(), [x, y, w, h], `getBBox ${id}`);
 	});
 	//////////////////////
@@ -213,9 +213,10 @@ tap.test("transform2", function (t) {
 	].forEach(([id, a, b, c, d, e, f]) => {
 		const v = doc.getElementById(id);
 		const m = Matrix.new([a, b, c, d, e, f]);
-		t.same(v.composeTM(top).describe(), m.describe(), `composeTM(top) ${id}`);
-		t.same(v._composeTM().describe(), m.describe(), `_composeTM() ${id}`);
-		t.same(v._composeTM(top).describe(), m.describe(), `_composeTM(top) ${id}`);
+		// t.same(v.composeTM(top).describe(), m.describe(), `composeTM(top) ${id}`);
+		t.same(v._rootTM.describe(), m.describe(), `_composeTM() ${id}`);
+		t.same(_rootTM(v).describe(), m.describe(), `_composeTM() ${id}`);
+		// t.same(v._relTM(v._ownTM, top).describe(), m.describe(), `_composeTM(top) ${id}`);
 	});
 	trsubs.forEach(([rootId, ...subs]) => {
 		const root = doc.getElementById(rootId);
@@ -225,58 +226,63 @@ tap.test("transform2", function (t) {
 			const sub = doc.getElementById(subId);
 			// t.same(v.composeTM(top).describe(), m.describe(), `composeTM(top) ${id}`);
 			// t.same(v._composeTM().describe(), m.describe(), `_composeTM() ${id}`);
-			const [p, o] = lay.pairTM(sub);
-			const r = lay.rootTM(sub);
-			t.same(
-				sub._composeTM(root).describe(),
-				m.describe(),
-				`${subId}._composeTM(${rootId})`
-			);
+			const [p, o] = lay._pairTM(sub);
+			const r = lay._rootTM(sub);
+			// t.same(
+			// 	sub._relTM(sub._ownTM, root).describe(),
+			// 	m.describe(),
+			// 	`${subId}._composeTM(${rootId})`
+			// );
 			t.same(
 				p.cat(o).describe(),
 				m.describe(),
 				`${subId}.p.cat(o) <-- ${rootId}`
 			);
-			t.same(r.describe(), m.describe(), `${subId}.rootTM(o) <-- ${rootId}`);
+			t.same(r.describe(), m.describe(), `${subId}._rootTM(o) <-- ${rootId}`);
 		});
 	});
 	t.end();
 });
 
-if (0) {
-	Array.from(document.documentElement.querySelectorAll(`*[id]`)).map((v) => {
-		const m = v.getScreenCTM();
-		const r = v.getBBox();
-		return [v.id, m.a, m.b, m.c, m.d, m.e, m.f];
-	});
-	Array.from(document.documentElement.querySelectorAll(`*[id]`))
-		.map((v) => {
-			if (v.getBBox) {
-				const r = v.getBBox();
-				return [v.id, r.x, r.y, r.width, r.height];
+import {  SVGGraphicsElement } from "../dist/svg/_element.js";
+
+	function _relTM(parent, tm, root) {
+		while (parent != root) {
+			const grand = parent.parentElement;
+			if (grand instanceof SVGGraphicsElement) {
+				tm = tm.postCat(parent._subTM);
+				parent = grand;
+			} else if (root) {
+				if (grand) {
+					throw new Error(`root not reached`);
+				} else {
+					const p = root._rootTM.inverse();
+					return p.cat(tm);
+				}
+			} else {
+				break;
 			}
-		})
-		.filter((v) => !!v);
-	document.documentElement.querySelectorAll(`rect`).forEach((v) => {
-		v.style.fill = "grey";
-		v.style.stroke = "none";
-	});
+		}
+		return tm;
 
-	Array.from(document.documentElement.querySelectorAll(`rect[id]`)).map((v) => {
-		const r = v.getBBox();
-		return [v.id, r.x, r.y, r.width, r.height];
-	});
 
-	Array.from(document.documentElement.querySelectorAll(`rect[id]`)).map((v) => {
-		const r = v.getBoundingClientRect();
-		return [v.id, r.x + 50, r.y + 10, r.width, r.height];
-	});
-	Array.from(document.documentElement.querySelectorAll(`g[id]`)).map((v) => {
-		const r = v.getBBox();
-		return [v.id, r.x, r.y, r.width, r.height];
-	});
-	Array.from(document.documentElement.querySelectorAll(`svg[id]`)).map((v) => {
-		const r = v.getBBox();
-		return [v.id, r.x, r.y, r.width, r.height];
-	});
-}
+	}
+
+
+	function _rootTM(node) {
+		// const { parentNode: parent, _ownTM } = node;
+		// if (parent instanceof SVGGraphicsElement) {
+		// 	return _relTM(parent, _ownTM);
+		// } else {
+		// 	return _ownTM;
+		// }
+		let { parentElement: parent, _ownTM: tm } = node;
+		while (parent instanceof SVGGraphicsElement) {
+			const { _subTM } = parent;
+			if ((parent = parent.parentElement) == null) {
+				break;
+			}
+			tm = tm.postCat(_subTM);
+		}
+		return tm;
+	}

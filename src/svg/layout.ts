@@ -9,16 +9,16 @@ export class SVGLayout {
 		this._root = node;
 	}
 	getTM(node: SVGGraphicsElement): Matrix {
-		return node.ownTM;
+		return node._ownTM;
 	}
 	setTM(node: SVGGraphicsElement, m: Matrix) {
-		node.ownTM = m;
+		node._ownTM = m;
 		return this;
 	}
-	innerTM(node: SVGGraphicsElement): Matrix {
+	_subTM(node: SVGGraphicsElement): Matrix {
 		const m = this.getTM(node);
 		if (node instanceof SVGSVGElement) {
-			return m.cat(node.viewportTM());
+			return m.cat(node._viewportTM());
 		}
 		return m;
 	}
@@ -30,7 +30,7 @@ export class SVGLayout {
 		while (parent != root) {
 			const grand: Element | null = parent.parentElement;
 			if (grand instanceof SVGGraphicsElement) {
-				tm = tm.postCat(this.innerTM(parent));
+				tm = tm.postCat(this._subTM(parent));
 				parent = grand;
 			} else if (root) {
 				throw new Error(`root not reached`);
@@ -41,7 +41,7 @@ export class SVGLayout {
 		return tm;
 	}
 
-	pairTM(node: SVGGraphicsElement): Matrix[] {
+	_pairTM(node: SVGGraphicsElement): Matrix[] {
 		const { parentNode: parent } = node;
 		const { _root } = this;
 		if (parent instanceof SVGGraphicsElement) {
@@ -50,19 +50,19 @@ export class SVGLayout {
 			return [Matrix.identity(), this.getTM(node)];
 		}
 	}
-	localTM(node: SVGGraphicsElement): Matrix {
+	_localTM(node: SVGGraphicsElement): Matrix {
 		// transform applied to decendants
 		const { _root } = this;
 		const { parentNode: parent } = node;
 		if (parent instanceof SVGGraphicsElement) {
-			return this.relTM(parent, this.innerTM(node), _root);
+			return this.relTM(parent, this._subTM(node), _root);
 		} else if (node instanceof SVGSVGElement) {
 			return Matrix.identity();
 		} else {
-			return this.innerTM(node);
+			return this._subTM(node);
 		}
 	}
-	rootTM(node: SVGGraphicsElement): Matrix {
+	_rootTM(node: SVGGraphicsElement): Matrix {
 		const { _root } = this;
 		const { parentNode: parent } = node;
 		if (parent instanceof SVGGraphicsElement) {
@@ -73,11 +73,11 @@ export class SVGLayout {
 	}
 	catTM(m: Matrix, ...nodes: Array<SVGGraphicsElement>) {
 		nodes.forEach((node) => {
-			const [P, M] = this.pairTM(node);
+			const [P, M] = this._pairTM(node);
 			this.setTM(node, P.inverse().cat(m).cat(P).cat(M));
 		});
 	}
-	boundingBox(
+	_boundingBox(
 		...args: Array<
 			| SVGGraphicsElement
 			| Box
@@ -89,14 +89,14 @@ export class SVGLayout {
 		let bbox = Box.new();
 		for (const v of args) {
 			if (v instanceof Array) {
-				bbox = this.boundingBox(...v).merge(bbox);
+				bbox = this._boundingBox(...v).merge(bbox);
 			} else if (v instanceof Box) {
 				bbox = v.merge(bbox);
 			} else if (v instanceof Vec || v instanceof Ray) {
 				const { x, y } = v;
 				bbox = Box.new(x, y, 0, 0).merge(bbox);
 			} else {
-				const [p, o] = this.pairTM(v);
+				const [p, o] = this._pairTM(v);
 				try {
 					bbox = v._boundingBox(p).merge(bbox);
 				} catch (err) {

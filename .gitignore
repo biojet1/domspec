@@ -108,3 +108,5 @@ package-lock.json
 test/jsdom/
 .ipynb_checkpoints
 test/.*
+
+.task/

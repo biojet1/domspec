@@ -208,7 +208,7 @@ export function htmlParser2(doc: Document, top: ParentNode, options?: any) {
 					const i = key.indexOf(":");
 					if (i < 0) {
 						// tag.setAttributeNS(null, key, value);
-						tag.letAttributeNode(key).value = value;
+						tag._letAttributeNode(key).value = value;
 					} else {
 						const prefix = key.substring(0, i);
 						let ns;
@@ -220,7 +220,7 @@ export function htmlParser2(doc: Document, top: ParentNode, options?: any) {
 								ns = getNamespace(prefix, top as Element, attribs);
 						}
 						// tag.setAttributeNS(ns, key, value);
-						tag.letAttributeNodeNS(ns, key).value = value;
+						tag._letAttributeNodeNS(ns, key).value = value;
 					}
 				}
 				// top.appendChild(tag);

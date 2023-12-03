@@ -1,4 +1,4 @@
-// import fs from "fs";
+import fs from "fs";
 // import vm from "vm";
 import tap from 'tap';
 // import fetch from "node-fetch";
@@ -17,7 +17,12 @@ import { ResourceLoader } from '../dist/resource.js';
 
 let _FILE = process.env._FILE;
 
+if(!process.env.WPT_ROOT || !fs.existsSync(process.env.WPT_ROOT)){
+    throw new Error(`No WPT_ROOT "${process.env.WPT_ROOT}"`)
+}
+
 const WPT_ROOT_URL = pathToFileURL(process.env.WPT_ROOT + '/');
+
 if (_FILE) {
     const test_name = _FILE;
 

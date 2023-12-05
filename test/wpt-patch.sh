@@ -1,4 +1,9 @@
-patch "$WPT_ROOT/dom/nodes/Document-createProcessingInstruction.js" - << 'EOD'
+if [ ! -d "$WPT_ROOT" ]; then
+	>&2 echo "No WPT_ROOT '$WPT_ROOT'"
+	exit 1 
+fi
+
+patch -s "$WPT_ROOT/dom/nodes/Document-createProcessingInstruction.js" - << 'EOD'
 18c18
 <   for (var i = 0, il = invalid.length; i < il; i++) {
 ---

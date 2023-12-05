@@ -154,14 +154,14 @@ export const AttributesHandler = {
 				};
 
 			case "item":
-				return (index: number | string) => {
+				return (index: number) => {
 					if (index >= 0) {
 						for (const attr of attributes(self)) {
 							if ((index as number)-- == 0) return attr;
 						}
 					} else {
 						for (const attr of attributes(self)) {
-							if (index == attr.name) return attr;
+							if (index == +attr.name) return attr;
 						}
 					}
 					return null;

@@ -1,10 +1,6 @@
 import fs from "fs";
-// import vm from "vm";
 import tap from 'tap';
-// import fetch from "node-fetch";
-
 import { fileURLToPath, pathToFileURL, URL } from 'url';
-// import * as all from "../dist/all.js";
 
 const ct = globalThis.clearTimeout;
 

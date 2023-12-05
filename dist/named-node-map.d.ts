@@ -14,7 +14,7 @@ export declare class NamedNodeMap {
     [Symbol.iterator](): Iterator<Attr>;
 }
 export declare const AttributesHandler: {
-    get(self: Element, key: string | symbol, receiver?: any): number | Attr | ((ns: string, name: string) => Attr | null) | ((attr: Attr) => Attr | null) | ((name: string) => boolean) | (() => string) | (() => Generator<Attr, void, unknown>) | undefined;
+    get(self: Element, key: string | symbol, receiver?: any): number | Attr | ((ns: string, name: string) => Attr | null) | ((attr: Attr) => Attr | null) | ((name: string) => boolean) | ((index: number) => Attr | null) | (() => string) | (() => Generator<Attr, void, unknown>) | undefined;
     ownKeys(self: Element): string[];
     has(self: Element, key: string): boolean;
     getOwnPropertyDescriptor(self: Element, key: string): {

@@ -143,7 +143,7 @@ export const AttributesHandler = {
                     }
                     else {
                         for (const attr of attributes(self)) {
-                            if (index == attr.name)
+                            if (index == +attr.name)
                                 return attr;
                         }
                     }

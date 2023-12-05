@@ -73,6 +73,7 @@ export declare class SVGImageElement extends SVGGraphicsElement {
     static TAGS: string[];
     get _isViewportElement(): number;
     _shapeBox(tm?: Matrix): Box;
+    _objectBBox(tm?: Matrix): Box;
 }
 export declare class SVGSwitchElement extends SVGGraphicsElement {
     static TAGS: string[];

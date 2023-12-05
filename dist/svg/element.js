@@ -238,6 +238,9 @@ export class SVGImageElement extends SVGGraphicsElement {
     _shapeBox(tm) {
         return this._viewportBox(tm);
     }
+    _objectBBox(tm) {
+        return this._viewportBox(tm);
+    }
 }
 export class SVGSwitchElement extends SVGGraphicsElement {
     static TAGS = ["switch"];

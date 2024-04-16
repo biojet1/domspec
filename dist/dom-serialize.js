@@ -35,7 +35,7 @@ function _lookupNamespaceURI(cur, prefix, map) {
 export function* enumXMLDump(start, end) {
     let isOpened = false;
     let cur = start;
-    const { ownerDocument } = start;
+    const { ownerDocument = undefined } = start;
     let voidElements = ownerDocument &&
         ownerDocument.isHTML &&
         /^(?:\w+:)?(?:area|base|br|col|embed|hr|img|input|keygen|link|menuitem|meta|param|source|track|wbr)$/i;

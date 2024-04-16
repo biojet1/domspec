@@ -1,5 +1,5 @@
 if [ ! -d "$WPT_ROOT" ]; then
-	>&2 echo "Threshold must be an integer value!"
+	>&2 echo "No WPT_ROOT '$WPT_ROOT'"
 	exit 1 
 fi
 

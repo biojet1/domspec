@@ -46,7 +46,7 @@ function _lookupNamespaceURI(
 export function* enumXMLDump(start: Node, end: Node) {
 	let isOpened = false;
 	let cur: Node | undefined = start;
-	const { ownerDocument } = start;
+	const { ownerDocument = undefined } = start;
 	let voidElements =
 		ownerDocument &&
 		ownerDocument.isHTML &&

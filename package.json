@@ -1,6 +1,6 @@
 {
 	"name": "domspec",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"author": "https://www.npmjs.com/~biojet1",
 	"type": "module",
 	"description": "DOM Implementation",

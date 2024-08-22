@@ -20,7 +20,7 @@ tap.test("getBBox", function (t) {
 	elements
 		.map(([k, v], i) => [k, v.box ?? []])
 		.forEach(([node, m]) => {
-			const b = Box.forRect(...m);
+			const b = Box.rect(...m);
 			if (node.localName == "svg") {
 				return;
 			}
@@ -127,7 +127,7 @@ tap.test("_boundingBox", async (t) => {
 	elements
 		.map(([k, v], i) => [k, v.root_box ?? []])
 		.forEach(([node, m]) => {
-			const b = Box.forRect(...m);
+			const b = Box.rect(...m);
 			if (node.localName == "svg") {
 				return;
 			}
@@ -150,7 +150,7 @@ tap.test("Layout.boundingBox2", async (t) => {
 
 			try {
 				// const a = g._boundingBox(node);
-				const b = Box.forRect(...box);
+				const b = Box.rect(...box);
 				const tg = g._rootTM;
 				const tn = node._rootTM;
 				const c = node.getBBox().transform(tg.inverse().cat(tn));

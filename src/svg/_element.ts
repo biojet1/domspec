@@ -1,4 +1,4 @@
-import { Vec, Box, Matrix, SVGTransform } from "svggeom";
+import { Vector, Box, Matrix, SVGTransform } from "svggeom";
 
 export interface SVGBoundingBoxOptions {
 	fill?: boolean;
@@ -539,7 +539,7 @@ export class SVGSVGElement extends SVGGraphicsElement {
 	// SVGNumber createSVGNumber();
 	// SVGAngle createSVGAngle();
 	createSVGPoint() {
-		return Vec.new(0, 0);
+		return Vector.new(0, 0);
 	}
 	createSVGRect() {
 		return SVGRect.forRect(0, 0, 0, 0);
@@ -590,7 +590,7 @@ export class SVGSVGElement extends SVGGraphicsElement {
 	}
 }
 
-export { Vec as SVGPoint };
+export { Vector as SVGPoint };
 import { Element } from "../element.js";
 import { ChildNode } from "../child-node.js";
 import {

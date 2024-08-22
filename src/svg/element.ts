@@ -1,4 +1,4 @@
-import { Vec, Box, Matrix, PathLS, SVGTransform } from "svggeom";
+import { Vector, Box, Matrix, PathLS, SVGTransform } from "svggeom";
 /// Base Elements //////////
 
 export class SVGMarkerElement extends SVGGraphicsElement {
@@ -177,8 +177,8 @@ export class SVGLineElement extends SVGGeometryElement {
 			let x2 = this.x2.baseVal.value;
 			let y1 = this.y1.baseVal.value;
 			let y2 = this.y2.baseVal.value;
-			[x1, y1] = Vec.new(x1, y1).transform(tm);
-			[x2, y2] = Vec.new(x2, y2).transform(tm);
+			[x1, y1] = Vector.new(x1, y1).transform(tm);
+			[x2, y2] = Vector.new(x2, y2).transform(tm);
 			this.x1.baseVal.value = x1;
 			this.x2.baseVal.value = x2;
 			this.y1.baseVal.value = y1;
@@ -213,7 +213,7 @@ export class SVGPolygonElement extends SVGGeometryElement {
 				?.split(/(\s+)/)
 				.filter((e) => e.trim().length > 0)
 				.map((e) => e.split(",").map((v) => parseFloat(v)))
-				.map((e) => Vec.new(e[0], e[1]))
+				.map((e) => Vector.new(e[0], e[1]))
 				.map((e) => [...e.transform(tm)])
 				.map((e) => `${e[0]},${e[1]}`);
 			l && this.setAttribute("points", l.join(" "));
@@ -235,7 +235,7 @@ export class SVGPolylineElement extends SVGGeometryElement {
 				?.split(/(\s+)/)
 				.filter((e) => e.trim().length > 0)
 				.map((e) => e.split(",").map((v) => parseFloat(v)))
-				.map((e) => Vec.new(e[0], e[1]))
+				.map((e) => Vector.new(e[0], e[1]))
 				.map((e) => [...e.transform(tm)])
 				.map((e) => `${e[0]},${e[1]}`);
 			l && this.setAttribute("points", l.join(" "));
@@ -382,7 +382,7 @@ export class SVGTextElement extends SVGTextContentElement {
 		} = this;
 		let box = Box.new();
 		box = box.merge(
-			Box.new(Vec.new(x, y).transform(m).toArray().concat([0, 0]))
+			Box.new(Vector.new(x, y).transform(m).toArray().concat([0, 0]))
 		);
 		for (const sub of this.children) {
 			if (sub instanceof SVGGraphicsElement && sub.localName == "tspan") {
@@ -406,8 +406,8 @@ export class SVGTSpanElement extends SVGTextContentElement {
 		const fontsize = 16;
 		const x2 = x1 + 0; // This is impossible to calculate!
 		const y2 = y1 + fontsize;
-		const a = Vec.new(x1, y1).transform(m);
-		const b = Vec.new(x2, y2).transform(m).sub(a);
+		const a = Vector.new(x1, y1).transform(m);
+		const b = Vector.new(x2, y2).transform(m).sub(a);
 		box = box.merge(Box.new([a.x, a.y, Math.abs(b.x), Math.abs(b.y)]));
 		return box;
 	}

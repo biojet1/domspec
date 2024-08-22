@@ -75,7 +75,7 @@ tap.test("layout1", { bail: 0 }, function (t) {
 			const l = v._innerTM;
 			// const l = _innerTM(v);
 			const o = v._ownTM;
-			const b0 = Box.forRect(x, y, w, h);
+			const b0 = Box.rect(x, y, w, h);
 			const b1 = v._boundingBox();
 			root.insertAdjacentHTML(
 				"beforeend",

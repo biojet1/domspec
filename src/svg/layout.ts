@@ -1,4 +1,4 @@
-import { Ray, Box, Matrix, Vec } from "svggeom";
+import { Ray, Box, Matrix, Vector } from "svggeom";
 import { SVGGraphicsElement, SVGSVGElement } from "./_element.js";
 import { Element } from "../element.js";
 
@@ -81,9 +81,9 @@ export class SVGLayout {
 		...args: Array<
 			| SVGGraphicsElement
 			| Box
-			| Vec
+			| Vector
 			| Ray
-			| Array<SVGGraphicsElement | Box | Vec | Ray>
+			| Array<SVGGraphicsElement | Box | Vector | Ray>
 		>
 	) {
 		let bbox = Box.new();
@@ -92,7 +92,7 @@ export class SVGLayout {
 				bbox = this._boundingBox(...v).merge(bbox);
 			} else if (v instanceof Box) {
 				bbox = v.merge(bbox);
-			} else if (v instanceof Vec || v instanceof Ray) {
+			} else if (v instanceof Vector || v instanceof Ray) {
 				const { x, y } = v;
 				bbox = Box.new(x, y, 0, 0).merge(bbox);
 			} else {

@@ -193,9 +193,9 @@ export class SVGAnimatedRect extends Attr {
 		...args: Array<
 			| SVGGraphicsElement
 			| Box
-			| Vec
+			| Vector
 			| Ray
-			| Array<SVGGraphicsElement | Box | Vec | Ray>
+			| Array<SVGGraphicsElement | Box | Vector | Ray>
 		>
 	) {
 		let bbox = contain(args);
@@ -304,7 +304,7 @@ export class SVGAnimatedRect extends Attr {
 			w = this._calcWidth();
 			h = this._calcHeight();
 		}
-		return Box.forRect(x, y, w, h);
+		return Box.rect(x, y, w, h);
 	}
 }
 
@@ -312,9 +312,9 @@ function contain(
 	args: Array<
 		| SVGGraphicsElement
 		| Box
-		| Vec
+		| Vector
 		| Ray
-		| Array<SVGGraphicsElement | Box | Vec | Ray>
+		| Array<SVGGraphicsElement | Box | Vector | Ray>
 	>
 ): Box {
 	let bbox = SVGRect.new() as SVGRect;
@@ -323,7 +323,7 @@ function contain(
 			bbox.mergeSelf(contain(v));
 		} else if (v instanceof Box) {
 			bbox.mergeSelf(v);
-		} else if (v instanceof Vec || v instanceof Ray) {
+		} else if (v instanceof Vector || v instanceof Ray) {
 			const { x, y } = v;
 			bbox.mergeSelf(Box.new(x, y, 0, 0));
 		} else {
@@ -340,7 +340,7 @@ function contain(
 	return bbox;
 }
 import { BoxMut as SVGRect } from "svggeom";
-import { Box, Vec, Ray } from "svggeom";
+import { Box, Vector, Ray } from "svggeom";
 import { Attr } from "../attr.js";
 import { SVGGraphicsElement, SVGSVGElement, SVGElement } from "./element.js";
 import { SVGLength } from "./length.js";

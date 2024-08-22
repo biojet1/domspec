@@ -3,7 +3,7 @@ import { Document, SVGDocument } from "../dist/document.js";
 import { ParentNode } from "../dist/parent-node.js";
 import { DOMParser } from "../dist/dom-parse.js";
 import { SVGLength } from "../dist/svg/element.js";
-import { PathLS, Matrix, Vec, Box } from "svggeom";
+import { PathLS, Matrix, Vector, Box } from "svggeom";
 
 const parser = new DOMParser();
 
@@ -74,8 +74,8 @@ tap.test("SVG getPointAtLength getTotalLength", function (t) {
 	const svg = doc.documentElement;
 	const L1 = doc.getElementById("L1");
 	t.same(L1.getTotalLength(), 500);
-	t.same(L1.getPointAtLength(500).toString(), Vec.new(300, 400).toString());
-	t.same(L1.getPointAtLength(0).toString(), Vec.new(0, 0).toString());
+	t.same(L1.getPointAtLength(500).toString(), Vector.new(300, 400).toString());
+	t.same(L1.getPointAtLength(0).toString(), Vector.new(0, 0).toString());
 	const p = L1._toPathElement();
 	t.match(p.getAttribute("d"), /^M\s*0[\s,]+0\s*L\s*300[\s,]+400$/);
 
@@ -161,7 +161,7 @@ tap.test("SVG width", function (t) {
 		// const b = mySVG.getBoundingClientRect();
 		// console.dir(b);
 		// console.dir(b.width);
-		// console.dir(Box.forRect(0, 0, NaN, NaN));
+		// console.dir(Box.rect(0, 0, NaN, NaN));
 	}
 
 	t.end();

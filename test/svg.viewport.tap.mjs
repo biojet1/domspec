@@ -175,7 +175,7 @@ tap.test("Geoms 2", function (t) {
     const b = Box.new(x, y, w, h);
     if (x == 0 && y == 0 && w == 0 && h == 0) {
       const k = v._shapeBox();
-      const emp = Box.forRect(0, 0, 0, 0).equals(k);
+      const emp = Box.rect(0, 0, 0, 0).equals(k);
       const val = k.isValid();
       t.ok(emp || !val, `${id} ${k} ${emp} ${val}`);
       return;

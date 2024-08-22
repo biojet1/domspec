@@ -539,7 +539,7 @@ export class SVGSVGElement extends SVGGraphicsElement {
 	// SVGNumber createSVGNumber();
 	// SVGAngle createSVGAngle();
 	createSVGPoint() {
-		return Vec.pos(0, 0);
+		return Vec.new(0, 0);
 	}
 	createSVGRect() {
 		return SVGRect.forRect(0, 0, 0, 0);

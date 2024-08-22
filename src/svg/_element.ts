@@ -1,4 +1,4 @@
-import { Vector, Box, Matrix, SVGTransform } from "svggeom";
+import { Vector, BoundingBox, Matrix, SVGTransform } from "svggeom";
 
 export interface SVGBoundingBoxOptions {
 	fill?: boolean;
@@ -135,13 +135,13 @@ export class SVGElement extends Element {
 	//////////////
 	// The box of element with viewport that has x, y, width, height
 	// like image, svg, symbol, foreignObject, ...
-	_viewportBox(tm?: Matrix): Box {
+	_viewportBox(tm?: Matrix): BoundingBox {
 		const width = this.width.baseVal.value;
 		const height = this.height.baseVal.value;
 		const x = this.x.baseVal.value;
 		const y = this.y.baseVal.value;
 		if (width && height) {
-			let b = Box.new(x, y, width, height);
+			let b = BoundingBox.new(x, y, width, height);
 			if (tm) {
 				b = b.transform(tm);
 			} else {
@@ -149,7 +149,7 @@ export class SVGElement extends Element {
 			}
 			return b;
 		}
-		return Box.not();
+		return BoundingBox.not();
 	}
 	//////////////
 	// The transformation up to document root
@@ -347,7 +347,7 @@ export class SVGGraphicsElement extends SVGElement {
 	//////////////
 	// 	<g/> box of decendant children
 	_objectBBox(T?: Matrix) {
-		let box = Box.new();
+		let box = BoundingBox.new();
 		for (const sub of this.children) {
 			if (sub instanceof SVGGraphicsElement && sub._canRender()) {
 				const M = sub._ownTM;
@@ -360,7 +360,7 @@ export class SVGGraphicsElement extends SVGElement {
 
 	//////////////
 	// The bounding box, transformed up to document root
-	_boundingBox(tm?: Matrix): Box {
+	_boundingBox(tm?: Matrix): BoundingBox {
 		const { _clipElement: clip } = this;
 		if (clip) {
 			if (tm) {
@@ -374,7 +374,7 @@ export class SVGGraphicsElement extends SVGElement {
 	}
 	//////////////
 	// The bounding box, transformed up to document root
-	// _logicalBox(tm?: Matrix, params:SVGBoundingBoxOptions): Box {
+	// _logicalBox(tm?: Matrix, params:SVGBoundingBoxOptions): BoundingBox {
 
 	// 	const { _clipElement: clip } = this;
 	// 	if (clip) {
@@ -390,10 +390,10 @@ export class SVGGraphicsElement extends SVGElement {
 
 	//////////////
 	// The bounding box of <g/>, decendants,  transformed up to document root
-	_shapeBox(tm?: Matrix): Box {
+	_shapeBox(tm?: Matrix): BoundingBox {
 		// const m = tm ? tm.cat(this._ownTM) : this._rootTM;
 		const m = tm ? tm.cat(this._ownTM) : this._innerTM;
-		let box = Box.new();
+		let box = BoundingBox.new();
 		for (const sub of this.children) {
 			if (sub instanceof SVGGraphicsElement && sub._canRender()) {
 				box = box.merge(sub._boundingBox(m));
@@ -441,7 +441,7 @@ export class SVGGraphicsElement extends SVGElement {
 
 	getBBox() {
 		const box = this._objectBBox();
-		return box.isValid() ? box : Box.empty();
+		return box.isValid() ? box : BoundingBox.empty();
 	}
 
 	_placeChild(ref: ChildNode | null | undefined, nodes: SVGGraphicsElement[]) {
@@ -519,8 +519,8 @@ export class SVGGraphicsElement extends SVGElement {
 	}
 	//////////////
 	//  decendants,  boxes
-	_subBBox(m: Matrix, params: SVGBoundingBoxOptions): Box {
-		let box = Box.new();
+	_subBBox(m: Matrix, params: SVGBoundingBoxOptions): BoundingBox {
+		let box = BoundingBox.new();
 		for (const sub of this.children) {
 			if (sub instanceof SVGGraphicsElement && sub._canRender()) {
 				box = box.merge(sub._ownBBox(m, params));
@@ -528,7 +528,7 @@ export class SVGGraphicsElement extends SVGElement {
 		}
 		return box;
 	}
-	_ownBBox(m: Matrix, params: SVGBoundingBoxOptions): Box {
+	_ownBBox(m: Matrix, params: SVGBoundingBoxOptions): BoundingBox {
 		return this._subBBox(m, params);
 	}
 }
@@ -542,7 +542,7 @@ export class SVGSVGElement extends SVGGraphicsElement {
 		return Vector.new(0, 0);
 	}
 	createSVGRect() {
-		return SVGRect.forRect(0, 0, 0, 0);
+		return SVGRect.rect(0, 0, 0, 0);
 	}
 	createSVGLength() {
 		return new SVGLength();
@@ -566,11 +566,11 @@ export class SVGSVGElement extends SVGGraphicsElement {
 		return this._ownTM.cat(this._viewportTM());
 	}
 
-	_shapeBox(tm?: Matrix): Box {
+	_shapeBox(tm?: Matrix): BoundingBox {
 		return this._viewportBox(tm);
 	}
 
-	_ownBBox(tm?: Matrix): Box {
+	_ownBBox(tm?: Matrix): BoundingBox {
 		return this._viewportBox(tm);
 	}
 

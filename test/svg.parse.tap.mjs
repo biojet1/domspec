@@ -3,7 +3,7 @@ import { Document, SVGDocument } from "../dist/document.js";
 import { ParentNode } from "../dist/parent-node.js";
 import { DOMParser } from "../dist/dom-parse.js";
 import { SVGLength } from "../dist/svg/element.js";
-import { PathLS, Matrix, Vector, Box } from "svggeom";
+import { PathLS, Matrix, Vector, BoundingBox } from "svggeom";
 
 const parser = new DOMParser();
 
@@ -161,7 +161,7 @@ tap.test("SVG width", function (t) {
 		// const b = mySVG.getBoundingClientRect();
 		// console.dir(b);
 		// console.dir(b.width);
-		// console.dir(Box.rect(0, 0, NaN, NaN));
+		// console.dir(BoundingBox.rect(0, 0, NaN, NaN));
 	}
 
 	t.end();

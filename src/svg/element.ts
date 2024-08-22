@@ -1,4 +1,4 @@
-import { Vector, Box, Matrix, PathLS, SVGTransform } from "svggeom";
+import { Vector, BoundingBox, Matrix, PathLS, SVGTransform } from "svggeom";
 /// Base Elements //////////
 
 export class SVGMarkerElement extends SVGGraphicsElement {
@@ -6,7 +6,7 @@ export class SVGMarkerElement extends SVGGraphicsElement {
 	get _isViewportElement() {
 		return 2;
 	}
-	_shapeBox(tm?: Matrix): Box {
+	_shapeBox(tm?: Matrix): BoundingBox {
 		return this._viewportBox(tm);
 	}
 }
@@ -34,7 +34,7 @@ export class SVGGeometryElement extends SVGGraphicsElement {
 			}
 			return _path.bbox();
 		}
-		return Box.not();
+		return BoundingBox.not();
 	}
 
 	_shapeBox(tm?: Matrix) {
@@ -255,7 +255,7 @@ export class SVGDefsElement extends SVGGraphicsElement {
 	static TAGS = ["defs"];
 
 	_objectBBox() {
-		return Box.empty();
+		return BoundingBox.empty();
 	}
 }
 
@@ -264,7 +264,7 @@ export class SVGForeignObjectElement extends SVGGraphicsElement {
 	get _isViewportElement() {
 		return 2;
 	}
-	_shapeBox(tm?: Matrix): Box {
+	_shapeBox(tm?: Matrix): BoundingBox {
 		return this._viewportBox(tm);
 	}
 }
@@ -279,10 +279,10 @@ export class SVGImageElement extends SVGGraphicsElement {
 	get _isViewportElement() {
 		return 1;
 	}
-	_shapeBox(tm?: Matrix): Box {
+	_shapeBox(tm?: Matrix): BoundingBox {
 		return this._viewportBox(tm);
 	}
-	_objectBBox(tm?: Matrix): Box {
+	_objectBBox(tm?: Matrix): BoundingBox {
 		return this._viewportBox(tm);
 	}
 }
@@ -319,7 +319,7 @@ export class SVGUseElement extends SVGGraphicsElement {
 					.transform(m);
 			}
 		}
-		return Box.not();
+		return BoundingBox.not();
 	}
 
 	_objectBBox(T?: Matrix) {
@@ -350,7 +350,7 @@ export class SVGUseElement extends SVGGraphicsElement {
 
 			return (ref as SVGGraphicsElement)._objectBBox(m);
 		}
-		return Box.not();
+		return BoundingBox.not();
 	}
 }
 // https://svgwg.org/svg2-draft/struct.html#SymbolElement
@@ -360,7 +360,7 @@ export class SVGSymbolElement extends SVGGraphicsElement {
 	get _isViewportElement() {
 		return 1;
 	}
-	_shapeBox(tm?: Matrix): Box {
+	_shapeBox(tm?: Matrix): BoundingBox {
 		return this._viewportBox(tm);
 	}
 }
@@ -370,7 +370,7 @@ export class SVGSymbolElement extends SVGGraphicsElement {
 export class SVGTextElement extends SVGTextContentElement {
 	static TAGS = ["text"];
 
-	_shapeBox(tm?: Matrix): Box {
+	_shapeBox(tm?: Matrix): BoundingBox {
 		const m = tm ? tm.cat(this._ownTM) : this._ownTM;
 		const {
 			x: {
@@ -380,9 +380,9 @@ export class SVGTextElement extends SVGTextContentElement {
 				baseVal: { value: y },
 			},
 		} = this;
-		let box = Box.new();
+		let box = BoundingBox.new();
 		box = box.merge(
-			Box.new(Vector.new(x, y).transform(m).toArray().concat([0, 0]))
+			BoundingBox.new(Vector.new(x, y).transform(m).toArray().concat([0, 0]))
 		);
 		for (const sub of this.children) {
 			if (sub instanceof SVGGraphicsElement && sub.localName == "tspan") {
@@ -395,9 +395,9 @@ export class SVGTextElement extends SVGTextContentElement {
 
 export class SVGTSpanElement extends SVGTextContentElement {
 	static TAGS = ["tspan"];
-	_shapeBox(tm?: Matrix): Box {
+	_shapeBox(tm?: Matrix): BoundingBox {
 		const m = tm ? tm.cat(this._ownTM) : this._ownTM;
-		let box = Box.new();
+		let box = BoundingBox.new();
 		// Returns a horrible bounding box that just contains the coord points
 		// of the text without width or height (which is impossible to calculate)
 		let s;
@@ -408,7 +408,7 @@ export class SVGTSpanElement extends SVGTextContentElement {
 		const y2 = y1 + fontsize;
 		const a = Vector.new(x1, y1).transform(m);
 		const b = Vector.new(x2, y2).transform(m).sub(a);
-		box = box.merge(Box.new([a.x, a.y, Math.abs(b.x), Math.abs(b.y)]));
+		box = box.merge(BoundingBox.new([a.x, a.y, Math.abs(b.x), Math.abs(b.y)]));
 		return box;
 	}
 }
@@ -441,7 +441,7 @@ export class SVGGlyphElement extends SVGElement {
 
 export class SVGPatternElement extends SVGElement {
 	static TAGS = ["pattern"];
-	_shapeBox(tm?: Matrix): Box {
+	_shapeBox(tm?: Matrix): BoundingBox {
 		return this._viewportBox(tm);
 	}
 }

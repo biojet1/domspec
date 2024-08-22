@@ -4,7 +4,7 @@ import { Document, SVGDocument } from "../dist/document.js";
 import { ParentNode } from "../dist/parent-node.js";
 import { DOMParser } from "../dist/dom-parse.js";
 import { SVGLength } from "../dist/svg/element.js";
-import { Box, Matrix } from "svggeom";
+import { BoundingBox, Matrix } from "svggeom";
 import DATA from "./res/transform.json" assert { type: "json" };
 // import DATA from "../../anim8/test/res/vps.json" assert { type: "json" };
 
@@ -20,7 +20,7 @@ tap.test("getBBox", function (t) {
 	elements
 		.map(([k, v], i) => [k, v.box ?? []])
 		.forEach(([node, m]) => {
-			const b = Box.rect(...m);
+			const b = BoundingBox.rect(...m);
 			if (node.localName == "svg") {
 				return;
 			}
@@ -127,7 +127,7 @@ tap.test("_boundingBox", async (t) => {
 	elements
 		.map(([k, v], i) => [k, v.root_box ?? []])
 		.forEach(([node, m]) => {
-			const b = Box.rect(...m);
+			const b = BoundingBox.rect(...m);
 			if (node.localName == "svg") {
 				return;
 			}
@@ -150,7 +150,7 @@ tap.test("Layout.boundingBox2", async (t) => {
 
 			try {
 				// const a = g._boundingBox(node);
-				const b = Box.rect(...box);
+				const b = BoundingBox.rect(...box);
 				const tg = g._rootTM;
 				const tn = node._rootTM;
 				const c = node.getBBox().transform(tg.inverse().cat(tn));

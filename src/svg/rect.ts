@@ -158,7 +158,7 @@ export class SVGAnimatedRect extends Attr {
 				}
 			} finally {
 				if (!box) {
-					box = SVGRect.forRect(0, 0, NaN, NaN);
+					box = SVGRect.rect(0, 0, NaN, NaN);
 				}
 				// box.owner = this.ownerElement as SVGSVGElement;
 				return (this._var = box);
@@ -192,10 +192,10 @@ export class SVGAnimatedRect extends Attr {
 	_closeIn(
 		...args: Array<
 			| SVGGraphicsElement
-			| Box
+			| BoundingBox
 			| Vector
 			| Ray
-			| Array<SVGGraphicsElement | Box | Vector | Ray>
+			| Array<SVGGraphicsElement | BoundingBox | Vector | Ray>
 		>
 	) {
 		let bbox = contain(args);
@@ -285,7 +285,7 @@ export class SVGAnimatedRect extends Attr {
 
 		return 100;
 	}
-	_calcBox(): Box {
+	_calcBox(): BoundingBox {
 		const { _var } = this;
 		if (_var) {
 			const { baseVal } = this;
@@ -304,28 +304,28 @@ export class SVGAnimatedRect extends Attr {
 			w = this._calcWidth();
 			h = this._calcHeight();
 		}
-		return Box.rect(x, y, w, h);
+		return BoundingBox.rect(x, y, w, h);
 	}
 }
 
 function contain(
 	args: Array<
 		| SVGGraphicsElement
-		| Box
+		| BoundingBox
 		| Vector
 		| Ray
-		| Array<SVGGraphicsElement | Box | Vector | Ray>
+		| Array<SVGGraphicsElement | BoundingBox | Vector | Ray>
 	>
-): Box {
+): BoundingBox {
 	let bbox = SVGRect.new() as SVGRect;
 	for (const v of args) {
 		if (v instanceof Array) {
 			bbox.mergeSelf(contain(v));
-		} else if (v instanceof Box) {
+		} else if (v instanceof BoundingBox) {
 			bbox.mergeSelf(v);
 		} else if (v instanceof Vector || v instanceof Ray) {
 			const { x, y } = v;
-			bbox.mergeSelf(Box.new(x, y, 0, 0));
+			bbox.mergeSelf(BoundingBox.new(x, y, 0, 0));
 		} else {
 			try {
 				bbox.mergeSelf(v._boundingBox());
@@ -340,7 +340,7 @@ function contain(
 	return bbox;
 }
 import { BoxMut as SVGRect } from "svggeom";
-import { Box, Vector, Ray } from "svggeom";
+import { BoundingBox, Vector, Ray } from "svggeom";
 import { Attr } from "../attr.js";
 import { SVGGraphicsElement, SVGSVGElement, SVGElement } from "./element.js";
 import { SVGLength } from "./length.js";

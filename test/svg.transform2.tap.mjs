@@ -3,7 +3,7 @@ import { Document, SVGDocument } from "../dist/document.js";
 import { ParentNode } from "../dist/parent-node.js";
 import { DOMParser } from "../dist/dom-parse.js";
 import { SVGLength } from "../dist/svg/element.js";
-import { Box, Matrix } from "svggeom";
+import { BoundingBox, Matrix } from "svggeom";
 import { createWriteStream, writeFileSync, WriteStream } from "fs";
 import fs from "fs";
 const trsubs = [
@@ -191,7 +191,7 @@ tap.test("transform2", function (t) {
 		["RB", 150, 75, 15, 15],
 	].forEach(([id, x, y, w, h]) => {
 		const v = doc.getElementById(id);
-		const b = Box.new(x, y, w, h);
+		const b = BoundingBox.new(x, y, w, h);
 		eqBox(b, v._shapeBox(), 0, id);
 	});
 

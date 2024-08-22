@@ -3,7 +3,7 @@ import { Document, SVGDocument } from "../dist/document.js";
 import { ParentNode } from "../dist/parent-node.js";
 import { DOMParser } from "../dist/dom-parse.js";
 import { SVGLength } from "../dist/svg/element.js";
-import { Matrix, Box } from "svggeom";
+import { Matrix, BoundingBox } from "svggeom";
 const parser = new DOMParser();
 tap.test("transform", function (t) {
   const document = parser.parseFromString(`
@@ -179,7 +179,7 @@ tap.test("_viewportTM", function (t) {
     const v = document.getElementById(id);
     const u = v.querySelector("use");
     // const r = u.shapeBox(true);
-    const b = Box.new(x, y, w, h);
+    const b = BoundingBox.new(x, y, w, h);
     // eqBox(b, r, 2e-5, id);
     eqBox(b, u._shapeBox(), 2e-5, id);
   });
@@ -199,7 +199,7 @@ tap.test("_viewportTM", function (t) {
     ["V_L", [390, 220, 50, 30]],
   ].forEach(([id, [x, y, w, h]]) => {
     const v = document.getElementById(id);
-    const b = Box.new(x, y, w, h);
+    const b = BoundingBox.new(x, y, w, h);
     // eqBox(b, v.shapeBox(true), 2e-5, `v:shapeBox ${id}`);
     eqBox(b, v._shapeBox(), 2e-5, `v:_shapeBox ${id}`);
   });
@@ -222,7 +222,7 @@ tap.test("_viewportTM", function (t) {
     // ['G_13', 390, 183.3333282470703, 83.33332824707031, 66.16667175292969],
   ].forEach(([id, x, y, w, h]) => {
     const v = document.getElementById(id);
-    const b = Box.new(x, y, w, h);
+    const b = BoundingBox.new(x, y, w, h);
     eqBox(b, v._shapeBox(), 1, `_shapeBox ${id}`);
   });
 

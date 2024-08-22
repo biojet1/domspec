@@ -4,7 +4,7 @@ import { Document, SVGDocument } from "../dist/document.js";
 import { ParentNode } from "../dist/parent-node.js";
 import { DOMParser } from "../dist/dom-parse.js";
 import { SVGLength } from "../dist/svg/element.js";
-import { Box } from "svggeom";
+import { BoundingBox } from "svggeom";
 const parser = new DOMParser();
 
 function closeEnough(t, a, b, threshold = 1e-6, tag) {
@@ -106,9 +106,9 @@ tap.test("Geoms 1", function (t) {
     ["R6", 250, 200, 50, 40],
   ].forEach(([id, x, y, w, h]) => {
     const v = document.getElementById(id);
-    const b = Box.new(x, y, w, h);
+    const b = BoundingBox.new(x, y, w, h);
     const r = v._shapeBox();
-    eqBox(t, b, r.isValid() ? r : Box.empty(), x - ~~x === 0 ? 1e-9 : 1, id);
+    eqBox(t, b, r.isValid() ? r : BoundingBox.empty(), x - ~~x === 0 ? 1e-9 : 1, id);
   });
   const R5 = document.getElementById("R5");
   const [p, m] = V1._pairTM();
@@ -172,10 +172,10 @@ tap.test("Geoms 2", function (t) {
     ["V3", 0, 132, 80, 400],
   ].forEach(([id, x, y, w, h]) => {
     const v = document.getElementById(id);
-    const b = Box.new(x, y, w, h);
+    const b = BoundingBox.new(x, y, w, h);
     if (x == 0 && y == 0 && w == 0 && h == 0) {
       const k = v._shapeBox();
-      const emp = Box.rect(0, 0, 0, 0).equals(k);
+      const emp = BoundingBox.rect(0, 0, 0, 0).equals(k);
       const val = k.isValid();
       t.ok(emp || !val, `${id} ${k} ${emp} ${val}`);
       return;
@@ -190,7 +190,7 @@ tap.test("Geoms 2", function (t) {
     ["V3", 0, 132, 80, 400],
   ].forEach(([id, x, y, w, h]) => {
     const v = document.getElementById(id);
-    const b = Box.new(x, y, w, h);
+    const b = BoundingBox.new(x, y, w, h);
     eqBox(t, b, v.viewBox._calcBox(), 1e-9, id);
     if (v.hasAttribute("viewBox")) eqBox(t, b, v.viewBox.baseVal, 1e-9, id);
   });

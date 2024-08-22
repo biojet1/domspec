@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg">
 
-  <title>Bounding Box Calculation</title>
+  <title>Bounding BoundingBox Calculation</title>
   <desc>Examples of elements with different bounding box results based on context.</desc>
 
   <defs id="defs-1">

@@ -4,7 +4,7 @@ import { Document, SVGDocument } from '../dist/document.js';
 import { ParentNode } from '../dist/parent-node.js';
 import { DOMParser } from '../dist/dom-parse.js';
 import { SVGLength } from '../dist/svg/element.js';
-import { Box, Matrix } from 'svggeom';
+import { BoundingBox, Matrix } from 'svggeom';
 import { SVGLayout } from '../dist/svg/layout.js';
 
 class Lay extends SVGLayout {
@@ -79,9 +79,9 @@ tap.test('Geoms 1', function (t) {
 		['R6', 250, 200, 50, 40],
 	].forEach(([id, x, y, w, h]) => {
 		const v = document.getElementById(id);
-		const b = Box.new(x, y, w, h);
+		const b = BoundingBox.new(x, y, w, h);
 		const r = lay._boundingBox(v);
-		eqBox(t, b, r.isValid() ? r : Box.empty(), x - ~~x === 0 ? 1e-9 : 1, id);
+		eqBox(t, b, r.isValid() ? r : BoundingBox.empty(), x - ~~x === 0 ? 1e-9 : 1, id);
 	});
 	// lay.transform(Matrix.translate(0, -40), R5);
 	// console.log(Matrix.translate(50).describe())
@@ -100,9 +100,9 @@ tap.test('Geoms 1', function (t) {
 			['L1', 0, 2.5, 5, 5],
 		].forEach(([id, x, y, w, h]) => {
 			const v = document.getElementById(id);
-			const b = Box.new(x, y, w, h);
+			const b = BoundingBox.new(x, y, w, h);
 			const r = LV3._boundingBox(v);
-			eqBox(t, b, r.isValid() ? r : Box.empty(), x - ~~x === 0 ? 1e-9 : 1, id);
+			eqBox(t, b, r.isValid() ? r : BoundingBox.empty(), x - ~~x === 0 ? 1e-9 : 1, id);
 		});
 	}
 

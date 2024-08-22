@@ -6,10 +6,10 @@ const CI = true;
 const parser = new DOMParser();
 
 test.test(`getBBox`, { bail: !CI }, function (t) {
-    const { all } = parser.parseFromString(
-        `<svg xmlns="http://www.w3.org/2000/svg">
+  const { all } = parser.parseFromString(
+    `<svg xmlns="http://www.w3.org/2000/svg">
 
-  <title>Bounding Box Calculation</title>
+  <title>Bounding BoundingBox Calculation</title>
   <desc>Examples of elements with different bounding box results based on context.</desc>
 
   <defs id="defs-1">
@@ -24,16 +24,16 @@ test.test(`getBBox`, { bail: !CI }, function (t) {
     </g>
   </g>
 </svg>`,
-        `application/xml`,
-    );
+    `application/xml`,
+  );
 
-    t.same(all['rect-1'].x.baseVal.value, 20, '.x.baseVal.value');
-    t.same(all['rect-1'].getBBox().toArray(), [20, 20, 40, 40], 'rect-1');
-    t.same(all['rect-2'].getBBox().toArray(), [10, 10, 100, 100], 'rect-2');
-    t.same(all['group-2'].getBBox().toArray(), [10, 10, 100, 100], 'group-2');
-    t.same(all['defs-1'].getBBox().toArray(), [0, 0, 0, 0], 'defs-1');
-    t.same(all['use-1'].getBBox().toArray(), [30, 30, 40, 40], 'use-1');
-    t.same(all['group-1'].getBBox().toArray(), [30, 30, 40, 40], 'group-1');
-    t.same(all['use-1']._hrefElement.id, 'rect-1', 'use-1 <- rect-1');
-    t.end();
+  t.same(all['rect-1'].x.baseVal.value, 20, '.x.baseVal.value');
+  t.same(all['rect-1'].getBBox().toArray(), [20, 20, 40, 40], 'rect-1');
+  t.same(all['rect-2'].getBBox().toArray(), [10, 10, 100, 100], 'rect-2');
+  t.same(all['group-2'].getBBox().toArray(), [10, 10, 100, 100], 'group-2');
+  t.same(all['defs-1'].getBBox().toArray(), [0, 0, 0, 0], 'defs-1');
+  t.same(all['use-1'].getBBox().toArray(), [30, 30, 40, 40], 'use-1');
+  t.same(all['group-1'].getBBox().toArray(), [30, 30, 40, 40], 'group-1');
+  t.same(all['use-1']._hrefElement.id, 'rect-1', 'use-1 <- rect-1');
+  t.end();
 });

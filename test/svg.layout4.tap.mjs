@@ -4,7 +4,7 @@ import { Document, SVGDocument } from "../dist/document.js";
 import { ParentNode } from "../dist/parent-node.js";
 import { DOMParser } from "../dist/dom-parse.js";
 import { SVGLength } from "../dist/svg/element.js";
-import { Box, Matrix } from "svggeom";
+import { BoundingBox, Matrix } from "svggeom";
 // import DATA from "./res/preserveAspectRatio.json" assert { type: "json" };
 // import DATA from "./res/preserveAspectRatio2.json" assert { type: "json" };
 import DATA from "./res/symbolViewBox.json" assert { type: "json" };
@@ -31,7 +31,7 @@ tap.test("DATA", function (t) {
 	// elements
 	// 	.map(([elem, v], i) => [elem, v.root_box ?? []])
 	// 	.forEach(([elem, m]) => {
-	// 		const b = Box.rect(...m);
+	// 		const b = BoundingBox.rect(...m);
 	// 		let a;
 	// 		if (elem.localName == "svg") {
 	// 			// a = elem._objectBBox(elem._innerTM);
@@ -47,7 +47,7 @@ tap.test("DATA", function (t) {
 	// elements
 	// 	.map(([elem, v], i) => [elem, v.box ?? []])
 	// 	.forEach(([elem, m]) => {
-	// 		const b = Box.rect(...m);
+	// 		const b = BoundingBox.rect(...m);
 	// 		const a = elem.getBBox();
 	// 		if (elem.localName == "defs") {
 	// 			return;
@@ -62,7 +62,7 @@ tap.test("DATA", function (t) {
 				case "g":
 					return;
 			}
-			const b = Box.rect(...m);
+			const b = BoundingBox.rect(...m);
 			const a = elem._boundingBox();
 			t.ok(b.equals(a, 1e-3), `${elem.id} [${a}] [${b}]`);
 		});
@@ -71,7 +71,7 @@ tap.test("DATA", function (t) {
 	// 	.map(([elem, v], i) => [elem, v.box ?? []])
 	// 	.forEach(([elem, m]) => {
 	// 		console.log();
-	// 		// const b = Box.rect(...m);
+	// 		// const b = BoundingBox.rect(...m);
 	// 		// const a = elem.getBBox();
 	// 		// t.ok(b.equals(a, 1e-5), `${id} [${a}] [${b}]`);
 	// 	});

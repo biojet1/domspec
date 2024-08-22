@@ -74,8 +74,8 @@ tap.test("SVG getPointAtLength getTotalLength", function (t) {
 	const svg = doc.documentElement;
 	const L1 = doc.getElementById("L1");
 	t.same(L1.getTotalLength(), 500);
-	t.same(L1.getPointAtLength(500).toString(), Vec.pos(300, 400).toString());
-	t.same(L1.getPointAtLength(0).toString(), Vec.pos(0, 0).toString());
+	t.same(L1.getPointAtLength(500).toString(), Vec.new(300, 400).toString());
+	t.same(L1.getPointAtLength(0).toString(), Vec.new(0, 0).toString());
 	const p = L1._toPathElement();
 	t.match(p.getAttribute("d"), /^M\s*0[\s,]+0\s*L\s*300[\s,]+400$/);
 

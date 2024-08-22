@@ -78,7 +78,7 @@ tap.test("_rootTM", async (t) => {
 
 	t.end();
 });
-import {  SVGGraphicsElement } from "../dist/svg/_element.js";
+import { SVGGraphicsElement } from "../dist/svg/_element.js";
 
 tap.test("_rootTM()", async (t) => {
 	function _rootTM(node) {
@@ -88,7 +88,7 @@ tap.test("_rootTM()", async (t) => {
 			if ((parent = parent.parentElement) == null) {
 				break;
 			}
-			tm = tm.postCat(_subTM);
+			tm = tm.post_cat(_subTM);
 		}
 		return tm;
 	}
@@ -99,7 +99,7 @@ tap.test("_rootTM()", async (t) => {
 			if ((parent = parent.parentElement) == null) {
 				break;
 			}
-			tm = tm.postCat(_subTM);
+			tm = tm.post_cat(_subTM);
 		}
 		return tm;
 	}

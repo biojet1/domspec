@@ -244,45 +244,45 @@ tap.test("transform2", function (t) {
 	t.end();
 });
 
-import {  SVGGraphicsElement } from "../dist/svg/_element.js";
+import { SVGGraphicsElement } from "../dist/svg/_element.js";
 
-	function _relTM(parent, tm, root) {
-		while (parent != root) {
-			const grand = parent.parentElement;
-			if (grand instanceof SVGGraphicsElement) {
-				tm = tm.postCat(parent._subTM);
-				parent = grand;
-			} else if (root) {
-				if (grand) {
-					throw new Error(`root not reached`);
-				} else {
-					const p = root._rootTM.inverse();
-					return p.cat(tm);
-				}
+function _relTM(parent, tm, root) {
+	while (parent != root) {
+		const grand = parent.parentElement;
+		if (grand instanceof SVGGraphicsElement) {
+			tm = tm.post_cat(parent._subTM);
+			parent = grand;
+		} else if (root) {
+			if (grand) {
+				throw new Error(`root not reached`);
 			} else {
-				break;
+				const p = root._rootTM.inverse();
+				return p.cat(tm);
 			}
+		} else {
+			break;
 		}
-		return tm;
-
-
 	}
+	return tm;
 
 
-	function _rootTM(node) {
-		// const { parentNode: parent, _ownTM } = node;
-		// if (parent instanceof SVGGraphicsElement) {
-		// 	return _relTM(parent, _ownTM);
-		// } else {
-		// 	return _ownTM;
-		// }
-		let { parentElement: parent, _ownTM: tm } = node;
-		while (parent instanceof SVGGraphicsElement) {
-			const { _subTM } = parent;
-			if ((parent = parent.parentElement) == null) {
-				break;
-			}
-			tm = tm.postCat(_subTM);
+}
+
+
+function _rootTM(node) {
+	// const { parentNode: parent, _ownTM } = node;
+	// if (parent instanceof SVGGraphicsElement) {
+	// 	return _relTM(parent, _ownTM);
+	// } else {
+	// 	return _ownTM;
+	// }
+	let { parentElement: parent, _ownTM: tm } = node;
+	while (parent instanceof SVGGraphicsElement) {
+		const { _subTM } = parent;
+		if ((parent = parent.parentElement) == null) {
+			break;
 		}
-		return tm;
+		tm = tm.post_cat(_subTM);
 	}
+	return tm;
+}

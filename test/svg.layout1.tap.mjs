@@ -214,7 +214,7 @@ function _rootTM(node) {
 		if ((parent = parent.parentElement) == null) {
 			break;
 		}
-		tm = tm.postCat(_subTM);
+		tm = tm.post_cat(_subTM);
 	}
 	return tm;
 }
@@ -225,7 +225,7 @@ function _innerTM(node) {
 		if ((parent = parent.parentElement) == null) {
 			break;
 		}
-		tm = tm.postCat(_subTM);
+		tm = tm.post_cat(_subTM);
 	}
 	return tm;
 }

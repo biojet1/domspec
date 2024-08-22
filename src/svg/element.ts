@@ -11,7 +11,7 @@ export class SVGMarkerElement extends SVGGraphicsElement {
 	}
 }
 
-export class SVGTextContentElement extends SVGGraphicsElement {}
+export class SVGTextContentElement extends SVGGraphicsElement { }
 
 export class SVGGeometryElement extends SVGGraphicsElement {
 	_describe(): string {
@@ -93,7 +93,7 @@ export class SVGPathElement extends SVGGeometryElement {
 	}
 
 	_fuseTransform(parentT?: Matrix) {
-		let tm = parentT ? this._ownTM.postCat(parentT) : this._ownTM;
+		let tm = parentT ? this._ownTM.post_cat(parentT) : this._ownTM;
 		this.setAttribute(
 			"d",
 			PathLS.parse(this._describe()).transform(tm).describe()
@@ -111,9 +111,8 @@ export class SVGCircleElement extends SVGGeometryElement {
 
 		if (r === 0) return "M0 0";
 
-		return `M ${x - r} ${y} A ${r} ${r} 0 0 0 ${x + r} ${y} A ${r} ${r} 0 0 0 ${
-			x - r
-		} ${y}`;
+		return `M ${x - r} ${y} A ${r} ${r} 0 0 0 ${x + r} ${y} A ${r} ${r} 0 0 0 ${x - r
+			} ${y}`;
 	}
 }
 
@@ -130,7 +129,7 @@ export class SVGRectElement extends SVGGeometryElement {
 		return `M ${x} ${y} h ${width} v ${height} h ${-width} Z`;
 	}
 	_fuseTransform(parentT?: Matrix) {
-		let tm = parentT ? this._ownTM.postCat(parentT) : this._ownTM;
+		let tm = parentT ? this._ownTM.post_cat(parentT) : this._ownTM;
 		const {
 			a: scale_x,
 			b: skew_x,
@@ -172,14 +171,14 @@ export class SVGLineElement extends SVGGeometryElement {
 		return `M ${x1} ${y1} L ${x2} ${y2}`;
 	}
 	_fuseTransform(parentT: Matrix) {
-		let tm = parentT ? this._ownTM.postCat(parentT) : this._ownTM;
+		let tm = parentT ? this._ownTM.post_cat(parentT) : this._ownTM;
 		if (!tm.isIdentity) {
 			let x1 = this.x1.baseVal.value;
 			let x2 = this.x2.baseVal.value;
 			let y1 = this.y1.baseVal.value;
 			let y2 = this.y2.baseVal.value;
-			[x1, y1] = Vec.pos(x1, y1).transform(tm);
-			[x2, y2] = Vec.pos(x2, y2).transform(tm);
+			[x1, y1] = Vec.new(x1, y1).transform(tm);
+			[x2, y2] = Vec.new(x2, y2).transform(tm);
 			this.x1.baseVal.value = x1;
 			this.x2.baseVal.value = x2;
 			this.y1.baseVal.value = y1;
@@ -196,9 +195,8 @@ export class SVGEllipseElement extends SVGGeometryElement {
 		const ry = this.ry.baseVal.value;
 		const x = this.cx.baseVal.value;
 		const y = this.cy.baseVal.value;
-		return `M ${x - rx} ${y} A ${rx} ${ry} 0 0 0 ${
-			x + rx
-		} ${y} A ${rx} ${ry} 0 0 0 ${x - rx} ${y}`;
+		return `M ${x - rx} ${y} A ${rx} ${ry} 0 0 0 ${x + rx
+			} ${y} A ${rx} ${ry} 0 0 0 ${x - rx} ${y}`;
 	}
 }
 
@@ -209,13 +207,13 @@ export class SVGPolygonElement extends SVGGeometryElement {
 		return p ? `M ${p} Z` : "";
 	}
 	_fuseTransform(parentT?: Matrix) {
-		let tm = parentT ? this._ownTM.postCat(parentT) : this._ownTM;
+		let tm = parentT ? this._ownTM.post_cat(parentT) : this._ownTM;
 		if (!tm.isIdentity) {
 			const l = this.getAttribute("points")
 				?.split(/(\s+)/)
 				.filter((e) => e.trim().length > 0)
 				.map((e) => e.split(",").map((v) => parseFloat(v)))
-				.map((e) => Vec.pos(e[0], e[1]))
+				.map((e) => Vec.new(e[0], e[1]))
 				.map((e) => [...e.transform(tm)])
 				.map((e) => `${e[0]},${e[1]}`);
 			l && this.setAttribute("points", l.join(" "));
@@ -231,13 +229,13 @@ export class SVGPolylineElement extends SVGGeometryElement {
 		return p ? `M ${p}` : "";
 	}
 	_fuseTransform(parentT?: Matrix) {
-		let tm = parentT ? this._ownTM.postCat(parentT) : this._ownTM;
+		let tm = parentT ? this._ownTM.post_cat(parentT) : this._ownTM;
 		if (!tm.isIdentity) {
 			const l = this.getAttribute("points")
 				?.split(/(\s+)/)
 				.filter((e) => e.trim().length > 0)
 				.map((e) => e.split(",").map((v) => parseFloat(v)))
-				.map((e) => Vec.pos(e[0], e[1]))
+				.map((e) => Vec.new(e[0], e[1]))
 				.map((e) => [...e.transform(tm)])
 				.map((e) => `${e[0]},${e[1]}`);
 			l && this.setAttribute("points", l.join(" "));
@@ -384,7 +382,7 @@ export class SVGTextElement extends SVGTextContentElement {
 		} = this;
 		let box = Box.new();
 		box = box.merge(
-			Box.new(Vec.at(x, y).transform(m).toArray().concat([0, 0]))
+			Box.new(Vec.new(x, y).transform(m).toArray().concat([0, 0]))
 		);
 		for (const sub of this.children) {
 			if (sub instanceof SVGGraphicsElement && sub.localName == "tspan") {
@@ -408,8 +406,8 @@ export class SVGTSpanElement extends SVGTextContentElement {
 		const fontsize = 16;
 		const x2 = x1 + 0; // This is impossible to calculate!
 		const y2 = y1 + fontsize;
-		const a = Vec.at(x1, y1).transform(m);
-		const b = Vec.at(x2, y2).transform(m).sub(a);
+		const a = Vec.new(x1, y1).transform(m);
+		const b = Vec.new(x2, y2).transform(m).sub(a);
 		box = box.merge(Box.new([a.x, a.y, Math.abs(b.x), Math.abs(b.y)]));
 		return box;
 	}

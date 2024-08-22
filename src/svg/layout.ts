@@ -30,7 +30,7 @@ export class SVGLayout {
 		while (parent != root) {
 			const grand: Element | null = parent.parentElement;
 			if (grand instanceof SVGGraphicsElement) {
-				tm = tm.postCat(this._subTM(parent));
+				tm = tm.post_cat(this._subTM(parent));
 				parent = grand;
 			} else if (root) {
 				throw new Error(`root not reached`);

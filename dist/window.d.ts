@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { Document, HTMLDocument } from './document.js';
 import { EventTarget } from './event-target.js';
 import * as all from './all.js';

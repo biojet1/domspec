@@ -131,7 +131,7 @@ export class SVGElement extends Element {
             if (grand == null) {
                 break;
             }
-            tm = tm.postCat(parent._subTM);
+            tm = tm.post_cat(parent._subTM);
             parent = grand;
         }
         return tm;
@@ -140,7 +140,7 @@ export class SVGElement extends Element {
         let { parentElement: parent, _ownTM: tm } = this;
         while (parent instanceof SVGGraphicsElement) {
             const { parentElement: grand, _subTM } = parent;
-            tm = tm.postCat(_subTM);
+            tm = tm.post_cat(_subTM);
             if (grand == null) {
                 break;
             }
@@ -210,7 +210,7 @@ export class SVGGraphicsElement extends SVGElement {
         while (parent != root) {
             const grand = parent.parentElement;
             if (grand instanceof SVGGraphicsElement) {
-                tm = tm.postCat(parent._subTM);
+                tm = tm.post_cat(parent._subTM);
                 parent = grand;
             }
             else if (root) {
@@ -245,7 +245,7 @@ export class SVGGraphicsElement extends SVGElement {
                 if (null == grand) {
                     break;
                 }
-                tm = tm.postCat(parent._subTM);
+                tm = tm.post_cat(parent._subTM);
                 parent = grand;
             }
         }
@@ -290,7 +290,7 @@ export class SVGGraphicsElement extends SVGElement {
         return box;
     }
     _fuseTransform(parentT) {
-        let tm = parentT ? this._ownTM.postCat(parentT) : this._ownTM;
+        let tm = parentT ? this._ownTM.post_cat(parentT) : this._ownTM;
         for (const sub of this.children) {
             if (sub instanceof SVGGraphicsElement) {
                 sub._fuseTransform(tm);
@@ -302,7 +302,7 @@ export class SVGGraphicsElement extends SVGElement {
         let { parentElement: parent, _ownTM: tm } = this;
         for (; parent; parent = parent.parentElement) {
             if (parent instanceof SVGGraphicsElement) {
-                tm = tm.postCat(parent._subTM);
+                tm = tm.post_cat(parent._subTM);
             }
             else {
                 break;
@@ -316,7 +316,7 @@ export class SVGGraphicsElement extends SVGElement {
             if (!(parent instanceof SVGGraphicsElement)) {
                 break;
             }
-            tm = tm.postCat(parent._subTM);
+            tm = tm.post_cat(parent._subTM);
             if (parent instanceof SVGSVGElement) {
                 break;
             }
@@ -395,7 +395,7 @@ export class SVGGraphicsElement extends SVGElement {
 export class SVGSVGElement extends SVGGraphicsElement {
     static TAGS = ["svg"];
     createSVGPoint() {
-        return Vec.pos(0, 0);
+        return Vec.new(0, 0);
     }
     createSVGRect() {
         return SVGRect.forRect(0, 0, 0, 0);

@@ -80,7 +80,7 @@ export class SVGPathElement extends SVGGeometryElement {
         return new _PathD(this);
     }
     _fuseTransform(parentT) {
-        let tm = parentT ? this._ownTM.postCat(parentT) : this._ownTM;
+        let tm = parentT ? this._ownTM.post_cat(parentT) : this._ownTM;
         this.setAttribute("d", PathLS.parse(this._describe()).transform(tm).describe());
         this.removeAttribute("transform");
     }
@@ -108,7 +108,7 @@ export class SVGRectElement extends SVGGeometryElement {
         return `M ${x} ${y} h ${width} v ${height} h ${-width} Z`;
     }
     _fuseTransform(parentT) {
-        let tm = parentT ? this._ownTM.postCat(parentT) : this._ownTM;
+        let tm = parentT ? this._ownTM.post_cat(parentT) : this._ownTM;
         const { a: scale_x, b: skew_x, c: skew_y, d: scale_y, e: translate_x, f: translate_y, } = tm;
         if (skew_x == 0 && skew_y == 0) {
             const { abs } = Math;
@@ -141,14 +141,14 @@ export class SVGLineElement extends SVGGeometryElement {
         return `M ${x1} ${y1} L ${x2} ${y2}`;
     }
     _fuseTransform(parentT) {
-        let tm = parentT ? this._ownTM.postCat(parentT) : this._ownTM;
+        let tm = parentT ? this._ownTM.post_cat(parentT) : this._ownTM;
         if (!tm.isIdentity) {
             let x1 = this.x1.baseVal.value;
             let x2 = this.x2.baseVal.value;
             let y1 = this.y1.baseVal.value;
             let y2 = this.y2.baseVal.value;
-            [x1, y1] = Vec.pos(x1, y1).transform(tm);
-            [x2, y2] = Vec.pos(x2, y2).transform(tm);
+            [x1, y1] = Vec.new(x1, y1).transform(tm);
+            [x2, y2] = Vec.new(x2, y2).transform(tm);
             this.x1.baseVal.value = x1;
             this.x2.baseVal.value = x2;
             this.y1.baseVal.value = y1;
@@ -174,13 +174,13 @@ export class SVGPolygonElement extends SVGGeometryElement {
         return p ? `M ${p} Z` : "";
     }
     _fuseTransform(parentT) {
-        let tm = parentT ? this._ownTM.postCat(parentT) : this._ownTM;
+        let tm = parentT ? this._ownTM.post_cat(parentT) : this._ownTM;
         if (!tm.isIdentity) {
             const l = this.getAttribute("points")
                 ?.split(/(\s+)/)
                 .filter((e) => e.trim().length > 0)
                 .map((e) => e.split(",").map((v) => parseFloat(v)))
-                .map((e) => Vec.pos(e[0], e[1]))
+                .map((e) => Vec.new(e[0], e[1]))
                 .map((e) => [...e.transform(tm)])
                 .map((e) => `${e[0]},${e[1]}`);
             l && this.setAttribute("points", l.join(" "));
@@ -195,13 +195,13 @@ export class SVGPolylineElement extends SVGGeometryElement {
         return p ? `M ${p}` : "";
     }
     _fuseTransform(parentT) {
-        let tm = parentT ? this._ownTM.postCat(parentT) : this._ownTM;
+        let tm = parentT ? this._ownTM.post_cat(parentT) : this._ownTM;
         if (!tm.isIdentity) {
             const l = this.getAttribute("points")
                 ?.split(/(\s+)/)
                 .filter((e) => e.trim().length > 0)
                 .map((e) => e.split(",").map((v) => parseFloat(v)))
-                .map((e) => Vec.pos(e[0], e[1]))
+                .map((e) => Vec.new(e[0], e[1]))
                 .map((e) => [...e.transform(tm)])
                 .map((e) => `${e[0]},${e[1]}`);
             l && this.setAttribute("points", l.join(" "));
@@ -312,7 +312,7 @@ export class SVGTextElement extends SVGTextContentElement {
         const m = tm ? tm.cat(this._ownTM) : this._ownTM;
         const { x: { baseVal: { value: x }, }, y: { baseVal: { value: y }, }, } = this;
         let box = Box.new();
-        box = box.merge(Box.new(Vec.at(x, y).transform(m).toArray().concat([0, 0])));
+        box = box.merge(Box.new(Vec.new(x, y).transform(m).toArray().concat([0, 0])));
         for (const sub of this.children) {
             if (sub instanceof SVGGraphicsElement && sub.localName == "tspan") {
                 box = sub._boundingBox(m).merge(box);
@@ -332,8 +332,8 @@ export class SVGTSpanElement extends SVGTextContentElement {
         const fontsize = 16;
         const x2 = x1 + 0;
         const y2 = y1 + fontsize;
-        const a = Vec.at(x1, y1).transform(m);
-        const b = Vec.at(x2, y2).transform(m).sub(a);
+        const a = Vec.new(x1, y1).transform(m);
+        const b = Vec.new(x2, y2).transform(m).sub(a);
         box = box.merge(Box.new([a.x, a.y, Math.abs(b.x), Math.abs(b.y)]));
         return box;
     }

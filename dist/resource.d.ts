@@ -1,5 +1,3 @@
-/// <reference types="node" />
-/// <reference types="node" />
 export declare class ResourceLoader {
     resolveURL(href: string, baseURI: string): string;
     readURL(url: string): Promise<string>;

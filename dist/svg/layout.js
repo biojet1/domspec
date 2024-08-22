@@ -23,7 +23,7 @@ export class SVGLayout {
         while (parent != root) {
             const grand = parent.parentElement;
             if (grand instanceof SVGGraphicsElement) {
-                tm = tm.postCat(this._subTM(parent));
+                tm = tm.post_cat(this._subTM(parent));
                 parent = grand;
             }
             else if (root) {

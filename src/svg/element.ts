@@ -382,7 +382,7 @@ export class SVGTextElement extends SVGTextContentElement {
 		} = this;
 		let box = Box.new();
 		box = box.merge(
-			Box.new(Vec.at(x, y).transform(m).toArray().concat([0, 0]))
+			Box.new(Vec.new(x, y).transform(m).toArray().concat([0, 0]))
 		);
 		for (const sub of this.children) {
 			if (sub instanceof SVGGraphicsElement && sub.localName == "tspan") {
@@ -406,8 +406,8 @@ export class SVGTSpanElement extends SVGTextContentElement {
 		const fontsize = 16;
 		const x2 = x1 + 0; // This is impossible to calculate!
 		const y2 = y1 + fontsize;
-		const a = Vec.at(x1, y1).transform(m);
-		const b = Vec.at(x2, y2).transform(m).sub(a);
+		const a = Vec.new(x1, y1).transform(m);
+		const b = Vec.new(x2, y2).transform(m).sub(a);
 		box = box.merge(Box.new([a.x, a.y, Math.abs(b.x), Math.abs(b.y)]));
 		return box;
 	}

@@ -86,17 +86,17 @@ tap.test('fuseTranform', function (t) {
 		[R1.x.baseVal.value, R1.y.baseVal.value, R1.width.baseVal.value, R1.height.baseVal.value],
 		[50, 120, 150, 150]
 	);
-	t.same([...R1._path.firstPoint], [50, 120, 0]);
+	t.same([...R1._path.from], [50, 120, 0]);
 	t.same(
 		[R2.x.baseVal.value, R2.y.baseVal.value, R2.width.baseVal.value, R2.height.baseVal.value],
 		[50 - 100, 20 + 100, 150, 150]
 	);
-	t.same([...R2._path.firstPoint], [50 - 100, 20 + 100, 0]);
+	t.same([...R2._path.from], [50 - 100, 20 + 100, 0]);
 
 	t.same(PL1.getAttribute('points'), '0,200 50,125 50,175 100,100');
 	t.same(PL2.getAttribute('points'), '200,-100 300,-25 300,-75 400,0');
 	let p = P1._path;
-	let [x, y] = p.firstPoint;
+	let [x, y] = p.from;
 	t.same([x, y], [130, 140]);
 
 	t.same(

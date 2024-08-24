@@ -102,10 +102,10 @@ tap.test("SVG getPointAtLength getTotalLength", function (t) {
 	{
 		// viewBox not serializing bug
 		t.same(svg.viewBox.valueOf(), "-100 100 810 410");
-		console.log("DUMP1", svg.viewBox.baseVal.dump(), SVGRect.parse("N S E W"))
+		// console.log("DUMP1", svg.viewBox.baseVal.dump(), SVGRect.parse("N S E W"))
 		svg.setAttribute("viewBox", "N S E W");
 
-		console.log("DUMP3", svg.viewBox._var)
+		// console.log("DUMP3", svg.viewBox._var)
 
 		t.same(svg.viewBox.valueOf(), "N S E W");
 
@@ -114,7 +114,7 @@ tap.test("SVG getPointAtLength getTotalLength", function (t) {
 		t.same(svg.viewBox.baseVal.x, 1);
 		svg.viewBox.baseVal.y = 2;
 		t.same(svg.viewBox.baseVal.y, 2);
-		console.log("DUMP2", svg.viewBox.baseVal.dump())
+		// console.log("DUMP2", svg.viewBox.baseVal.dump())
 		svg.viewBox.baseVal.width = 3;
 		t.same(svg.viewBox.baseVal.width, 3);
 		svg.viewBox.baseVal.height = 4;

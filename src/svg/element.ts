@@ -28,7 +28,7 @@ export class SVGGeometryElement extends SVGGraphicsElement {
 	// https://greensock.com/forums/topic/13681-svg-gotchas/page/2/?tab=comments#comment-72060
 	_objectBBox(T?: Matrix) {
 		let { _path } = this;
-		if (_path.firstPoint) {
+		if (_path.from) {
 			if (T) {
 				return _path.transform(T).bbox();
 			}

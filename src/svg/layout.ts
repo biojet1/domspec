@@ -86,7 +86,7 @@ export class SVGLayout {
 			| Array<SVGGraphicsElement | BoundingBox | Vector | Ray>
 		>
 	) {
-		let bbox = BoundingBox.new();
+		let bbox = BoundingBox.not();
 		for (const v of args) {
 			if (v instanceof Array) {
 				bbox = this._boundingBox(...v).merge(bbox);
@@ -94,7 +94,7 @@ export class SVGLayout {
 				bbox = v.merge(bbox);
 			} else if (v instanceof Vector || v instanceof Ray) {
 				const { x, y } = v;
-				bbox = BoundingBox.new(x, y, 0, 0).merge(bbox);
+				bbox = BoundingBox.rect(x, y, 0, 0).merge(bbox);
 			} else {
 				const [p, o] = this._pairTM(v);
 				try {

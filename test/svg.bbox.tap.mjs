@@ -28,12 +28,12 @@ test.test(`getBBox`, { bail: !CI }, function (t) {
   );
 
   t.same(all['rect-1'].x.baseVal.value, 20, '.x.baseVal.value');
-  t.same(all['rect-1'].getBBox().toArray(), [20, 20, 40, 40], 'rect-1');
-  t.same(all['rect-2'].getBBox().toArray(), [10, 10, 100, 100], 'rect-2');
-  t.same(all['group-2'].getBBox().toArray(), [10, 10, 100, 100], 'group-2');
-  t.same(all['defs-1'].getBBox().toArray(), [0, 0, 0, 0], 'defs-1');
-  t.same(all['use-1'].getBBox().toArray(), [30, 30, 40, 40], 'use-1');
-  t.same(all['group-1'].getBBox().toArray(), [30, 30, 40, 40], 'group-1');
+  t.same(all['rect-1'].getBBox().dump_rect(), [20, 20, 40, 40], 'rect-1');
+  t.same(all['rect-2'].getBBox().dump_rect(), [10, 10, 100, 100], 'rect-2');
+  t.same(all['group-2'].getBBox().dump_rect(), [10, 10, 100, 100], 'group-2');
+  t.same(all['defs-1'].getBBox().dump_rect(), [0, 0, 0, 0], 'defs-1');
+  t.same(all['use-1'].getBBox().dump_rect(), [30, 30, 40, 40], 'use-1');
+  t.same(all['group-1'].getBBox().dump_rect(), [30, 30, 40, 40], 'group-1');
   t.same(all['use-1']._hrefElement.id, 'rect-1', 'use-1 <- rect-1');
   t.end();
 });

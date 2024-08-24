@@ -141,7 +141,7 @@ export class SVGElement extends Element {
 		const x = this.x.baseVal.value;
 		const y = this.y.baseVal.value;
 		if (width && height) {
-			let b = BoundingBox.new(x, y, width, height);
+			let b = BoundingBox.rect(x, y, width, height);
 			if (tm) {
 				b = b.transform(tm);
 			} else {
@@ -347,7 +347,7 @@ export class SVGGraphicsElement extends SVGElement {
 	//////////////
 	// 	<g/> box of decendant children
 	_objectBBox(T?: Matrix) {
-		let box = BoundingBox.new();
+		let box = BoundingBox.not();
 		for (const sub of this.children) {
 			if (sub instanceof SVGGraphicsElement && sub._canRender()) {
 				const M = sub._ownTM;
@@ -393,7 +393,7 @@ export class SVGGraphicsElement extends SVGElement {
 	_shapeBox(tm?: Matrix): BoundingBox {
 		// const m = tm ? tm.cat(this._ownTM) : this._rootTM;
 		const m = tm ? tm.cat(this._ownTM) : this._innerTM;
-		let box = BoundingBox.new();
+		let box = BoundingBox.not();
 		for (const sub of this.children) {
 			if (sub instanceof SVGGraphicsElement && sub._canRender()) {
 				box = box.merge(sub._boundingBox(m));
@@ -441,7 +441,7 @@ export class SVGGraphicsElement extends SVGElement {
 
 	getBBox() {
 		const box = this._objectBBox();
-		return box.isValid() ? box : BoundingBox.empty();
+		return box.is_valid() ? box : BoundingBox.rect(0, 0, 0, 0);
 	}
 
 	_placeChild(ref: ChildNode | null | undefined, nodes: SVGGraphicsElement[]) {
@@ -520,7 +520,7 @@ export class SVGGraphicsElement extends SVGElement {
 	//////////////
 	//  decendants,  boxes
 	_subBBox(m: Matrix, params: SVGBoundingBoxOptions): BoundingBox {
-		let box = BoundingBox.new();
+		let box = BoundingBox.not();
 		for (const sub of this.children) {
 			if (sub instanceof SVGGraphicsElement && sub._canRender()) {
 				box = box.merge(sub._ownBBox(m, params));

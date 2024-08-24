@@ -1,11 +1,7 @@
 import fs from "fs";
 import tap from "tap";
-import { Document, SVGDocument } from "../dist/document.js";
-import { ParentNode } from "../dist/parent-node.js";
 import { DOMParser } from "../dist/dom-parse.js";
-import { SVGLength } from "../dist/svg/element.js";
-import { BoundingBox, Matrix } from "svggeom";
-import { createWriteStream, writeFileSync, WriteStream } from "fs";
+import { writeFileSync } from "fs";
 const parser = new DOMParser();
 
 function closeEnough(t, a, b, threshold = 1e-6, tag) {

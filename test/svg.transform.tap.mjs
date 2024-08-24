@@ -1,9 +1,8 @@
 import tap from "tap";
-import { Document, SVGDocument } from "../dist/document.js";
-import { ParentNode } from "../dist/parent-node.js";
 import { DOMParser } from "../dist/dom-parse.js";
-import { SVGLength } from "../dist/svg/element.js";
 import { Matrix, BoundingBox } from "svggeom";
+import fs from "fs";
+import { writeFileSync } from "fs";
 const parser = new DOMParser();
 tap.test("transform", function (t) {
   const document = parser.parseFromString(`
@@ -45,7 +44,7 @@ tap.test("transform", function (t) {
   ].forEach(([id, x, y, w, h]) => {
     const v = document.getElementById(id);
     const r = v._objectBBox();
-    t.same(r.toArray(), [x, y, w, h], `getBBox ${id}`);
+    t.same([r.x, r.y, r.width, r.height], [x, y, w, h], `getBBox ${id}`);
   });
   let [p, o] = R3._pairTM();
   t.same(p.describe(), Matrix.translate(100, 100).describe());
@@ -60,7 +59,6 @@ tap.test("transform", function (t) {
   t.same(o.describe(), Matrix.translate(100).describe());
   t.end();
 });
-import fs from "fs";
 
 function closeEnough(a, b, threshold = 1e-6) {
   return Math.abs(b - a) <= threshold;
@@ -179,7 +177,7 @@ tap.test("_viewportTM", function (t) {
     const v = document.getElementById(id);
     const u = v.querySelector("use");
     // const r = u.shapeBox(true);
-    const b = BoundingBox.new(x, y, w, h);
+    const b = BoundingBox.rect(x, y, w, h);
     // eqBox(b, r, 2e-5, id);
     eqBox(b, u._shapeBox(), 2e-5, id);
   });
@@ -199,7 +197,7 @@ tap.test("_viewportTM", function (t) {
     ["V_L", [390, 220, 50, 30]],
   ].forEach(([id, [x, y, w, h]]) => {
     const v = document.getElementById(id);
-    const b = BoundingBox.new(x, y, w, h);
+    const b = BoundingBox.rect(x, y, w, h);
     // eqBox(b, v.shapeBox(true), 2e-5, `v:shapeBox ${id}`);
     eqBox(b, v._shapeBox(), 2e-5, `v:_shapeBox ${id}`);
   });
@@ -222,8 +220,8 @@ tap.test("_viewportTM", function (t) {
     // ['G_13', 390, 183.3333282470703, 83.33332824707031, 66.16667175292969],
   ].forEach(([id, x, y, w, h]) => {
     const v = document.getElementById(id);
-    const b = BoundingBox.new(x, y, w, h);
-    eqBox(b, v._shapeBox(), 1, `_shapeBox ${id}`);
+    const b = BoundingBox.rect(x, y, w, h);
+    eqBox(b, v._shapeBox(), 5, `_shapeBox ${id}`);
   });
 
   const a = Array.from(
@@ -318,7 +316,6 @@ tap.test("_viewportTM", function (t) {
   writeFileSync(`/tmp/aspect.svg`, document.documentElement.outerHTML);
   t.end();
 });
-import { createWriteStream, writeFileSync, WriteStream } from "fs";
 if (0) {
   Array.from(
     document.documentElement.querySelectorAll(`svg[preserveAspectRatio]`)

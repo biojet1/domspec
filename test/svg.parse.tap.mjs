@@ -1,9 +1,7 @@
 import tap from "tap";
-import { Document, SVGDocument } from "../dist/document.js";
-import { ParentNode } from "../dist/parent-node.js";
 import { DOMParser } from "../dist/dom-parse.js";
-import { SVGLength } from "../dist/svg/element.js";
-import { PathLS, Matrix, Vector, BoundingBox } from "svggeom";
+import { SVGLength, SVGRect } from "../dist/svg/element.js";
+import { PathLS, Matrix, Vector } from "svggeom";
 
 const parser = new DOMParser();
 
@@ -104,13 +102,26 @@ tap.test("SVG getPointAtLength getTotalLength", function (t) {
 	{
 		// viewBox not serializing bug
 		t.same(svg.viewBox.valueOf(), "-100 100 810 410");
+		console.log("DUMP1", svg.viewBox.baseVal.dump(), SVGRect.parse("N S E W"))
 		svg.setAttribute("viewBox", "N S E W");
+
+		console.log("DUMP3", svg.viewBox._var)
+
 		t.same(svg.viewBox.valueOf(), "N S E W");
+
+
 		svg.viewBox.baseVal.x = 1;
+		t.same(svg.viewBox.baseVal.x, 1);
 		svg.viewBox.baseVal.y = 2;
+		t.same(svg.viewBox.baseVal.y, 2);
+		console.log("DUMP2", svg.viewBox.baseVal.dump())
 		svg.viewBox.baseVal.width = 3;
+		t.same(svg.viewBox.baseVal.width, 3);
 		svg.viewBox.baseVal.height = 4;
+		t.same(svg.viewBox.baseVal.height, 4);
+		//
 		t.same(svg.viewBox.valueOf(), "1 2 3 4");
+
 		svg.viewBox.baseVal.height = NaN;
 		t.same(svg.viewBox.valueOf(), null);
 		svg.viewBox.baseVal.height = 5;

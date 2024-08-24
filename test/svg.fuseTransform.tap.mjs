@@ -2,7 +2,7 @@ import tap from 'tap';
 import { Document, SVGDocument } from '../dist/document.js';
 import { ParentNode } from '../dist/parent-node.js';
 import { DOMParser } from '../dist/dom-parse.js';
-import { SVGLength } from '../dist/svg/element.js';
+import { SVGLength, SVGRect } from '../dist/svg/element.js';
 import { PathLS, BoundingBox } from 'svggeom';
 
 const parser = new DOMParser();
@@ -64,11 +64,11 @@ tap.test('fuseTranform', function (t) {
 	t.same(E1.ry.baseVal.value, 10);
 
 
-	eqBox(E1, BoundingBox.new('-5 100 30 20'));
-	eqBox(PL1, BoundingBox.new('0 100 100 100'));
-	eqBox(PL2, BoundingBox.new('200 -100 200 100'));
-	eqBox(C1, BoundingBox.new('0 100 100 100'));
-	eqBox(L1, BoundingBox.new('100 120 100 60'));
+	eqBox(E1, SVGRect.parse('-5 100 30 20'));
+	eqBox(PL1, SVGRect.parse('0 100 100 100'));
+	eqBox(PL2, SVGRect.parse('200 -100 200 100'));
+	eqBox(C1, SVGRect.parse('0 100 100 100'));
+	eqBox(L1, SVGRect.parse('100 120 100 60'));
 	top._fuseTransform();
 
 

@@ -90,7 +90,8 @@ tap.test("layout1", { bail: 0 }, function (t) {
 				r.equals(v._rootTM, 1e-3),
 				`docTM ${id} ${r.describe()} ${v._rootTM.describe()}`
 			);
-			if ((metrix.tag_name != "defs", !b0.isEmpty())) {
+
+			if ((metrix.tag_name != "defs", !BoundingBox.rect(0, 0, 0, 0).equals(b0))) {
 				eqBox(t, b0, b1, 1e-1, id);
 			}
 		}

@@ -255,7 +255,7 @@ export class SVGDefsElement extends SVGGraphicsElement {
 	static TAGS = ["defs"];
 
 	_objectBBox() {
-		return BoundingBox.empty();
+		return BoundingBox.rect(0, 0, 0, 0);
 	}
 }
 
@@ -380,9 +380,10 @@ export class SVGTextElement extends SVGTextContentElement {
 				baseVal: { value: y },
 			},
 		} = this;
-		let box = BoundingBox.new();
+		let box = BoundingBox.not();
+		const [a, b] = Vector.new(x, y).transform(m);
 		box = box.merge(
-			BoundingBox.new(Vector.new(x, y).transform(m).toArray().concat([0, 0]))
+			BoundingBox.rect(a, b, 0, 0)
 		);
 		for (const sub of this.children) {
 			if (sub instanceof SVGGraphicsElement && sub.localName == "tspan") {
@@ -397,7 +398,7 @@ export class SVGTSpanElement extends SVGTextContentElement {
 	static TAGS = ["tspan"];
 	_shapeBox(tm?: Matrix): BoundingBox {
 		const m = tm ? tm.cat(this._ownTM) : this._ownTM;
-		let box = BoundingBox.new();
+		let box = BoundingBox.not();
 		// Returns a horrible bounding box that just contains the coord points
 		// of the text without width or height (which is impossible to calculate)
 		let s;
@@ -408,7 +409,7 @@ export class SVGTSpanElement extends SVGTextContentElement {
 		const y2 = y1 + fontsize;
 		const a = Vector.new(x1, y1).transform(m);
 		const b = Vector.new(x2, y2).transform(m).sub(a);
-		box = box.merge(BoundingBox.new([a.x, a.y, Math.abs(b.x), Math.abs(b.y)]));
+		box = box.merge(BoundingBox.rect(a.x, a.y, Math.abs(b.x), Math.abs(b.y)));
 		return box;
 	}
 }

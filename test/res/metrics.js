@@ -177,7 +177,7 @@ function transformBox(r, m) {
   let xMin = Infinity;
   let xMax = -Infinity;
   let yMin = Infinity;
-  let maxY = -Infinity;
+  let max_y = -Infinity;
   const { x, y, bottom, right } = r;
   [
     [x, y],
@@ -190,13 +190,13 @@ function transformBox(r, m) {
     xMin = Math.min(xMin, x);
     xMax = Math.max(xMax, x);
     yMin = Math.min(yMin, y);
-    maxY = Math.max(maxY, y);
+    max_y = Math.max(max_y, y);
   });
   return DOMRect.fromRect({
     x: xMin,
     y: yMin,
     width: Math.abs(xMax - xMin),
-    height: Math.abs(maxY - yMin),
+    height: Math.abs(max_y - yMin),
   });
 }
 function boxArray(r) {
@@ -273,7 +273,7 @@ function matArray(r) {
     );
   });
   metrix[""] = root.outerHTML;
-    graphics.forEach((v) => {
+  graphics.forEach((v) => {
     v.style.strokeWidth = null;
   });
 }

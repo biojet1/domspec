@@ -117,34 +117,34 @@ tap.test("createSVGTransformFromMatrix", function (t) {
 	let t2 = r.transform.baseVal.getItem(1);
 
 	// check that matrices are as specified in the markup
-	t.strictSame(t1.matrix.toArray(), [1, 0, 0, 1, 10, 10]);
-	t.strictSame(t2.matrix.toArray(), [0, 1, -1, 0, 0, 0]);
+	t.strictSame(t1.matrix.dump_hexad(), [1, 0, 0, 1, 10, 10]);
+	t.strictSame(t2.matrix.dump_hexad(), [0, 1, -1, 0, 0, 0]);
 
 	// consolidate
 	let tfm = r.transform.baseVal.consolidate();
 
 	// check that the consolidation is ok
-	t.strictSame(tfm.matrix.toArray(), [0, 1, -1, 0, 10, 10]);
+	t.strictSame(tfm.matrix.dump_hexad(), [0, 1, -1, 0, 10, 10]);
 
 	// check that t1 and t2 were not affected by the consolidation
-	t.strictSame(t1.matrix.toArray(), [1, 0, 0, 1, 10, 10]);
-	t.strictSame(t2.matrix.toArray(), [0, 1, -1, 0, 0, 0]);
+	t.strictSame(t1.matrix.dump_hexad(), [1, 0, 0, 1, 10, 10]);
+	t.strictSame(t2.matrix.dump_hexad(), [0, 1, -1, 0, 0, 0]);
 
 	// // check that modifying t1 has no effect on the consolidated transform
 	t1.setTranslate(10, 200);
-	t.strictSame(t1.matrix.toArray(), [1, 0, 0, 1, 10, 200]);
-	t.strictSame(tfm.matrix.toArray(), [0, 1, -1, 0, 10, 10]);
+	t.strictSame(t1.matrix.dump_hexad(), [1, 0, 0, 1, 10, 200]);
+	t.strictSame(tfm.matrix.dump_hexad(), [0, 1, -1, 0, 10, 10]);
 
 	// check that modifying t2 has no effect on the consolidated transform
 	t2.setRotate(-90, 0, 0);
-	t.strictSame(t2.matrix.toArray(), [0, -1, 1, 0, 0, 0]);
-	t.strictSame(tfm.matrix.toArray(), [0, 1, -1, 0, 10, 10]);
+	t.strictSame(t2.matrix.dump_hexad(), [0, -1, 1, 0, 0, 0]);
+	t.strictSame(tfm.matrix.dump_hexad(), [0, 1, -1, 0, 10, 10]);
 
 	// check that modifying the consolidated transform has no effect on the t1 and t2 transforms
 	tfm.matrix.f = 400;
-	t.strictSame(tfm.matrix.toArray(), [0, 1, -1, 0, 10, 400]);
-	t.strictSame(t1.matrix.toArray(), [1, 0, 0, 1, 10, 200]);
-	t.strictSame(t2.matrix.toArray(), [0, -1, 1, 0, 0, 0]);
+	t.strictSame(tfm.matrix.dump_hexad(), [0, 1, -1, 0, 10, 400]);
+	t.strictSame(t1.matrix.dump_hexad(), [1, 0, 0, 1, 10, 200]);
+	t.strictSame(t2.matrix.dump_hexad(), [0, -1, 1, 0, 0, 0]);
 
 	// document.getElementById("status").setAttributeNS(null, "fill", passed ? "lime" : "red");
 	// document.getElementById("scriptstatus").textContent = "Scripting enabled";

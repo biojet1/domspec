@@ -6,13 +6,24 @@ export declare class SVGAnimatedRect extends Attr {
     get animVal(): SVGRect;
     get specified(): boolean;
     valueOf(): string | undefined;
-    _closeIn(...args: Array<SVGGraphicsElement | Box | Vec | Ray | Array<SVGGraphicsElement | Box | Vec | Ray>>): this;
+    _closeIn(...args: Array<SVGGraphicsElement | BoundingBox | Vector | Ray | Array<SVGGraphicsElement | BoundingBox | Vector | Ray>>): this;
     _calcWidth(): number;
     _calcHeight(): number;
-    _calcBox(): Box;
+    _calcBox(): BoundingBox;
 }
-import { BoxMut as SVGRect } from "svggeom";
-import { Box, Vec, Ray } from "svggeom";
+import { BoundingBox, Vector, Ray } from "svggeom";
+declare class SVGRect extends BoundingBox {
+    static parse(s: string): BoundingBox;
+    set x(n: number);
+    get x(): number;
+    set y(n: number);
+    get y(): number;
+    set width(n: number);
+    get width(): number;
+    set height(n: number);
+    get height(): number;
+    copy(that: BoundingBox): this;
+}
 import { Attr } from "../attr.js";
 import { SVGGraphicsElement } from "./element.js";
 export { SVGRect };

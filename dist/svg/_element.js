@@ -1,4 +1,4 @@
-import { Vec, Box, Matrix, SVGTransform } from "svggeom";
+import { Vector, BoundingBox, Matrix, SVGTransform } from "svggeom";
 export class SVGElement extends Element {
     _newAttributeNode(name) {
         switch (name) {
@@ -113,7 +113,7 @@ export class SVGElement extends Element {
         const x = this.x.baseVal.value;
         const y = this.y.baseVal.value;
         if (width && height) {
-            let b = Box.new(x, y, width, height);
+            let b = BoundingBox.rect(x, y, width, height);
             if (tm) {
                 b = b.transform(tm);
             }
@@ -122,7 +122,7 @@ export class SVGElement extends Element {
             }
             return b;
         }
-        return Box.not();
+        return BoundingBox.not();
     }
     get _rootTM() {
         let { parentElement: parent, _ownTM: tm } = this;
@@ -255,7 +255,7 @@ export class SVGGraphicsElement extends SVGElement {
         return tm;
     }
     _objectBBox(T) {
-        let box = Box.new();
+        let box = BoundingBox.not();
         for (const sub of this.children) {
             if (sub instanceof SVGGraphicsElement && sub._canRender()) {
                 const M = sub._ownTM;
@@ -281,7 +281,7 @@ export class SVGGraphicsElement extends SVGElement {
     }
     _shapeBox(tm) {
         const m = tm ? tm.cat(this._ownTM) : this._innerTM;
-        let box = Box.new();
+        let box = BoundingBox.not();
         for (const sub of this.children) {
             if (sub instanceof SVGGraphicsElement && sub._canRender()) {
                 box = box.merge(sub._boundingBox(m));
@@ -325,7 +325,7 @@ export class SVGGraphicsElement extends SVGElement {
     }
     getBBox() {
         const box = this._objectBBox();
-        return box.isValid() ? box : Box.empty();
+        return box.is_valid() ? box : BoundingBox.rect(0, 0, 0, 0);
     }
     _placeChild(ref, nodes) {
         const pCtm = this._rootTM.inverse();
@@ -380,7 +380,7 @@ export class SVGGraphicsElement extends SVGElement {
         return Matrix.identity();
     }
     _subBBox(m, params) {
-        let box = Box.new();
+        let box = BoundingBox.not();
         for (const sub of this.children) {
             if (sub instanceof SVGGraphicsElement && sub._canRender()) {
                 box = box.merge(sub._ownBBox(m, params));
@@ -395,10 +395,10 @@ export class SVGGraphicsElement extends SVGElement {
 export class SVGSVGElement extends SVGGraphicsElement {
     static TAGS = ["svg"];
     createSVGPoint() {
-        return Vec.new(0, 0);
+        return Vector.new(0, 0);
     }
     createSVGRect() {
-        return SVGRect.forRect(0, 0, 0, 0);
+        return SVGRect.rect(0, 0, 0, 0);
     }
     createSVGLength() {
         return new SVGLength();
@@ -441,7 +441,7 @@ export class SVGSVGElement extends SVGGraphicsElement {
         throw new Error(`No ownerDocument`);
     }
 }
-export { Vec as SVGPoint };
+export { Vector as SVGPoint };
 import { Element } from "../element.js";
 import { SVGLength, SVGAnimatedLength, SVGLengthHAttr, SVGLengthWAttr, SVGLengthXAttr, SVGLengthYAttr, } from "./length.js";
 import { SVGAnimatedRect, SVGRect } from "./rect.js";

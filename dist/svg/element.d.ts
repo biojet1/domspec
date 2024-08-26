@@ -1,21 +1,21 @@
-import { Vec, Box, Matrix, PathLS } from "svggeom";
+import { Vector, BoundingBox, Matrix, PathLC } from "svggeom";
 export declare class SVGMarkerElement extends SVGGraphicsElement {
     static TAGS: string[];
     get _isViewportElement(): number;
-    _shapeBox(tm?: Matrix): Box;
+    _shapeBox(tm?: Matrix): BoundingBox;
 }
 export declare class SVGTextContentElement extends SVGGraphicsElement {
 }
 export declare class SVGGeometryElement extends SVGGraphicsElement {
     _describe(): string;
-    get _path(): PathLS;
-    _objectBBox(T?: Matrix): Box;
-    _shapeBox(tm?: Matrix): Box;
+    get _path(): PathLC;
+    _objectBBox(T?: Matrix): BoundingBox;
+    _shapeBox(tm?: Matrix): BoundingBox;
     _toPathElement(): SVGGeometryElement;
     getTotalLength(): number;
-    getPointAtLength(L: number): Vec | undefined;
+    getPointAtLength(L: number): Vector | undefined;
 }
-declare class _PathD extends PathLS {
+declare class _PathD extends PathLC {
     _node: SVGPathElement;
     constructor(node: SVGPathElement);
     assign(): this;
@@ -59,12 +59,12 @@ export declare class SVGAElement extends SVGGraphicsElement {
 }
 export declare class SVGDefsElement extends SVGGraphicsElement {
     static TAGS: string[];
-    _objectBBox(): Box;
+    _objectBBox(): BoundingBox;
 }
 export declare class SVGForeignObjectElement extends SVGGraphicsElement {
     static TAGS: string[];
     get _isViewportElement(): number;
-    _shapeBox(tm?: Matrix): Box;
+    _shapeBox(tm?: Matrix): BoundingBox;
 }
 export declare class SVGGElement extends SVGGraphicsElement {
     static TAGS: string[];
@@ -72,29 +72,29 @@ export declare class SVGGElement extends SVGGraphicsElement {
 export declare class SVGImageElement extends SVGGraphicsElement {
     static TAGS: string[];
     get _isViewportElement(): number;
-    _shapeBox(tm?: Matrix): Box;
-    _objectBBox(tm?: Matrix): Box;
+    _shapeBox(tm?: Matrix): BoundingBox;
+    _objectBBox(tm?: Matrix): BoundingBox;
 }
 export declare class SVGSwitchElement extends SVGGraphicsElement {
     static TAGS: string[];
 }
 export declare class SVGUseElement extends SVGGraphicsElement {
     static TAGS: string[];
-    _shapeBox(tm?: Matrix): Box;
-    _objectBBox(T?: Matrix): Box;
+    _shapeBox(tm?: Matrix): BoundingBox;
+    _objectBBox(T?: Matrix): BoundingBox;
 }
 export declare class SVGSymbolElement extends SVGGraphicsElement {
     static TAGS: string[];
     get _isViewportElement(): number;
-    _shapeBox(tm?: Matrix): Box;
+    _shapeBox(tm?: Matrix): BoundingBox;
 }
 export declare class SVGTextElement extends SVGTextContentElement {
     static TAGS: string[];
-    _shapeBox(tm?: Matrix): Box;
+    _shapeBox(tm?: Matrix): BoundingBox;
 }
 export declare class SVGTSpanElement extends SVGTextContentElement {
     static TAGS: string[];
-    _shapeBox(tm?: Matrix): Box;
+    _shapeBox(tm?: Matrix): BoundingBox;
 }
 export declare class SVGTRefElement extends SVGTextContentElement {
     static TAGS: string[];
@@ -116,7 +116,7 @@ export declare class SVGGlyphElement extends SVGElement {
 }
 export declare class SVGPatternElement extends SVGElement {
     static TAGS: string[];
-    _shapeBox(tm?: Matrix): Box;
+    _shapeBox(tm?: Matrix): BoundingBox;
 }
 import { SVGElement, SVGSVGElement, SVGGraphicsElement } from "./_element.js";
 export { SVGLength, SVGAnimatedLength } from "./length.js";

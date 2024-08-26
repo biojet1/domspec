@@ -1,4 +1,4 @@
-import { Ray, Box, Matrix, Vec } from "svggeom";
+import { Ray, BoundingBox, Matrix, Vector } from "svggeom";
 import { SVGGraphicsElement } from "./_element.js";
 export declare class SVGLayout {
     _root: SVGGraphicsElement;
@@ -11,5 +11,5 @@ export declare class SVGLayout {
     _localTM(node: SVGGraphicsElement): Matrix;
     _rootTM(node: SVGGraphicsElement): Matrix;
     catTM(m: Matrix, ...nodes: Array<SVGGraphicsElement>): void;
-    _boundingBox(...args: Array<SVGGraphicsElement | Box | Vec | Ray | Array<SVGGraphicsElement | Box | Vec | Ray>>): Box;
+    _boundingBox(...args: Array<SVGGraphicsElement | BoundingBox | Vector | Ray | Array<SVGGraphicsElement | BoundingBox | Vector | Ray>>): BoundingBox;
 }

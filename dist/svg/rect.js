@@ -1,7 +1,6 @@
 function _format(box) {
-    return box
-        .toArray()
-        .map((n, i) => {
+    const { left, top, width, height } = box;
+    return [left, top, width, height].map((n, i) => {
         const v = n.toFixed(3);
         return v.indexOf(".") < 0 ? v : v.replace(/0+$/g, "").replace(/\.$/g, "");
     })
@@ -12,20 +11,18 @@ export class SVGAnimatedRect extends Attr {
     set value(value) {
         const { _var } = this;
         if (_var instanceof SVGRect) {
+            let rec = undefined;
             try {
-                const { x, y, width, height } = SVGRect.parse(value);
-                _var.x = x;
-                _var.y = y;
-                _var.width = width;
-                _var.height = height;
+                rec = SVGRect.parse(value);
             }
             catch (err) {
-                this._var = value;
+            }
+            if (rec && rec.is_valid()) {
+                _var.copy(rec);
+                return;
             }
         }
-        else {
-            this._var = value;
-        }
+        this._var = value;
     }
     get value() {
         const { _var } = this;
@@ -39,6 +36,9 @@ export class SVGAnimatedRect extends Attr {
         if (_var instanceof SVGRect) {
             return _var;
         }
+        if (!(_var === undefined || typeof _var === "string")) {
+            throw new TypeError(`_var is ${_var}`);
+        }
         {
             let box;
             try {
@@ -47,8 +47,8 @@ export class SVGAnimatedRect extends Attr {
                 }
             }
             finally {
-                if (!box) {
-                    box = SVGRect.forRect(0, 0, NaN, NaN);
+                if (!box || !box.is_valid()) {
+                    box = SVGRect.rect(0, 0, NaN, NaN);
                 }
                 return (this._var = box);
             }
@@ -59,17 +59,22 @@ export class SVGAnimatedRect extends Attr {
     }
     get specified() {
         const { _var } = this;
-        return !!(_var && (!(_var instanceof SVGRect) || _var.isValid()));
+        return !!(_var && (!(_var instanceof SVGRect) || _var.is_valid()));
     }
     valueOf() {
         const { _var } = this;
         if (_var instanceof SVGRect) {
-            if (_var.isValid()) {
+            if (_var.is_valid()) {
                 return _format(_var);
             }
         }
-        else if (_var) {
-            return _var;
+        else {
+            if (!(_var === undefined || typeof _var === "string")) {
+                throw new TypeError(`_var is ${_var}`);
+            }
+            if (_var) {
+                return _var;
+            }
         }
     }
     _closeIn(...args) {
@@ -83,7 +88,7 @@ export class SVGAnimatedRect extends Attr {
             _var.copy(bbox);
         }
         else {
-            this._var = SVGRect.new(bbox);
+            this._var = new SVGRect(...bbox);
         }
         return this;
     }
@@ -91,7 +96,7 @@ export class SVGAnimatedRect extends Attr {
         const { _var } = this;
         if (_var) {
             const { baseVal } = this;
-            if (baseVal && baseVal.isValid()) {
+            if (baseVal && baseVal.is_valid()) {
                 return baseVal.width;
             }
         }
@@ -123,7 +128,7 @@ export class SVGAnimatedRect extends Attr {
         const { _var } = this;
         if (_var) {
             const { baseVal } = this;
-            if (baseVal && baseVal.isValid()) {
+            if (baseVal && baseVal.is_valid()) {
                 return baseVal.height;
             }
         }
@@ -160,7 +165,7 @@ export class SVGAnimatedRect extends Attr {
         const { _var } = this;
         if (_var) {
             const { baseVal } = this;
-            if (baseVal && baseVal.isValid()) {
+            if (baseVal && baseVal.is_valid()) {
                 return baseVal;
             }
         }
@@ -172,25 +177,25 @@ export class SVGAnimatedRect extends Attr {
             w = this._calcWidth();
             h = this._calcHeight();
         }
-        return Box.forRect(x, y, w, h);
+        return BoundingBox.rect(x, y, w, h);
     }
 }
 function contain(args) {
-    let bbox = SVGRect.new();
+    let bbox = SVGRect.not();
     for (const v of args) {
         if (v instanceof Array) {
-            bbox.mergeSelf(contain(v));
+            bbox.merge_self(contain(v));
         }
-        else if (v instanceof Box) {
-            bbox.mergeSelf(v);
+        else if (v instanceof BoundingBox) {
+            bbox.merge_self(v);
         }
-        else if (v instanceof Vec || v instanceof Ray) {
+        else if (v instanceof Vector || v instanceof Ray) {
             const { x, y } = v;
-            bbox.mergeSelf(Box.new(x, y, 0, 0));
+            bbox.merge_self(BoundingBox.rect(x, y, 0, 0));
         }
         else {
             try {
-                bbox.mergeSelf(v._boundingBox());
+                bbox.merge_self(v._boundingBox());
             }
             catch (err) {
                 console.error(`Failed to merge ${v.constructor.name} ${bbox.constructor.name}(${bbox})`);
@@ -200,8 +205,49 @@ function contain(args) {
     }
     return bbox;
 }
-import { BoxMut as SVGRect } from "svggeom";
-import { Box, Vec, Ray } from "svggeom";
+import { BoundingBox, Vector, Ray, BoundingInterval } from "svggeom";
+class SVGRect extends BoundingBox {
+    static parse(s) {
+        const v = s.split(/[\s,]+/).map(parseFloat);
+        return SVGRect.rect(v[0], v[1], v[2], v[3]);
+    }
+    set x(n) {
+        const [a, b] = this[0];
+        this[0] = new BoundingInterval([n, n + (b - a)]);
+    }
+    get x() {
+        return this[0][0];
+    }
+    set y(n) {
+        const [a, b] = this[1];
+        this[1] = new BoundingInterval([n, n + (b - a)]);
+    }
+    get y() {
+        return this[1].minimum;
+    }
+    set width(n) {
+        const { minimum } = this[0];
+        this[0] = new BoundingInterval([minimum, minimum + n]);
+    }
+    get width() {
+        const { size } = this[0];
+        return size;
+    }
+    set height(n) {
+        const { minimum } = this[1];
+        this[1] = new BoundingInterval([minimum, minimum + n]);
+    }
+    get height() {
+        const { size } = this[1];
+        return size;
+    }
+    copy(that) {
+        const [x, y] = that;
+        this[0] = x;
+        this[1] = y;
+        return this;
+    }
+}
 import { Attr } from "../attr.js";
 import { SVGGraphicsElement } from "./element.js";
 import { SVGLength } from "./length.js";

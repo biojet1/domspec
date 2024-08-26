@@ -1,10 +1,7 @@
 import fs from "fs";
 import tap from "tap";
-import { Document, SVGDocument } from "../dist/document.js";
-import { ParentNode } from "../dist/parent-node.js";
 import { DOMParser } from "../dist/dom-parse.js";
-import { SVGLength } from "../dist/svg/element.js";
-import { Box } from "svggeom";
+import { BoundingBox } from "svggeom";
 const parser = new DOMParser();
 
 function closeEnough(t, a, b, threshold = 1e-6, tag) {
@@ -12,7 +9,7 @@ function closeEnough(t, a, b, threshold = 1e-6, tag) {
 }
 
 function eqBox(t, a, b, epsilon = 0, tag) {
-  t.ok(a.equals(b, epsilon), `${tag} [${a}] vs [${b}]`);
+  t.ok(a.equals(b, epsilon), `${tag} [${a.dump_rect()}] vs [${b.dump_rect()}] epsilon=${epsilon}`);
 }
 
 function test_circle_geom(t, document) {
@@ -47,7 +44,7 @@ tap.test("Geoms 1", function (t) {
   );
   t.same(C4.r.baseVal.value, 0);
   t.same(C2.r.baseVal.value, 40);
-  t.same(V1._shapeBox().toArray(), [200, 0, 100, 400]);
+  t.same(V1._shapeBox().dump_rect(), [200, 0, 100, 400]);
   t.same(R3.x.baseVal.value, 5);
   t.same(R3.y.baseVal.value, 0);
   t.same(R3.width.baseVal.value, 5);
@@ -56,8 +53,8 @@ tap.test("Geoms 1", function (t) {
   t.same(R1.y.baseVal.value, 0);
   t.same(R1.width.baseVal.value, 5);
   t.same(R1.height.baseVal.value, 4);
-  // // t.same(R1._shapeBox().toArray(), [200, 175, 50, 40]);
-  // // t.same(R3._shapeBox().toArray(), [250, 175, 50, 40]);
+  // // t.same(R1._shapeBox().dump_rect(), [200, 175, 50, 40]);
+  // // t.same(R3._shapeBox().dump_rect(), [250, 175, 50, 40]);
   [
     ["C4", 0, 150, 192],
     ["C1", 35.355342864990234, 150, 70],
@@ -106,9 +103,13 @@ tap.test("Geoms 1", function (t) {
     ["R6", 250, 200, 50, 40],
   ].forEach(([id, x, y, w, h]) => {
     const v = document.getElementById(id);
-    const b = Box.new(x, y, w, h);
+    const b = BoundingBox.rect(x, y, w, h);
     const r = v._shapeBox();
-    eqBox(t, b, r.isValid() ? r : Box.empty(), x - ~~x === 0 ? 1e-9 : 1, id);
+    if (id == "L1") {
+      console.log(v.x1.baseVal)
+    }
+    t.ok(b.is_valid(), `${id} ${b.dump_rect()}`)
+    eqBox(t, b, r.is_valid() ? r : BoundingBox.empty(), x - ~~x === 0 ? 1e-9 : 1, `${id} ${[x, y, w, h]}`);
   });
   const R5 = document.getElementById("R5");
   const [p, m] = V1._pairTM();
@@ -117,11 +118,11 @@ tap.test("Geoms 1", function (t) {
   // console.log(R5._shapeBox().transform(p.cat(V1._subTM).inverse()));
   // console.log(p.cat(V1._subTM).inverse());
   // console.log(V1._rootTM.cat(V1._subTM).inverse());
-  V1.viewBox._closeIn(R5._shapeBox());
+  // V1.viewBox._closeIn(R5._shapeBox());
   // console.log(V1.viewBox.baseVal);
   [["L1", 0, 2.5, 5, 7.5]].forEach(([id, x1, y1, x2, y2]) => {
     const v = document.getElementById(id);
-    // console.log(v.outerHTML);
+    console.log(v.parentElement.outerHTML);
     t.same(
       [
         v.x1.baseVal.value,
@@ -132,7 +133,7 @@ tap.test("Geoms 1", function (t) {
       [x1, y1, x2, y2]
     );
   });
-  t.not(V3.viewBox.baseVal.isValid(), V3.viewBox.baseVal);
+  t.not(V3.viewBox.baseVal.is_valid(), V3.viewBox.baseVal);
   // t.strictSame(V3.viewBox.baseVal, null);
 
   t.end();
@@ -172,11 +173,11 @@ tap.test("Geoms 2", function (t) {
     ["V3", 0, 132, 80, 400],
   ].forEach(([id, x, y, w, h]) => {
     const v = document.getElementById(id);
-    const b = Box.new(x, y, w, h);
+    const b = BoundingBox.rect(x, y, w, h);
     if (x == 0 && y == 0 && w == 0 && h == 0) {
       const k = v._shapeBox();
-      const emp = Box.forRect(0, 0, 0, 0).equals(k);
-      const val = k.isValid();
+      const emp = BoundingBox.rect(0, 0, 0, 0).equals(k);
+      const val = k.is_valid();
       t.ok(emp || !val, `${id} ${k} ${emp} ${val}`);
       return;
     }
@@ -190,7 +191,7 @@ tap.test("Geoms 2", function (t) {
     ["V3", 0, 132, 80, 400],
   ].forEach(([id, x, y, w, h]) => {
     const v = document.getElementById(id);
-    const b = Box.new(x, y, w, h);
+    const b = BoundingBox.rect(x, y, w, h);
     eqBox(t, b, v.viewBox._calcBox(), 1e-9, id);
     if (v.hasAttribute("viewBox")) eqBox(t, b, v.viewBox.baseVal, 1e-9, id);
   });

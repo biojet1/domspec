@@ -6,7 +6,7 @@ import { Document, SVGDocument } from "../dist/document.js";
 import { ParentNode } from "../dist/parent-node.js";
 import { DOMParser } from "../dist/dom-parse.js";
 import { SVGLength } from "../dist/svg/element.js";
-import { Box, Matrix } from "svggeom";
+import { BoundingBox, Matrix } from "svggeom";
 import { SVGLayout } from "../dist/svg/layout.js";
 
 function apply(m, node) {
@@ -75,7 +75,7 @@ tap.test("layout1", { bail: 0 }, function (t) {
 			const l = v._innerTM;
 			// const l = _innerTM(v);
 			const o = v._ownTM;
-			const b0 = Box.forRect(x, y, w, h);
+			const b0 = BoundingBox.rect(x, y, w, h);
 			const b1 = v._boundingBox();
 			root.insertAdjacentHTML(
 				"beforeend",
@@ -90,7 +90,8 @@ tap.test("layout1", { bail: 0 }, function (t) {
 				r.equals(v._rootTM, 1e-3),
 				`docTM ${id} ${r.describe()} ${v._rootTM.describe()}`
 			);
-			if ((metrix.tag_name != "defs", !b0.isEmpty())) {
+
+			if ((metrix.tag_name != "defs", !BoundingBox.rect(0, 0, 0, 0).equals(b0))) {
 				eqBox(t, b0, b1, 1e-1, id);
 			}
 		}

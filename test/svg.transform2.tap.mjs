@@ -3,7 +3,7 @@ import { Document, SVGDocument } from "../dist/document.js";
 import { ParentNode } from "../dist/parent-node.js";
 import { DOMParser } from "../dist/dom-parse.js";
 import { SVGLength } from "../dist/svg/element.js";
-import { Box, Matrix } from "svggeom";
+import { BoundingBox, Matrix } from "svggeom";
 import { createWriteStream, writeFileSync, WriteStream } from "fs";
 import fs from "fs";
 const trsubs = [
@@ -158,7 +158,7 @@ tap.test("transform2", function (t) {
 	].forEach(([id, x, y, w, h]) => {
 		const v = doc.getElementById(id);
 		const r = v._objectBBox();
-		t.same(r.toArray(), [x, y, w, h], `getBBox ${id}`);
+		t.same(r.dump_rect(), [x, y, w, h], `getBBox ${id}`);
 	});
 	[
 		["G1", -50, 40, 100, 120],
@@ -168,7 +168,7 @@ tap.test("transform2", function (t) {
 	].forEach(([id, x, y, w, h]) => {
 		const v = doc.getElementById(id);
 		const r = v._objectBBox();
-		t.same(r.toArray(), [x, y, w, h], `getBBox ${id}`);
+		t.same(r.dump_rect(), [x, y, w, h], `getBBox ${id}`);
 	});
 
 	[
@@ -177,7 +177,7 @@ tap.test("transform2", function (t) {
 	].forEach(([id, x, y, w, h]) => {
 		const v = doc.getElementById(id);
 		const r = v._objectBBox();
-		t.same(r.toArray(), [x, y, w, h], `getBBox ${id}`);
+		t.same(r.dump_rect(), [x, y, w, h], `getBBox ${id}`);
 	});
 	//////////////////////
 	[
@@ -191,7 +191,7 @@ tap.test("transform2", function (t) {
 		["RB", 150, 75, 15, 15],
 	].forEach(([id, x, y, w, h]) => {
 		const v = doc.getElementById(id);
-		const b = Box.new(x, y, w, h);
+		const b = BoundingBox.rect(x, y, w, h);
 		eqBox(b, v._shapeBox(), 0, id);
 	});
 

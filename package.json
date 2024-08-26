@@ -1,6 +1,6 @@
 {
 	"name": "domspec",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"author": "https://www.npmjs.com/~biojet1",
 	"type": "module",
 	"description": "DOM Implementation",
@@ -49,7 +49,8 @@
 		"htmlparser2": "^7.1.1",
 		"image-size": "^1.0.2",
 		"saxes": "https://github.com/biojet1/saxes/tarball/release",
-		"svggeom": "https://github.com/biojet1/svggeom/tarball/release"
+		"svggeom": "https://github.com/biojet1/svggeom/tarball/release",
+		"typescript": "^5.5.4"
 	},
 	"peerDependencies": {
 		"node-fetch": "*"

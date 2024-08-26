@@ -2,8 +2,8 @@ import tap from 'tap';
 import { Document, SVGDocument } from '../dist/document.js';
 import { ParentNode } from '../dist/parent-node.js';
 import { DOMParser } from '../dist/dom-parse.js';
-import { SVGLength } from '../dist/svg/element.js';
-import { PathLS, Box } from 'svggeom';
+import { SVGLength, SVGRect } from '../dist/svg/element.js';
+import { PathLS, BoundingBox } from 'svggeom';
 
 const parser = new DOMParser();
 
@@ -64,11 +64,11 @@ tap.test('fuseTranform', function (t) {
 	t.same(E1.ry.baseVal.value, 10);
 
 
-	eqBox(E1, Box.new('-5 100 30 20'));
-	eqBox(PL1, Box.new('0 100 100 100'));
-	eqBox(PL2, Box.new('200 -100 200 100'));
-	eqBox(C1, Box.new('0 100 100 100'));
-	eqBox(L1, Box.new('100 120 100 60'));
+	eqBox(E1, SVGRect.parse('-5 100 30 20'));
+	eqBox(PL1, SVGRect.parse('0 100 100 100'));
+	eqBox(PL2, SVGRect.parse('200 -100 200 100'));
+	eqBox(C1, SVGRect.parse('0 100 100 100'));
+	eqBox(L1, SVGRect.parse('100 120 100 60'));
 	top._fuseTransform();
 
 
@@ -86,17 +86,17 @@ tap.test('fuseTranform', function (t) {
 		[R1.x.baseVal.value, R1.y.baseVal.value, R1.width.baseVal.value, R1.height.baseVal.value],
 		[50, 120, 150, 150]
 	);
-	t.same([...R1._path.firstPoint], [50, 120, 0]);
+	t.same([...R1._path.from], [50, 120, 0]);
 	t.same(
 		[R2.x.baseVal.value, R2.y.baseVal.value, R2.width.baseVal.value, R2.height.baseVal.value],
 		[50 - 100, 20 + 100, 150, 150]
 	);
-	t.same([...R2._path.firstPoint], [50 - 100, 20 + 100, 0]);
+	t.same([...R2._path.from], [50 - 100, 20 + 100, 0]);
 
 	t.same(PL1.getAttribute('points'), '0,200 50,125 50,175 100,100');
 	t.same(PL2.getAttribute('points'), '200,-100 300,-25 300,-75 400,0');
 	let p = P1._path;
-	let [x, y] = p.firstPoint;
+	let [x, y] = p.from;
 	t.same([x, y], [130, 140]);
 
 	t.same(
@@ -109,7 +109,7 @@ tap.test('fuseTranform', function (t) {
 			[50, 80],
 		]
 	);
-	
+
 	t.same(
 		[...P3._path].reverse().map((s) => s.to).map((p) => [p.x, p.y]),
 		[

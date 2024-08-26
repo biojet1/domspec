@@ -1,9 +1,6 @@
 import tap from "tap";
-import { Document, SVGDocument } from "../dist/document.js";
-import { ParentNode } from "../dist/parent-node.js";
 import { DOMParser } from "../dist/dom-parse.js";
-import { SVGLength } from "../dist/svg/element.js";
-import { Matrix, Box } from "svggeom";
+import { Matrix } from "svggeom";
 const parser = new DOMParser();
 tap.test("transform", function (t) {
   // https://github.com/michielbdejong/gecko-dev/blob/4ca96f2eee849a7c3a7f9ad1838c95fe9b5cba2b/dom/svg/test/test_SVGMatrix.xhtml

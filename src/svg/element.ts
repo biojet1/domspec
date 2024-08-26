@@ -1,4 +1,4 @@
-import { Vector, BoundingBox, Matrix, PathLS, SVGTransform } from "svggeom";
+import { Vector, BoundingBox, Matrix, PathLC, SVGTransform } from "svggeom";
 /// Base Elements //////////
 
 export class SVGMarkerElement extends SVGGraphicsElement {
@@ -20,9 +20,9 @@ export class SVGGeometryElement extends SVGGraphicsElement {
 	}
 	get _path() {
 		try {
-			return PathLS.parse(this._describe());
+			return PathLC.parse(this._describe());
 		} catch (err) {
-			return new PathLS(undefined);
+			return new PathLC(undefined);
 		}
 	}
 	// https://greensock.com/forums/topic/13681-svg-gotchas/page/2/?tab=comments#comment-72060
@@ -65,12 +65,12 @@ export class SVGGeometryElement extends SVGGraphicsElement {
 		return this._path.length;
 	}
 	getPointAtLength(L: number) {
-		return this._path.pointAtLength(L, true);
+		return this._path.point_at_length(L, true);
 	}
 }
 
 /// SVGGeometryElement //////////
-class _PathD extends PathLS {
+class _PathD extends PathLC {
 	_node: SVGPathElement;
 	constructor(node: SVGPathElement) {
 		super(undefined);
@@ -96,7 +96,7 @@ export class SVGPathElement extends SVGGeometryElement {
 		let tm = parentT ? this._ownTM.post_cat(parentT) : this._ownTM;
 		this.setAttribute(
 			"d",
-			PathLS.parse(this._describe()).transform(tm).describe()
+			PathLC.parse(this._describe()).transform(tm).describe()
 		);
 		this.removeAttribute("transform");
 	}

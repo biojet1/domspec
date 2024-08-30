@@ -10,14 +10,14 @@ import { SVGLayout } from '../dist/svg/layout.js';
 class Lay extends SVGLayout {
 	trans(m, node) {
 		const [P, M] = this._pairTM(node);
-		if (M.isIdentity) {
+		if (M.is_identity()) {
 			node._ownTM = P.inverse().cat(m);
 		} else {
 			const T = P.cat(M);
 			const R = P.cat(M);
 			// node._ownTM =P.inverse().cat(m).cat(M)
 			// node._ownTM = R.inverse().cat(m).cat(P).inverse();
-			if (P.isIdentity) {
+			if (P.is_identity()) {
 				// node._ownTM = M.cat(P.inverse().cat(m));
 				// 	// node._ownTM = m.cat(M);
 				node._ownTM = M.cat(m);

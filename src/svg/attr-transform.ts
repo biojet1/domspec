@@ -43,7 +43,7 @@ export class SVGAnimatedTransformList extends Attr {
 		const { _var } = this;
 		if (_var instanceof SVGTransformList) {
 			const m = _var.combine();
-			if (m && !m.isIdentity) {
+			if (m && !m.is_identity()) {
 				return m.toString();
 			}
 		} else {

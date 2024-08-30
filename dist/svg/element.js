@@ -142,7 +142,7 @@ export class SVGLineElement extends SVGGeometryElement {
     }
     _fuseTransform(parentT) {
         let tm = parentT ? this._ownTM.post_cat(parentT) : this._ownTM;
-        if (!tm.isIdentity) {
+        if (!tm.is_identity()) {
             let x1 = this.x1.baseVal.value;
             let x2 = this.x2.baseVal.value;
             let y1 = this.y1.baseVal.value;
@@ -175,7 +175,7 @@ export class SVGPolygonElement extends SVGGeometryElement {
     }
     _fuseTransform(parentT) {
         let tm = parentT ? this._ownTM.post_cat(parentT) : this._ownTM;
-        if (!tm.isIdentity) {
+        if (!tm.is_identity()) {
             const l = this.getAttribute("points")
                 ?.split(/(\s+)/)
                 .filter((e) => e.trim().length > 0)
@@ -196,7 +196,7 @@ export class SVGPolylineElement extends SVGGeometryElement {
     }
     _fuseTransform(parentT) {
         let tm = parentT ? this._ownTM.post_cat(parentT) : this._ownTM;
-        if (!tm.isIdentity) {
+        if (!tm.is_identity()) {
             const l = this.getAttribute("points")
                 ?.split(/(\s+)/)
                 .filter((e) => e.trim().length > 0)

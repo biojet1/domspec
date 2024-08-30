@@ -60,12 +60,12 @@ tap.test("Mi", function (t) {
 
       // let { x, y, width, height, center } = v._boundingBox();
       // let t = MatrixInterpolate.parse({ translate: [200, 200] });
-      // let t = MatrixInterpolate.parse({ translate: A._boundingBox().center.sub(center) });
+      // let t = MatrixInterpolate.parse({ translate: A._boundingBox().center.subtract(center) });
 
-      // console.log(S.id, S._boundingBox().center.sub(b.center), b);
+      // console.log(S.id, S._boundingBox().center.subtract(b.center), b);
 
       // let t = MatrixInterpolate.parse([
-      //   { translate: S._boundingBox().center.sub(b.center), weight: 2 },
+      //   { translate: S._boundingBox().center.subtract(b.center), weight: 2 },
       //   {
       //     scale: 10,
       //     anchor: b.center,
@@ -84,9 +84,9 @@ tap.test("Mi", function (t) {
   //     let { x, y, width, height, center } = v._boundingBox();
 
   //     // let t = MatrixInterpolate.parse({ translate: [200, 200] });
-  //     // let t = MatrixInterpolate.parse({ translate: A._boundingBox().center.sub(center) });
+  //     // let t = MatrixInterpolate.parse({ translate: A._boundingBox().center.subtract(center) });
   //     let t = MatrixInterpolate.parse([
-  //         { translate: A._boundingBox().center.sub(center), weight: 2 },
+  //         { translate: A._boundingBox().center.subtract(center), weight: 2 },
   //         {
   //             scale: 4,
   //             anchor: center,

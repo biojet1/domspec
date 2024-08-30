@@ -51,7 +51,7 @@ tap.test("SVG clip-path", function (t) {
 	t.ok(svg.id);
 	// console.log(svg.outerHTML);
 
-	t.ok(R1._ownTM.isIdentity);
+	t.ok(R1._ownTM.is_identity());
 	R1._ownTM = Matrix.parse("matrix(1 2 3 4 5 6)");
 	t.ok(R1._ownTM.equals(Matrix.new([1, 2, 3, 4, 5, 6])));
 

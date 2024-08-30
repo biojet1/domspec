@@ -20,7 +20,7 @@ function apply(m, node) {
 	// const T = P.inverse().cat(m).inverse().cat(M).inverse();
 	let S, T;
 	T = S = R.inverse().cat(m).cat(P);
-	if (M.isIdentity == false) {
+	if (M.is_identity() == false) {
 		T = M.cat(T).inverse(); // R1,R2 OK
 		// T = T.cat(M).inverse() // R1,R2 OK
 		// T = T.inverse()

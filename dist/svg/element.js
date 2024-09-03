@@ -334,7 +334,7 @@ export class SVGTSpanElement extends SVGTextContentElement {
         const x2 = x1 + 0;
         const y2 = y1 + fontsize;
         const a = Vector.new(x1, y1).transform(m);
-        const b = Vector.new(x2, y2).transform(m).sub(a);
+        const b = Vector.new(x2, y2).transform(m).subtract(a);
         box = box.merge(BoundingBox.rect(a.x, a.y, Math.abs(b.x), Math.abs(b.y)));
         return box;
     }
